@@ -1,0 +1,24 @@
+{
+  "name": "discord_js_bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/voice": "^0.7.5",
+    "@distube/spotify": "^1.0.0",
+    "discord.js": "^13.4.0",
+    "distube": "^3.0.5",
+    "ffmpeg-static": "^4.4.0",
+    "tweetnacl": "^1.0.3",
+    "yt-search": "^2.10.2",
+    "ytdl": "^1.4.1",
+    "ytdl-core": "^4.9.2",
+    "ytpl": "^2.2.3"
+  }
+}
