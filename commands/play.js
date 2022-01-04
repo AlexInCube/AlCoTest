@@ -16,8 +16,12 @@ module.exports.run = async (client,message,args) => {
     if (user_search === ""){message.reply("Ты как-то неправильно ввёл название, попробуй ещё раз."); return}
 
     let songToPlay;
+    let music_queue = distube.getQueue(message);
+    let guildID = message.guildId;
+
     if (isValidURL(user_search)){
         songToPlay = user_search
+        //Получаем очередь
         await startPlayer()
     }else{
         await searchSong()
@@ -72,9 +76,6 @@ module.exports.run = async (client,message,args) => {
     }
 
     async function startPlayer() {
-        //Получаем очередь
-        let music_queue = distube.getQueue(message);
-        let guildID = message.guildId;
 
         if (music_queue !== undefined && musicPlayerMap[guildID]) {
             await distube.play(message, songToPlay);

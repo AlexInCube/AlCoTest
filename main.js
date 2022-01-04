@@ -62,7 +62,7 @@ const distube = new DisTube.default(client,{
 distube
     .on('error', (textChannel, e) => {
         console.error(e)
-        textChannel.send(`Произошла ошибка: ${e.slice(0, 2000)}`)
+        textChannel.send(`Произошла ошибка, сообщите об этом криворукому разрабу: ${e.stack.slice(0, 2000)}`)
     })
     .on('playSong', async (music_queue, song) => {
         let guild = music_queue.textChannel.guildId;
@@ -77,9 +77,7 @@ distube
         music_queue.textChannel.send({content: `Добавлено: ${song.name} - \`${song.formattedDuration}\` в очередь по запросу ${song.user}`}))
     .on('addList', (queue, playlist) =>
         queue.textChannel.send(
-            `Added \`${playlist.name}\` playlist (${
-                playlist.songs.length
-            } songs) to queue\n${status(queue)}`,
+            `Добавлен \`${playlist.name}\` плейлист`
         ))
     .on('disconnect', queue => {delete musicPlayerMap[queue.textChannel.guildId]})
 
