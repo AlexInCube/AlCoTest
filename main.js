@@ -4,7 +4,11 @@ const prefix = config.BOT_PREFIX;
 const fs = require('fs') // подключаем fs к файлу
 const {getCurrentTimestamp} = require("./tools");
 
-const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_VOICE_STATES"] });
+const client = new Discord.Client({
+    intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_VOICE_STATES", "GUILD_MESSAGE_REACTIONS"],
+    restTimeOffset: 0,
+    shards: "auto"
+});
 client.commands = new Discord.Collection() // создаём коллекцию для команд
 
 
@@ -16,7 +20,7 @@ fs.readdir('./commands', (err, files) => { // чтение файлов в па�
     if (jsfile.length <= 0) return console.log(getCurrentTimestamp()+'Команды не найдены!') // если нет ни одного файла с расширением .js
 
     console.log(getCurrentTimestamp()+`Загружено ${jsfile.length} команд`)
-    jsfile.forEach((f, i) => { // добавляем каждый файл в коллекцию команд
+    jsfile.forEach((f) => { // добавляем каждый файл в коллекцию команд
         let props = require(`./commands/${f}`)
         client.commands.set(props.help.name, props)
     })
@@ -37,10 +41,11 @@ client.on("messageCreate", function(message) {
     let args = commandBody.split(' ');
     const command = args.shift().toLowerCase();
 
-    if (args === undefined) {args = []};
+    if (!args) {args = []}
 
     let command_file = client.commands.get(command) // получение команды из коллекции
     if (command_file) command_file.run(client, message, args)
+    else message.reply("Команды не существует")
 });
 
 global.musicPlayerMap = {}
@@ -48,11 +53,17 @@ const DisTube = require("distube")
 const { SpotifyPlugin } = require("@distube/spotify");
 
 const distube = new DisTube.default(client,{
+    searchSongs: 1,
+    searchCooldown: 30,
     plugins: [new SpotifyPlugin()],
 })
 
 
 distube
+    .on('error', (textChannel, e) => {
+        console.error(e)
+        textChannel.send(`Произошла ошибка: ${e.slice(0, 2000)}`)
+    })
     .on('playSong', async (music_queue, song) => {
         let guild = music_queue.textChannel.guildId;
         musicPlayerMap[guild].PlayerEmbed.setTitle(song.name).setAuthor(`🎵 Играет 🎵`).setColor('#49f743').setThumbnail(song.thumbnail);
@@ -64,7 +75,13 @@ distube
     })
     .on('addSong', (music_queue, song) =>
         music_queue.textChannel.send({content: `Добавлено: ${song.name} - \`${song.formattedDuration}\` в очередь по запросу ${song.user}`}))
-
+    .on('addList', (queue, playlist) =>
+        queue.textChannel.send(
+            `Added \`${playlist.name}\` playlist (${
+                playlist.songs.length
+            } songs) to queue\n${status(queue)}`,
+        ))
+    .on('disconnect', queue => {delete musicPlayerMap[queue.textChannel.guildId]})
 
 module.exports = { distube };
 

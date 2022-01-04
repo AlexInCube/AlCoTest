@@ -1,6 +1,4 @@
 const {getVoiceConnection} = require("@discordjs/voice");
-const {GuildMember} = require("discord.js");
-
 function getCurrentTimestamp(){
     let today = new Date();
     const dd = String(today.getDate()).padStart(2, '0');
@@ -18,11 +16,17 @@ function isUserConnectedToSameVoice(message,button){
     let connection = getVoiceConnection(message.guildId)
 
     if(!connection) return false
-    if(connection.joinConfig.channelId === button.member.voice.channelId) {
-        return true
-    }else{
-        return false
-    }
+    return connection.joinConfig.channelId === button.member.voice.channelId;
 }
 
-module.exports = { getCurrentTimestamp , isUserConnectedToSameVoice};
+function isValidURL(str) {
+    var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+        '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+    return !!pattern.test(str);
+}
+
+module.exports = { getCurrentTimestamp , isUserConnectedToSameVoice, isValidURL};
