@@ -20,5 +20,8 @@
     "ytdl": "^1.4.1",
     "ytdl-core": "^4.9.2",
     "ytpl": "^2.2.3"
+  },
+  "devDependencies": {
+    "lyrics-finder": "^21.7.0"
   }
 }

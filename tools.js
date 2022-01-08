@@ -1,4 +1,5 @@
 const {getVoiceConnection} = require("@discordjs/voice");
+
 function getCurrentTimestamp(){
     let today = new Date();
     const dd = String(today.getDate()).padStart(2, '0');
@@ -29,4 +30,18 @@ function isValidURL(str) {
     return !!pattern.test(str);
 }
 
-module.exports = { getCurrentTimestamp , isUserConnectedToSameVoice, isValidURL};
+function ClearUsedIDFromMention(mention) {
+    if (!mention) return;
+
+    if (mention.startsWith('<@&') && mention.endsWith('>')) {
+        mention = mention.slice(3, -1);
+
+        if (mention.startsWith('!')) {
+            mention = mention.slice(1);
+        }
+
+        return mention;
+    }
+}
+
+module.exports = { getCurrentTimestamp , isUserConnectedToSameVoice, isValidURL, ClearUsedIDFromMention};

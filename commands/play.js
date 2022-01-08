@@ -29,11 +29,12 @@ module.exports.run = async (client,message,args) => {
 
     async function searchSong() {
         //Ищем музыку
-        let foundSongs = await distube.search(user_search, {limit: 10}).then(function (result) {
-            return result
-        });
-
-        if (foundSongs === undefined) {
+        let foundSongs
+        try {
+            foundSongs = await distube.search(user_search, {limit: 10}).then(function (result) {
+                return result
+            });
+        }catch (e){
             await message.reply("Ничего не найдено")
             return
         }
@@ -76,7 +77,6 @@ module.exports.run = async (client,message,args) => {
     }
 
     async function startPlayer() {
-
         if (music_queue !== undefined && musicPlayerMap[guildID]) {
             await distube.play(message, songToPlay);
             return
@@ -86,8 +86,10 @@ module.exports.run = async (client,message,args) => {
             .setColor('#f7ee43')
             .setAuthor("⌛ Загрузка ⌛")
             .addFields(
-                {name: 'Автор: ', value: 'Никто'},
-                {name: 'Длительность: ', value: '0'},
+                {name: 'Автор', value: 'Никто'},
+                {name: 'Длительность песни', value: '0',inline: false},
+                {name: 'Оставшаяся длительность очереди', value: '0',inline: true},
+                {name: 'Осталось песен в очереди', value: '0',inline: true},
             )
 
         const musicPlayerRow = new MessageActionRow()//Создаём кнопки для плеера
@@ -141,14 +143,14 @@ module.exports.run = async (client,message,args) => {
                 await button.deferUpdate();
                 try {
                     await distube.skip(message);
-                    await button.message.channel.send("Пропущено")
+                    //await button.message.channel.send("Пропущено")
                     let pause = distube.getQueue(message).paused;
                     if (pause) {
                         await distube.resume(message);
                         musicPlayerMap[guildID].PlayerEmbed.setAuthor(`🎵 Играет 🎵`).setColor('#49f743');
                     }
                 } catch (e) {
-                    await button.message.channel.send("В очереди дальше ничего нет");
+                    await button.message.channel.send({content: "В очереди дальше ничего нет", ephemeral: true});
                     return;
                 }
             }
@@ -159,17 +161,20 @@ module.exports.run = async (client,message,args) => {
                     await button.reply({content: 'Ничего не проигрывается', ephemeral: true})
                 } else {
                     await button.reply({
-                            content: `Текущая очередь:\n${queue.songs
+                            content: `Текущая очередь:\n**Сейчас играет: **${queue.songs
                                 .map(
-                                    (song, id) =>
-                                        `**${id ? id : 'Сейчас играет'}**. ${song.name} - \`${
+                                    (song,id) =>
+                                        `${id}. ${song.name} - \`${
                                             song.formattedDuration
                                         }\``,
                                 )
-                                .slice(0, 10)
                                 .join('\n')}`, ephemeral: true
                         }
                     )
+                    /*
+                    let queueMessage = await button.fetchReply();
+                    await queueMessage.react('⬅️')
+                    await queueMessage.react('➡️')*/
                 }
             }
         });

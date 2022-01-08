@@ -48,11 +48,13 @@ client.on("messageCreate", function(message) {
     else message.reply("Команды не существует")
 });
 
+//Музыкальный блок
 global.musicPlayerMap = {}
-const DisTube = require("distube")
+const DisTubeLib = require("distube")
 const { SpotifyPlugin } = require("@distube/spotify");
+const lyricsFinder = require('lyrics-finder');
 
-const distube = new DisTube.default(client,{
+const distube = new DisTubeLib.default(client,{
     searchSongs: 1,
     searchCooldown: 30,
     plugins: [new SpotifyPlugin()],
@@ -62,13 +64,15 @@ const distube = new DisTube.default(client,{
 distube
     .on('error', (textChannel, e) => {
         console.error(e)
-        textChannel.send(`Произошла ошибка, сообщите об этом криворукому разрабу: ${e.stack.slice(0, 2000)}`)
+        textChannel.send(`Произошла ошибка, сообщите об этом криворукому разрабу: ${e.stack.slice(0, 1900)}`)
     })
     .on('playSong', async (music_queue, song) => {
         let guild = music_queue.textChannel.guildId;
-        musicPlayerMap[guild].PlayerEmbed.setTitle(song.name).setAuthor(`🎵 Играет 🎵`).setColor('#49f743').setThumbnail(song.thumbnail);
-        musicPlayerMap[guild].PlayerEmbed.fields[0].value = song.uploader.name
-        musicPlayerMap[guild].PlayerEmbed.fields[1].value = song.formattedDuration
+        await musicPlayerMap[guild].PlayerEmbed.setTitle(song.name).setURL(song.url).setAuthor(`🎵 Играет 🎵`).setColor('#49f743').setThumbnail(song.thumbnail);
+        musicPlayerMap[guild].PlayerEmbed.fields[0].value = song.uploader.name//Автор загрузки
+        musicPlayerMap[guild].PlayerEmbed.fields[1].value = song.formattedDuration//Длительность песни
+        musicPlayerMap[guild].PlayerEmbed.fields[2].value = music_queue.formattedDuration//Длительность очереди
+        musicPlayerMap[guild].PlayerEmbed.fields[3].value = (music_queue.songs.length-1).toString()//Количество песен в очереди
         let channel = await music_queue.textChannel.fetch(musicPlayerMap[guild].ChannelID);
         let message = await channel.messages.fetch(musicPlayerMap[guild].MessageID);
         await message.edit({embeds: [musicPlayerMap[guild].PlayerEmbed]});
@@ -81,6 +85,7 @@ distube
         ))
     .on('disconnect', queue => {delete musicPlayerMap[queue.textChannel.guildId]})
 
-module.exports = { distube };
+module.exports = { distube, lyricsFinder, client };
 
+//ЛОГИН БОТ ДЕЛАТЬ ВСЕГДА В КОНЦЕ main.js
 client.login(config.BOT_TOKEN);
