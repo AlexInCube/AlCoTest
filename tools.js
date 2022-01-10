@@ -1,5 +1,3 @@
-const {getVoiceConnection} = require("@discordjs/voice");
-
 function getCurrentTimestamp(){
     let today = new Date();
     const dd = String(today.getDate()).padStart(2, '0');
@@ -13,12 +11,6 @@ function getCurrentTimestamp(){
     return `[ ${today.toString()} ] `
 }
 
-function isUserConnectedToSameVoice(message,button){
-    let connection = getVoiceConnection(message.guildId)
-
-    if(!connection) return false
-    return connection.joinConfig.channelId === button.member.voice.channelId;
-}
 
 function isValidURL(str) {
     var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
@@ -44,4 +36,4 @@ function ClearUsedIDFromMention(mention) {
     }
 }
 
-module.exports = { getCurrentTimestamp , isUserConnectedToSameVoice, isValidURL, ClearUsedIDFromMention};
+module.exports = { getCurrentTimestamp, isValidURL, ClearUsedIDFromMention};

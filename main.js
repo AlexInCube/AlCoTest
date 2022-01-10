@@ -69,10 +69,10 @@ distube
     .on('playSong', async (music_queue, song) => {
         let guild = music_queue.textChannel.guildId;
         await musicPlayerMap[guild].PlayerEmbed.setTitle(song.name).setURL(song.url).setAuthor(`🎵 Играет 🎵`).setColor('#49f743').setThumbnail(song.thumbnail);
-        musicPlayerMap[guild].PlayerEmbed.fields[0].value = song.uploader.name//Автор загрузки
-        musicPlayerMap[guild].PlayerEmbed.fields[1].value = song.formattedDuration//Длительность песни
-        musicPlayerMap[guild].PlayerEmbed.fields[2].value = music_queue.formattedDuration//Длительность очереди
-        musicPlayerMap[guild].PlayerEmbed.fields[3].value = (music_queue.songs.length-1).toString()//Количество песен в очереди
+        musicPlayerMap[guild].PlayerEmbed.fields[0].value = song.uploader.name || "Неизвестно"//Автор загрузки
+        musicPlayerMap[guild].PlayerEmbed.fields[1].value = song.formattedDuration || "Неизвестно"//Длительность песни
+        musicPlayerMap[guild].PlayerEmbed.fields[2].value = music_queue.formattedDuration || "Неизвестно"//Длительность очереди
+        musicPlayerMap[guild].PlayerEmbed.fields[3].value = (music_queue.songs.length-1).toString() || "Неизвестно"//Количество песен в очереди
         let channel = await music_queue.textChannel.fetch(musicPlayerMap[guild].ChannelID);
         let message = await channel.messages.fetch(musicPlayerMap[guild].MessageID);
         await message.edit({embeds: [musicPlayerMap[guild].PlayerEmbed]});

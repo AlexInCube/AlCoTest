@@ -1,10 +1,7 @@
-const Discord = module.require("discord.js");
-const fs = require("fs");
-
 module.exports.help = {
     name: "command_name"
 };
 
-module.exports.run = async (client,message,args) => {
+module.exports.run = async (client,message) => {
     message.channel.send("Вывод");
 };
