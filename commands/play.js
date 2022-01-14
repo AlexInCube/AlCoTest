@@ -15,9 +15,9 @@ module.exports.run = async (client,message,args) => {
     //Пытаемся устранить все ошибки пользователя
     if (!message.member.voice.channel) {message.reply("Зайди сначала в голосовой канал"); return}
 
-    let user_search;
+    let user_search = "";
 
-    if (message.attachments){
+    if (message.attachments.size > 0){
         user_search = message.attachments.first().url
         if(user_search.endsWith(".mp3") || user_search.endsWith(".wav") || user_search.endsWith(".ogg")){
 
@@ -36,7 +36,6 @@ module.exports.run = async (client,message,args) => {
 
 
     let songToPlay;
-    let music_queue = distube.getQueue(message);
     let guildID = message.guildId;
 
     if (isValidURL(user_search)){
@@ -67,7 +66,7 @@ module.exports.run = async (client,message,args) => {
 
         let foundSongsEmbed = new Discord.MessageEmbed()
             .setColor('#436df7')
-            .setAuthor("Результаты поиска")
+            .setAuthor({name: "Результаты поиска"})
             .setTitle(`Напишите число песни (без префикса //), чтобы выбрать её, у вас есть 30 секунд!`)
             .setDescription(foundSongsFormattedList)
 
@@ -84,7 +83,6 @@ module.exports.run = async (client,message,args) => {
                 let parsedSelectedSong = parseInt(message.content);
                 if (!isNaN(parsedSelectedSong)) {
                     songToPlay = foundSongs[parsedSelectedSong - 1]
-                    message.reply({content: foundSongs[parsedSelectedSong - 1].name})
                     startPlayer()
                 } else {
                     message.reply(`Вы указали что-то неверное, а нужно было число!`)
@@ -97,14 +95,18 @@ module.exports.run = async (client,message,args) => {
     }
 
     async function startPlayer() {
-        if (music_queue !== undefined && musicPlayerMap[guildID]) {
-            await distube.play(message, songToPlay);
+        let user_channel = message.member.voice.channel
+        let options = {
+            textChannel : message.channel
+        }
+        if (musicPlayerMap[guildID]) {
+            await distube.play(user_channel, songToPlay, options);
             return
         }
 
         let musicPlayerEmbed = new Discord.MessageEmbed()//Создаём сообщение с плеером
             .setColor('#f7ee43')
-            .setAuthor("⌛ Загрузка ⌛")
+            .setAuthor({name: "⌛ Загрузка ⌛"})
             .addFields(
                 {name: 'Автор', value: "Неизвестно"},
                 {name: 'Длительность песни', value: "Неизвестно",inline: false},
@@ -130,8 +132,7 @@ module.exports.run = async (client,message,args) => {
             PlayerEmbed: musicPlayerEmbed
         }
 
-        await distube.play(message, songToPlay)
-
+        await distube.play(user_channel, songToPlay, options)
         filter = button => button.customId;
 
         const collector = musicPlayerMessage.channel.createMessageComponentCollector({filter});
@@ -145,8 +146,8 @@ module.exports.run = async (client,message,args) => {
                 return
             }
 
-            if(!button.member.permissions.has('MANAGE_GUILD') && !button.member.roles.cache.some(role => role.name === 'DJEban') && button.user.id !== message.author.id && message.guild.me.voice.channel.members.size > 2){
-                await button.message.channel.send({content: "У тебя нехватает прав на нажатие кнопок плеера", ephemeral: true})
+            if(!button.member.permissions.has('MANAGE_GUILD') && button.user.id !== message.author.id && message.guild.me.voice.channel.members.size > 2){
+                await button.reply({content: "У тебя нехватает прав на нажатие кнопок плеера", ephemeral: true})
                 return
             }
 
@@ -162,10 +163,10 @@ module.exports.run = async (client,message,args) => {
                 let pause = distube.getQueue(message).paused;
                 if (pause) {
                     await distube.resume(message);
-                    musicPlayerMap[guildID].PlayerEmbed.setAuthor(`🎵 Играет 🎵`).setColor('#49f743');
+                    musicPlayerMap[guildID].PlayerEmbed.setAuthor({name: `🎵 Играет 🎵`}).setColor('#49f743');
                 } else {
                     await distube.pause(message);
-                    musicPlayerMap[guildID].PlayerEmbed.setAuthor(`⏸ Пауза ⏸`).setColor('#f74343');
+                    musicPlayerMap[guildID].PlayerEmbed.setAuthor({name: `🎵 Играет 🎵`}).setColor('#f74343');
                 }
 
                 await button.update({embeds: [musicPlayerMap[guildID].PlayerEmbed]});
@@ -197,17 +198,15 @@ module.exports.run = async (client,message,args) => {
             }
 
             if (button.customId === 'skip_song') {
-                await button.deferUpdate();
                 try {
                     await distube.skip(message);
-                    //await button.message.channel.send("Пропущено")
+                    await button.reply({content: `По запросу от ${button.user.username} была пропущена песня` });
                     let pause = distube.getQueue(message).paused;
                     if (pause) {
                         await distube.resume(message);
-                        musicPlayerMap[guildID].PlayerEmbed.setAuthor(`🎵 Играет 🎵`).setColor('#49f743');
                     }
                 } catch (e) {
-                    await button.message.channel.send({content: "В очереди дальше ничего нет", ephemeral: true});
+                    await button.reply({content: "В очереди дальше ничего нет", ephemeral: true});
                     return;
                 }
             }

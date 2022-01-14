@@ -1,4 +1,8 @@
 {
-    "BOT_TOKEN": "ODEzNzUwMTY1Nzg5MzQzNzY0.YDT15g.5WV6dVB5mgOARQYqvI8ALZtRCpY",
-    "BOT_PREFIX": "//"
+    "BOT_TOKEN": "OTMxMTU3MDY1MDA1NjkwOTMw.YeAVmA.3a4uZir_CJSZ_J2rgcEgWrZ-cHc",
+    "BOT_PREFIX": "//",
+    "DB_IP": "localhost",
+    "DB_USER": "root",
+    "DB_PASSWORD": "Alex.2212",
+    "DB_DATABASE": "aicdb"
 }
