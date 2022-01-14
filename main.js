@@ -115,7 +115,19 @@ distube
         musicPlayerMap[guild].PlayerEmbed.fields[3].value = (music_queue.songs.length - 1).toString() || "Неизвестно"//Количество песен в очереди
         await updateMusicPlayerMessage(music_queue.textChannel.guildId,music_queue)
     })
-    .on('disconnect', queue => {delete musicPlayerMap[queue.textChannel.guildId]})
+    .on("finishSong", async music_queue => {
+        let guild = music_queue.textChannel.guildId;
+        if (!music_queue.next) {
+            await musicPlayerMap[guild].PlayerEmbed.setTitle("").setURL("").setAuthor({name: `💿 Ожидание 💿`}).setColor('#43f7f7').setThumbnail(null);
+            if (!musicPlayerMap[guild]) {return}
+            musicPlayerMap[guild].PlayerEmbed.fields[0].value = "Неизвестно"//Автор загрузки
+            musicPlayerMap[guild].PlayerEmbed.fields[1].value = "Неизвестно"//Длительность песни
+            musicPlayerMap[guild].PlayerEmbed.fields[2].value = "Неизвестно"//Длительность очереди
+            musicPlayerMap[guild].PlayerEmbed.fields[3].value = "Неизвестно"//Количество песен в очереди
+            await updateMusicPlayerMessage(guild, music_queue)
+        }
+    })
+    .on('disconnect', music_queue => {delete musicPlayerMap[music_queue.textChannel.guildId]})
 
 module.exports = { distube, lyricsFinder, client };
 

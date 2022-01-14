@@ -66,7 +66,7 @@ module.exports.run = async (client,message,args) => {
 
         let foundSongsEmbed = new Discord.MessageEmbed()
             .setColor('#436df7')
-            .setAuthor({name: "Результаты поиска"})
+            .setAuthor({name: "🔍 Результаты поиска 🔎"})
             .setTitle(`Напишите число песни (без префикса //), чтобы выбрать её, у вас есть 30 секунд!`)
             .setDescription(foundSongsFormattedList)
 
@@ -125,7 +125,7 @@ module.exports.run = async (client,message,args) => {
             )
 
 
-        let musicPlayerMessage = await message.channel.send({embeds: [musicPlayerEmbed], components: [musicPlayerRow]}); // Отправляем сообщение с плеером
+        let musicPlayerMessage = await message.channel.send({embeds: [musicPlayerEmbed], components: [musicPlayerRow]}).then((msg) => msg.pin()); // Отправляем сообщение с плеером
         musicPlayerMap[guildID] = {
             MessageID: musicPlayerMessage.id,
             ChannelID: musicPlayerMessage.channel_id,
@@ -166,7 +166,7 @@ module.exports.run = async (client,message,args) => {
                     musicPlayerMap[guildID].PlayerEmbed.setAuthor({name: `🎵 Играет 🎵`}).setColor('#49f743');
                 } else {
                     await distube.pause(message);
-                    musicPlayerMap[guildID].PlayerEmbed.setAuthor({name: `🎵 Играет 🎵`}).setColor('#f74343');
+                    musicPlayerMap[guildID].PlayerEmbed.setAuthor({name: `⏸️ Пауза ⏸️ `}).setColor('#f74343');
                 }
 
                 await button.update({embeds: [musicPlayerMap[guildID].PlayerEmbed]});
@@ -200,7 +200,7 @@ module.exports.run = async (client,message,args) => {
             if (button.customId === 'skip_song') {
                 try {
                     await distube.skip(message);
-                    await button.reply({content: `По запросу от ${button.user.username} была пропущена песня` });
+                    await button.reply({content: `По запросу от ${button.user} была пропущена песня` });
                     let pause = distube.getQueue(message).paused;
                     if (pause) {
                         await distube.resume(message);
@@ -216,16 +216,17 @@ module.exports.run = async (client,message,args) => {
                 if (!queue) {
                     await button.reply({content: 'Ничего не проигрывается', ephemeral: true})
                 } else {
-                    await button.reply({
-                            content: `Текущая очередь:\n**Сейчас играет: **${queue.songs
-                                .map(
-                                    (song,id) =>
-                                        `${id}. ${song.name} - \`${
-                                            song.formattedDuration
-                                        }\``,
-                                )
-                                .join('\n')}`, ephemeral: true
-                        }
+                    let queueList = "";
+                    queue.songs.forEach((song,id) =>{
+                        if (id === 0){return}
+                        queueList += `${id}. ` + `[${song.name}](${song.url})` +  ` - \`${song.formattedDuration}\`\n`
+                    })
+
+                    let queueEmbed = new Discord.MessageEmbed()
+                        .setAuthor({name: "Сейчас играет: "})
+                        .setTitle(queue.songs[0].name).setURL(queue.songs[0].url)
+                        .setDescription("**Оставшиеся песни: **\n"+`${queueList}`.slice(0,4096))
+                    await button.reply({embeds: [queueEmbed], ephemeral: true}
                     )
                     /*
                     let queueMessage = await button.fetchReply();
