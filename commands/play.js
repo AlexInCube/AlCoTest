@@ -7,7 +7,11 @@ const {RepeatMode} = require("distube");
 const {getVoiceConnection} = require("@discordjs/voice");
 
 module.exports.help = {
-    name: "play"
+    name: "play",
+    arguments: "(запрос)",
+    description:
+        "Проигрывает музыку указанную пользователем. \n" +
+        "Принимаются: Ссылка с Youtube или Spotify\n1 прикреплённый аудиофайл (mp3, wav или ogg)\nЛюбая писанина, будет запросом на поиск",
 };
 
 module.exports.run = async (client,message,args) => {

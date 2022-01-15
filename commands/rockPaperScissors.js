@@ -2,7 +2,9 @@ const {MessageActionRow, MessageButton} = require("discord.js");
 const Discord = module.require("discord.js");
 
 module.exports.help = {
-    name: "rps"
+    name: "rps",
+    arguments: "(@имя_соперника)",
+    description: "Киньте вызов в \"Камень, Ножницы, Бумага!\" против любого человека и уничтожьте своего врага!"
 };
 
 module.exports.run = async (client,message) => {

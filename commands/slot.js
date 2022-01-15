@@ -1,11 +1,9 @@
-const Discord = module.require("discord.js");
-const fs = require("fs");
-
 module.exports.help = {
-    name: "slot"
+    name: "slot",
+    description: "Автомат \"Однорукий бандит\", это такой рандом, что хер его знает как тут победить. "
 };
 
-module.exports.run = async (client,message,args,prefix) => {
+module.exports.run = async (client,message) => {
     const a = randomItem()
     const b = randomItem()
     const c = randomItem()

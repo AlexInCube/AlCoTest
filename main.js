@@ -3,38 +3,17 @@ const config = require("./config.json");
 const prefix = config.BOT_PREFIX;
 const fs = require('fs') // подключаем fs к файлу
 const {getCurrentTimestamp} = require("./tools");
-
-const mysql = require("mysql2");
-
-const connection = mysql.createConnection({
-    host: config.DB_IP,
-    user: config.DB_USER,
-    database: config.DB_DATABASE,
-    password: config.DB_PASSWORD
-});
-connection.connect(function(err){
-    if (err) {
-        return console.error(getCurrentTimestamp()+"Ошибка: " + err.message);
-    }
-    else{
-        console.log(getCurrentTimestamp()+"Подключение к серверу MySQL успешно установлено");
-    }
-
-    let sql_query = "CREATE TABLE IF NOT EXISTS guild_settings (guild_id INT NOT NULL, settings TEXT NOT NULL)"
-
-    connection.query(sql_query, function (err) {
-        if (err) throw err;
-        console.log(getCurrentTimestamp()+"Таблица настроек создана");
-    });
-});
+const {mySQLSetup} = require("./mySQLSetup");
+mySQLSetup()
 
 const client = new Discord.Client({
     intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_VOICE_STATES", "GUILD_MESSAGE_REACTIONS"],
     restTimeOffset: 0,
     shards: "auto"
 });
-client.commands = new Discord.Collection() // создаём коллекцию для команд
 
+
+client.commands = new Discord.Collection() // создаём коллекцию для команд
 
 //Находим имена команд (имя файла.js) и собираем их в коллекцию.
 fs.readdir('./commands', (err, files) => { // чтение файлов в папке commands
@@ -53,7 +32,7 @@ fs.readdir('./commands', (err, files) => { // чтение файлов в па�
 //Когда бот запустился
 client.on('ready', () => {
     console.log(getCurrentTimestamp()+`Бот ${client.user.username} запустился`);
-    client.user.setActivity('Хозяин снова взялся за меня');
+    client.user.setActivity('Напиши //help');
 })
 
 //Преобразование введённых сообщений в команды
@@ -129,11 +108,6 @@ distube
     })
     .on('disconnect', music_queue => {delete musicPlayerMap[music_queue.textChannel.guildId]})
 
-module.exports = { distube, lyricsFinder, client };
-
-//ЛОГИН БОТА ДЕЛАТЬ ВСЕГДА В КОНЦЕ main.js
-client.login(config.BOT_TOKEN);
-
 async function updateMusicPlayerMessage(guildid,music_queue) {
     try {
         let channel = await music_queue.textChannel.fetch(musicPlayerMap[guildid].ChannelID);
@@ -144,3 +118,9 @@ async function updateMusicPlayerMessage(guildid,music_queue) {
         //delete musicPlayerMap[guild]
     }
 }
+
+module.exports = { distube, lyricsFinder, client, prefix };
+
+//ЛОГИН БОТА ДЕЛАТЬ ВСЕГДА В КОНЦЕ main.js
+client.login(config.BOT_TOKEN);
+

@@ -1,5 +1,6 @@
 module.exports.help = {
-    name: "alcotest"
+    name: "alcotest",
+    description: "Пишет процент пива в твоей крови"
 };
 
 module.exports.run = async (client,message) => {

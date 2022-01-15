@@ -1,9 +1,9 @@
-const Discord = module.require("discord.js");
-const fs = require("fs");
 const {MessageActionRow, MessageButton} = require("discord.js");
 
 module.exports.help = {
-    name: "timer"
+    name: "timer",
+    arguments: "(длительность)",
+    description: "Запускает таймер на указанное время, по умолчанию время 10 секунд, максимум можно поставить на 300 секунд."
 };
 
 module.exports.run = async (client,message,args) => {
@@ -36,7 +36,7 @@ module.exports.run = async (client,message,args) => {
 
     let interval = setInterval(async () => {
         await msg.edit({content: `${duration--}`});
-        if (duration == 0) {
+        if (duration === 0) {
             clearInterval(interval)
             await msg.edit({content: "Таймер остановлен!", components: []});
         }
