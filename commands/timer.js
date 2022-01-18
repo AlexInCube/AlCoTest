@@ -38,7 +38,7 @@ module.exports.run = async (client,message,args) => {
         await msg.edit({content: `${duration--}`});
         if (duration === 0) {
             clearInterval(interval)
-            await msg.edit({content: "Таймер остановлен!", components: []});
+            await msg.edit({content: `Таймер остановлен! ${msg.author.user}`, components: []});
         }
     },1000)
 
@@ -49,7 +49,7 @@ module.exports.run = async (client,message,args) => {
     collector.on('collect', async i => {
         if (i.customId === 'stop_timer') {
             clearInterval(interval)
-            await i.update({content: "Таймер остановлен!", components: []});
+            await i.update({content: `Таймер остановлен! ${msg.author.user}`, components: []});
         }
     });
 }

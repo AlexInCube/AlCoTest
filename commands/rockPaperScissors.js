@@ -1,10 +1,11 @@
-const {MessageActionRow, MessageButton} = require("discord.js");
+const {MessageActionRow, MessageButton, Permissions} = require("discord.js");
 const Discord = module.require("discord.js");
 
 module.exports.help = {
     name: "rps",
     arguments: "(@имя_соперника)",
-    description: "Киньте вызов в \"Камень, Ножницы, Бумага!\" против любого человека и уничтожьте своего врага!"
+    description: "Киньте вызов в \"Камень, Ножницы, Бумага!\" против любого человека и уничтожьте своего врага!",
+    bot_permissions: [Permissions.FLAGS.SEND_MESSAGES]
 };
 
 module.exports.run = async (client,message) => {

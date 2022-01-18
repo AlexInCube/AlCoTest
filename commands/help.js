@@ -1,9 +1,11 @@
 const {prefix} = require("../main");
+const {Permissions} = require("discord.js");
 const Discord = module.require("discord.js");
 
 module.exports.help = {
     name: "help",
-    description: "Всё таки кто-то догадался посмотреть помощь о помощи, раз ты такой умный, то бери с полки пирожок."
+    description: "Всё таки кто-то догадался посмотреть помощь о помощи, раз ты такой умный, то возьми с полки пирожок.",
+    bot_permissions: [Permissions.FLAGS.SEND_MESSAGES]
 };
 
 module.exports.run = async (client,message,args) => {

@@ -1,6 +1,8 @@
+const {Permissions} = require("discord.js");
 module.exports.help = {
     name: "slot",
-    description: "Автомат \"Однорукий бандит\", это такой рандом, что хер его знает как тут победить. "
+    description: "Автомат \"Однорукий бандит\", это такой рандом, что хер его знает как тут победить. ",
+    bot_permissions: [Permissions.FLAGS.SEND_MESSAGES]
 };
 
 module.exports.run = async (client,message) => {

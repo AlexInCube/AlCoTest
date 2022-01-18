@@ -1,10 +1,11 @@
 const Discord = module.require("discord.js");
 require("fs");
-const {distube} = require("../main");
+const {distube, CheckAllNecessaryPermission} = require("../main");
 const {MessageActionRow, MessageButton} = require("discord.js");
 const {isValidURL} = require("../tools");
 const {RepeatMode} = require("distube");
 const {getVoiceConnection} = require("@discordjs/voice");
+const { Permissions } = require('discord.js');
 
 module.exports.help = {
     name: "play",
@@ -12,13 +13,12 @@ module.exports.help = {
     description:
         "Проигрывает музыку указанную пользователем. \n" +
         "Принимаются: Ссылка с Youtube или Spotify\n1 прикреплённый аудиофайл (mp3, wav или ogg)\nЛюбая писанина, будет запросом на поиск",
+    bot_permissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.CONNECT, Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SPEAK, Permissions.FLAGS.MANAGE_MESSAGES]
 };
 
 module.exports.run = async (client,message,args) => {
-
     //Пытаемся устранить все ошибки пользователя
-    if (!message.member.voice.channel) {message.reply("Зайди сначала в голосовой канал"); return}
-
+    if (!message.member.voice.channel) {await message.reply("Зайди сначала в голосовой канал"); return}
     let user_search = "";
 
     if (message.attachments.size > 0){
@@ -26,11 +26,11 @@ module.exports.run = async (client,message,args) => {
         if(user_search.endsWith(".mp3") || user_search.endsWith(".wav") || user_search.endsWith(".ogg")){
 
         }else{
-            message.reply("Это не аудиофайл, это чёрт пойми что!");return
+            await message.reply("Это не аудиофайл, это чёрт пойми что!");return
         }
     }else{
-        if (args[0] === undefined) {message.reply("А что ты слушать хочешь, то а? Укажи хоть что-нибудь.");return}
-        if (args[0] === ""){message.reply("Ты как-то неправильно ввёл название, попробуй ещё раз."); return}
+        if (args[0] === undefined) {await message.reply("А что ты слушать хочешь, то а? Укажи хоть что-нибудь.");return}
+        if (args[0] === ""){await message.reply("Ты как-то неправильно ввёл название, попробуй ещё раз."); return}
 
 
         args.forEach((item) => {
@@ -44,7 +44,6 @@ module.exports.run = async (client,message,args) => {
 
     if (isValidURL(user_search)){
         songToPlay = user_search
-        //Получаем очередь
         await startPlayer()
     }else{
         await searchSong()
@@ -143,7 +142,29 @@ module.exports.run = async (client,message,args) => {
 
 
         collector.on('collect', (async button => {
+            if (!CheckAllNecessaryPermission(message, module.exports.help.bot_permissions)){return}
+
             let connection = getVoiceConnection(message.guildId)
+
+            if (button.customId === 'show_queue') {
+                const queue = distube.getQueue(message);
+                if (!queue) {
+                    await button.reply({content: 'Ничего не проигрывается', ephemeral: true})
+                } else {
+                    let queueList = "";
+                    queue.songs.forEach((song,id) =>{
+                        if (id === 0){return}
+                        queueList += `${id}. ` + `[${song.name}](${song.url})` +  ` - \`${song.formattedDuration}\`\n`
+                    })
+
+                    let queueEmbed = new Discord.MessageEmbed()
+                        .setAuthor({name: "Сейчас играет: "})
+                        .setTitle(queue.songs[0].name).setURL(queue.songs[0].url)
+                        .setDescription("**Оставшиеся песни: **\n"+`${queueList}`.slice(0,4096))
+                    await button.reply({embeds: [queueEmbed], ephemeral: true}
+                    )
+                }
+            }
 
             if (!connection && connection.joinConfig.channelId !== button.member.voice.channelId) {
                 await button.message.channel.send({content: `${button.user.username} попытался нажать на кнопки, но он не в голосовом чате со мной!`})
@@ -211,31 +232,6 @@ module.exports.run = async (client,message,args) => {
                     }
                 } catch (e) {
                     await button.reply({content: "В очереди дальше ничего нет", ephemeral: true});
-                    return;
-                }
-            }
-
-            if (button.customId === 'show_queue') {
-                const queue = distube.getQueue(message);
-                if (!queue) {
-                    await button.reply({content: 'Ничего не проигрывается', ephemeral: true})
-                } else {
-                    let queueList = "";
-                    queue.songs.forEach((song,id) =>{
-                        if (id === 0){return}
-                        queueList += `${id}. ` + `[${song.name}](${song.url})` +  ` - \`${song.formattedDuration}\`\n`
-                    })
-
-                    let queueEmbed = new Discord.MessageEmbed()
-                        .setAuthor({name: "Сейчас играет: "})
-                        .setTitle(queue.songs[0].name).setURL(queue.songs[0].url)
-                        .setDescription("**Оставшиеся песни: **\n"+`${queueList}`.slice(0,4096))
-                    await button.reply({embeds: [queueEmbed], ephemeral: true}
-                    )
-                    /*
-                    let queueMessage = await button.fetchReply();
-                    await queueMessage.react('⬅️')
-                    await queueMessage.react('➡️')*/
                 }
             }
         }));

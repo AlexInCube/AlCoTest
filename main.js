@@ -4,6 +4,7 @@ const prefix = config.BOT_PREFIX;
 const fs = require('fs') // подключаем fs к файлу
 const {getCurrentTimestamp} = require("./tools");
 const {mySQLSetup} = require("./mySQLSetup");
+const { Permissions } = require('discord.js');
 mySQLSetup()
 
 const client = new Discord.Client({
@@ -47,8 +48,13 @@ client.on("messageCreate", function(message) {
     if (!args) {args = []}
 
     let command_file = client.commands.get(command) // получение команды из коллекции
-    if (command_file) command_file.run(client, message, args)
-    else message.reply("Команды не существует")
+    try {
+        if (!CheckAllNecessaryPermission(message, command_file.help.bot_permissions)){return}
+        if (command_file) command_file.run(client, message, args)
+        else message.reply("Команды не существует")
+    }catch (e) {
+        console.log(`${e.stack}`.slice(0,2000))
+    }
 });
 
 //Музыкальный блок
@@ -119,7 +125,19 @@ async function updateMusicPlayerMessage(guildid,music_queue) {
     }
 }
 
-module.exports = { distube, lyricsFinder, client, prefix };
+
+function CheckAllNecessaryPermission(message,permissions_required){
+    const bot = message.guild.members.cache.get(client.user.id)//client.users.fetch(client.user.id)
+    const permission_provided = bot.permissions.has(permissions_required)
+    if(!permission_provided) {
+        if(bot.permissions.has(Permissions.FLAGS.SEND_MESSAGES)) {
+            message.channel.send(`У БОТА недостаточно прав, напишите ${prefix}help (название команды), чтобы увидеть недостающие права. А также попросите администрацию сервера их выдать.`)
+        }
+    }
+    return permission_provided
+}
+
+module.exports = { distube, lyricsFinder, client, prefix, CheckAllNecessaryPermission};
 
 //ЛОГИН БОТА ДЕЛАТЬ ВСЕГДА В КОНЦЕ main.js
 client.login(config.BOT_TOKEN);
