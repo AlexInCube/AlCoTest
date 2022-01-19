@@ -4,8 +4,10 @@ const prefix = config.BOT_PREFIX;
 const fs = require('fs') // подключаем fs к файлу
 const {getCurrentTimestamp} = require("./tools");
 const {mySQLSetup} = require("./mySQLSetup");
+const {spotifySetup} = require("./spotifySetup");
 const { Permissions } = require('discord.js');
 mySQLSetup()
+spotifySetup()
 
 const client = new Discord.Client({
     intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_VOICE_STATES", "GUILD_MESSAGE_REACTIONS"],
@@ -49,9 +51,12 @@ client.on("messageCreate", function(message) {
 
     let command_file = client.commands.get(command) // получение команды из коллекции
     try {
-        if (!CheckAllNecessaryPermission(message, command_file.help.bot_permissions)){return}
-        if (command_file) command_file.run(client, message, args)
-        else message.reply("Команды не существует")
+        if (command_file){
+            if (!CheckAllNecessaryPermission(message, command_file.help.bot_permissions)){return}
+            command_file.run(client, message, args)
+        } else {
+            message.reply("Команды не существует")
+        }
     }catch (e) {
         console.log(`${e.stack}`.slice(0,2000))
     }

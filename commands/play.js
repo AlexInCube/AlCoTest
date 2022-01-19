@@ -226,8 +226,7 @@ module.exports.run = async (client,message,args) => {
                 try {
                     await distube.skip(message);
                     await button.reply({content: `По запросу от ${button.user} была пропущена песня` });
-                    let pause = distube.getQueue(message).paused;
-                    if (pause) {
+                    if (distube.getQueue(message).paused) {
                         await distube.resume(message);
                     }
                 } catch (e) {
