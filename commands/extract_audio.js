@@ -6,6 +6,8 @@ const {getData} = require('spotify-url-info')
 
 module.exports.help = {
     name: "extract_audio",
+    arguments: "Ссылка на Youtube видел или Spotify трек (в любом случае поиск будет на Youtube)",
+    description: "Достаёт аудио дорожку из видео и отправляет её в чат",
     bot_permissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.MANAGE_MESSAGES]
 };
 
@@ -37,7 +39,13 @@ module.exports.run = async (client,message,args) => {
     let file_name = `${song_data.name}.mp3`
     ytdl(song_data.url,{filter: 'audioonly', format: 'mp3'}).on("end", async () => {
         await fs.rename('audio.mp3',file_name,(err => {if(err)throw err}))
-        await bot_message.edit({content: `${message.author} я смог извлечь звук`, files: [file_name]})
+        let stats = fs.statSync(file_name)
+        if (stats.size >= 8388608){
+            await bot_message.edit({content: `${message.author} я не могу отправить файл, так как он весит больше чем 8мб.`})
+        }else{
+            await bot_message.edit({content: `${message.author} я смог извлечь звук`, files: [file_name]})
+        }
+
         fs.unlink(file_name,(err => {if(err)throw err}))
     }).pipe(file_path)
 };

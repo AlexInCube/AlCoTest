@@ -1,13 +1,12 @@
 const Discord = require("discord.js");
+const voice = require('@discordjs/voice');
 const config = require("./config.json");
 const prefix = config.BOT_PREFIX;
 const fs = require('fs') // подключаем fs к файлу
 const {getCurrentTimestamp} = require("./tools");
 const {mySQLSetup} = require("./mySQLSetup");
-const {spotifySetup} = require("./spotifySetup");
 const { Permissions } = require('discord.js');
 mySQLSetup()
-spotifySetup()
 
 const client = new Discord.Client({
     intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_VOICE_STATES", "GUILD_MESSAGE_REACTIONS"],
@@ -60,6 +59,32 @@ client.on("messageCreate", function(message) {
     }catch (e) {
         console.log(`${e.stack}`.slice(0,2000))
     }
+});
+
+client.on('voiceStateUpdate', (oldState, newState) => {
+    if (oldState.channelId !==  oldState.guild.me.voice.channelId || newState.channel)
+        return;
+
+    if (!oldState.channel.members.size - 1)
+        setTimeout(async () => { // if 1 (you), wait five minutes
+            if (!oldState.channel.members.size - 1) { // if there's still 1 member,
+                let queue = distube.getQueue(oldState.channel)
+                if (queue) {
+                    let guildid = oldState.guild.id
+                    musicPlayerMap[guildid].Collector.stop()
+                    let channel = await queue.textChannel.fetch(musicPlayerMap[guildid].ChannelID);
+                    if (channel) {
+                        let message = await channel.messages.fetch(musicPlayerMap[guildid].MessageID);
+                        if (message){
+                            await message.delete()
+                        }
+                    }
+                    await distube.stop(queue)
+                } else {
+                    voice.getVoiceConnection(oldState.guild.id).disconnect();
+                }
+            }
+        }, 50000); // (5 min in ms)
 });
 
 //Музыкальный блок

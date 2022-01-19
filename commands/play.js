@@ -132,14 +132,15 @@ module.exports.run = async (client,message,args) => {
         musicPlayerMap[guildID] = {
             MessageID: musicPlayerMessage.id,
             ChannelID: musicPlayerMessage.channel_id,
-            PlayerEmbed: musicPlayerEmbed
+            PlayerEmbed: musicPlayerEmbed,
+            Collector: "",
         }
 
         await distube.play(user_channel, songToPlay, options)
         filter = button => button.customId;
 
         const collector = musicPlayerMessage.channel.createMessageComponentCollector({filter});
-
+        musicPlayerMap[guildID].Collector = collector
 
         collector.on('collect', (async button => {
             if (!CheckAllNecessaryPermission(message, module.exports.help.bot_permissions)){return}
