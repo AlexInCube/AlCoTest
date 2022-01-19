@@ -1,11 +1,13 @@
 const Discord = module.require("discord.js");
 require("fs");
-const {distube, CheckAllNecessaryPermission} = require("../main");
+const {distube, CheckAllNecessaryPermission, lyricsFinder} = require("../main");
 const {MessageActionRow, MessageButton} = require("discord.js");
-const {isValidURL} = require("../tools");
+const {isValidURL, generateRandomCharacters} = require("../tools");
 const {RepeatMode} = require("distube");
 const {getVoiceConnection} = require("@discordjs/voice");
 const { Permissions } = require('discord.js');
+const fs = require("fs");
+const ytdl = require("ytdl-core");
 
 module.exports.help = {
     name: "play",
@@ -102,8 +104,13 @@ module.exports.run = async (client,message,args) => {
         let options = {
             textChannel : message.channel
         }
-        if (musicPlayerMap[guildID]) {
-            await distube.play(user_channel, songToPlay, options);
+        try {
+            if (musicPlayerMap[guildID]) {
+                await distube.play(user_channel, songToPlay, options);
+                return
+            }
+        }catch (e) {
+            message.channel.send("Что-то не так с этим аудио, возможно он не доступен в стране бота (Украина)")
             return
         }
 
@@ -118,17 +125,22 @@ module.exports.run = async (client,message,args) => {
                 {name: 'Режим повтора', value: "Выключен",inline: true},
             )
 
-        const musicPlayerRow = new MessageActionRow()//Создаём кнопки для плеера
+        const musicPlayerRowPrimary = new MessageActionRow()//Создаём кнопки для плеера
             .addComponents(
                 new MessageButton().setCustomId("stop_music").setLabel("Выключить").setStyle("DANGER"),
                 new MessageButton().setCustomId("pause_music").setLabel("Пауза / Возобновить").setStyle("PRIMARY"),
                 new MessageButton().setCustomId("toggle_repeat").setLabel("Переключить режим повтора").setStyle("PRIMARY"),
                 new MessageButton().setCustomId("skip_song").setLabel("Пропустить").setStyle("PRIMARY"),
-                new MessageButton().setCustomId("show_queue").setLabel("Показать очередь").setStyle("SECONDARY"),
             )
 
+        const musicPlayerRowSecondary = new MessageActionRow()//Создаём кнопки для плеера
+            .addComponents(
+                new MessageButton().setCustomId("show_queue").setLabel("Показать очередь").setStyle("SECONDARY"),
+                new MessageButton().setCustomId("download_song").setLabel("Скачать песню").setStyle("SECONDARY"),
+                new MessageButton().setCustomId("show_lyrics").setLabel("Показать текст песни").setStyle("SECONDARY"),
+            )
 
-        let musicPlayerMessage = await message.channel.send({embeds: [musicPlayerEmbed], components: [musicPlayerRow]}).then((msg) => msg.pin()); // Отправляем сообщение с плеером
+        let musicPlayerMessage = await message.channel.send({embeds: [musicPlayerEmbed], components: [musicPlayerRowPrimary,musicPlayerRowSecondary]}).then((msg) => msg.pin()); // Отправляем сообщение с плеером
         musicPlayerMap[guildID] = {
             MessageID: musicPlayerMessage.id,
             ChannelID: musicPlayerMessage.channel_id,
@@ -136,7 +148,13 @@ module.exports.run = async (client,message,args) => {
             Collector: "",
         }
 
-        await distube.play(user_channel, songToPlay, options)
+        try{
+            await distube.play(user_channel, songToPlay, options)
+        }catch (e) {
+            message.channel.send("Что-то не так с этим аудио, возможно он не доступен в стране бота (Украина)")
+            return
+        }
+
         filter = button => button.customId;
 
         const collector = musicPlayerMessage.channel.createMessageComponentCollector({filter});
@@ -161,7 +179,7 @@ module.exports.run = async (client,message,args) => {
                     let queueEmbed = new Discord.MessageEmbed()
                         .setAuthor({name: "Сейчас играет: "})
                         .setTitle(queue.songs[0].name).setURL(queue.songs[0].url)
-                        .setDescription("**Оставшиеся песни: **\n"+`${queueList}`.slice(0,4096))
+                        .setDescription(`**Оставшиеся песни: **\n+${queueList}`.slice(0,4096))
                     await button.reply({embeds: [queueEmbed], ephemeral: true}
                     )
                 }
@@ -233,6 +251,30 @@ module.exports.run = async (client,message,args) => {
                 } catch (e) {
                     await button.reply({content: "В очереди дальше ничего нет", ephemeral: true});
                 }
+            }
+
+            if (button.customId === "download_song"){
+                let file_path = fs.createWriteStream(`${generateRandomCharacters(15)}.mp3`)
+                let song = distube.getQueue(message).songs[0]
+
+                let file_name = `${song.name}.mp3`
+                ytdl(song.url,{filter: 'audioonly', format: 'mp3'}).on("end", async () => {
+                    await fs.rename(file_path.path,file_name,(err => {if(err)throw err}))
+                    let stats = fs.statSync(file_name)
+                    if (stats.size >= 8388608){
+                        await button.message.channel.send({content: `${message.author} я не могу отправить файл, так как он весит больше чем 8мб.`})
+                    }else{
+                        await button.message.channel.send({content: `${message.author} я смог извлечь звук`, files: [file_name]})
+                    }
+
+                    fs.unlink(file_name,(err => {if(err)throw err}))
+                }).pipe(file_path)
+            }
+
+            if (button.customId === "show_lyrics"){
+                let song = distube.getQueue(message).songs[0]
+                let text = await lyricsFinder("",song.name) || "Ничего не найдено!"
+                await button.reply({content: text.slice(0,2000), ephemeral: true});
             }
         }));
     }

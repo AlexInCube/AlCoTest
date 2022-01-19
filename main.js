@@ -66,8 +66,8 @@ client.on('voiceStateUpdate', (oldState, newState) => {
         return;
 
     if (!oldState.channel.members.size - 1)
-        setTimeout(async () => { // if 1 (you), wait five minutes
-            if (!oldState.channel.members.size - 1) { // if there's still 1 member,
+        setTimeout(async () => {
+            if (!oldState.channel.members.size - 1) {
                 let queue = distube.getQueue(oldState.channel)
                 if (queue) {
                     let guildid = oldState.guild.id
@@ -84,7 +84,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
                     voice.getVoiceConnection(oldState.guild.id).disconnect();
                 }
             }
-        }, 50000); // (5 min in ms)
+        }, 50000);
 });
 
 //Музыкальный блок

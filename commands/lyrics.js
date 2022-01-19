@@ -12,5 +12,5 @@ module.exports.run = async (client,message,args) => {
     let user_input = ""
     args.forEach((value) => {user_input += value+" "})
     let text = await lyricsFinder("",user_input) || "Ничего не найдено!"
-    await message.author.send(text);
+    await message.author.send(text.slice(0,2000));
 };
