@@ -94,8 +94,11 @@ const { SpotifyPlugin } = require("@distube/spotify");
 const lyricsFinder = require('lyrics-finder');
 
 const distube = new DisTubeLib.default(client,{
-    searchSongs: 1,
+    searchSongs: 0,
     searchCooldown: 30,
+    leaveOnEmpty: false,
+    leaveOnFinish: true,
+    leaveOnStop: true,
     plugins: [new SpotifyPlugin()],
 })
 
@@ -142,9 +145,13 @@ distube
             await updateMusicPlayerMessage(guild, music_queue)
         }
     })
-    .on('disconnect', music_queue => {
-        musicPlayerMap[music_queue.textChannel.guildId].Collector.stop()
-        delete musicPlayerMap[music_queue.textChannel.guildId];
+    .on('disconnect', async music_queue => {
+        let guildid = music_queue.textChannel.guildId
+        await musicPlayerMap[guildid].Collector.stop()
+        let channel = await music_queue.textChannel.fetch(musicPlayerMap[guildid].ChannelID);
+        let message = await channel.messages.fetch(musicPlayerMap[guildid].MessageID);
+        await message.delete()
+        delete musicPlayerMap[guildid];
     })
 
 async function updateMusicPlayerMessage(guildid,music_queue) {

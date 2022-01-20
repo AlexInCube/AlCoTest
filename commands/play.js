@@ -190,16 +190,17 @@ module.exports.run = async (client,message,args) => {
                 return
             }
 
-            if(!button.member.permissions.has('MANAGE_GUILD') && button.user.id !== message.author.id && message.guild.me.voice.channel.members.size > 2){
+            if(button.member.permissions.has('MANAGE_GUILD') || button.user.id === message.author.id || message.guild.me.voice.channel.members.size < 2){
+            }else{
                 await button.reply({content: "У тебя нехватает прав на нажатие кнопок плеера", ephemeral: true})
                 return
             }
 
             if (button.customId === 'stop_music') {
+                button.message.channel.send({content: `${button.user.username} выключил плеер`})
                 if (distube.getQueue(message)){
                     await distube.stop(message);
                 }
-                await button.message.delete();
             }
 
             if (button.customId === 'pause_music') {
