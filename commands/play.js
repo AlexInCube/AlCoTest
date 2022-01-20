@@ -197,7 +197,7 @@ module.exports.run = async (client,message,args) => {
             }
 
             if (button.customId === 'stop_music') {
-                button.message.channel.send({content: `${button.user.username} выключил плеер`})
+                await button.message.channel.send({content: `${button.user.username} выключил плеер`})
                 if (distube.getQueue(message)){
                     await distube.stop(message);
                 }

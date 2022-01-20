@@ -97,7 +97,7 @@ const distube = new DisTubeLib.default(client,{
     searchSongs: 0,
     searchCooldown: 30,
     leaveOnEmpty: false,
-    leaveOnFinish: true,
+    leaveOnFinish: false,
     leaveOnStop: true,
     plugins: [new SpotifyPlugin()],
 })
@@ -149,8 +149,14 @@ distube
         let guildid = music_queue.textChannel.guildId
         await musicPlayerMap[guildid].Collector.stop()
         let channel = await music_queue.textChannel.fetch(musicPlayerMap[guildid].ChannelID);
-        let message = await channel.messages.fetch(musicPlayerMap[guildid].MessageID);
-        await message.delete()
+        if (channel){
+            let message = await channel.messages.fetch(musicPlayerMap[guildid].MessageID);
+            if(message){
+                await message.delete()
+            }
+        }
+
+
         delete musicPlayerMap[guildid];
     })
 
