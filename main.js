@@ -142,7 +142,10 @@ distube
             await updateMusicPlayerMessage(guild, music_queue)
         }
     })
-    .on('disconnect', music_queue => {delete musicPlayerMap[music_queue.textChannel.guildId]})
+    .on('disconnect', music_queue => {
+        musicPlayerMap[music_queue.textChannel.guildId].Collector.stop()
+        delete musicPlayerMap[music_queue.textChannel.guildId];
+    })
 
 async function updateMusicPlayerMessage(guildid,music_queue) {
     try {
@@ -151,7 +154,6 @@ async function updateMusicPlayerMessage(guildid,music_queue) {
         await message.edit({embeds: [musicPlayerMap[guildid].PlayerEmbed]});
     } catch (e) {
         console.log(getCurrentTimestamp()+"Ошибка с обновлением полей: " + e)
-        //delete musicPlayerMap[guild]
     }
 }
 
