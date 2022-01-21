@@ -140,7 +140,7 @@ module.exports.run = async (client,message,args) => {
                 new MessageButton().setCustomId("show_lyrics").setLabel("Показать текст песни").setStyle("SECONDARY"),
             )
 
-        let musicPlayerMessage = await message.channel.send({embeds: [musicPlayerEmbed], components: [musicPlayerRowPrimary,musicPlayerRowSecondary]}).then((msg) => msg.pin()); // Отправляем сообщение с плеером
+        let musicPlayerMessage = await message.channel.send({embeds: [musicPlayerEmbed], components: [musicPlayerRowPrimary,musicPlayerRowSecondary]}) // Отправляем сообщение с плеером
         musicPlayerMap[guildID] = {
             MessageID: musicPlayerMessage.id,
             ChannelID: musicPlayerMessage.channel_id,
@@ -179,23 +179,29 @@ module.exports.run = async (client,message,args) => {
                     let queueEmbed = new Discord.MessageEmbed()
                         .setAuthor({name: "Сейчас играет: "})
                         .setTitle(queue.songs[0].name).setURL(queue.songs[0].url)
-                        .setDescription(`**Оставшиеся песни: **\n+${queueList}`.slice(0,4096))
+                        .setDescription(`**Оставшиеся песни: **\n${queueList}`.slice(0,4096))
                     await button.reply({embeds: [queueEmbed], ephemeral: true}
                     )
                 }
+            }
+
+            if (button.customId === "show_lyrics"){
+                let song = distube.getQueue(message).songs[0]
+                let text = await lyricsFinder("",song.name) || "Ничего не найдено!"
+                await button.reply({content: text.slice(0,2000), ephemeral: true});
             }
 
             if (!connection && connection.joinConfig.channelId !== button.member.voice.channelId) {
                 await button.message.channel.send({content: `${button.user.username} попытался нажать на кнопки, но он не в голосовом чате со мной!`})
                 return
             }
-
-            if(button.member.permissions.has('MANAGE_GUILD') || button.user.id === message.author.id || message.guild.me.voice.channel.members.size < 2){
+            /*
+            if(button.member.permissions.has('MANAGE_GUILD') || button.member.user.id === message.author.id || message.guild.me.voice.channel.members.size < 2){
             }else{
                 await button.reply({content: "У тебя нехватает прав на нажатие кнопок плеера", ephemeral: true})
                 return
             }
-
+*/
             if (button.customId === 'stop_music') {
                 await button.message.channel.send({content: `${button.user.username} выключил плеер`})
                 if (distube.getQueue(message)){
@@ -269,12 +275,6 @@ module.exports.run = async (client,message,args) => {
 
                     fs.unlink(file_name,(err => {if(err)throw err}))
                 }).pipe(file_path)
-            }
-
-            if (button.customId === "show_lyrics"){
-                let song = distube.getQueue(message).songs[0]
-                let text = await lyricsFinder("",song.name) || "Ничего не найдено!"
-                await button.reply({content: text.slice(0,2000), ephemeral: true});
             }
         }));
     }

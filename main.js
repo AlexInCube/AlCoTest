@@ -148,14 +148,17 @@ distube
     .on('disconnect', async music_queue => {
         let guildid = music_queue.textChannel.guildId
         await musicPlayerMap[guildid].Collector.stop()
-        let channel = await music_queue.textChannel.fetch(musicPlayerMap[guildid].ChannelID);
-        if (channel){
-            let message = await channel.messages.fetch(musicPlayerMap[guildid].MessageID);
-            if(message){
-                await message.delete()
+        try{
+            let channel = await music_queue.textChannel.fetch(musicPlayerMap[guildid].ChannelID);
+            if (channel){
+                let message = await channel.messages.fetch(musicPlayerMap[guildid].MessageID);
+                if(message){
+                    await message.delete()
+                }
             }
+        }catch (e) {
+            console.log("Ошибка при отключении"+e)
         }
-
 
         delete musicPlayerMap[guildid];
     })
