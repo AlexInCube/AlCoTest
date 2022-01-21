@@ -47,4 +47,8 @@ function generateRandomCharacters(length) {
     return result;
 }
 
-module.exports = { getCurrentTimestamp, isValidURL, ClearUsedIDFromMention, generateRandomCharacters};
+function clamp(num, min, max){
+    return Math.min(Math.max(num, min), max)
+}
+
+module.exports = { getCurrentTimestamp, isValidURL, ClearUsedIDFromMention, generateRandomCharacters, clamp};

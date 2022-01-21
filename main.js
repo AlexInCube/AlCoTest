@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const voice = require('@discordjs/voice');
 const config = require("./config.json");
 const prefix = config.BOT_PREFIX;
 const fs = require('fs') // подключаем fs к файлу
@@ -61,32 +60,6 @@ client.on("messageCreate", function(message) {
     }
 });
 
-client.on('voiceStateUpdate', (oldState, newState) => {
-    if (oldState.channelId !==  oldState.guild.me.voice.channelId || newState.channel)
-        return;
-
-    if (!oldState.channel.members.size - 1)
-        setTimeout(async () => {
-            if (!oldState.channel.members.size - 1) {
-                let queue = distube.getQueue(oldState.channel)
-                if (queue) {
-                    let guildid = oldState.guild.id
-                    musicPlayerMap[guildid].Collector.stop()
-                    let channel = await queue.textChannel.fetch(musicPlayerMap[guildid].ChannelID);
-                    if (channel) {
-                        let message = await channel.messages.fetch(musicPlayerMap[guildid].MessageID);
-                        if (message){
-                            await message.delete()
-                        }
-                    }
-                    await distube.stop(queue)
-                } else {
-                    voice.getVoiceConnection(oldState.guild.id).disconnect();
-                }
-            }
-        }, 50000);
-});
-
 //Музыкальный блок
 global.musicPlayerMap = {}
 const DisTubeLib = require("distube")
@@ -95,8 +68,7 @@ const lyricsFinder = require('lyrics-finder');
 
 const distube = new DisTubeLib.default(client,{
     searchSongs: 0,
-    searchCooldown: 30,
-    leaveOnEmpty: false,
+    leaveOnEmpty: true,
     leaveOnFinish: false,
     leaveOnStop: true,
     plugins: [new SpotifyPlugin()],
@@ -119,14 +91,14 @@ distube
     })
     .on('addSong', async (music_queue, song) => {
         let guild = music_queue.textChannel.guildId;
-        await music_queue.textChannel.send({content: `Добавлено: ${song.name} - \`${song.formattedDuration}\` в очередь по запросу ${song.user}`})
+        await music_queue.textChannel.send({content: `Добавлено: ${song.name} - \`${song.formattedDuration}\` в очередь`})
         musicPlayerMap[guild].PlayerEmbed.fields[2].value = music_queue.formattedDuration || "Неизвестно"//Длительность очереди
         musicPlayerMap[guild].PlayerEmbed.fields[3].value = (music_queue.songs.length - 1).toString() || "Неизвестно"//Количество песен в очереди
         await updateMusicPlayerMessage(music_queue.textChannel.guildId,music_queue)
     })
     .on('addList', async (music_queue, playlist) => {
         await music_queue.textChannel.send(
-            `Добавлено \`${playlist.songs.length}\` песен из плейлиста \`${playlist.name}\` в очередь по запросу ${playlist.user}`
+            `Добавлено \`${playlist.songs.length}\` песен из плейлиста \`${playlist.name}\` в очередь`
         )
         let guild = music_queue.textChannel.guildId;
         musicPlayerMap[guild].PlayerEmbed.fields[2].value = music_queue.formattedDuration || "Неизвестно"//Длительность очереди

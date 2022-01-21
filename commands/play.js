@@ -2,7 +2,7 @@ const Discord = module.require("discord.js");
 require("fs");
 const {distube, CheckAllNecessaryPermission, lyricsFinder} = require("../main");
 const {MessageActionRow, MessageButton} = require("discord.js");
-const {isValidURL, generateRandomCharacters} = require("../tools");
+const {isValidURL, generateRandomCharacters, clamp} = require("../tools");
 const {RepeatMode} = require("distube");
 const {getVoiceConnection} = require("@discordjs/voice");
 const { Permissions } = require('discord.js');
@@ -21,41 +21,39 @@ module.exports.help = {
 module.exports.run = async (client,message,args) => {
     //Пытаемся устранить все ошибки пользователя
     if (!message.member.voice.channel) {await message.reply("Зайди сначала в голосовой канал"); return}
-    let user_search = "";
+    let user_search = "";//Эта переменная становится запросом который дал пользователь, ссылка (трек или плейлист), прикреплённый файл или любая белеберда будет работать как поиск
 
-    if (message.attachments.size > 0){
-        user_search = message.attachments.first().url
+    if (message.attachments.size > 0){//Если к сообщению прикреплены аудиофайлы
+        user_search = message.attachments.first().url//Берём ссылку из Discord CDN на файл
         if(user_search.endsWith(".mp3") || user_search.endsWith(".wav") || user_search.endsWith(".ogg")){
 
         }else{
             await message.reply("Это не аудиофайл, это чёрт пойми что!");return
         }
-    }else{
-        if (args[0] === undefined) {await message.reply("А что ты слушать хочешь, то а? Укажи хоть что-нибудь.");return}
-        if (args[0] === ""){await message.reply("Ты как-то неправильно ввёл название, попробуй ещё раз."); return}
+    }else{//Если файлов всё таки нет, то проверяем правильность ввода ссылки или белеберды
+        if (args[0] === undefined) {await message.reply("А что ты слушать хочешь, то а? Укажи хоть что-нибудь.");return}//Если пользователь ничего не предоставил
+        if (args[0] === ""){await message.reply("Ты как-то неправильно ввёл название, попробуй ещё раз."); return}//Защита от случайного пробела после команды
 
-
-        args.forEach((item) => {
+        args.forEach((item) => {//Складываем в кучу все аргументы пользователя, чтобы удобнее было составлять запрос на поиск песен
             user_search += item;
         })
     }
 
 
-    let songToPlay;
+    let songToPlay;//Эта штука должна становится окончательной ссылкой для проигрывания
     let guildID = message.guildId;
 
-    if (isValidURL(user_search)){
-        songToPlay = user_search
+    if (isValidURL(user_search)){//Если то что дал пользователь можно рассчитывать как ссылку
+        songToPlay = user_search//Внезапно это оказалась ссылка, то сразу ебашим запрос в плеер
         await startPlayer()
     }else{
-        await searchSong()
+        await searchSong()//А если не удалось понять что это ссылка, то ищем песню
     }
 
-    async function searchSong() {
-        //Ищем музыку
-        let foundSongs
+    async function searchSong() {//Предлагаем поиск из 10 песен для пользователя
+        let foundSongs//Список найденных песен
         try {
-            foundSongs = await distube.search(user_search, {limit: 10}).then(function (result) {
+            foundSongs = await distube.search(user_search, {limit: 10}).then(function (result) {//Ищем песни
                 return result
             });
         }catch (e){
@@ -63,9 +61,9 @@ module.exports.run = async (client,message,args) => {
             return
         }
 
-        let foundSongsFormattedList = "";
+        let foundSongsFormattedList = "";//Превращаем список в то что можно вывести в сообщение
 
-        foundSongs.forEach((item, index) => {
+        foundSongs.forEach((item, index) => {//Перебираем все песни в списке и превращаем в вывод для отображения результата поиска
             foundSongsFormattedList += `**${index + 1}**.  ` + `[${item.name}](${item.url})` + " — " + ` \`${item.formattedDuration}\` ` + "\n"
         })
 
@@ -75,31 +73,31 @@ module.exports.run = async (client,message,args) => {
             .setTitle(`Напишите число песни (без префикса //), чтобы выбрать её, у вас есть 30 секунд!`)
             .setDescription(foundSongsFormattedList)
 
-        let filter = m => m.author.id === message.author.id;
+        let filter = m => m.author.id === message.author.id;//Принимаем номер поиска только от того кто делал запрос
 
-        await message.channel.send({embeds: [foundSongsEmbed], ephemeral: true}).then(() => {
-            message.channel.awaitMessages({
+        await message.channel.send({embeds: [foundSongsEmbed], ephemeral: true}).then(() => {//Отправляем сообщение с результатами
+            message.channel.awaitMessages({//Ждём цифру от пользователя с песней из результата
                 filter,
                 max: 1,
                 time: 30000,
                 errors: ['time']
             }).then(message => {
                 message = message.first()
-                let parsedSelectedSong = parseInt(message.content);
-                if (!isNaN(parsedSelectedSong)) {
-                    songToPlay = foundSongs[parsedSelectedSong - 1]
+                let parsedSelectedSong = parseInt(message.content);//Пытаемся конвертировать сообщение в строку
+                if (!isNaN(parsedSelectedSong)) {//Если это число, то указываем пределы.
+                    songToPlay = foundSongs[clamp(parsedSelectedSong,1,10)-1]//Забираем окончательную ссылку на видео
                     startPlayer()
                 } else {
                     message.reply(`Вы указали что-то неверное, а нужно было число!`)
                 }
             })
-                .catch(() => {
+                .catch(() => {//Если истёк таймер
                     message.reply('Вы ничего не выбрали');
                 });
         })
     }
 
-    async function startPlayer() {
+    async function startPlayer() {//Собственно плеер, сердце этой команды.
         let user_channel = message.member.voice.channel
         let options = {
             textChannel : message.channel
@@ -148,14 +146,14 @@ module.exports.run = async (client,message,args) => {
             Collector: "",
         }
 
-        try{
-            await distube.play(user_channel, songToPlay, options)
+        try {
+            await distube.play(user_channel, songToPlay, options);
         }catch (e) {
             message.channel.send("Что-то не так с этим аудио, возможно он не доступен в стране бота (Украина)")
             return
         }
 
-        filter = button => button.customId;
+        let filter = button => button.customId;
 
         const collector = musicPlayerMessage.channel.createMessageComponentCollector({filter});
         musicPlayerMap[guildID].Collector = collector
