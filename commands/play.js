@@ -189,10 +189,17 @@ module.exports.run = async (client,message,args) => {
                 await button.reply({content: text.slice(0,2000), ephemeral: true});
             }
 
-            if (!connection && connection.joinConfig.channelId !== button.member.voice.channelId) {
-                await button.message.channel.send({content: `${button.user.username} попытался нажать на кнопки, но он не в голосовом чате со мной!`})
-                return
+            if (connection){
+                if (connection.joinConfig.channelId !== button.member.voice.channelId) {
+                    await button.message.channel.send({content: `${button.user.username} попытался нажать на кнопки, но он не в голосовом чате со мной!`})
+                    return
+                }
+            }else{
+                if (distube.getQueue(message)){
+                    await distube.stop(message);
+                }
             }
+
             /*
             if(button.member.permissions.has('MANAGE_GUILD') || button.member.user.id === message.author.id || message.guild.me.voice.channel.members.size < 2){
             }else{

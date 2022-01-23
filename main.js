@@ -5,7 +5,12 @@ const fs = require('fs') // подключаем fs к файлу
 const {getCurrentTimestamp} = require("./tools");
 const {mySQLSetup} = require("./mySQLSetup");
 const { Permissions } = require('discord.js');
-mySQLSetup()
+
+process.on('uncaughtException', function (err) {
+    console.log(getCurrentTimestamp() + "Uncaught Exception" + err.stack);
+});
+
+global.mySQLconnection = mySQLSetup()
 
 const client = new Discord.Client({
     intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_VOICE_STATES", "GUILD_MESSAGE_REACTIONS"],
