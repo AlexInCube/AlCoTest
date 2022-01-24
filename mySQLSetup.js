@@ -31,6 +31,13 @@ function mySQLSetup(){
             if (err) throw err;
             console.log(getCurrentTimestamp()+"Таблица слотов создана");
         });
+
+        sql_query = 'CREATE TABLE IF NOT EXISTS rps_stats (`user_id` BIGINT UNSIGNED NOT NULL UNIQUE, `total_games` INT DEFAULT 0, `wins` INT DEFAULT 0, `draws` INT DEFAULT 0);'
+
+        connection.query(sql_query, function (err) {
+            if (err) throw err;
+            console.log(getCurrentTimestamp()+"Таблица камня ножницы бумаги создана");
+        });
     });
 
     return connection

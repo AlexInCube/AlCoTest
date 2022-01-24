@@ -22,9 +22,27 @@ module.exports.run = async (client,message, args) => {
                     statEmbed.addField('Джекпотов:', `${results[0][0].jackpots}`, true)
                     await message.channel.send({embeds: [statEmbed]});
                 })
+                .catch(() => {
+                    message.reply("Ты ещё ни разу не играл в эту игру")
+                })
+            break
+        case "rps":
+            mySQLconnection.promise().query(`SELECT total_games, wins, draws FROM rps_stats WHERE user_id = ${user_id}`)
+                .then(async (results) =>
+                {
+                    await setStatTitle("Камень, ножницы, бумага!")
+                    let games = results[0][0].total_games;let wins = results[0][0].wins;
+                    statEmbed.addField('Всего игр:', `${games}`, true)
+                    statEmbed.addField('Победная:', "Всего побед: "+`${wins}`+`\nПроцент побед: ${Math.round(wins/games*100)}%`, true)
+                    statEmbed.addField('Ничьих:', `${results[0][0].draws}`, true)
+                    await message.channel.send({embeds: [statEmbed]});
+                })
+                .catch(async () => {
+                    await message.reply("Ты ещё ни разу не играл в эту игру")
+                })
             break
         default:
-            message.reply("Такой статистики не существует")
+            await message.reply("Такой статистики не существует")
             return
     }
 

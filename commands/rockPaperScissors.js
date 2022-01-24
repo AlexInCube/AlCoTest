@@ -1,4 +1,5 @@
 const {MessageActionRow, MessageButton, Permissions} = require("discord.js");
+const {setupUserData} = require("../mySQLSetup");
 const Discord = module.require("discord.js");
 
 module.exports.help = {
@@ -22,12 +23,12 @@ module.exports.run = async (client,message) => {
         paper: "🧻"
     }
 
-    let duelEmbed = new Discord.MessageEmbed()//Создаём сообщение с плеером
+    let duelEmbed = new Discord.MessageEmbed()
         .setColor('#ffffff')
         .setTitle(`${user_attacker.username} кинул вызов ${user_defender.username}`)
         .setDescription("Выбирай оружие и жди оппонента, на ответ даётся 10 секунд.")
 
-    const duelButtons = new MessageActionRow()//Создаём кнопки для плеера
+    const duelButtons = new MessageActionRow()
         .addComponents(
             new MessageButton().setCustomId("rock").setLabel(items.rock+"Камень").setStyle("PRIMARY"),
             new MessageButton().setCustomId("paper").setLabel(items.paper+"Бумага").setStyle("PRIMARY"),
@@ -54,12 +55,14 @@ module.exports.run = async (client,message) => {
 
             await i.reply({content: `Вы выбрали ${items.rock}`,ephemeral: true})
         }
+
         if (i.customId === 'paper') {
             if(i.user.id === user_attacker.id){attacker_choice = items.paper}
             if(i.user.id === user_defender.id){defender_choice = items.paper}
 
             await i.reply({content: `Вы выбрали ${items.paper}`,ephemeral: true})
         }
+
         if (i.customId === 'scissors') {
             if(i.user.id === user_attacker.id){attacker_choice = items.scissors}
             if(i.user.id === user_defender.id){defender_choice = items.scissors}
@@ -68,20 +71,38 @@ module.exports.run = async (client,message) => {
         }
 
         if (attacker_choice !== undefined && defender_choice !== undefined){
+            await setupUserData(user_attacker.id, "rps_stats")
+            await setupUserData(user_defender.id, "rps_stats")
+
             let resultEmbed = new Discord.MessageEmbed()//Создаём сообщение с плеером
                 .setColor('#49f743')
 
+        let attacker_sql_query = "", defender_sql_query = ""
             switch (getResult(attacker_choice,defender_choice)){
+                case 0:
+                    resultEmbed.setTitle(`${user_defender.username} победил против ${user_attacker.username}`)
+                    attacker_sql_query = `UPDATE rps_stats SET total_games = total_games+1 WHERE user_id = ${user_attacker.id}`
+                    defender_sql_query = `UPDATE rps_stats SET total_games = total_games+1, wins = wins+1  WHERE user_id = ${user_defender.id}`
+                    break
                 case 1:
                     resultEmbed.setTitle(`${user_attacker.username} победил против ${user_defender.username}`)
+                    attacker_sql_query = `UPDATE rps_stats SET total_games = total_games+1, wins = wins+1 WHERE user_id = ${user_attacker.id}`
+                    defender_sql_query = `UPDATE rps_stats SET total_games = total_games+1 WHERE user_id = ${user_defender.id}`
                     break
                 case 2:
                     resultEmbed.setTitle(`У ${user_defender.username} и ${user_attacker.username} вышла ничья`).setColor(`#ffffff`)
-                    break
-                case 0:
-                    resultEmbed.setTitle(`${user_defender.username} победил против ${user_attacker.username}`)
+                    attacker_sql_query = `UPDATE rps_stats SET total_games = total_games+1, draws = draws + 1  WHERE user_id = ${user_attacker.id}`
+                    defender_sql_query = `UPDATE rps_stats SET total_games = total_games+1, draws = draws + 1 WHERE user_id = ${user_defender.id}`
                     break
             }
+
+            mySQLconnection.query(attacker_sql_query, function (err) {
+                if (err) throw err;
+            });
+
+            mySQLconnection.query(defender_sql_query, function (err) {
+                if (err) throw err;
+            });
 
             await message.channel.send({embeds: [resultEmbed.addFields(
                     {name: `Выбор ${user_attacker.username}`, value: attacker_choice,inline: true},
