@@ -76,12 +76,12 @@ module.exports.run = async (client,message,args) => {
 
         let filter = m => m.author.id === message.author.id;//Принимаем номер поиска только от того кто делал запрос
 
-        await message.channel.send({embeds: [foundSongsEmbed], ephemeral: true}).then((collected) => {//Отправляем сообщение с результатами
+        await message.channel.send({embeds: [foundSongsEmbed]}).then((collected) => {//Отправляем сообщение с результатами
             let result_message = collected
             message.channel.awaitMessages({//Ждём цифру от пользователя с песней из результата
                 filter,
                 max: 1,
-                time: 3000,
+                time: 30000,
                 errors: ['time']
             })
             .then(async select_message => {
@@ -198,10 +198,9 @@ module.exports.run = async (client,message,args) => {
             }
 
             if (button.customId === "show_lyrics"){
-                await button.deferReply()
                 let song = distube.getQueue(message).songs[0]
                 let text = await lyricsFinder("",song.name) || "Ничего не найдено!"
-                await button.reply({content: text.slice(0,2000), ephemeral: true});
+                await button.user.send(text.slice(0,2000))
             }
 
             if (connection){
