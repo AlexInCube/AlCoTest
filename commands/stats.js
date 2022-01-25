@@ -1,7 +1,7 @@
 const {Permissions, MessageEmbed} = require("discord.js");
 module.exports.help = {
     name: "stats",
-    arguments: "Название игры (команда которая вызывает игру)",
+    arguments: "(Название игры (команда которая вызывает игру))",
     description: "Показывает вашу статистику в какой-то из игр. К примеру //stats slot",
     bot_permissions: [Permissions.FLAGS.SEND_MESSAGES]
 };

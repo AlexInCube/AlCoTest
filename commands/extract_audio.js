@@ -7,8 +7,8 @@ const {generateRandomCharacters} = require("../tools");
 
 module.exports.help = {
     name: "extract_audio",
-    arguments: "Ссылка на Youtube видео или Spotify трек (в любом случае поиск будет на Youtube)",
-    description: "Достаёт аудио дорожку из видео и отправляет её в чат",
+    arguments: "(Ссылка на Youtube видео или Spotify трек)",
+    description: "Достаёт аудио дорожку из видео и отправляет её в чат. Если трек из Spotify, то он ищется на Youtube.",
     bot_permissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.MANAGE_MESSAGES, Permissions.FLAGS.ATTACH_FILES]
 };
 

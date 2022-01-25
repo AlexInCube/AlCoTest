@@ -16,7 +16,10 @@ module.exports.run = async (client,message,args) => {
         let helpEmbed = new Discord.MessageEmbed()//Создаём сообщение с плеером
             .setColor('#436df7')
             .setAuthor({name: "Список команд"})
-            .setTitle(`Введите ${prefix}help (название команды), чтобы узнать подробности`)
+            .setTitle(`Введите ${prefix}help (название команды), чтобы узнать подробности
+                \nОбозначения в аргументах команд:
+                \n() - обязательно
+                \n[] - по желанию`)
             .setDescription(commands_list)
 
         await message.channel.send({embeds: [helpEmbed]});
@@ -55,7 +58,7 @@ module.exports.run = async (client,message,args) => {
             case Permissions.FLAGS.SPEAK: return "Говорить";
             case Permissions.FLAGS.VIEW_CHANNEL: return "Просматривать каналы";
             case Permissions.FLAGS.ATTACH_FILES: return "Прикреплять файлы";
-            default: return "Не найдено название права: "+permission;
+            default: return "Не найдено название прав: "+permission;
         }
     }
 };

@@ -2,7 +2,7 @@ const {Permissions} = require("discord.js");
 
 module.exports.help = {
     name: "roll",
-    arguments: "(максимальное/минимальное число) (максимальное число)",
+    arguments: "[максимальное/минимальное число] [максимальное число]",
     description: "Выбирается случайное число из указанного диапазона, по умолчанию число 100",
     bot_permissions: [Permissions.FLAGS.SEND_MESSAGES]
 };
