@@ -57,7 +57,8 @@ module.exports.run = async (client,message,args) => {
                 return result
             });
         }catch (e){
-            await message.reply("Ничего не найдено")
+            await message.reply({content: "Ничего не найдено",ephemeral: true})
+            await message.delete()
             return
         }
 
@@ -75,25 +76,38 @@ module.exports.run = async (client,message,args) => {
 
         let filter = m => m.author.id === message.author.id;//Принимаем номер поиска только от того кто делал запрос
 
-        await message.channel.send({embeds: [foundSongsEmbed], ephemeral: true}).then(() => {//Отправляем сообщение с результатами
+        await message.channel.send({embeds: [foundSongsEmbed], ephemeral: true}).then((collected) => {//Отправляем сообщение с результатами
+            let result_message = collected
             message.channel.awaitMessages({//Ждём цифру от пользователя с песней из результата
                 filter,
                 max: 1,
-                time: 30000,
+                time: 3000,
                 errors: ['time']
-            }).then(message => {
-                message = message.first()
-                let parsedSelectedSong = parseInt(message.content);//Пытаемся конвертировать сообщение в строку
-                if (!isNaN(parsedSelectedSong)) {//Если это число, то указываем пределы.
-                    songToPlay = foundSongs[clamp(parsedSelectedSong,1,10)-1]//Забираем окончательную ссылку на видео
-                    startPlayer()
+            })
+            .then(async select_message => {
+                select_message = select_message.first()
+                let parsedSelectedSong = parseInt(select_message.content);//Пытаемся конвертировать сообщение в строку
+                if (!isNaN(parsedSelectedSong) && !Number.isInteger(select_message.content)) {//Если это число, то указываем пределы.
+                    songToPlay = foundSongs[clamp(parsedSelectedSong, 1, 10) - 1]//Забираем окончательную ссылку на видео
+                    await startPlayer()
+                    await select_message.delete()
+                    await message.delete()
+                    result_message.delete()
                 } else {
-                    message.reply(`Вы указали что-то неверное, а нужно было число!`)
+                    await message.delete()
+                    await select_message.reply({
+                        content: `Вы указали что-то неверное, проверьте запрос!`,
+                        ephemeral: true
+                    })
+                    await select_message.delete()
+                    result_message.delete()
                 }
             })
-                .catch(() => {//Если истёк таймер
-                    message.reply('Вы ничего не выбрали');
-                });
+            .catch(async () => {//Если истёк таймер
+                await message.reply({content: 'Вы ничего не выбрали', ephemeral: true});
+                await message.delete()
+                result_message.delete()
+            });
         })
     }
 
@@ -184,6 +198,7 @@ module.exports.run = async (client,message,args) => {
             }
 
             if (button.customId === "show_lyrics"){
+                await button.deferReply()
                 let song = distube.getQueue(message).songs[0]
                 let text = await lyricsFinder("",song.name) || "Ничего не найдено!"
                 await button.reply({content: text.slice(0,2000), ephemeral: true});

@@ -14,6 +14,7 @@ module.exports.help = {
 
 module.exports.run = async (client,message,args) => {
     let url = args[0]
+    if(!url) {message.reply("А ссылку указать? Мне что самому надо придумать что тебе надо?")}
     let file_path = fs.createWriteStream(`${generateRandomCharacters(15)}.mp3`)
     let song_data;
     let search_query;
