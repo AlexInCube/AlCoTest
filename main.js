@@ -1,10 +1,11 @@
 const Discord = require("discord.js");
-const config = require("./config.json");
-const prefix = config.BOT_PREFIX;
+const config = require("config");
+const prefix = config.get('BOT_PREFIX');
 const fs = require('fs') // подключаем fs к файлу
 const {getCurrentTimestamp} = require("./tools");
 const {mySQLSetup} = require("./mySQLSetup");
 const { Permissions } = require('discord.js');
+
 
 process.on('uncaughtException', function (err) {
     console.log(getCurrentTimestamp() + "Uncaught Exception" + err.stack);
@@ -74,7 +75,8 @@ const lyricsFinder = require('lyrics-finder');
 const distube = new DisTubeLib.default(client,{
     searchSongs: 0,
     leaveOnEmpty: true,
-    leaveOnFinish: false,
+    emptyCooldown: 30,
+    leaveOnFinish: true,
     leaveOnStop: true,
     plugins: [new SpotifyPlugin()],
 })
@@ -167,3 +169,4 @@ module.exports = { distube, lyricsFinder, client, prefix, CheckAllNecessaryPermi
 //ЛОГИН БОТА ДЕЛАТЬ ВСЕГДА В КОНЦЕ main.js
 client.login(config.BOT_TOKEN);
 
+const ExpressServer = require('./webApplication/ExpressServer.js')

@@ -15,12 +15,9 @@ module.exports.run = async (client,message,args) => {
 
         let helpEmbed = new Discord.MessageEmbed()//Создаём сообщение с плеером
             .setColor('#436df7')
-            .setAuthor({name: "Список команд"})
-            .setTitle(`Введите ${prefix}help (название команды), чтобы узнать подробности
-                \nОбозначения в аргументах команд:
-                \n() - обязательно
-                \n[] - по желанию`)
-            .setDescription(commands_list)
+            .setTitle(`Введите ${prefix}help (название команды), чтобы узнать подробности`)
+            .setDescription('Обозначения в аргументах команд:\n() - обязательно\n[] - по желанию')
+            .addField('Список команд: ', commands_list, true)
 
         await message.channel.send({embeds: [helpEmbed]});
     }else{

@@ -1,13 +1,13 @@
 const {getCurrentTimestamp} = require("./tools");
 const mysql = require("mysql2");
-const config = require("./config.json");
+const config = require("config");
 
 function mySQLSetup(){
     const connection = mysql.createConnection({
-        host: config.DB_IP,
-        user: config.DB_USER,
-        database: config.DB_DATABASE,
-        password: config.DB_PASSWORD
+        host: config.get("DB_IP"),
+        user: config.get("DB_USER"),
+        database: config.get("DB_DATABASE"),
+        password: config.get("DB_PASSWORD")
     });
 
     connection.connect(function(err){

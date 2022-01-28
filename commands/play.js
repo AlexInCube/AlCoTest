@@ -196,13 +196,13 @@ module.exports.run = async (client,message,args) => {
                     )
                 }
             }
-
+            /*
             if (button.customId === "show_lyrics"){
                 let song = distube.getQueue(message).songs[0]
                 let text = await lyricsFinder("",song.name) || "Ничего не найдено!"
                 await button.user.send(text.slice(0,2000))
             }
-
+            */
             if (connection){
                 if (connection.joinConfig.channelId !== button.member.voice.channelId) {
                     await button.message.channel.send({content: `${button.user.username} попытался нажать на кнопки, но он не в голосовом чате со мной!`})

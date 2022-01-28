@@ -1,7 +1,7 @@
 const {Permissions, MessageEmbed} = require("discord.js");
 module.exports.help = {
     name: "stats",
-    arguments: "(Название игры (команда которая вызывает игру))",
+    arguments: "[Название игры (команда которая вызывает игру)]",
     description: "Показывает вашу статистику в какой-то из игр. К примеру //stats slot",
     bot_permissions: [Permissions.FLAGS.SEND_MESSAGES]
 };
@@ -9,6 +9,12 @@ module.exports.help = {
 module.exports.run = async (client,message, args) => {
     let user_id = message.author.id
     let statEmbed = new MessageEmbed()
+
+    if (!args[0]){
+        statEmbed.setAuthor({name: "Статистика существует для: "}).setTitle("Напишите //stats [название игры]").setDescription("\`rps\` \`slot\`")
+        await message.reply({embeds: [statEmbed]})
+        return
+    }
 
     switch (args[0]) {
         case "slot":
