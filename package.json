@@ -1,10 +1,10 @@
 {
   "name": "discord_js_bot",
-  "version": "1.0.0",
+  "version": "1.17.1",
   "description": "",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node main.js"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +19,7 @@
     "express": "^4.17.2",
     "ffmpeg-static": "^4.4.0",
     "mysql2": "^2.3.3",
+    "node-fetch": "^2.6.1",
     "spotify-url-info": "^2.2.3",
     "spotify-web-api-node": "^5.0.2",
     "tweetnacl": "^1.0.3",

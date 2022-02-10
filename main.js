@@ -8,7 +8,7 @@ const { Permissions } = require('discord.js');
 
 
 process.on('uncaughtException', function (err) {
-    console.log(getCurrentTimestamp() + "Uncaught Exception" + err.stack);
+    console.error(getCurrentTimestamp() + "Uncaught Exception" + err.stack);
 });
 
 global.mySQLconnection = mySQLSetup()
@@ -76,7 +76,7 @@ const distube = new DisTubeLib.default(client,{
     searchSongs: 0,
     leaveOnEmpty: true,
     emptyCooldown: 30,
-    leaveOnFinish: true,
+    leaveOnFinish: false,
     leaveOnStop: true,
     plugins: [new SpotifyPlugin()],
 })
