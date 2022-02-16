@@ -1,6 +1,6 @@
 {
   "name": "discord_js_bot",
-  "version": "1.17.1",
+  "version": "1.18",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -12,10 +12,11 @@
   "dependencies": {
     "@discordjs/opus": "github:discordjs/opus",
     "@discordjs/voice": "^0.7.5",
-    "@distube/spotify": "^1.0.0",
+    "@distube/spotify": "^1.2.1",
+    "@distube/yt-dlp": "^1.0.2",
     "config": "^3.3.7",
     "discord.js": "^13.4.0",
-    "distube": "^3.1.0",
+    "distube": "^3.3.2",
     "express": "^4.17.2",
     "ffmpeg-static": "^4.4.0",
     "mysql2": "^2.3.3",

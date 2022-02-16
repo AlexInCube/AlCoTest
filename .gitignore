@@ -1,3 +1,3 @@
 spotifySetup.js
-config
-webApplication/compiledScripts/*
+config/default.json
+web_application/compiledScripts/*

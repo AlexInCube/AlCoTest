@@ -8,6 +8,7 @@ const {getVoiceConnection} = require("@discordjs/voice");
 const { Permissions } = require('discord.js');
 const fs = require("fs");
 const ytdl = require("ytdl-core");
+const voice = require('@discordjs/voice');
 
 module.exports.help = {
     name: "play",
@@ -196,6 +197,24 @@ module.exports.run = async (client,message,args) => {
                     )
                 }
             }
+
+            if (button.customId === "download_song"){
+                let file_path = fs.createWriteStream(`${generateRandomCharacters(15)}.mp3`)
+                let song = distube.getQueue(message).songs[0]
+
+                let file_name = `${song.name}.mp3`
+                ytdl(song.url,{filter: 'audioonly', format: 'mp3'}).on("end", async () => {
+                    await fs.rename(file_path.path,file_name,(err => {if(err)throw err}))
+                    let stats = fs.statSync(file_name)
+                    if (stats.size >= 8388608){
+                        await button.message.channel.send({content: `${message.author} я не могу отправить файл, так как он весит больше чем 8мб.`})
+                    }else{
+                        await button.message.channel.send({content: `${message.author} я смог извлечь звук`, files: [file_name]})
+                    }
+
+                    fs.unlink(file_name,(err => {if(err)throw err}))
+                }).pipe(file_path)
+            }
             /*
             if (button.customId === "show_lyrics"){
                 let song = distube.getQueue(message).songs[0]
@@ -223,10 +242,16 @@ module.exports.run = async (client,message,args) => {
 */
             if (button.customId === 'stop_music') {
                 await button.message.channel.send({content: `${button.user.username} выключил плеер`})
-                if (distube.getQueue(message)){
+                let queue = distube.getQueue(message)
+                if (queue){
                     await distube.stop(message);
                 }else{
-                    distube.leave()
+                    await voice.getVoiceConnection(message.guild.id).destroy()
+                    await musicPlayerMap[message.guild.id].Collector.stop()
+                    await message.channel.messages.fetch(musicPlayerMap[message.guild.id].MessageID).then((m) => {
+                        m.delete()
+                    });
+                    delete musicPlayerMap[message.guild.id];
                 }
             }
 
@@ -278,24 +303,6 @@ module.exports.run = async (client,message,args) => {
                 } catch (e) {
                     await button.reply({content: "В очереди дальше ничего нет", ephemeral: true});
                 }
-            }
-
-            if (button.customId === "download_song"){
-                let file_path = fs.createWriteStream(`${generateRandomCharacters(15)}.mp3`)
-                let song = distube.getQueue(message).songs[0]
-
-                let file_name = `${song.name}.mp3`
-                ytdl(song.url,{filter: 'audioonly', format: 'mp3'}).on("end", async () => {
-                    await fs.rename(file_path.path,file_name,(err => {if(err)throw err}))
-                    let stats = fs.statSync(file_name)
-                    if (stats.size >= 8388608){
-                        await button.message.channel.send({content: `${message.author} я не могу отправить файл, так как он весит больше чем 8мб.`})
-                    }else{
-                        await button.message.channel.send({content: `${message.author} я смог извлечь звук`, files: [file_name]})
-                    }
-
-                    fs.unlink(file_name,(err => {if(err)throw err}))
-                }).pipe(file_path)
             }
         }));
     }

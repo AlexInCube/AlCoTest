@@ -78,7 +78,17 @@ const distube = new DisTubeLib.default(client,{
     emptyCooldown: 30,
     leaveOnFinish: false,
     leaveOnStop: true,
-    plugins: [new SpotifyPlugin()],
+    plugins: [
+        new SpotifyPlugin(
+            {
+                parallel: true,
+                emitEventsAfterFetching: true,
+                api:{
+                    clientId: config.get("SPOTIFY_CLIENT_ID"),
+                    clientSecret: config.get("SPOTIFY_CLIENT_SECRET")
+                }
+            })
+    ],
 })
 
 
@@ -104,12 +114,12 @@ distube
         await updateMusicPlayerMessage(music_queue.textChannel.guildId,music_queue)
     })
     .on('addList', async (music_queue, playlist) => {
-        await music_queue.textChannel.send(
+        music_queue.textChannel.send(
             `Добавлено \`${playlist.songs.length}\` песен из плейлиста \`${playlist.name}\` в очередь`
         )
         let guild = music_queue.textChannel.guildId;
         musicPlayerMap[guild].PlayerEmbed.fields[2].value = music_queue.formattedDuration || "Неизвестно"//Длительность очереди
-        musicPlayerMap[guild].PlayerEmbed.fields[3].value = (music_queue.songs.length - 1).toString() || "Неизвестно"//Количество песен в очереди
+        musicPlayerMap[guild].PlayerEmbed.fields[3].value = (playlist.songs.length - 1).toString() || "Неизвестно"//Количество песен в очереди
         await updateMusicPlayerMessage(music_queue.textChannel.guildId,music_queue)
     })
     .on("finishSong", async music_queue => {
@@ -130,10 +140,7 @@ distube
         try{
             let channel = await music_queue.textChannel.fetch(musicPlayerMap[guildid].ChannelID);
             if (channel){
-                let message = await channel.messages.fetch(musicPlayerMap[guildid].MessageID);
-                if(message){
-                    await message.delete()
-                }
+                await channel.messages.fetch(musicPlayerMap[guildid].MessageID).then((m) => {m.delete()});
             }
         }catch (e) {
             console.log("Ошибка при отключении"+e)
@@ -169,4 +176,4 @@ module.exports = { distube, lyricsFinder, client, prefix, CheckAllNecessaryPermi
 //ЛОГИН БОТА ДЕЛАТЬ ВСЕГДА В КОНЦЕ main.js
 client.login(config.BOT_TOKEN);
 
-const ExpressServer = require('./webApplication/ExpressServer.js')
+const ExpressServer = require('./web_application/ExpressServer.js')
