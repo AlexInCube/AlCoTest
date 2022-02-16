@@ -78,6 +78,7 @@ const distube = new DisTubeLib.default(client,{
     emptyCooldown: 30,
     leaveOnFinish: false,
     leaveOnStop: true,
+    updateYouTubeDL: false,
     plugins: [
         new SpotifyPlugin(
             {
@@ -176,4 +177,4 @@ module.exports = { distube, lyricsFinder, client, prefix, CheckAllNecessaryPermi
 //ЛОГИН БОТА ДЕЛАТЬ ВСЕГДА В КОНЦЕ main.js
 client.login(config.BOT_TOKEN);
 
-const ExpressServer = require('./web_application/ExpressServer.js')
+//const ExpressServer = require('./web_application/ExpressServer.js')

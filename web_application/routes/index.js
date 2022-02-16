@@ -1,4 +1,4 @@
-const mainRoutes = require('./main')
+const mainRoutes = require('../mainserver')
 
 module.exports = function (app){
     mainRoutes(app)
