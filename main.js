@@ -11,7 +11,7 @@ process.on('uncaughtException', function (err) {
     console.error(getCurrentTimestamp() + "Uncaught Exception" + err.stack);
 });
 
-global.mySQLconnection = mySQLSetup()
+mySQLSetup()
 
 const client = new Discord.Client({
     intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_VOICE_STATES", "GUILD_MESSAGE_REACTIONS"],
