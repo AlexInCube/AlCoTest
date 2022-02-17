@@ -10,6 +10,7 @@ const fs = require("fs");
 const ytdl = require("ytdl-core");
 const voice = require('@discordjs/voice');
 
+
 module.exports.help = {
     name: "play",
     arguments: "(запрос)",
@@ -79,6 +80,7 @@ module.exports.run = async (client,message,args) => {
 
         await message.channel.send({embeds: [foundSongsEmbed]}).then((collected) => {//Отправляем сообщение с результатами
             let result_message = collected
+
             message.channel.awaitMessages({//Ждём цифру от пользователя с песней из результата
                 filter,
                 max: 1,
@@ -92,16 +94,14 @@ module.exports.run = async (client,message,args) => {
                     songToPlay = foundSongs[clamp(parsedSelectedSong, 1, 10) - 1]//Забираем окончательную ссылку на видео
                     await startPlayer()
                     await select_message.delete()
-                    await message.delete()
-                    result_message.delete()
+                    await result_message.delete()
                 } else {
-                    await message.delete()
                     await select_message.reply({
                         content: `Вы указали что-то неверное, проверьте запрос!`,
                         ephemeral: true
                     })
-                    await select_message.delete()
-                    result_message.delete()
+                    await message.delete()
+                    await result_message.delete()
                 }
             })
             .catch(async () => {//Если истёк таймер
@@ -115,7 +115,8 @@ module.exports.run = async (client,message,args) => {
     async function startPlayer() {//Собственно плеер, сердце этой команды.
         let user_channel = message.member.voice.channel
         let options = {
-            textChannel : message.channel
+            textChannel : message.channel,
+            member : message.member
         }
         try {
             if (musicPlayerMap[guildID]) {
@@ -172,6 +173,8 @@ module.exports.run = async (client,message,args) => {
 
         const collector = musicPlayerMessage.channel.createMessageComponentCollector({filter});
         musicPlayerMap[guildID].Collector = collector
+
+        await message.delete()
 
         collector.on('collect', (async button => {
             if (!CheckAllNecessaryPermission(message, module.exports.help.bot_permissions)){return}

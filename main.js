@@ -78,7 +78,10 @@ const distube = new DisTubeLib.default(client,{
     emptyCooldown: 30,
     leaveOnFinish: false,
     leaveOnStop: true,
+
     updateYouTubeDL: false,
+    youtubeCookie: config.get("YOUTUBE_COOKIE"),
+
     plugins: [
         new SpotifyPlugin(
             {
@@ -96,7 +99,7 @@ const distube = new DisTubeLib.default(client,{
 distube
     .on('error', (textChannel, e) => {
         console.error(e)
-        textChannel.send(`Произошла ошибка, сообщите об этом криворукому разрабу: ${e.stack}`.slice(0, 2000))
+        textChannel.send(`Произошла ошибка: ${e.stack}`.slice(0, 2000))
     })
     .on('playSong', async (music_queue, song) => {
         let guild = music_queue.textChannel.guildId;
@@ -109,15 +112,17 @@ distube
     })
     .on('addSong', async (music_queue, song) => {
         let guild = music_queue.textChannel.guildId;
-        await music_queue.textChannel.send({content: `Добавлено: ${song.name} - \`${song.formattedDuration}\` в очередь`})
+        await music_queue.textChannel.send({content:
+                `Добавлено: ${song.name} - \`${song.formattedDuration}\` в очередь по запросу \`${song.member.user.username}\``
+        })
         musicPlayerMap[guild].PlayerEmbed.fields[2].value = music_queue.formattedDuration || "Неизвестно"//Длительность очереди
         musicPlayerMap[guild].PlayerEmbed.fields[3].value = (music_queue.songs.length - 1).toString() || "Неизвестно"//Количество песен в очереди
         await updateMusicPlayerMessage(music_queue.textChannel.guildId,music_queue)
     })
     .on('addList', async (music_queue, playlist) => {
-        music_queue.textChannel.send(
-            `Добавлено \`${playlist.songs.length}\` песен из плейлиста \`${playlist.name}\` в очередь`
-        )
+        music_queue.textChannel.send({content:
+                `Добавлено \`${playlist.songs.length}\` песен из плейлиста \`${playlist.name}\` в очередь по запросу \`${playlist.member.user.username}\``
+        })
         let guild = music_queue.textChannel.guildId;
         musicPlayerMap[guild].PlayerEmbed.fields[2].value = music_queue.formattedDuration || "Неизвестно"//Длительность очереди
         musicPlayerMap[guild].PlayerEmbed.fields[3].value = (playlist.songs.length - 1).toString() || "Неизвестно"//Количество песен в очереди
