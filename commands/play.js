@@ -1,7 +1,6 @@
 const Discord = module.require("discord.js");
 require("fs");
-const {distube, CheckAllNecessaryPermission, lyricsFinder} = require("../main");
-const {MessageActionRow, MessageButton} = require("discord.js");
+const {distube, CheckAllNecessaryPermission} = require("../main");
 const {isValidURL, generateRandomCharacters, clamp} = require("../tools");
 const {RepeatMode} = require("distube");
 const {getVoiceConnection} = require("@discordjs/voice");
@@ -9,6 +8,8 @@ const { Permissions } = require('discord.js');
 const fs = require("fs");
 const ytdl = require("ytdl-core");
 const voice = require('@discordjs/voice');
+const Audioplayer = require("../audio_player/Audioplayer");
+const {PLAYER_STATES} = require("../audio_player/Audioplayer");
 
 
 module.exports.help = {
@@ -60,7 +61,6 @@ module.exports.run = async (client,message,args) => {
             });
         }catch (e){
             await message.reply({content: "Ничего не найдено",ephemeral: true})
-            await message.delete()
             return
         }
 
@@ -128,37 +128,13 @@ module.exports.run = async (client,message,args) => {
             return
         }
 
-        let musicPlayerEmbed = new Discord.MessageEmbed()//Создаём сообщение с плеером
-            .setColor('#f7ee43')
-            .setAuthor({name: "⌛ Загрузка ⌛"})
-            .addFields(
-                {name: 'Автор', value: "Неизвестно"},
-                {name: 'Длительность песни', value: "Неизвестно",inline: false},
-                {name: 'Оставшаяся длительность очереди', value: "Неизвестно",inline: true},
-                {name: 'Осталось песен в очереди', value: "Неизвестно",inline: true},
-                {name: 'Режим повтора', value: "Выключен",inline: true},
-            )
+        let Player = Audioplayer.createPlayer()
 
-        const musicPlayerRowPrimary = new MessageActionRow()//Создаём кнопки для плеера
-            .addComponents(
-                new MessageButton().setCustomId("stop_music").setLabel("Выключить").setStyle("DANGER"),
-                new MessageButton().setCustomId("pause_music").setLabel("Пауза / Возобновить").setStyle("PRIMARY"),
-                new MessageButton().setCustomId("toggle_repeat").setLabel("Переключить режим повтора").setStyle("PRIMARY"),
-                new MessageButton().setCustomId("skip_song").setLabel("Пропустить").setStyle("PRIMARY"),
-            )
-
-        const musicPlayerRowSecondary = new MessageActionRow()//Создаём кнопки для плеера
-            .addComponents(
-                new MessageButton().setCustomId("show_queue").setLabel("Показать очередь").setStyle("SECONDARY"),
-                new MessageButton().setCustomId("download_song").setLabel("Скачать песню").setStyle("SECONDARY"),
-                new MessageButton().setCustomId("show_lyrics").setLabel("Показать текст песни").setStyle("SECONDARY"),
-            )
-
-        let musicPlayerMessage = await message.channel.send({embeds: [musicPlayerEmbed], components: [musicPlayerRowPrimary,musicPlayerRowSecondary]}) // Отправляем сообщение с плеером
+        let musicPlayerMessage = await message.channel.send(Player) // Отправляем сообщение с плеером
         musicPlayerMap[guildID] = {
             MessageID: musicPlayerMessage.id,
             ChannelID: musicPlayerMessage.channel_id,
-            PlayerEmbed: musicPlayerEmbed,
+            PlayerEmbed: Player.embeds[0],
             Collector: "",
         }
 
@@ -259,13 +235,13 @@ module.exports.run = async (client,message,args) => {
             }
 
             if (button.customId === 'pause_music') {
-                let pause = distube.getQueue(message).paused;
-                if (pause) {
+                let queue = distube.getQueue(message);
+                if (queue.paused) {
                     await distube.resume(message);
-                    musicPlayerMap[guildID].PlayerEmbed.setAuthor({name: `🎵 Играет 🎵`}).setColor('#49f743');
+                    await Audioplayer.setPlayerState(guildID , PLAYER_STATES.playing)
                 } else {
                     await distube.pause(message);
-                    musicPlayerMap[guildID].PlayerEmbed.setAuthor({name: `⏸️ Пауза ⏸️ `}).setColor('#f74343');
+                    await Audioplayer.setPlayerState(guildID , PLAYER_STATES.paused)
                 }
 
                 await button.update({embeds: [musicPlayerMap[guildID].PlayerEmbed]});

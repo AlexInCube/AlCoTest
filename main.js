@@ -71,6 +71,8 @@ global.musicPlayerMap = {}
 const DisTubeLib = require("distube")
 const { SpotifyPlugin } = require("@distube/spotify");
 const lyricsFinder = require('lyrics-finder');
+const Audioplayer = require("./audio_player/Audioplayer");
+const {PLAYER_STATES , PLAYER_FIELDS} = require("./audio_player/Audioplayer");
 
 const distube = new DisTubeLib.default(client,{
     searchSongs: 0,
@@ -103,41 +105,38 @@ distube
     })
     .on('playSong', async (music_queue, song) => {
         let guild = music_queue.textChannel.guildId;
-        await musicPlayerMap[guild].PlayerEmbed.setTitle(song.name).setURL(song.url).setAuthor({name: `🎵 Играет 🎵`}).setColor('#49f743').setThumbnail(song.thumbnail);
-        musicPlayerMap[guild].PlayerEmbed.fields[0].value = song.uploader.name || "Неизвестно"//Автор загрузки
-        musicPlayerMap[guild].PlayerEmbed.fields[1].value = song.formattedDuration || "Неизвестно"//Длительность песни
-        musicPlayerMap[guild].PlayerEmbed.fields[2].value = music_queue.formattedDuration || "Неизвестно"//Длительность очереди
-        musicPlayerMap[guild].PlayerEmbed.fields[3].value = (music_queue.songs.length - 1).toString() || "Неизвестно"//Количество песен в очереди
-        await updateMusicPlayerMessage(guild,music_queue)
+        await Audioplayer.setPlayerState(guild , PLAYER_STATES.playing)
+        Audioplayer.editField(guild, PLAYER_FIELDS.author, song.uploader.name)
+        Audioplayer.editField(guild, PLAYER_FIELDS.duration, song.formattedDuration)
+        Audioplayer.editField(guild, PLAYER_FIELDS.queue_duration, music_queue.formattedDuration)
+        Audioplayer.editField(guild, PLAYER_FIELDS.remaining_songs, (music_queue.songs.length - 1).toString())
+        musicPlayerMap[guild].PlayerEmbed.setThumbnail(song.thumbnail)
+        await Audioplayer.pushChangesToPlayerMessage(guild,music_queue)
     })
     .on('addSong', async (music_queue, song) => {
         let guild = music_queue.textChannel.guildId;
         await music_queue.textChannel.send({content:
                 `Добавлено: ${song.name} - \`${song.formattedDuration}\` в очередь по запросу \`${song.member.user.username}\``
         })
-        musicPlayerMap[guild].PlayerEmbed.fields[2].value = music_queue.formattedDuration || "Неизвестно"//Длительность очереди
-        musicPlayerMap[guild].PlayerEmbed.fields[3].value = (music_queue.songs.length - 1).toString() || "Неизвестно"//Количество песен в очереди
-        await updateMusicPlayerMessage(music_queue.textChannel.guildId,music_queue)
+        Audioplayer.editField(guild, PLAYER_FIELDS.queue_duration, music_queue.formattedDuration)
+        Audioplayer.editField(guild, PLAYER_FIELDS.remaining_songs, (music_queue.songs.length - 1).toString())
+        await Audioplayer.pushChangesToPlayerMessage(music_queue.textChannel.guildId,music_queue)
     })
     .on('addList', async (music_queue, playlist) => {
         music_queue.textChannel.send({content:
                 `Добавлено \`${playlist.songs.length}\` песен из плейлиста \`${playlist.name}\` в очередь по запросу \`${playlist.member.user.username}\``
         })
         let guild = music_queue.textChannel.guildId;
-        musicPlayerMap[guild].PlayerEmbed.fields[2].value = music_queue.formattedDuration || "Неизвестно"//Длительность очереди
-        musicPlayerMap[guild].PlayerEmbed.fields[3].value = (playlist.songs.length - 1).toString() || "Неизвестно"//Количество песен в очереди
-        await updateMusicPlayerMessage(music_queue.textChannel.guildId,music_queue)
+        Audioplayer.editField(guild, PLAYER_FIELDS.queue_duration, music_queue.formattedDuration)
+        Audioplayer.editField(guild, PLAYER_FIELDS.remaining_songs, (music_queue.songs.length - 1).toString())
+        await Audioplayer.pushChangesToPlayerMessage(music_queue.textChannel.guildId,music_queue)
     })
     .on("finishSong", async music_queue => {
         let guild = music_queue.textChannel.guildId;
         if (!music_queue.next) {
-            await musicPlayerMap[guild].PlayerEmbed.setTitle("").setURL("").setAuthor({name: `💿 Ожидание 💿`}).setColor('#43f7f7').setThumbnail(null);
+            await Audioplayer.setPlayerState(guild,PLAYER_STATES.waiting)
             if (!musicPlayerMap[guild]) {return}
-            musicPlayerMap[guild].PlayerEmbed.fields[0].value = "Неизвестно"//Автор загрузки
-            musicPlayerMap[guild].PlayerEmbed.fields[1].value = "Неизвестно"//Длительность песни
-            musicPlayerMap[guild].PlayerEmbed.fields[2].value = "Неизвестно"//Длительность очереди
-            musicPlayerMap[guild].PlayerEmbed.fields[3].value = "Неизвестно"//Количество песен в очереди
-            await updateMusicPlayerMessage(guild, music_queue)
+            await Audioplayer.pushChangesToPlayerMessage(guild , music_queue)
         }
     })
     .on('disconnect', async music_queue => {
@@ -155,15 +154,7 @@ distube
         delete musicPlayerMap[guildid];
     })
 
-async function updateMusicPlayerMessage(guildid,music_queue) {
-    try {
-        let channel = await music_queue.textChannel.fetch(musicPlayerMap[guildid].ChannelID);
-        let message = await channel.messages.fetch(musicPlayerMap[guildid].MessageID);
-        await message.edit({embeds: [musicPlayerMap[guildid].PlayerEmbed]});
-    } catch (e) {
-        console.log(getCurrentTimestamp()+"Ошибка с обновлением полей: " + e)
-    }
-}
+
 
 
 function CheckAllNecessaryPermission(message,permissions_required){
