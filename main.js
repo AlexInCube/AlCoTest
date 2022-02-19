@@ -110,7 +110,7 @@ distube
         Audioplayer.editField(guild, PLAYER_FIELDS.duration, song.formattedDuration)
         Audioplayer.editField(guild, PLAYER_FIELDS.queue_duration, music_queue.formattedDuration)
         Audioplayer.editField(guild, PLAYER_FIELDS.remaining_songs, (music_queue.songs.length - 1).toString())
-        musicPlayerMap[guild].PlayerEmbed.setThumbnail(song.thumbnail)
+        await musicPlayerMap[guild].PlayerEmbed.setThumbnail(song.thumbnail).setTitle(song.name).setURL(song.url)
         await Audioplayer.pushChangesToPlayerMessage(guild,music_queue)
     })
     .on('addSong', async (music_queue, song) => {
