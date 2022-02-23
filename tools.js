@@ -1,3 +1,5 @@
+const {Permissions} = require("discord.js");
+
 function getCurrentTimestamp(){
     let today = new Date();
     const dd = String(today.getDate()).padStart(2, '0');
@@ -51,4 +53,15 @@ function clamp(num, min, max){
     return Math.min(Math.max(num, min), max)
 }
 
-module.exports = { getCurrentTimestamp, isValidURL, ClearUsedIDFromMention, generateRandomCharacters, clamp};
+function CheckAllNecessaryPermission(client,message,permissions_required){
+    const bot = message.guild.members.cache.get(client.user.id)//client.users.fetch(client.user.id)
+    const permission_provided = bot.permissions.has(permissions_required)
+    if(!permission_provided) {
+        if(bot.permissions.has(Permissions.FLAGS.SEND_MESSAGES)) {
+            message.channel.send(`У БОТА недостаточно прав, напишите //help (название команды), чтобы увидеть недостающие права. А также попросите администрацию сервера их выдать.`)
+        }
+    }
+    return permission_provided
+}
+
+module.exports = { getCurrentTimestamp, isValidURL, ClearUsedIDFromMention, generateRandomCharacters, clamp, CheckAllNecessaryPermission};

@@ -7,9 +7,8 @@ const {getVoiceConnection} = require("@discordjs/voice");
 const { Permissions } = require('discord.js');
 const fs = require("fs");
 const ytdl = require("ytdl-core");
-const voice = require('@discordjs/voice');
-const Audioplayer = require("../audio_player/Audioplayer");
-const {PLAYER_STATES} = require("../audio_player/Audioplayer");
+const Audioplayer = require("../custom_modules/Audioplayer/Audioplayer");
+const {PLAYER_STATES , PLAYER_FIELDS} = require("../custom_modules/Audioplayer/Audioplayer");
 
 
 module.exports.help = {
@@ -133,16 +132,9 @@ module.exports.run = async (client,message,args) => {
         let musicPlayerMessage = await message.channel.send(Player) // Отправляем сообщение с плеером
         musicPlayerMap[guildID] = {
             MessageID: musicPlayerMessage.id,
-            ChannelID: musicPlayerMessage.channel_id,
+            ChannelID: musicPlayerMessage.channel.id,
             PlayerEmbed: Player.embeds[0],
             Collector: "",
-        }
-
-        try {
-            await distube.play(user_channel, songToPlay, options);
-        }catch (e) {
-            message.channel.send("Что-то не так с этим аудио, возможно он не доступен в стране бота (Украина)")
-            return
         }
 
         let filter = button => button.customId;
@@ -153,7 +145,7 @@ module.exports.run = async (client,message,args) => {
         await message.delete()
 
         collector.on('collect', (async button => {
-            if (!CheckAllNecessaryPermission(message, module.exports.help.bot_permissions)){return}
+            if (!CheckAllNecessaryPermission(client, message, module.exports.help.bot_permissions)){return}
 
             let connection = getVoiceConnection(message.guildId)
 
@@ -194,13 +186,7 @@ module.exports.run = async (client,message,args) => {
                     fs.unlink(file_name,(err => {if(err)throw err}))
                 }).pipe(file_path)
             }
-            /*
-            if (button.customId === "show_lyrics"){
-                let song = distube.getQueue(message).songs[0]
-                let text = await lyricsFinder("",song.name) || "Ничего не найдено!"
-                await button.user.send(text.slice(0,2000))
-            }
-            */
+
             if (connection){
                 if (connection.joinConfig.channelId !== button.member.voice.channelId) {
                     await button.message.channel.send({content: `${button.user.username} попытался нажать на кнопки, но он не в голосовом чате со мной!`})
@@ -220,18 +206,8 @@ module.exports.run = async (client,message,args) => {
             }
 */
             if (button.customId === 'stop_music') {
+                await Audioplayer.stopPlayer(distube,message.guild)
                 await button.message.channel.send({content: `${button.user.username} выключил плеер`})
-                let queue = distube.getQueue(message)
-                if (queue){
-                    await distube.stop(message);
-                }else{
-                    await voice.getVoiceConnection(message.guild.id).destroy()
-                    await musicPlayerMap[message.guild.id].Collector.stop()
-                    await message.channel.messages.fetch(musicPlayerMap[message.guild.id].MessageID).then((m) => {
-                        m.delete()
-                    });
-                    delete musicPlayerMap[message.guild.id];
-                }
             }
 
             if (button.customId === 'pause_music') {
@@ -267,7 +243,7 @@ module.exports.run = async (client,message,args) => {
                             break;
                     }
 
-                    musicPlayerMap[guildID].PlayerEmbed.fields[4].value = mode
+                    Audioplayer.editField(guildID,PLAYER_FIELDS.repeat_mode,mode)
                 }
                 await button.update({embeds: [musicPlayerMap[guildID].PlayerEmbed]});
             }
@@ -284,5 +260,12 @@ module.exports.run = async (client,message,args) => {
                 }
             }
         }));
+
+        try {
+            await distube.play(user_channel, songToPlay, options);
+        }catch (e) {
+            message.channel.send("Что-то не так с этим аудио, возможно он не доступен в стране бота (Украина)")
+
+        }
     }
 };

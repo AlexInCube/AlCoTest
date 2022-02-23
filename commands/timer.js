@@ -1,9 +1,10 @@
-const {MessageActionRow, MessageButton} = require("discord.js");
+const {MessageActionRow, MessageButton , Permissions} = require("discord.js");
 
 module.exports.help = {
     name: "timer",
     arguments: "(длительность)",
-    description: "Запускает таймер на указанное время, по умолчанию время 10 секунд, максимум можно поставить на 300 секунд."
+    description: "Запускает таймер на указанное время, по умолчанию время 10 секунд, максимум можно поставить на 300 секунд.",
+    bot_permissions: [Permissions.FLAGS.SEND_MESSAGES]
 };
 
 module.exports.run = async (client,message,args) => {

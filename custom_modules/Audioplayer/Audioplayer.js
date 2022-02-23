@@ -1,5 +1,7 @@
 const {MessageActionRow , MessageButton} = require("discord.js");
+const voice = require("@discordjs/voice");
 const Discord = module.require("discord.js");
+
 
 /**
  * Создаёт embed сообщение с видом Аудио Плеера, но не отправляет его.
@@ -51,7 +53,7 @@ module.exports.PLAYER_FIELDS = PLAYER_FIELDS
  * Редактирует значения поля в плеере, но не отправляет изменения в сообщение в Discord
  *
  * @param guildID
- * @param field - author || duration || queue_duration || remaining_songs || repeat_mode
+ * @param field - PLAYERFIELDS.author || duration || queue_duration || remaining_songs || repeat_mode
  * @param value
  */
 module.exports.editField = function editField(guildID,field,value){
@@ -113,3 +115,22 @@ module.exports.pushChangesToPlayerMessage = async (guildID , music_queue) => {
     }
 }
 
+module.exports.downloadSong = async (song) => {
+
+}
+
+module.exports.stopPlayer = async (distube,guild) => {
+    let queue = distube.getQueue(guild)
+    if (queue) {
+        await distube.stop(guild);
+    } else {
+        let vc = voice.getVoiceConnection(guild.id)
+        if (vc) await voice.getVoiceConnection(guild.id).destroy()
+        await musicPlayerMap[guild.id].Collector.stop()
+        let channel = guild.channels.cache.get(musicPlayerMap[guild.id].ChannelID)
+        await channel.messages.fetch(musicPlayerMap[guild.id].MessageID).then((m) => {
+            m.delete()
+        });
+        delete musicPlayerMap[guild.id];
+    }
+}

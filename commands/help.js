@@ -1,5 +1,5 @@
-const {prefix} = require("../main");
 const {Permissions} = require("discord.js");
+const {prefix} = require("../custom_modules/CommandHandler");
 const Discord = module.require("discord.js");
 
 module.exports.help = {

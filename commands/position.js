@@ -8,7 +8,6 @@ module.exports.help = {
 };
 
 module.exports.run = async (client,message, args) => {
-    message.channel.send("Вывод"+args);
     if (!args){message.reply({content: "А время указать? Не понимаешь как? Пиши //help position"});return}
 
     let totalTime = 0
