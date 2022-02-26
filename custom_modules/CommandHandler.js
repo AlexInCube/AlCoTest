@@ -1,51 +1,74 @@
-const Discord = require("discord.js");
-const fs = require("fs");
-const {getCurrentTimestamp , CheckAllNecessaryPermission} = require("../tools");
-const path = require("path");
-const config = require("config");
-const prefix = config.get('BOT_PREFIX');
-
+const Discord = require('discord.js')
+const fs = require('fs')
+const { getCurrentTimestamp, CheckAllNecessaryPermission } = require('./tools')
+const path = require('path')
+const config = require('config')
+const prefix = config.get('BOT_PREFIX')
+module.exports.prefix = prefix
 
 module.exports.CommandsSetup = (client) => {
-    client.commands = new Discord.Collection() // создаём коллекцию для команд
+  client.commands = new Discord.Collection() // создаём коллекцию для команд
+  client.commands_groups = new Map() // группируем команды в группы тупо для //help
 
-    const commandsPath = path.resolve('commands')
-    //Находим имена команд (имя файла.js) и собираем их в коллекцию.
-    fs.readdir(commandsPath, (err, files) => { // чтение файлов в папке commands
-        if (err) {console.log(getCurrentTimestamp()+err); return}
+  function getAllFiles (dirPath, arrayOfFiles) {
+    const files = fs.readdirSync(dirPath)
 
-        let jsfile = files.filter(f => f.split('.').pop() === 'js') // файлы не имеющие расширение .js игнорируются
-        if (jsfile.length <= 0) return console.log(getCurrentTimestamp()+'Команды не найдены!') // если нет ни одного файла с расширением .js
+    arrayOfFiles = arrayOfFiles || []
 
-        console.log(getCurrentTimestamp()+`Загружено ${jsfile.length} команд`)
-        jsfile.forEach((f) => { // добавляем каждый файл в коллекцию команд
-            let props = require(`${commandsPath}/${f}`)
-            client.commands.set(props.help.name, props)
-        })
+    files.forEach(function (file) {
+      const foundedFile = fs.statSync(dirPath + '/' + file)
+      if (foundedFile.isDirectory()) {
+        arrayOfFiles = getAllFiles(dirPath + '/' + file, arrayOfFiles)
+      } else {
+        const pathToPush = path.join('..//', dirPath, '/', file)
+        if (pathToPush.endsWith('.js')) {
+          arrayOfFiles.push(path.join('..//', dirPath, '/', file))
+        }
+      }
     })
 
-    client.on("messageCreate", function(message) {
-        if (message.author.bot) return;//Если автор сообщения бот, тогда не обрабатываем его.
-        if (!message.content.startsWith(prefix)) return;//Проверка префикса сообщения
+    return arrayOfFiles
+  }
 
-        const commandBody = message.content.slice(prefix.length);
-        let args = commandBody.split(' ');
-        const command = args.shift().toLowerCase();
+  const commandsPath = 'commands'
 
-        if (!args) {args = []}
+  const scanResult = getAllFiles(commandsPath)
 
-        let command_file = client.commands.get(command) // получение команды из коллекции
-        try {
-            if (command_file){
-                if (!CheckAllNecessaryPermission(client, message, command_file.help.bot_permissions)){return}
-                command_file.run(client, message, args)
-            } else {
-                message.reply("Команды не существует")
-            }
-        }catch (e) {
-            console.log(`${e.stack}`.slice(0,2000))
-        }
-    });
+  scanResult.forEach((filePath) => { // добавляем каждый файл в коллекцию команд
+    const props = require(filePath)
+    if (!client.commands_groups.has(props.help.group)) {
+      client.commands_groups.set(props.help.group, [props.help.name])
+    } else {
+      const commandsArray = client.commands_groups.get(props.help.group)
+      commandsArray.push(props.help.name)
+      client.commands_groups.set(props.help.group, commandsArray)
+    }
+    client.commands.set(props.help.name, props)
+  })
+
+  console.log(getCurrentTimestamp() + `Загружено ${scanResult.length} команд`)
+  // Находим имена команд (имя файла.js) и собираем их в коллекцию.
+
+  client.on('messageCreate', function (message) {
+    if (message.author.bot) return// Если автор сообщения бот, тогда не обрабатываем его.
+    if (!message.content.startsWith(prefix)) return// Проверка префикса сообщения
+
+    const commandBody = message.content.slice(prefix.length)
+    let args = commandBody.split(' ')
+    const command = args.shift().toLowerCase()
+
+    if (!args) { args = [] }
+
+    const commandFile = client.commands.get(command) // получение команды из коллекции
+    try {
+      if (commandFile) {
+        if (!CheckAllNecessaryPermission(client, message, commandFile.help.bot_permissions)) { return }
+        commandFile.run(client, message, args)
+      } else {
+        message.reply('Команды не существует')
+      }
+    } catch (e) {
+      console.log(`${e.stack}`.slice(0, 2000))
+    }
+  })
 }
-
-module.exports.prefix = prefix
