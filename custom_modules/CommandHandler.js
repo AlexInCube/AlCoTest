@@ -22,7 +22,7 @@ module.exports.CommandsSetup = (client) => {
       } else {
         const pathToPush = path.join('..//', dirPath, '/', file)
         if (pathToPush.endsWith('.js')) {
-          arrayOfFiles.push(path.join('..//', dirPath, '/', file))
+          arrayOfFiles.push(pathToPush)
         }
       }
     })

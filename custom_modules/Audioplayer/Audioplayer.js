@@ -1,5 +1,9 @@
 const { MessageActionRow, MessageButton } = require('discord.js')
 const voice = require('@discordjs/voice')
+const { generateRandomCharacters } = require('../tools')
+const { getVoiceConnection } = require('@discordjs/voice')
+const fs = require('fs')
+const ytdl = require('ytdl-core')
 const Discord = module.require('discord.js')
 
 /**
@@ -30,11 +34,131 @@ module.exports.createPlayerEmbed = () => {
   const musicPlayerRowSecondary = new MessageActionRow()// Создаём кнопки для плеера
     .addComponents(
       new MessageButton().setCustomId('show_queue').setLabel('Показать очередь').setStyle('SECONDARY'),
-      new MessageButton().setCustomId('download_song').setLabel('Скачать песню').setStyle('SECONDARY'),
-      new MessageButton().setCustomId('show_lyrics').setLabel('Показать текст песни').setStyle('SECONDARY')
+      new MessageButton().setCustomId('download_song').setLabel('Скачать песню').setStyle('SECONDARY')
+      // new MessageButton().setCustomId('show_lyrics').setLabel('Показать текст песни').setStyle('SECONDARY')
     )
 
   return { embeds: [musicPlayerEmbed], components: [musicPlayerRowPrimary, musicPlayerRowSecondary] }
+}
+
+module.exports.createPlayer = async (client, queue, distube) => {
+  await module.exports.clearPlayerState(queue.textChannel.guild)
+  const Player = module.exports.createPlayerEmbed()
+
+  const guildId = queue.textChannel.guild.id
+
+  const musicPlayerMessage = await queue.textChannel.send(Player) // Отправляем сообщение с плеером
+  musicPlayerMap[guildId] = {
+    MessageID: musicPlayerMessage.id,
+    ChannelID: musicPlayerMessage.channel.id,
+    PlayerEmbed: Player.embeds[0],
+    Collector: ''
+  }
+
+  const filter = button => button.customId
+
+  const collector = musicPlayerMessage.channel.createMessageComponentCollector({ filter })
+  musicPlayerMap[guildId].Collector = collector
+
+  collector.on('collect', async button => {
+    // const permissions = [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.CONNECT, Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SPEAK, Permissions.FLAGS.MANAGE_MESSAGES, Permissions.FLAGS.ATTACH_FILES]
+    // if (!CheckAllNecessaryPermission(client, message, permissions)) { return }
+
+    const connection = getVoiceConnection(guildId)
+
+    if (button.customId === 'show_queue') {
+      const showQueue = distube.getQueue(queue.textChannel.guild)
+      if (!showQueue) {
+        await button.reply({ content: 'Ничего не проигрывается', ephemeral: true })
+      } else {
+        let queueList = ''
+        showQueue.songs.forEach((song, id) => {
+          if (id === 0) { return }
+          queueList += `${id}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`
+        })
+
+        const queueEmbed = new Discord.MessageEmbed()
+          .setAuthor({ name: 'Сейчас играет: ' })
+          .setTitle(showQueue.songs[0].name).setURL(showQueue.songs[0].url)
+          .setDescription(`**Оставшиеся песни: **\n${queueList}`.slice(0, 4096))
+        await button.reply({ embeds: [queueEmbed], ephemeral: true }
+        )
+      }
+    }
+
+    if (button.customId === 'download_song') {
+      const filePath = fs.createWriteStream(`${generateRandomCharacters(15)}.mp3`)
+      const song = distube.getQueue(queue.textChannel.guild).songs[0]
+
+      const fileName = `${song.name}.mp3`
+      ytdl(song.url, { filter: 'audioonly', format: 'mp3' }).on('end', async () => {
+        await fs.rename(filePath.path, fileName, err => { if (err) throw err })
+        const stats = fs.statSync(fileName)
+        if (stats.size >= 8388608) {
+          await button.message.channel.send({ content: `${button.user.username} я не могу отправить файл, так как он весит больше чем 8мб.` })
+        } else {
+          await button.message.channel.send({ content: `${button.user.username} я смог извлечь звук`, files: [fileName] })
+        }
+
+        fs.unlink(fileName, err => { if (err) throw err })
+      }).pipe(filePath)
+    }
+
+    if (connection) {
+      if (connection.joinConfig.channelId !== button.member.voice.channelId) {
+        await button.message.channel.send({ content: `${button.user.username} попытался нажать на кнопки, но он не в голосовом чате со мной!` })
+        return
+      }
+    } else {
+      if (distube.getQueue(queue.textChannel.guild)) {
+        await distube.stop(queue.textChannel.guild)
+      }
+    }
+
+    /*
+          if(button.member.permissions.has('MANAGE_GUILD') || button.member.user.id === message.author.id || message.guild.me.voice.channel.members.size < 2){
+          }else{
+              await button.reply({content: "У тебя нехватает прав на нажатие кнопок плеера", ephemeral: true})
+              return
+          }
+    */
+    if (button.customId === 'stop_music') {
+      await module.exports.stopPlayer(distube, queue.textChannel.guild)
+      await button.message.channel.send({ content: `${button.user.username} выключил плеер` })
+    }
+
+    if (button.customId === 'pause_music') {
+      await module.exports.pausePlayer(distube, button.message)
+      await button.deferUpdate()
+    }
+
+    if (button.customId === 'toggle_repeat') {
+      await module.exports.changeRepeatMode(distube, button.message)
+      await button.deferUpdate()
+    }
+
+    if (button.customId === 'skip_song') {
+      try {
+        await distube.skip(queue.textChannel.guild)
+        await button.reply({ content: `По запросу от ${button.user} была пропущена песня` })
+        if (distube.getQueue(queue.textChannel.guild).paused) {
+          await distube.resume(queue.textChannel.guild)
+        }
+      } catch (e) {
+        await button.reply({ content: 'В очереди дальше ничего нет', ephemeral: true })
+      }
+    }
+  })
+}
+
+module.exports.updateEmbedWithSong = async (queue, song) => {
+  const guild = queue.textChannel.guildId
+  await module.exports.setPlayerEmbedState(guild, PLAYER_STATES.playing)
+  module.exports.editField(guild, PLAYER_FIELDS.author, song.uploader.name)
+  module.exports.editField(guild, PLAYER_FIELDS.duration, song.formattedDuration)
+  module.exports.editField(guild, PLAYER_FIELDS.queue_duration, queue.formattedDuration)
+  module.exports.editField(guild, PLAYER_FIELDS.remaining_songs, (queue.songs.length - 1).toString())
+  await musicPlayerMap[guild].PlayerEmbed.setThumbnail(song.thumbnail).setTitle(song.name).setURL(song.url)
 }
 
 const PLAYER_FIELDS = {
@@ -116,6 +240,17 @@ module.exports.downloadSong = async (song) => {
 
 }
 
+module.exports.clearPlayerState = async (guild) => {
+  if (musicPlayerMap[guild.id]) {
+    await musicPlayerMap[guild.id].Collector.stop()
+    const channel = guild.channels.cache.get(musicPlayerMap[guild.id].ChannelID)
+    await channel.messages.fetch(musicPlayerMap[guild.id].MessageID).then((m) => {
+      m.delete()
+    })
+    delete musicPlayerMap[guild.id]
+  }
+}
+
 module.exports.stopPlayer = async (distube, guild) => {
   const queue = distube.getQueue(guild)
   if (queue) {
@@ -123,12 +258,7 @@ module.exports.stopPlayer = async (distube, guild) => {
   } else {
     const vc = voice.getVoiceConnection(guild.id)
     if (vc) await voice.getVoiceConnection(guild.id).destroy()
-    await musicPlayerMap[guild.id].Collector.stop()
-    const channel = guild.channels.cache.get(musicPlayerMap[guild.id].ChannelID)
-    await channel.messages.fetch(musicPlayerMap[guild.id].MessageID).then((m) => {
-      m.delete()
-    })
-    delete musicPlayerMap[guild.id]
+    await module.exports.clearPlayerState(guild)
   }
 }
 
@@ -143,4 +273,29 @@ module.exports.pausePlayer = async (distube, message) => {
   }
 
   await message.edit({ embeds: [musicPlayerMap[message.guild.id].PlayerEmbed] })
+}
+
+module.exports.changeRepeatMode = async (distube, message) => {
+  const queue = distube.getQueue(message)
+  if (queue) {
+    const repeat = queue.repeatMode
+    let mode
+    switch (repeat) {
+      case 0:
+        queue.setRepeatMode(1)
+        mode = 'Песня'
+        break
+      case 1:
+        queue.setRepeatMode(2)
+        mode = 'Очередь'
+        break
+      case 2:
+        queue.setRepeatMode(0)
+        mode = 'Выключен'
+        break
+    }
+
+    module.exports.editField(message.guild.id, PLAYER_FIELDS.repeat_mode, mode)
+    await message.edit({ embeds: [musicPlayerMap[message.guild.id].PlayerEmbed] })
+  }
 }

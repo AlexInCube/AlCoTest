@@ -1,16 +1,21 @@
 const DisTubeLib = require('distube')
+const Discord = module.require('discord.js')
 const config = require('config')
 const { SpotifyPlugin } = require('@distube/spotify')
 const { YtDlpPlugin } = require('@distube/yt-dlp')
 const { SoundCloudPlugin } = require('@distube/soundcloud')
-const { PLAYER_FIELDS, PLAYER_STATES, editField, pushChangesToPlayerMessage, stopPlayer, setPlayerEmbedState } = require('./Audioplayer')
+const {
+  PLAYER_STATES, pushChangesToPlayerMessage, stopPlayer, setPlayerEmbedState, createPlayer,
+  updateEmbedWithSong
+} = require('./Audioplayer')
 
 module.exports.PlayerInitSetup = (client) => {
   global.musicPlayerMap = {}
 
   // eslint-disable-next-line new-cap
   const distube = new DisTubeLib.default(client, {
-    searchSongs: 0,
+    searchSongs: 10,
+    searchCooldown: 30,
     leaveOnEmpty: true,
     emptyCooldown: 30,
     leaveOnFinish: true,
@@ -47,23 +52,16 @@ module.exports.PlayerInitSetup = (client) => {
       textChannel.send(`Произошла ошибка: ${e.stack}`.slice(0, 2000))
     })
     .on('playSong', async (musicQueue, song) => {
-      const guild = musicQueue.textChannel.guildId
-      await setPlayerEmbedState(guild, PLAYER_STATES.playing)
-      editField(guild, PLAYER_FIELDS.author, song.uploader.name)
-      editField(guild, PLAYER_FIELDS.duration, song.formattedDuration)
-      editField(guild, PLAYER_FIELDS.queue_duration, musicQueue.formattedDuration)
-      editField(guild, PLAYER_FIELDS.remaining_songs, (musicQueue.songs.length - 1).toString())
-      await musicPlayerMap[guild].PlayerEmbed.setThumbnail(song.thumbnail).setTitle(song.name).setURL(song.url)
-      await pushChangesToPlayerMessage(guild, musicQueue)
+      // if (!musicPlayerMap[musicQueue.textChannel.guildId]) return
+      await updateEmbedWithSong(musicQueue, song)
+      await pushChangesToPlayerMessage(musicQueue.textChannel.guildId, musicQueue)
     })
     .on('addSong', async (musicQueue, song) => {
-      const guild = musicQueue.textChannel.guildId
       await musicQueue.textChannel.send({
-        content:
-                    `Добавлено: ${song.name} - \`${song.formattedDuration}\` в очередь по запросу \`${song.member.user.username}\``
+        content: `Добавлено: ${song.name} - \`${song.formattedDuration}\` в очередь по запросу \`${song.member.user.username}\``
       })
-      editField(guild, PLAYER_FIELDS.queue_duration, musicQueue.formattedDuration)
-      editField(guild, PLAYER_FIELDS.remaining_songs, (musicQueue.songs.length - 1).toString())
+      await createPlayer(client, musicQueue, distube)
+      await updateEmbedWithSong(musicQueue, song)
       await pushChangesToPlayerMessage(musicQueue.textChannel.guildId, musicQueue)
     })
     .on('addList', async (musicQueue, playlist) => {
@@ -71,10 +69,12 @@ module.exports.PlayerInitSetup = (client) => {
         content:
                     `Добавлено \`${playlist.songs.length}\` песен из плейлиста \`${playlist.name}\` в очередь по запросу \`${playlist.member.user.username}\``
       })
-      const guild = musicQueue.textChannel.guildId
-      editField(guild, PLAYER_FIELDS.queue_duration, musicQueue.formattedDuration)
-      editField(guild, PLAYER_FIELDS.remaining_songs, (musicQueue.songs.length - 1).toString())
+      await createPlayer(client, musicQueue, distube)
+      await updateEmbedWithSong(musicQueue, musicQueue.songs[0])
       await pushChangesToPlayerMessage(musicQueue.textChannel.guildId, musicQueue)
+    })
+    .on('initQueue', async queue => {
+      await createPlayer(client, queue, distube)
     })
     .on('finishSong', async musicQueue => {
       const guild = musicQueue.textChannel.guildId
@@ -87,6 +87,44 @@ module.exports.PlayerInitSetup = (client) => {
     .on('disconnect', async musicQueue => {
       await stopPlayer(distube, musicQueue.textChannel.guild)
     })
+    .on('searchResult', async (userMessage, results) => {
+      let resultsFormattedList = ''// Превращаем список в то что можно вывести в сообщение
 
+      results.forEach((item, index) => { // Перебираем все песни в списке и превращаем в вывод для отображения результата поиска
+        resultsFormattedList += `**${index + 1}**.  ` + `[${item.name}](${item.url})` + ' — ' + ` \`${item.formattedDuration}\` ` + '\n'
+      })
+
+      const resultsEmbed = new Discord.MessageEmbed()
+        .setColor('#436df7')
+        .setAuthor({ name: '🔍 Результаты поиска 🔎' })
+        .setTitle('Напишите число песни (без префикса //), чтобы выбрать её, у вас есть 30 секунд!')
+        .setDescription(resultsFormattedList)
+
+      await userMessage.channel.send({ embeds: [resultsEmbed] })
+
+      /* const resultsRow = new MessageActionRow()// Создаём кнопки для плеера
+        .addComponents(
+          new MessageButton().setCustomId('cancel_search').setLabel('Отменить поиск').setStyle('DANGER')
+        )
+
+      const resultMessage = await userMessage.channel.send({ embeds: [resultsEmbed], components: [resultsRow] })
+
+      const filter = button => button.customId
+
+      const collector = userMessage.channel.createMessageComponentCollector({ filter })
+
+      collector.on('collect', async button => {
+        if (userMessage.author.id !== button.user.id) return
+        if (button.customId === 'cancel_search') {
+          collector.stop()
+          await resultMessage.delete()
+        }
+      }) */
+    }
+    )
+    .on('searchNoResult', (message, query) => message.channel.send(`Ничего не найдено по запросу ${query}!`))
+    .on('searchInvalidAnswer', (message) => message.channel.send('Вы указали что-то неверное, проверьте запрос!'))
+    .on('searchCancel', (message) => message.channel.send('Вы ничего не выбрали, поиск отменён'))
+    .on('searchDone', () => {})
   return distube
 }
