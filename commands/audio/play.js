@@ -1,6 +1,7 @@
 require('fs')
 const { distube } = require('../../main')
 const { Permissions } = require('discord.js')
+const { isValidURL } = require('../../custom_modules/tools')
 
 module.exports.help = {
   name: 'play',
@@ -24,10 +25,13 @@ module.exports.run = async (client, queryMessage, args) => {
   } else { // Если файлов всё таки нет, то проверяем правильность ввода ссылки или белеберды
     if (args[0] === undefined) { await queryMessage.reply('А что ты слушать хочешь, то а? Укажи хоть что-нибудь.'); return }// Если пользователь ничего не предоставил
     if (args[0] === '') { await queryMessage.reply('Ты как-то неправильно ввёл название, попробуй ещё раз.'); return }// Защита от случайного пробела после команды
-
-    args.forEach((item) => { // Складываем в кучу все аргументы пользователя, чтобы удобнее было составлять запрос на поиск песен
-      userSearch += ` ${item}`
-    })
+    if (isValidURL(args[0])) {
+      userSearch = args[0]
+    } else {
+      args.forEach((item) => { // Складываем в кучу все аргументы пользователя, чтобы удобнее было составлять запрос на поиск песен
+        userSearch += `${item} `
+      })
+    }
   }
 
   const options = {

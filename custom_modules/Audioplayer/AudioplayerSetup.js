@@ -52,7 +52,7 @@ module.exports.PlayerInitSetup = (client) => {
       textChannel.send(`Произошла ошибка: ${e.stack}`.slice(0, 2000))
     })
     .on('playSong', async (musicQueue, song) => {
-      // if (!musicPlayerMap[musicQueue.textChannel.guildId]) return
+      if (!musicPlayerMap[musicQueue.textChannel.guildId]) return
       await updateEmbedWithSong(musicQueue, song)
       await pushChangesToPlayerMessage(musicQueue.textChannel.guildId, musicQueue)
     })
