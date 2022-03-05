@@ -61,7 +61,7 @@ module.exports.PlayerInitSetup = (client) => {
         content: `Добавлено: ${song.name} - \`${song.formattedDuration}\` в очередь по запросу \`${song.member.user.username}\``
       })
       await createPlayer(client, musicQueue, distube)
-      await updateEmbedWithSong(musicQueue, song)
+      await updateEmbedWithSong(musicQueue, musicQueue.songs[0])
       await pushChangesToPlayerMessage(musicQueue.textChannel.guildId, musicQueue)
     })
     .on('addList', async (musicQueue, playlist) => {

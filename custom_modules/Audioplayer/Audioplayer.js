@@ -123,7 +123,8 @@ module.exports.createPlayer = async (client, queue, distube) => {
           }
     */
     if (button.customId === 'stop_music') {
-      await module.exports.stopPlayer(distube, queue.textChannel.guild)
+      const vc = voice.getVoiceConnection(button.guild.id)
+      if (vc) await voice.getVoiceConnection(button.guild.id).destroy()
       await button.message.channel.send({ content: `${button.user.username} выключил плеер` })
     }
 
@@ -252,14 +253,9 @@ module.exports.clearPlayerState = async (guild) => {
 }
 
 module.exports.stopPlayer = async (distube, guild) => {
-  const queue = distube.getQueue(guild)
-  if (queue) {
-    await distube.stop(guild)
-  } else {
-    const vc = voice.getVoiceConnection(guild.id)
-    if (vc) await voice.getVoiceConnection(guild.id).destroy()
-    await module.exports.clearPlayerState(guild)
-  }
+  const vc = voice.getVoiceConnection(guild.id)
+  if (vc) await voice.getVoiceConnection(guild.id).destroy()
+  await module.exports.clearPlayerState(guild)
 }
 
 module.exports.pausePlayer = async (distube, message) => {
