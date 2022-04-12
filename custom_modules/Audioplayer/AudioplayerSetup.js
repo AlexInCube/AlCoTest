@@ -17,7 +17,7 @@ module.exports.PlayerInitSetup = (client) => {
     searchSongs: 10,
     searchCooldown: 30,
     leaveOnEmpty: true,
-    emptyCooldown: 30,
+    emptyCooldown: 20,
     leaveOnFinish: true,
     leaveOnStop: true,
     youtubeDL: false,

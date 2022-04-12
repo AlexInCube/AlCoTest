@@ -306,3 +306,21 @@ module.exports.downloadSong = async (song, message, username) => {
     fs.unlink(fileName, err => { if (err) throw err })
   }).pipe(filePath)
 }
+
+module.exports.CheckUserInVoice = async (client, message) => {
+  if (!message.member.voice.channel) {
+    await message.reply('Зайди сначала в любой голосовой канал')
+    return true
+  }
+
+  const connection = getVoiceConnection(message.guild.id)
+  if (connection) {
+    if (connection.joinConfig.channelId !== message.member.voice.channel.id) {
+      client.channels.fetch(connection.joinConfig.channelId)
+        .then(channel => message.reply({ content: `Зайди на канал ${channel.name} ` }))
+      return true
+    }
+  }
+
+  return false
+}

@@ -1,5 +1,6 @@
 const { Permissions } = require('discord.js')
 const { distube } = require('../../main')
+const { CheckUserInVoice } = require('../../custom_modules/Audioplayer/Audioplayer')
 module.exports.help = {
   name: 'shuffle',
   group: 'audio',
@@ -9,6 +10,8 @@ module.exports.help = {
 }
 
 module.exports.run = async (client, message) => {
+  if (await CheckUserInVoice(client, message)) return
+
   const queue = distube.getQueue(message)
   if (queue) {
     await distube.shuffle(queue)

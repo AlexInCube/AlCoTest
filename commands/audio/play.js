@@ -2,6 +2,7 @@ require('fs')
 const { distube } = require('../../main')
 const { Permissions } = require('discord.js')
 const { isValidURL } = require('../../custom_modules/tools')
+const { CheckUserInVoice } = require('../../custom_modules/Audioplayer/Audioplayer')
 
 module.exports.help = {
   name: 'play',
@@ -14,7 +15,8 @@ module.exports.help = {
 }
 
 module.exports.run = async (client, queryMessage, args) => {
-  if (!queryMessage.member.voice.channel) { await queryMessage.reply('Зайди сначала в голосовой канал'); return }
+  if (await CheckUserInVoice(client, queryMessage)) return
+
   let userSearch = ''// Эта переменная становится запросом который дал пользователь, ссылка (трек или плейлист), прикреплённый файл или любая белеберда будет работать как поиск
 
   if (queryMessage.attachments.size > 0) { // Если к сообщению прикреплены аудиофайлы
