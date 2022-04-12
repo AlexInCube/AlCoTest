@@ -1,10 +1,8 @@
-const ytdl = require('ytdl-core')
-const fs = require('fs')
 const { Permissions } = require('discord.js')
 
 const { getData } = require('spotify-url-info')
-const { generateRandomCharacters } = require('../../custom_modules/tools')
 const { distube } = require('../../main')
+const { downloadSong } = require('../../custom_modules/Audioplayer/Audioplayer')
 
 module.exports.help = {
   name: 'extract_audio',
@@ -17,9 +15,8 @@ module.exports.help = {
 module.exports.run = async (client, message, args) => {
   const url = args[0]
   if (!url) { message.reply('А ссылку указать? Мне что самому надо придумать что тебе надо?') }
-  const filePath = fs.createWriteStream(`${generateRandomCharacters(15)}.mp3`)
   let songData
-  let searchQuery
+  let searchQuery = ''
 
   const botMessage = await message.channel.send({ content: `${message.author} ожидайте...` })
 
@@ -28,7 +25,9 @@ module.exports.run = async (client, message, args) => {
       searchQuery = data.name
     })
   } else {
-    searchQuery = url
+    args.forEach((item) => {
+      searchQuery += `${item} `
+    })
   }
 
   try {
@@ -40,16 +39,5 @@ module.exports.run = async (client, message, args) => {
     return
   }
 
-  const fileName = `${songData.name}.mp3`
-  ytdl(songData.url, { filter: 'audioonly', format: 'mp3' }).on('end', async () => {
-    await fs.rename(filePath.path, fileName, err => { if (err) throw err })
-    const stats = fs.statSync(fileName)
-    if (stats.size >= 8388608) {
-      await botMessage.edit({ content: `${message.author} я не могу отправить файл, так как он весит больше чем 8мб.` })
-    } else {
-      await botMessage.edit({ content: `${message.author} я смог извлечь звук`, files: [fileName] })
-    }
-
-    fs.unlink(fileName, err => { if (err) throw err })
-  }).pipe(filePath)
+  await downloadSong(songData, message, message.author.username)
 }

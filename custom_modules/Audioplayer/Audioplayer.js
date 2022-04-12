@@ -87,21 +87,9 @@ module.exports.createPlayer = async (client, queue, distube) => {
     }
 
     if (button.customId === 'download_song') {
-      const filePath = fs.createWriteStream(`${generateRandomCharacters(15)}.mp3`)
       const song = distube.getQueue(queue.textChannel.guild).songs[0]
 
-      const fileName = `${song.name}.mp3`
-      ytdl(song.url, { filter: 'audioonly', format: 'mp3' }).on('end', async () => {
-        await fs.rename(filePath.path, fileName, err => { if (err) throw err })
-        const stats = fs.statSync(fileName)
-        if (stats.size >= 8388608) {
-          await button.message.channel.send({ content: `${button.user.username} я не могу отправить файл, так как он весит больше чем 8мб.` })
-        } else {
-          await button.message.channel.send({ content: `${button.user.username} я смог извлечь звук`, files: [fileName] })
-        }
-
-        fs.unlink(fileName, err => { if (err) throw err })
-      }).pipe(filePath)
+      await module.exports.downloadSong(song, button.message, button.user.username)
     }
 
     if (connection) {
@@ -156,7 +144,11 @@ module.exports.updateEmbedWithSong = async (queue, song) => {
   const guild = queue.textChannel.guildId
   await module.exports.setPlayerEmbedState(guild, PLAYER_STATES.playing)
   module.exports.editField(guild, PLAYER_FIELDS.author, song.uploader.name)
-  module.exports.editField(guild, PLAYER_FIELDS.duration, song.formattedDuration)
+  if (song.isLive) {
+    module.exports.editField(guild, PLAYER_FIELDS.duration, ':red_circle:' + ' Прямая трансляция')
+  } else {
+    module.exports.editField(guild, PLAYER_FIELDS.duration, song.formattedDuration)
+  }
   module.exports.editField(guild, PLAYER_FIELDS.queue_duration, queue.formattedDuration)
   module.exports.editField(guild, PLAYER_FIELDS.remaining_songs, (queue.songs.length - 1).toString())
   await musicPlayerMap[guild].PlayerEmbed.setThumbnail(song.thumbnail).setTitle(song.name).setURL(song.url)
@@ -237,10 +229,6 @@ module.exports.pushChangesToPlayerMessage = async (guildID, musicQueue) => {
   }
 }
 
-module.exports.downloadSong = async (song) => {
-
-}
-
 module.exports.clearPlayerState = async (guild) => {
   if (musicPlayerMap[guild.id]) {
     await musicPlayerMap[guild.id].Collector.stop()
@@ -294,4 +282,27 @@ module.exports.changeRepeatMode = async (distube, message) => {
     module.exports.editField(message.guild.id, PLAYER_FIELDS.repeat_mode, mode)
     await message.edit({ embeds: [musicPlayerMap[message.guild.id].PlayerEmbed] })
   }
+}
+
+module.exports.downloadSong = async (song, message, username) => {
+  if (song.isLive) {
+    await message.channel.send({ content: `${username} это прямая трансляция, её нельзя скачать!` })
+    return 0
+  }
+
+  const filePath = fs.createWriteStream(`${generateRandomCharacters(15)}.mp3`)
+
+  const fileName = `${song.name}.mp3`
+
+  ytdl(song.url, { filter: 'audioonly', format: 'mp3' }).on('end', async () => {
+    await fs.rename(filePath.path, fileName, err => { if (err) throw err })
+    const stats = fs.statSync(fileName)
+    if (stats.size >= 8388608) {
+      await message.channel.send({ content: `${username} я не могу отправить файл, так как он весит больше чем 8мб.` })
+    } else {
+      await message.channel.send({ content: `${username} я смог извлечь звук`, files: [fileName] })
+    }
+
+    fs.unlink(fileName, err => { if (err) throw err })
+  }).pipe(filePath)
 }

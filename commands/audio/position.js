@@ -9,6 +9,12 @@ module.exports.help = {
 }
 
 module.exports.run = async (client, message, args) => {
+  const queue = distube.getQueue(message)
+  if (queue.songs[0].isLive) {
+    message.reply({ content: 'Нельзя перематывать прямые трансляции' })
+    return
+  }
+
   if (!args) { message.reply({ content: 'А время указать? Не понимаешь как? Пиши //help position' }); return }
 
   let totalTime = 0
@@ -19,7 +25,8 @@ module.exports.run = async (client, message, args) => {
   if (!Number.isInteger(totalTime)) { message.reply({ content: 'Я не понял что ты написал' }); return }
 
   message.reply({ content: `Время изменено на ${totalTime} секунд` })
-  distube.seek(distube.getQueue(message), totalTime)
+
+  distube.seek(queue, totalTime)
 
   function parseTime (time) {
     const lastTimeChar = time.charAt(time.length - 1)
