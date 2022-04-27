@@ -3,6 +3,7 @@ const { distube } = require('../../main')
 const { Permissions } = require('discord.js')
 const { isValidURL } = require('../../custom_modules/tools')
 const { CheckUserInVoice } = require('../../custom_modules/Audioplayer/Audioplayer')
+const { joinVoiceChannel } = require('@discordjs/voice')
 
 module.exports.help = {
   name: 'play',
@@ -41,5 +42,12 @@ module.exports.run = async (client, queryMessage, args) => {
     message: queryMessage,
     member: queryMessage.member
   }
+
+  joinVoiceChannel({
+    channelId: queryMessage.member.voice.channel.id,
+    guildId: queryMessage.guild.id,
+    adapterCreator: queryMessage.guild.voiceAdapterCreator
+  })
+
   await distube.play(queryMessage.member.voice.channel, userSearch, options)
 }

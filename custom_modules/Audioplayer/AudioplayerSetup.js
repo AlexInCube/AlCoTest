@@ -23,7 +23,9 @@ module.exports.PlayerInitSetup = (client) => {
     youtubeDL: false,
     updateYouTubeDL: false,
     youtubeCookie: config.get('YOUTUBE_COOKIE'),
-
+    nsfw: true,
+    emitAddListWhenCreatingQueue: true,
+    emitAddSongWhenCreatingQueue: true,
     plugins: [
       new SpotifyPlugin(
         {
@@ -73,9 +75,6 @@ module.exports.PlayerInitSetup = (client) => {
       await updateEmbedWithSong(musicQueue, musicQueue.songs[0])
       await pushChangesToPlayerMessage(musicQueue.textChannel.guildId, musicQueue)
     })
-    .on('initQueue', async queue => {
-      await createPlayer(client, queue, distube)
-    })
     .on('finishSong', async musicQueue => {
       const guild = musicQueue.textChannel.guildId
       if (!musicQueue.next) {
@@ -101,25 +100,6 @@ module.exports.PlayerInitSetup = (client) => {
         .setDescription(resultsFormattedList)
 
       await userMessage.channel.send({ embeds: [resultsEmbed] })
-
-      /* const resultsRow = new MessageActionRow()// Создаём кнопки для плеера
-        .addComponents(
-          new MessageButton().setCustomId('cancel_search').setLabel('Отменить поиск').setStyle('DANGER')
-        )
-
-      const resultMessage = await userMessage.channel.send({ embeds: [resultsEmbed], components: [resultsRow] })
-
-      const filter = button => button.customId
-
-      const collector = userMessage.channel.createMessageComponentCollector({ filter })
-
-      collector.on('collect', async button => {
-        if (userMessage.author.id !== button.user.id) return
-        if (button.customId === 'cancel_search') {
-          collector.stop()
-          await resultMessage.delete()
-        }
-      }) */
     }
     )
     .on('searchNoResult', (message, query) => message.channel.send(`Ничего не найдено по запросу ${query}!`))

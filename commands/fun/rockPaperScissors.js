@@ -81,12 +81,12 @@ module.exports.run = async (client, message) => {
       let attackerQuery = ''; let defenderQuery = ''
       switch (getResult(attackerChoice, defenderChoice)) {
         case 0:
-          resultEmbed.setTitle(`${userDefender.username} победил против ${userAttacker.username}`)
+          resultEmbed.setTitle(`${userDefender.username} победил(-а) против ${userAttacker.username}`)
           attackerQuery = `UPDATE rps_stats SET total_games = total_games+1 WHERE user_id = ${userAttacker.id}`
           defenderQuery = `UPDATE rps_stats SET total_games = total_games+1, wins = wins+1  WHERE user_id = ${userDefender.id}`
           break
         case 1:
-          resultEmbed.setTitle(`${userAttacker.username} победил против ${userDefender.username}`)
+          resultEmbed.setTitle(`${userAttacker.username} победил(-а) против ${userDefender.username}`)
           attackerQuery = `UPDATE rps_stats SET total_games = total_games+1, wins = wins+1 WHERE user_id = ${userAttacker.id}`
           defenderQuery = `UPDATE rps_stats SET total_games = total_games+1 WHERE user_id = ${userDefender.id}`
           break
