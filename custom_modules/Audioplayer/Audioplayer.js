@@ -127,15 +127,8 @@ module.exports.createPlayer = async (client, queue, distube) => {
     }
 
     if (button.customId === 'skip_song') {
-      try {
-        await distube.skip(queue.textChannel.guild)
-        await button.reply({ content: `По запросу от ${button.user} была пропущена песня` })
-        if (distube.getQueue(queue.textChannel.guild).paused) {
-          await distube.resume(queue.textChannel.guild)
-        }
-      } catch (e) {
-        await button.reply({ content: 'В очереди дальше ничего нет', ephemeral: true })
-      }
+      await module.exports.skipSong(distube, distube.getQueue(queue.textChannel.guild), button.message, button.user.username)
+      await button.deferUpdate()
     }
   })
 }
@@ -281,6 +274,18 @@ module.exports.changeRepeatMode = async (distube, message) => {
 
     module.exports.editField(message.guild.id, PLAYER_FIELDS.repeat_mode, mode)
     await message.edit({ embeds: [musicPlayerMap[message.guild.id].PlayerEmbed] })
+  }
+}
+
+module.exports.skipSong = async (distube, queue, message, username) => {
+  if (queue.songs.length > 1) {
+    await distube.skip(queue.textChannel.guild)
+    await message.reply({ content: `По запросу от ${username} была пропущена песня` })
+    if (queue.paused) {
+      await distube.resume(queue.textChannel.guild)
+    }
+  } else {
+    await message.reply({ content: 'В очереди дальше ничего нет', ephemeral: true })
   }
 }
 

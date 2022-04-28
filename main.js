@@ -30,7 +30,7 @@ CommandsSetup(client)
 // Когда бот запустился
 client.on('ready', () => {
   console.log(getCurrentTimestamp() + `Бот ${client.user.username} запустился`)
-  client.user.setActivity('Напиши //help')
+  client.user.setActivity(`Напиши ${config.BOT_PREFIX}help`)
 })
 
 // ЛОГИН БОТА ДЕЛАТЬ ВСЕГДА В КОНЦЕ main.js

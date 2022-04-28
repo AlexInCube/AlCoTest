@@ -96,7 +96,7 @@ module.exports.PlayerInitSetup = (client) => {
       const resultsEmbed = new Discord.MessageEmbed()
         .setColor('#436df7')
         .setAuthor({ name: '🔍 Результаты поиска 🔎' })
-        .setTitle('Напишите число песни (без префикса //), чтобы выбрать её, у вас есть 30 секунд!')
+        .setTitle(`Напишите число песни (без префикса ${config.BOT_PREFIX}), чтобы выбрать её, у вас есть 30 секунд!`)
         .setDescription(resultsFormattedList)
 
       await userMessage.channel.send({ embeds: [resultsEmbed] })

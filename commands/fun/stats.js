@@ -1,9 +1,10 @@
 const { Permissions, MessageEmbed } = require('discord.js')
+const config = require('config')
 module.exports.help = {
   name: 'stats',
   group: 'fun',
   arguments: '[Название игры (команда которая вызывает игру)]',
-  description: 'Показывает вашу статистику в какой-то из игр. К примеру //stats slot',
+  description: `Показывает вашу статистику в какой-то из игр. К примеру ${config.BOT_PREFIX}stats slot`,
   bot_permissions: [Permissions.FLAGS.SEND_MESSAGES]
 }
 
@@ -12,7 +13,7 @@ module.exports.run = async (client, message, args) => {
   const statEmbed = new MessageEmbed()
 
   if (!args[0]) {
-    statEmbed.setAuthor({ name: 'Статистика существует для: ' }).setTitle('Напишите //stats [название игры]').setDescription('`rps` `slot`')
+    statEmbed.setAuthor({ name: 'Статистика существует для: ' }).setTitle(`Напишите ${config.BOT_PREFIX}stats [название игры]`).setDescription('`rps` `slot`')
     await message.reply({ embeds: [statEmbed] })
     return
   }
