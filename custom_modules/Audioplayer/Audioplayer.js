@@ -72,10 +72,16 @@ module.exports.createPlayer = async (client, queue, distube) => {
         await button.reply({ content: 'Ничего не проигрывается', ephemeral: true })
       } else {
         let queueList = ''
-        showQueue.songs.forEach((song, id) => {
-          if (id === 0) { return }
-          queueList += `${id}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`
-        })
+
+        let song = ''
+        for (let i = 1; i < 31; i++) {
+          song = showQueue.songs[i]
+          queueList += `${i}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`
+        }
+
+        if (showQueue.songs.length > 31) {
+          queueList += `И ещё ${showQueue.songs.length - 32} песни ждут своего часа`
+        }
 
         const queueEmbed = new Discord.MessageEmbed()
           .setAuthor({ name: 'Сейчас играет: ' })
