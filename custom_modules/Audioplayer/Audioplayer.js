@@ -67,7 +67,7 @@ module.exports.createPlayer = async (client, queue, distube) => {
     const connection = getVoiceConnection(guildId)
 
     if (button.customId === 'show_queue') {
-      const showQueue = distube.getQueue(queue.textChannel.guild)
+      const showQueue = distube.getQueue(button.guild)
       if (!showQueue) {
         await button.reply({ content: 'Ничего не проигрывается', ephemeral: true })
       } else {
