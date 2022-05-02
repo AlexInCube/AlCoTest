@@ -74,7 +74,7 @@ module.exports.createPlayer = async (client, queue, distube) => {
         let queueList = ''
 
         let song = ''
-        for (let i = 1; i < 31; i++) {
+        for (let i = 1; i < Math.min(31, showQueue.songs.length); i++) {
           song = showQueue.songs[i]
           queueList += `${i}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`
         }
