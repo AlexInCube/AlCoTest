@@ -296,26 +296,30 @@ module.exports.skipSong = async (distube, queue, message, username) => {
 }
 
 module.exports.downloadSong = async (song, message, username) => {
-  if (song.isLive) {
-    await message.channel.send({ content: `${username} это прямая трансляция, её нельзя скачать!` })
-    return 0
-  }
-
-  const filePath = fs.createWriteStream(`${generateRandomCharacters(15)}.mp3`)
-
-  const fileName = `${song.name}.mp3`
-
-  ytdl(song.url, { filter: 'audioonly', format: 'mp3' }).on('end', async () => {
-    await fs.rename(filePath.path, fileName, err => { if (err) throw err })
-    const stats = fs.statSync(fileName)
-    if (stats.size >= 8388608) {
-      await message.channel.send({ content: `${username} я не могу отправить файл, так как он весит больше чем 8мб.` })
-    } else {
-      await message.channel.send({ content: `${username} я смог извлечь звук`, files: [fileName] })
+  try {
+    if (song.isLive) {
+      await message.channel.send({ content: `${username} это прямая трансляция, её нельзя скачать!` })
+      return 0
     }
 
-    fs.unlink(fileName, err => { if (err) throw err })
-  }).pipe(filePath)
+    const filePath = await fs.createWriteStream(`${generateRandomCharacters(15)}.mp3`)
+
+    const fileName = `${song.name}.mp3`
+
+    ytdl(song.url, { filter: 'audioonly', format: 'mp3' }).on('end', async () => {
+      await fs.rename(filePath.path, fileName, err => { if (err) throw err })
+      const stats = fs.statSync(fileName)
+      if (stats.size >= 8388608) {
+        await message.channel.send({ content: `${username} я не могу отправить файл, так как он весит больше чем 8мб.` })
+      } else {
+        await message.channel.send({ content: `${username} я смог извлечь звук`, files: [fileName] })
+      }
+
+      fs.unlink(fileName, err => { if (err) throw err })
+    }).pipe(filePath)
+  } catch (e) {
+    await message.channel.send({ content: `${username} произошла ошибка, попробуйте ещё раз` })
+  }
 }
 
 module.exports.CheckUserInVoice = async (client, message) => {

@@ -26,7 +26,7 @@ module.exports.run = async (client, queryMessage, args) => {
       await queryMessage.reply('Это не аудиофайл, это чёрт пойми что!'); return
     }
   } else { // Если файлов всё таки нет, то проверяем правильность ввода ссылки или белеберды
-    if (args[0] === undefined) { await queryMessage.reply('А что ты слушать хочешь, то а? Укажи хоть что-нибудь.'); return }// Если пользователь ничего не предоставил
+    if (args[0] === undefined) { await queryMessage.reply('А что ты слушать хочешь то, а? Укажи хоть что-нибудь.'); return }// Если пользователь ничего не предоставил
     if (args[0] === '') { await queryMessage.reply('Ты как-то неправильно ввёл название, попробуй ещё раз.'); return }// Защита от случайного пробела после команды
     if (isValidURL(args[0])) {
       userSearch = args[0]

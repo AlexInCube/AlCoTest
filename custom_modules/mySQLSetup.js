@@ -7,7 +7,9 @@ module.exports.mySQLSetup = () => {
     host: config.get('DB_IP'),
     user: config.get('DB_USER'),
     database: config.get('DB_DATABASE'),
-    password: config.get('DB_PASSWORD')
+    password: config.get('DB_PASSWORD'),
+    supportBigNumbers: true,
+    bigNumberStrings: true
   })
   handleDisconnect(mySQLconnection)
 

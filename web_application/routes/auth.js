@@ -40,4 +40,6 @@ module.exports = function (app) {
       res.redirect('https://discord.com/api/oauth2/authorize?client_id=931157065005690930&redirect_uri=26.221.216.202%3A8000%2Fauth&response_type=code&scope=identify%20guilds')
     }
   })
+
+  app.get('/')
 }
