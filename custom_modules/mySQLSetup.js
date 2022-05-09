@@ -58,7 +58,7 @@ function handleDisconnect (client) {
     if (!error.fatal) return
     // if (error.code !== 'PROTOCOL_CONNECTION_LOST') throw err
 
-    console.error('Переподключение к MYSQL: ' + error.stack)
+    console.error('Переподключение к базе данных')
 
     // NOTE: This assignment is to a variable from an outer scope; this is extremely important
     // If this said `client =` it wouldn't do what you want. The assignment here is implicitly changed

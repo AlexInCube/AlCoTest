@@ -69,6 +69,7 @@ module.exports.run = async (client, message, args) => {
       case 'audio': return 'Аудио'
       case 'fun': return 'Развлечения'
       case 'other': return 'Остальное'
+      default: return 'НЕИЗВЕСТНО'
     }
   }
 }

@@ -22,7 +22,6 @@
     "discord.js": "^13.4.0",
     "distube": "^3.3.2",
     "express": "^4.17.2",
-    "ffmpeg-static": "^4.4.0",
     "mysql2": "^2.3.3",
     "node-fetch": "^2.6.1",
     "spotify-url-info": "^2.2.3",

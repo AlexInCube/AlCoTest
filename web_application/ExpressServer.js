@@ -6,7 +6,7 @@ const app = express()
 
 app.use(function (req, res, next) {
   // Website you wish to allow to connect
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+  res.setHeader('Access-Control-Allow-Origin', config.get('USER_APPLICATION_ADDRESS'))
 
   // Request methods you wish to allow
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE')
@@ -25,4 +25,4 @@ app.use(function (req, res, next) {
 require('./routes')(app)
 
 const PORT = config.get('PORT')
-app.listen(PORT, () => (console.log(getCurrentTimestamp() + `Веб-сервер запущен на порту ${PORT}`)))
+app.listen(PORT, () => (console.log(getCurrentTimestamp() + `API запущено на порту ${PORT}`)))

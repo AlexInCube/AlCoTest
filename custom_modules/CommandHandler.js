@@ -9,6 +9,7 @@ module.exports.prefix = prefix
 module.exports.CommandsSetup = (client) => {
   client.commands = new Discord.Collection() // создаём коллекцию для команд
   client.commands_groups = new Map() // группируем команды в группы тупо для //help
+  client.prefix = prefix
 
   function getAllFiles (dirPath, arrayOfFiles) {
     const files = fs.readdirSync(dirPath)

@@ -33,7 +33,7 @@ module.exports.run = async (client, message, args) => {
 
   const previousTime = queue.formattedCurrentTime
 
-  await distube.seek(queue, totalTime)
+  await distube.seek(queue, Number(totalTime))
 
   message.reply({ content: `Время изменено с ${previousTime} на ${queue.formattedCurrentTime}` })
 
