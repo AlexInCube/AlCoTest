@@ -20,7 +20,7 @@ module.exports = function (app) {
   })
 
   commandsRouter.use('/prefix', function (request, response) {
-    response.send(client.prefix)
+    response.send({ prefix: client.prefix })
   })
 
   app.use('/commands', commandsRouter)

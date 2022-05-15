@@ -6,9 +6,9 @@ module.exports = function (app) {
   const leaderboardRouter = express.Router()
 
   // определяем маршруты и их обработчики внутри роутера
-  leaderboardRouter.use('/slot/:column', async function (request, response) {
+  leaderboardRouter.use('/:game_stats/:column', async function (request, response) {
     mySQLconnection.promise().query(`
-    SELECT user_id as name, ${request.params.column} as value FROM slot_stats
+    SELECT user_id as name, ${request.params.column} as value FROM ${request.params.game_stats}
     ORDER BY ${request.params.column} DESC LIMIT 10`
     )
       .then(async (results) => {
