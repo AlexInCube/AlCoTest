@@ -27,10 +27,5 @@ module.exports = function (app) {
         response.status(400)
       })
   })
-
-  leaderboardRouter.use('/rps', function (request, response) {
-    response.send(`Товар ${request.params.gamename}`)
-  })
-  // сопотавляем роутер с конечной точкой "/products"
   app.use('/leaderboard', leaderboardRouter)
 }

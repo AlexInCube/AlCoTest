@@ -3,6 +3,7 @@ const DiscordOauth2 = require('discord-oauth2')
 const session = require('express-session')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
+const { client } = require('../../main')
 
 const oauth = new DiscordOauth2({
   clientId: config.get('BOT_CLIENT_ID'),
@@ -19,7 +20,7 @@ module.exports = function (app) {
     resave: false,
     saveUninitialized: false,
     cookie: {
-      expires: 60 * 60 * 24
+      expires: 60 * 60 * 24 * 1000// Один день
     }
   }))
 
@@ -36,8 +37,6 @@ module.exports = function (app) {
       grantType: 'authorization_code'
     }).then((data) => {
       req.session.user = data
-      console.log('Token session')
-      console.log(req.session)
       res.redirect('http://localhost:3000/')
     })
   })
@@ -47,21 +46,36 @@ module.exports = function (app) {
       if (err) {
         return console.log(err)
       }
-      res.redirect('/')
+      res.redirect('http://localhost:3000/')
     })
   })
 
   app.get('/getUser', async (req, res) => {
-    if (req.session) {
-      console.log('GetUser session')
-      console.log(req.session)
+    if (req.session.user) {
       oauth.getUser(req.session.user.access_token).then((data) => {
         res.send({ userid: data.id, username: data.username, avatar: data.avatar })
       })
     } else {
-      res.status(402).send({})
+      res.status(401).send({})
     }
   })
 
+  app.get('/getUserGuilds', async (req, res) => {
+    if (req.session.user) {
+      oauth.getUserGuilds(req.session.user.access_token).then((userGuildsList) => {
+        const botGuildsList = []
+        userGuildsList.forEach((element) => {
+          const guild = client.guilds.cache.get(element.id)// Бот проверяет только те гильдии, в которых он присутствует.
+
+          if (guild?.members.cache.find(user => user.id === client.user.id)) {
+            botGuildsList.push(element)
+          }
+        })
+        res.send({ botGuildsList })
+      })
+    } else {
+      res.status(401).send({})
+    }
+  })
   app.get('/')
 }
