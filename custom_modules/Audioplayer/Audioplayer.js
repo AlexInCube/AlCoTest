@@ -1,6 +1,5 @@
 const { MessageActionRow, MessageButton } = require('discord.js')
 const voice = require('@discordjs/voice')
-const { generateRandomCharacters } = require('../tools')
 const { getVoiceConnection } = require('@discordjs/voice')
 const fs = require('fs')
 const ytdl = require('ytdl-core')
@@ -302,11 +301,9 @@ module.exports.downloadSong = async (song, message, username) => {
       return 0
     }
 
-    const filePath = await fs.createWriteStream(`${generateRandomCharacters(15)}.mp3`)
-
-    const fileName = `${song.name}.mp3`
-
-    ytdl(song.url, { filter: 'audioonly', format: 'mp3' }).on('end', async () => {
+    const fileName = `${song.name.replaceAll(/[&/\\#,+()$~%.'":*?<>|{}]/g, '')}.mp3`
+    const filePath = await fs.createWriteStream(fileName)
+    ytdl(song.url, { filter: 'audioonly', format: 'mp3', quality: 'lowestaudio' }).on('end', async () => {
       await fs.rename(filePath.path, fileName, err => { if (err) throw err })
       const stats = fs.statSync(fileName)
       if (stats.size >= 8388608) {

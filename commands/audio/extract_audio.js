@@ -1,8 +1,9 @@
 const { Permissions } = require('discord.js')
-
+const ytdl = require('ytdl-core')
 const { getData } = require('spotify-url-info')
 const { distube } = require('../../main')
 const { downloadSong } = require('../../custom_modules/Audioplayer/Audioplayer')
+const { Song } = require('distube')
 
 module.exports.help = {
   name: 'extract_audio',
@@ -20,6 +21,12 @@ module.exports.run = async (client, message, args) => {
 
   const botMessage = await message.channel.send({ content: `${message.author} ожидайте...` })
 
+  if (url.startsWith('https://www.youtube.com')) {
+    songData = new Song(await ytdl.getBasicInfo(url))
+    await downloadSong(songData, message, message.author.username)
+    return
+  }
+
   if (url.startsWith('https://open.spotify.com')) {
     await getData(url).then(data => {
       searchQuery = data.name
@@ -29,6 +36,8 @@ module.exports.run = async (client, message, args) => {
       searchQuery += `${item} `
     })
   }
+
+  searchQuery.slice(0, -1)
 
   try {
     songData = await distube.search(searchQuery, { limit: 1, type: 'video' }).then(function (result) {
