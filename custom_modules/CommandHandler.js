@@ -1,6 +1,6 @@
 const Discord = require('discord.js')
 const fs = require('fs')
-const { getCurrentTimestamp, CheckAllNecessaryPermission } = require('./tools')
+const { CheckAllNecessaryPermission, loggerSend } = require('./tools')
 const path = require('path')
 const config = require('config')
 const prefix = config.get('BOT_PREFIX')
@@ -47,7 +47,7 @@ module.exports.CommandsSetup = (client) => {
     client.commands.set(props.help.name, props)
   })
 
-  console.log(getCurrentTimestamp() + `Загружено ${scanResult.length} команд`)
+  loggerSend(`Загружено ${scanResult.length} команд`)
   // Находим имена команд (имя файла.js) и собираем их в коллекцию.
 
   client.on('messageCreate', function (message) {

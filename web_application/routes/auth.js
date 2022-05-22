@@ -71,6 +71,7 @@ module.exports = function (app) {
             botGuildsList.push(element)
           }
         })
+        req.session.guilds = botGuildsList
         res.send({ botGuildsList })
       })
     } else {

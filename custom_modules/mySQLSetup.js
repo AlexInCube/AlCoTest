@@ -1,4 +1,4 @@
-const { getCurrentTimestamp } = require('./tools')
+const { getCurrentTimestamp, loggerSend } = require('./tools')
 const mysql = require('mysql2')
 const config = require('config')
 
@@ -17,28 +17,28 @@ module.exports.mySQLSetup = () => {
     if (err) {
       return console.error(getCurrentTimestamp() + 'Ошибка: ' + err.message)
     } else {
-      console.log(getCurrentTimestamp() + 'Подключение к серверу MySQL успешно установлено')
+      loggerSend('Подключение к серверу MySQL успешно установлено')
     }
 
     let sqlQuery = 'CREATE TABLE IF NOT EXISTS guild_settings (`guild_id` BIGINT UNSIGNED NOT NULL UNIQUE, `settings` TEXT NOT NULL); '
 
     mySQLconnection.query(sqlQuery, function (err) {
       if (err) throw err
-      console.log(getCurrentTimestamp() + 'Таблица настроек создана')
+      // loggerSend('Таблица настроек создана')
     })
 
     sqlQuery = 'CREATE TABLE IF NOT EXISTS slot_stats (`user_id` BIGINT UNSIGNED NOT NULL UNIQUE, `total_games` INT DEFAULT 0, `total_wins` INT DEFAULT 0, `jackpots` INT DEFAULT 0);'
 
     mySQLconnection.query(sqlQuery, function (err) {
       if (err) throw err
-      console.log(getCurrentTimestamp() + 'Таблица слотов создана')
+      // loggerSend('Таблица слотов создана')
     })
 
     sqlQuery = 'CREATE TABLE IF NOT EXISTS rps_stats (`user_id` BIGINT UNSIGNED NOT NULL UNIQUE, `total_games` INT DEFAULT 0, `wins` INT DEFAULT 0, `draws` INT DEFAULT 0);'
 
     mySQLconnection.query(sqlQuery, function (err) {
       if (err) throw err
-      console.log(getCurrentTimestamp() + 'Таблица камня ножницы бумаги создана')
+      // loggerSend('Таблица камня ножницы бумаги создана')
     })
   })
 
@@ -49,7 +49,6 @@ module.exports.setupUserData = (userId, table) => {
   const sqlQuery = `INSERT IGNORE INTO ${table} (user_id) VALUES (${userId})`
   mySQLconnection.query(sqlQuery, function (err) {
     if (err) throw err
-    // console.log(getCurrentTimestamp()+"Пользователь создан");
   })
 }
 

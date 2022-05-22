@@ -1,6 +1,6 @@
 const express = require('express')
 const config = require('config')
-const { getCurrentTimestamp } = require('../custom_modules/tools')
+const { loggerSend } = require('../custom_modules/tools')
 
 const app = express()
 
@@ -15,4 +15,4 @@ app.use(function (req, res, next) {
 require('./routes')(app)
 
 const PORT = config.get('PORT')
-app.listen(PORT, () => (console.log(getCurrentTimestamp() + `API запущено на порту ${PORT}`)))
+app.listen(PORT, () => loggerSend(`Express сервер запущен на порту ${PORT}`))
