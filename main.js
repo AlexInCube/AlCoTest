@@ -36,5 +36,5 @@ client.on('ready', () => {
 // ЛОГИН БОТА ДЕЛАТЬ ВСЕГДА В КОНЦЕ main.js
 client.login(config.BOT_TOKEN)
 
-require('./web_application/ExpressServer.js')
-require('./web_application/WebsocketServer')
+require('./web_application/express/ExpressServer.js')
+require('./web_application/websockets/WebsocketServer')

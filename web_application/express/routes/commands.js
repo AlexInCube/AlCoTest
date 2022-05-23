@@ -1,5 +1,5 @@
 const express = require('express')
-const { client } = require('../../main')
+const { client } = require('../../../main')
 
 module.exports = function (app) {
   const commandsRouter = express.Router()
@@ -11,7 +11,7 @@ module.exports = function (app) {
       commandsList.groups.push(key)
     })
 
-    client.commands.forEach((value, key) => {
+    client.commands.forEach((value) => {
       const command = Object.assign({}, value.help)
       delete command.bot_permissions
       commandsList.commands.push(command)

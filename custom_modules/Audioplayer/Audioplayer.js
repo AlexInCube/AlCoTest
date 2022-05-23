@@ -75,16 +75,16 @@ module.exports.createPlayer = async (client, queue, distube) => {
         let song = ''
         for (let i = 1; i < Math.min(31, showQueue.songs.length); i++) {
           song = showQueue.songs[i]
-          queueList += `${i}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`
+          queueList += `${i + 1}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`
         }
 
-        if (showQueue.songs.length > 31) {
-          queueList += `И ещё ${showQueue.songs.length - 32} песни ждут своего часа`
+        if (showQueue.songs.length > 32) {
+          queueList += `И ещё ${showQueue.songs.length - 33} песни ждут своего часа`
         }
 
         const queueEmbed = new Discord.MessageEmbed()
           .setAuthor({ name: 'Сейчас играет: ' })
-          .setTitle(showQueue.songs[0].name).setURL(showQueue.songs[0].url)
+          .setTitle('1. ' + showQueue.songs[0].name).setURL(showQueue.songs[0].url)
           .setDescription(`**Оставшиеся песни: **\n${queueList}`.slice(0, 4096))
         await button.reply({ embeds: [queueEmbed], ephemeral: true }
         )
@@ -284,8 +284,8 @@ module.exports.changeRepeatMode = async (distube, message) => {
 
 module.exports.skipSong = async (distube, queue, message, username) => {
   if (queue.songs.length > 1) {
+    await message.reply({ content: `По запросу от ${username} была пропущена песня ${queue.songs[0].name}` })
     await distube.skip(queue.textChannel.guild)
-    await message.reply({ content: `По запросу от ${username} была пропущена песня` })
     if (queue.paused) {
       await distube.resume(queue.textChannel.guild)
     }

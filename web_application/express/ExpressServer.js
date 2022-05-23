@@ -1,6 +1,6 @@
 const express = require('express')
 const config = require('config')
-const { loggerSend } = require('../custom_modules/tools')
+const { loggerSend } = require('../../custom_modules/tools')
 
 const app = express()
 

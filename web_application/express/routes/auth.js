@@ -3,7 +3,7 @@ const DiscordOauth2 = require('discord-oauth2')
 const session = require('express-session')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
-const { client } = require('../../main')
+const { client } = require('../../../main')
 
 const oauth = new DiscordOauth2({
   clientId: config.get('BOT_CLIENT_ID'),
@@ -25,20 +25,24 @@ module.exports = function (app) {
   }))
 
   app.get('/auth', async (req, res) => {
-    const { code } = req.query
-    if (!code) {
-      res.redirect('https://discord.com/api/oauth2/authorize?client_id=' + config.get('BOT_CLIENT_ID') + '&redirect_uri=' + encodeURI(config.get('BOT_REDIRECT_URI') + '/auth') + '&response_type=code&scope=identify')
-      return
-    }
+    try {
+      const { code } = req.query
+      if (!code) {
+        res.redirect('https://discord.com/api/oauth2/authorize?client_id=' + config.get('BOT_CLIENT_ID') + '&redirect_uri=' + encodeURI(config.get('BOT_REDIRECT_URI') + '/auth') + '&response_type=code&scope=identify')
+        return
+      }
 
-    oauth.tokenRequest({
-      code: code.toString(),
-      scope: 'identify guilds',
-      grantType: 'authorization_code'
-    }).then((data) => {
-      req.session.user = data
-      res.redirect('http://localhost:3000/')
-    })
+      oauth.tokenRequest({
+        code: code.toString(),
+        scope: 'identify guilds',
+        grantType: 'authorization_code'
+      }).then((data) => {
+        req.session.user = data
+        res.redirect('http://localhost:3000/')
+      })
+    } catch (e) {
+
+    }
   })
 
   app.get('/logout', async (req, res) => {
