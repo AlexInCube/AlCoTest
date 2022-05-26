@@ -244,17 +244,17 @@ module.exports.stopPlayer = async (distube, guild) => {
   await module.exports.clearPlayerState(guild)
 }
 
-module.exports.pausePlayer = async (distube, message) => {
-  const queue = distube.getQueue(message)
+module.exports.pausePlayer = async (distube, messageWithPlayer) => {
+  const queue = distube.getQueue(messageWithPlayer)
   if (queue.paused) {
-    await distube.resume(message)
-    await module.exports.setPlayerEmbedState(message.guild.id, PLAYER_STATES.playing)
+    await distube.resume(messageWithPlayer)
+    await module.exports.setPlayerEmbedState(messageWithPlayer.guild.id, PLAYER_STATES.playing)
   } else {
-    await distube.pause(message)
-    await module.exports.setPlayerEmbedState(message.guild.id, PLAYER_STATES.paused)
+    await distube.pause(messageWithPlayer)
+    await module.exports.setPlayerEmbedState(messageWithPlayer.guild.id, PLAYER_STATES.paused)
   }
-
-  await message.edit({ embeds: [musicPlayerMap[message.guild.id].PlayerEmbed] })
+  distube.emit('pause', queue)
+  await messageWithPlayer.edit({ embeds: [musicPlayerMap[messageWithPlayer.guild.id].PlayerEmbed] })
 }
 
 module.exports.changeRepeatMode = async (distube, message) => {

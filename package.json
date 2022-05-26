@@ -27,6 +27,7 @@
     "express-session": "^1.17.3",
     "mysql2": "^2.3.3",
     "node-fetch": "^2.6.1",
+    "socket.io": "^4.5.1",
     "spotify-url-info": "^2.2.3",
     "spotify-web-api-node": "^5.0.2",
     "string-progressbar": "^1.0.4",

@@ -1,32 +1,28 @@
-const ws = require('ws')
 const config = require('config')
 const { loggerSend } = require('../../custom_modules/tools')
 const { distube, client } = require('../../main')
+const { pausePlayer } = require('../../custom_modules/Audioplayer/Audioplayer')
+
 const PORT = parseInt(config.get('PORT')) + 1
+const io = require('socket.io')(PORT, {
+  cors: {
+    origin: [config.get('USER_APPLICATION_ADDRESS')]
+  }
+})
+loggerSend('Websocket сервер запущен на порту ' + PORT)
 
-const wss = new ws.Server({
-  port: PORT
-}, () => loggerSend('Websocket сервер запущен на порту ' + PORT))
+io.on('connection', socket => {
+  socket.on('requestPlaylist', guildId => {
+    sendPlaylistState(guildId)
+    sendPauseState(guildId)
+  })
 
-wss.on('connection', function connection (sock) {
-  sock.on('message', function (message) {
-    message = JSON.parse(message)
-    switch (message.event) {
-      case 'connection':
-        sock.guildId = message.id
-        sendPlaylistState(message.id)
-        break
+  socket.on('requestCurrentDuration', guildId => {
+    sendCurrentDuration(guildId)
+  })
 
-      case 'getPlaylist':
-        sock.guildId = message.id
-        sendPlaylistState(message.id)
-        break
-
-      case 'getCurrentDuration':
-        sock.guildId = message.id
-        sendCurrentDuration(message.id)
-        break
-    }
+  socket.on('changePauseState', (guildId, pause) => {
+    setPauseState(guildId, pause)
   })
 })
 
@@ -39,6 +35,7 @@ distube.on('finishSong', async (musicQueue) => {
 })
 distube.on('disconnect', async (musicQueue) => {
   sendPlaylistState(musicQueue.textChannel.guild.id)
+  sendCurrentDuration(musicQueue.textChannel.guild.id)
 })
 distube.on('addList', async (musicQueue) => {
   sendPlaylistState(musicQueue.textChannel.guild.id)
@@ -46,23 +43,30 @@ distube.on('addList', async (musicQueue) => {
 distube.on('addSong', async (musicQueue) => {
   sendPlaylistState(musicQueue.textChannel.guild.id)
 })
+distube.on('pause', async (musicQueue) => {
+  sendPauseState(musicQueue.textChannel.guild.id)
+})
 
 function sendPlaylistState (guildId) {
   const guildDiscord = client.guilds.cache.get(guildId)
-  const songs = []
+  const playlist = []
   if (guildDiscord) {
     const queue = distube.getQueue(guildDiscord)
     if (queue) {
       queue.songs.forEach((song) => {
-        songs.push({ title: song.name, author: song.uploader.name, requester: song.user.username, duration: song.duration, img: song.thumbnail, url: song.url })
+        playlist.push({
+          title: song.name,
+          author: song.uploader.name,
+          requester: song.user.username,
+          duration: song.duration,
+          img: song.thumbnail,
+          url: song.url
+        })
       })
     }
   }
-  wss.clients.forEach(client => {
-    if (client.guildId === guildId) {
-      client.send(JSON.stringify({ data: songs, method: 'getPlaylist' }))
-    }
-  })
+
+  io.emit('responsePlaylist', playlist)
 }
 
 function sendCurrentDuration (guildId) {
@@ -70,11 +74,32 @@ function sendCurrentDuration (guildId) {
   if (guildDiscord) {
     const queue = distube.getQueue(guildDiscord)
     if (queue) {
-      wss.clients.forEach(client => {
-        if (client.guildId === guildId) {
-          client.send(JSON.stringify({ data: queue.currentTime, method: 'getCurrentDuration' }))
-        }
-      })
+      io.emit('responseCurrentDuration', Math.round(queue.currentTime))
+    }
+  }
+}
+
+function sendPauseState (guildId) {
+  const guildDiscord = client.guilds.cache.get(guildId)
+  if (guildDiscord) {
+    const queue = distube.getQueue(guildDiscord)
+    if (queue) {
+      io.emit('responsePauseState', queue.paused)
+    }
+  }
+}
+
+async function setPauseState (guildId) {
+  const guildDiscord = client.guilds.cache.get(guildId)
+  if (guildDiscord) {
+    const queue = distube.getQueue(guildDiscord)
+    if (queue) {
+      const channel = await client.channels.cache.get(musicPlayerMap[guildId].ChannelID)
+      if (channel) {
+        const message = await channel.messages.fetch(musicPlayerMap[guildId].MessageID)
+        await pausePlayer(distube, message)
+        io.emit('responsePauseState', queue.paused)
+      }
     }
   }
 }

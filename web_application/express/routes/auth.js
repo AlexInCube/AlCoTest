@@ -38,7 +38,7 @@ module.exports = function (app) {
         grantType: 'authorization_code'
       }).then((data) => {
         req.session.user = data
-        res.redirect('http://localhost:3000/')
+        res.redirect('http://localhost:3000/app')
       })
     } catch (e) {
 
