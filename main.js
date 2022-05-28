@@ -27,14 +27,16 @@ module.exports = { client, distube }
 
 CommandsSetup(client)
 
+const { ExpressRun } = require('./web_application/express/ExpressServer.js')
+const { WebsocketRun } = require('./web_application/websockets/WebsocketServer')
 // Когда бот запустился
 client.on('ready', () => {
   loggerSend(`Бот ${client.user.username} запустился`)
   client.user.setActivity(`Напиши ${config.BOT_PREFIX}help`)
+
+  ExpressRun()
+  WebsocketRun()
 })
 
 // ЛОГИН БОТА ДЕЛАТЬ ВСЕГДА В КОНЦЕ main.js
 client.login(config.BOT_TOKEN)
-
-require('./web_application/express/ExpressServer.js')
-require('./web_application/websockets/WebsocketServer')

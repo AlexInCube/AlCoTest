@@ -19,14 +19,12 @@ module.exports = function (app) {
       .then(async (results) => {
         const result = results[0]
 
-        await (result.map(async (player, index) => {
-          await client.users.fetch(player.name).then(async (user) => {
+        await Promise.all(result.map(async (player, index) => {
+          client.users.fetch(player.name).then(async (user) => {
             await (result[index].name = user.username)
           })
           return 0
-        }))
-
-        response.send(result)
+        })).then(() => { response.send(result) })
       })
       .catch(() => {
         response.status(400)

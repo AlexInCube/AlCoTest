@@ -11,18 +11,24 @@ const oauth = new DiscordOauth2({
   redirectUri: config.get('BOT_REDIRECT_URI') + '/auth'
 })
 
-module.exports = function (app) {
+const sessionMiddleware = session({
+  key: 'userId',
+  secret: 'superdupersecret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    expires: 60 * 60 * 24 * 1000 * 7// Секунды - Минуты - Часы - Милисекунды - Дни, итого одна неделя.
+  }
+})
+
+module.exports.getSessionMiddleware = function () {
+  return sessionMiddleware
+}
+
+module.exports.AuthRoutes = function (app) {
   app.use(cookieParser())
   app.use(bodyParser.urlencoded({ extended: true }))
-  app.use(session({
-    key: 'userId',
-    secret: 'superdupersecret',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      expires: 60 * 60 * 24 * 1000// Один день
-    }
-  }))
+  app.use(sessionMiddleware)
 
   app.get('/auth', async (req, res) => {
     try {
@@ -76,7 +82,9 @@ module.exports = function (app) {
           }
         })
         req.session.guilds = botGuildsList
-        res.send({ botGuildsList })
+        req.session.save(() => {
+          res.send({ botGuildsList })
+        })
       })
     } else {
       res.status(401).send({})

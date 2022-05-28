@@ -7,8 +7,6 @@ const Discord = module.require('discord.js')
 
 /**
  * Создаёт embed сообщение с видом Аудио Плеера, но не отправляет его.
- *
- * @returns {{embeds: (Discord.MessageEmbed|Promise<Role>)[], components: MessageActionRow[]}}
  */
 module.exports.createPlayerEmbed = () => {
   const musicPlayerEmbed = new Discord.MessageEmbed()// Создаём сообщение с плеером
@@ -284,13 +282,11 @@ module.exports.changeRepeatMode = async (distube, message) => {
 
 module.exports.skipSong = async (distube, queue, message, username) => {
   if (queue.songs.length > 1) {
-    await message.reply({ content: `По запросу от ${username} была пропущена песня ${queue.songs[0].name}` })
+    await message.reply({ content: `По запросу от ${username} была пропущена песня ${queue.songs[0].name} - ${queue.songs[0].uploader.name}` })
     await distube.skip(queue.textChannel.guild)
     if (queue.paused) {
       await distube.resume(queue.textChannel.guild)
     }
-  } else {
-    await message.reply({ content: 'В очереди дальше ничего нет', ephemeral: true })
   }
 }
 
@@ -335,4 +331,11 @@ module.exports.CheckUserInVoice = async (client, message) => {
   }
 
   return false
+}
+
+module.exports.getPlayerMessageInGuild = async (client, guild) => {
+  const guildId = guild.id
+  const channel = await client.channels.cache.get(musicPlayerMap[guildId]?.ChannelID)
+  if (!channel) return
+  return await channel.messages.fetch(musicPlayerMap[guildId]?.MessageID)
 }

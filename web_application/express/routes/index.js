@@ -1,9 +1,9 @@
-const mainRoutes = require('./auth')
+const { AuthRoutes } = require('./auth')
 const leaderboardRoutes = require('./leaderboard')
 const commandsRoutes = require('./commands')
 
 module.exports = function (app) {
-  mainRoutes(app)
+  AuthRoutes(app)
   leaderboardRoutes(app)
   commandsRoutes(app)
 }
