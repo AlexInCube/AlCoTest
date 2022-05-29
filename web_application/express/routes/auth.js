@@ -4,6 +4,9 @@ const session = require('express-session')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const { client } = require('../../../main')
+const Redis = require('ioredis')
+const RedisStore = require('connect-redis')(session)
+const redisClient = new Redis()
 
 const oauth = new DiscordOauth2({
   clientId: config.get('BOT_CLIENT_ID'),
@@ -16,16 +19,15 @@ const sessionMiddleware = session({
   secret: 'superdupersecret',
   resave: false,
   saveUninitialized: false,
+  store: new RedisStore({
+    client: redisClient
+  }),
   cookie: {
     expires: 60 * 60 * 24 * 1000 * 7// Секунды - Минуты - Часы - Милисекунды - Дни, итого одна неделя.
   }
 })
 
-module.exports.getSessionMiddleware = function () {
-  return sessionMiddleware
-}
-
-module.exports.AuthRoutes = function (app) {
+function AuthRoutes (app) {
   app.use(cookieParser())
   app.use(bodyParser.urlencoded({ extended: true }))
   app.use(sessionMiddleware)
@@ -42,9 +44,12 @@ module.exports.AuthRoutes = function (app) {
         code: code.toString(),
         scope: 'identify guilds',
         grantType: 'authorization_code'
-      }).then((data) => {
+      }).then(async (data) => {
         req.session.user = data
-        res.redirect('http://localhost:3000/app')
+        await fetchBotWithUserGuilds(req.session.user.access_token).then((botGuildList) => {
+          req.session.guilds = botGuildList
+          res.redirect('http://localhost:3000/app')
+        })
       })
     } catch (e) {
 
@@ -72,23 +77,32 @@ module.exports.AuthRoutes = function (app) {
 
   app.get('/getUserGuilds', async (req, res) => {
     if (req.session.user) {
-      oauth.getUserGuilds(req.session.user.access_token).then((userGuildsList) => {
-        const botGuildsList = []
-        userGuildsList.forEach((element) => {
-          const guild = client.guilds.cache.get(element.id)// Бот проверяет только те гильдии, в которых он присутствует.
-
-          if (guild?.members.cache.find(user => user.id === client.user.id)) {
-            botGuildsList.push(element)
-          }
-        })
+      await fetchBotWithUserGuilds(req.session.user.access_token).then((botGuildsList) => {
         req.session.guilds = botGuildsList
-        req.session.save(() => {
-          res.send({ botGuildsList })
-        })
+        res.send(botGuildsList)
       })
     } else {
       res.status(401).send({})
     }
   })
   app.get('/')
+
+  async function fetchBotWithUserGuilds (token) {
+    const botGuildsList = []
+    const userGuildsList = await oauth.getUserGuilds(token)
+
+    userGuildsList.forEach((element) => {
+      const guild = client.guilds.cache.get(element.id)// Бот проверяет только те гильдии, в которых он присутствует.
+
+      if (guild?.members.cache.find(user => user.id === client.user.id)) {
+        botGuildsList.push(element)
+      }
+    })
+    return botGuildsList
+  }
 }
+
+const wrap = expressMiddlware => (socket, next) =>
+  expressMiddlware(socket.request, {}, next)
+
+module.exports = { AuthRoutes, wrap, sessionMiddleware }

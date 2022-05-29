@@ -2,10 +2,10 @@ const config = require('config')
 const { loggerSend } = require('../../custom_modules/tools')
 const { distube, client } = require('../../main')
 const { pausePlayer, skipSong, getPlayerMessageInGuild } = require('../../custom_modules/Audioplayer/Audioplayer')
-const { getSessionMiddleware } = require('../express/routes/auth')
+const { wrap, sessionMiddleware } = require('../express/routes/auth')
 
 module.exports.WebsocketRun = () => {
-  const PORT = parseInt(config.get('PORT')) + 1
+  const PORT = config.get('SOCKET_IO_PORT')
   const io = require('socket.io')(PORT, {
     cors: {
       origin: [config.get('USER_APPLICATION_ADDRESS')],
@@ -15,31 +15,21 @@ module.exports.WebsocketRun = () => {
   })
   loggerSend('Websocket сервер запущен на порту ' + PORT)
 
-  const wrap = middleware => (socket, next) => middleware(socket.request, {}, next)
-  io.use(wrap(getSessionMiddleware()))
-
-  io.use((socket, next) => {
-    const session = socket.request.session
-    if (session && session.user) {
-      next()
-    } else {
-      next(new Error('unauthorized'))
-    }
-  })
+  io.use(wrap(sessionMiddleware))
 
   io.on('connection', socket => {
     if (!socket.request.session) {
-      socket.emit('exception', { errorMessage: 'Не авторизован' })
       return
     }
 
     socket.on('joinAudioPlayer', guildId => {
-      socket.request.session.reload(function () {})
+      socket.request.session.reload(function () {
+        // console.log(socket.request.session)
+      })
       socket.rooms.forEach((room) => {
         socket.leave(room)
       })
       const guilds = socket.request.session.guilds
-      // console.log(socket.request.session)
       if (guilds) {
         if (guilds.some(guild => guild.id === guildId)) {
           socket.join(guildId)
