@@ -1,0 +1,125 @@
+const { client, AudioPlayer } = require('../../main')
+
+class AudioPlayerSocketHandler {
+  constructor (serverSocketIO) {
+    this.io = serverSocketIO
+    AudioPlayer.distube.setMaxListeners(2)
+    AudioPlayer.distube.on('playSong', async (musicQueue) => {
+      this.sendPlaylistState(musicQueue.textChannel.guild.id)
+    })
+    AudioPlayer.distube.on('finishSong', async (musicQueue) => {
+      this.sendPlaylistState(musicQueue.textChannel.guild.id)
+    })
+    AudioPlayer.distube.on('disconnect', async (musicQueue) => {
+      this.sendPlaylistState(musicQueue.textChannel.guild.id)
+      this.io.to(musicQueue.textChannel.guild.id).emit('responseCurrentDuration', 0)
+    })
+    AudioPlayer.distube.on('addList', async (musicQueue) => {
+      this.sendPlaylistState(musicQueue.textChannel.guild.id)
+    })
+    AudioPlayer.distube.on('addSong', async (musicQueue) => {
+      this.sendPlaylistState(musicQueue.textChannel.guild.id)
+    })
+    AudioPlayer.distube.on('pause', async (musicQueue) => {
+      this.sendPauseState(musicQueue.textChannel.guild.id)
+    })
+  }
+
+  setEvents (socket) {
+    socket.on('joinAudioPlayer', guildId => {
+      socket.request.session.reload(function () {
+        // console.log(socket.request.session)
+      })
+      socket.rooms.forEach((room) => {
+        socket.leave(room)
+      })
+      const guilds = socket.request.session.guilds
+      if (guilds) {
+        if (guilds.some(guild => guild.id === guildId)) {
+          socket.join(guildId)
+        }
+      }
+    })
+
+    socket.on('requestPlaylist', guildId => {
+      this.sendPlaylistState(guildId)
+      this.sendPauseState(guildId)
+    })
+
+    socket.on('requestCurrentDuration', guildId => {
+      this.sendCurrentDuration(guildId)
+    })
+
+    socket.on('changePauseState', (guildId, pause) => {
+      this.setPauseState(guildId, pause)
+    })
+
+    socket.on('requestPauseState', guildId => {
+      this.sendPauseState(guildId)
+    })
+
+    socket.on('nextSong', (guildId, username) => {
+      this.setNextSong(guildId, username)
+    })
+  }
+
+  sendPlaylistState (guildId) {
+    const playlist = []
+    const guildDiscord = client.guilds.cache.get(guildId)
+    if (guildDiscord) {
+      const queue = AudioPlayer.getQueue(guildDiscord)
+      if (queue) {
+        queue.songs.forEach((song) => {
+          playlist.push({
+            title: song.name,
+            author: song.uploader.name,
+            requester: song.user.username,
+            duration: song.duration,
+            img: song.thumbnail,
+            url: song.url
+          })
+        })
+      }
+    }
+
+    this.io.to(guildId).emit('responsePlaylist', playlist)
+  }
+
+  sendCurrentDuration (guildId) {
+    const guildDiscord = client.guilds.cache.get(guildId)
+    if (!guildDiscord) return
+    const queue = AudioPlayer.getQueue(guildDiscord)
+    if (!queue) return
+    this.io.to(guildId).emit('responseCurrentDuration', Math.round(queue.currentTime))
+  }
+
+  sendPauseState (guildId) {
+    const guildDiscord = client.guilds.cache.get(guildId)
+    if (!guildDiscord) return
+
+    const queue = AudioPlayer.getQueue(guildDiscord)
+    if (!queue) return
+    this.io.to(guildId).emit('responsePauseState', queue.paused)
+  }
+
+  async setPauseState (guildId) {
+    const guildDiscord = client.guilds.cache.get(guildId)
+    if (!guildDiscord) return
+    const message = await AudioPlayer.getPlayerMessageInGuild(guildDiscord)
+    if (!message) return
+
+    await AudioPlayer.pause(message)
+  }
+
+  async setNextSong (guildId, username) {
+    const guildDiscord = client.guilds.cache.get(guildId)
+    if (!guildDiscord) return
+    const queue = AudioPlayer.getQueue(guildDiscord)
+
+    const message = await AudioPlayer.getPlayerMessageInGuild(guildDiscord)
+    if (!message) return
+    await AudioPlayer.skipSong(queue, message, username)
+  }
+}
+
+module.exports = { AudioPlayerSocketHandler }

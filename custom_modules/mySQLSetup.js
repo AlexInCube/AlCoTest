@@ -2,15 +2,17 @@ const { getCurrentTimestamp, loggerSend } = require('./tools')
 const mysql = require('mysql2')
 const config = require('config')
 
+const options = {
+  host: config.get('DB_IP'),
+  user: config.get('DB_USER'),
+  database: config.get('DB_DATABASE'),
+  password: config.get('DB_PASSWORD'),
+  supportBigNumbers: true,
+  bigNumberStrings: true
+}
+
 module.exports.mySQLSetup = () => {
-  global.mySQLconnection = mysql.createConnection({
-    host: config.get('DB_IP'),
-    user: config.get('DB_USER'),
-    database: config.get('DB_DATABASE'),
-    password: config.get('DB_PASSWORD'),
-    supportBigNumbers: true,
-    bigNumberStrings: true
-  })
+  global.mySQLconnection = mysql.createConnection(options)
   handleDisconnect(mySQLconnection)
 
   mySQLconnection.connect(function (err) {
@@ -57,12 +59,9 @@ function handleDisconnect (client) {
     if (!error.fatal) return
     // if (error.code !== 'PROTOCOL_CONNECTION_LOST') throw err
 
-    console.error('Переподключение к базе данных')
+    loggerSend('Переподключение к базе данных')
 
-    // NOTE: This assignment is to a variable from an outer scope; this is extremely important
-    // If this said `client =` it wouldn't do what you want. The assignment here is implicitly changed
-    // to `global.mysqlClient =` in node.
-    mySQLconnection = mysql.createConnection(client.config)
+    mySQLconnection = mysql.createConnection(options)
     handleDisconnect(mySQLconnection)
     mySQLconnection.connect()
   })

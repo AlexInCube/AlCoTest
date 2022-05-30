@@ -1,9 +1,5 @@
 const { Permissions } = require('discord.js')
-const ytdl = require('ytdl-core')
-const { getData } = require('spotify-url-info')
-const { distube } = require('../../main')
-const { downloadSong } = require('../../custom_modules/Audioplayer/Audioplayer')
-const { Song } = require('distube')
+const { AudioPlayer } = require('../../main')
 
 module.exports.help = {
   name: 'extract_audio',
@@ -14,39 +10,5 @@ module.exports.help = {
 }
 
 module.exports.run = async (client, message, args) => {
-  const url = args[0]
-  if (!url) { message.reply('А ссылку указать? Мне что самому надо придумать что тебе надо?') }
-  let songData
-  let searchQuery = ''
-
-  const botMessage = await message.channel.send({ content: `${message.author} ожидайте...` })
-
-  if (url.startsWith('https://www.youtube.com')) {
-    songData = new Song(await ytdl.getBasicInfo(url))
-    await downloadSong(songData, message, message.author.username)
-    return
-  }
-
-  if (url.startsWith('https://open.spotify.com')) {
-    await getData(url).then(data => {
-      searchQuery = data.name
-    })
-  } else {
-    args.forEach((item) => {
-      searchQuery += `${item} `
-    })
-  }
-
-  searchQuery.slice(0, -1)
-
-  try {
-    songData = await distube.search(searchQuery, { limit: 1, type: 'video' }).then(function (result) {
-      return result[0]
-    })
-  } catch (e) {
-    await botMessage.edit({ content: `${message.author} я не смог ничего найти` })
-    return
-  }
-
-  await downloadSong(songData, message, message.author.username)
+  await AudioPlayer.extractAudioToMessage(message, args)
 }

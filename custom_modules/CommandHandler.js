@@ -2,11 +2,8 @@ const Discord = require('discord.js')
 const fs = require('fs')
 const { CheckAllNecessaryPermission, loggerSend } = require('./tools')
 const path = require('path')
-const config = require('config')
-const prefix = config.get('BOT_PREFIX')
-module.exports.prefix = prefix
 
-module.exports.CommandsSetup = (client) => {
+module.exports.CommandsSetup = (client, prefix) => {
   client.commands = new Discord.Collection() // создаём коллекцию для команд
   client.commands_groups = new Map() // группируем команды в группы тупо для //help
   client.prefix = prefix

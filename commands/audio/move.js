@@ -1,7 +1,5 @@
-const { distube } = require('../../main')
+const { AudioPlayer } = require('../../main')
 const { Permissions } = require('discord.js')
-const { CheckUserInVoice } = require('../../custom_modules/Audioplayer/Audioplayer')
-const { clamp } = require('../../custom_modules/tools')
 module.exports.help = {
   name: 'move',
   group: 'audio',
@@ -11,17 +9,5 @@ module.exports.help = {
 }
 
 module.exports.run = async (client, message, args) => {
-  if (await CheckUserInVoice(client, message)) return
-
-  const queue = distube.getQueue(message.guild)
-  if (!queue) { await message.reply('Никакой очереди не существует'); return }
-  let moveNumber = parseInt(args[0])
-  if (isNaN(moveNumber)) { await message.reply('Это не число'); return }
-  moveNumber = clamp(moveNumber - 1, 1, queue.songs.length)
-  try {
-    await distube.jump(message.guild, moveNumber)
-    await message.reply('Очередь перемещена')
-  } catch (e) {
-    await message.reply('Неверный номер песни')
-  }
+  await AudioPlayer.jump(message, parseInt(args[0]))
 }
