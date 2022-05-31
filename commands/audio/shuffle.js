@@ -9,5 +9,5 @@ module.exports.help = {
 }
 
 module.exports.run = async (client, message) => {
-  await AudioPlayer.shuffle(message)
+  await AudioPlayer.shuffle(message, message.author.username)
 }

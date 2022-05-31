@@ -9,5 +9,5 @@ module.exports.help = {
 }
 
 module.exports.run = async (client, message) => {
-  await AudioPlayer.getCurrentPlaying(message)
+  await AudioPlayer.getCurrentPlayingMessage(message)
 }

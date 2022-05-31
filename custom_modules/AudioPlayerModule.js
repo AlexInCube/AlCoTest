@@ -268,6 +268,7 @@ class AudioPlayerModule {
           mode = 'Выключен'
           break
       }
+      this.distube.emit('repeatChanged', queue)
 
       this.editField(message.guild.id, PLAYER_FIELDS.repeat_mode, mode)
       await message.edit({ embeds: [this.musicPlayerMap[message.guild.id].PlayerEmbed] })
@@ -532,7 +533,7 @@ class AudioPlayerModule {
     }
   }
 
-  async getCurrentPlaying (message) {
+  async getCurrentPlayingMessage (message) {
     const queue = this.getQueue(message.guild)
 
     if (!queue) { message.channel.send('Очереди не существует'); return }
@@ -597,15 +598,14 @@ class AudioPlayerModule {
     }
   }
 
-  async shuffle (message) {
+  async shuffle (message, username) {
     if (await this.checkUserInVoice(message)) return
 
     const queue = this.getQueue(message)
     if (queue) {
       await this.distube.shuffle(queue)
-      message.channel.send('Все песни в очереди перемешаны')
-    } else {
-      message.channel.send('Очереди не существует')
+      message.channel.send(`${username} перемешал все песни`)
+      this.distube.emit('shuffleQueue', queue)
     }
   }
 }

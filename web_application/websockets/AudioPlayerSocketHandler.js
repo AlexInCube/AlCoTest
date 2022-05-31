@@ -23,6 +23,12 @@ class AudioPlayerSocketHandler {
     AudioPlayer.distube.on('pause', async (musicQueue) => {
       this.sendPauseState(musicQueue.textChannel.guild.id)
     })
+    AudioPlayer.distube.on('repeatChanged', async (musicQueue) => {
+      this.sendRepeatState(musicQueue.textChannel.guild.id)
+    })
+    AudioPlayer.distube.on('shuffleQueue', async (musicQueue) => {
+      this.sendPlaylistState(musicQueue.textChannel.guild.id)
+    })
   }
 
   setEvents (socket) {
@@ -60,6 +66,18 @@ class AudioPlayerSocketHandler {
 
     socket.on('nextSong', (guildId, username) => {
       this.setNextSong(guildId, username)
+    })
+
+    socket.on('requestRepeatState', guildId => {
+      this.sendRepeatState(guildId)
+    })
+
+    socket.on('changeRepeatState', guildId => {
+      this.setRepeatState(guildId)
+    })
+
+    socket.on('shuffleQueue', (guildId, username) => {
+      this.setShuffle(guildId, username)
     })
   }
 
@@ -119,6 +137,32 @@ class AudioPlayerSocketHandler {
     const message = await AudioPlayer.getPlayerMessageInGuild(guildDiscord)
     if (!message) return
     await AudioPlayer.skipSong(queue, message, username)
+  }
+
+  sendRepeatState (guildId) {
+    const guildDiscord = client.guilds.cache.get(guildId)
+    if (!guildDiscord) return
+
+    const queue = AudioPlayer.getQueue(guildDiscord)
+    if (!queue) return
+    this.io.to(guildId).emit('responseRepeatState', queue.repeatMode)
+  }
+
+  async setRepeatState (guildId) {
+    const guildDiscord = client.guilds.cache.get(guildId)
+    if (!guildDiscord) return
+    const message = await AudioPlayer.getPlayerMessageInGuild(guildDiscord)
+    if (!message) return
+
+    await AudioPlayer.changeRepeatMode(message)
+  }
+
+  async setShuffle (guildId, username) {
+    const guildDiscord = client.guilds.cache.get(guildId)
+    if (!guildDiscord) return
+    const message = await AudioPlayer.getPlayerMessageInGuild(guildDiscord)
+    if (!message) return
+    await AudioPlayer.shuffle(message, username)
   }
 }
 
