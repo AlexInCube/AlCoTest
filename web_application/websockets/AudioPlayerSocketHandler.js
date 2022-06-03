@@ -29,56 +29,71 @@ class AudioPlayerSocketHandler {
     AudioPlayer.distube.on('shuffleQueue', async (musicQueue) => {
       this.sendPlaylistState(musicQueue.textChannel.guild.id)
     })
+
+    this.setEvents = (socket) => {
+      socket.on('joinAudioPlayer', guildId => {
+        socket.request.session.reload(() => {
+          socket.rooms.forEach((room) => {
+            socket.leave(room)
+          })
+          const guilds = socket.request.session.guilds
+          if (guilds) {
+            if (guilds.some(guild => guild.id === guildId)) {
+              socket.join(guildId)
+              this.sendPlayerState(guildId)
+            }
+          }
+        })
+      })
+
+      socket.on('requestPlaylist', guildId => {
+        this.sendPlaylistState(guildId)
+        this.sendPauseState(guildId)
+      })
+
+      socket.on('requestCurrentDuration', guildId => {
+        this.sendCurrentDuration(guildId)
+      })
+
+      socket.on('changePauseState', (guildId, pause) => {
+        this.setPauseState(guildId, pause)
+      })
+
+      socket.on('requestPauseState', guildId => {
+        this.sendPauseState(guildId)
+      })
+
+      socket.on('nextSong', (guildId, username) => {
+        this.setNextSong(guildId, username)
+      })
+
+      socket.on('requestRepeatState', guildId => {
+        this.sendRepeatState(guildId)
+      })
+
+      socket.on('changeRepeatState', guildId => {
+        this.setRepeatState(guildId)
+      })
+
+      socket.on('shuffleQueue', (guildId, username) => {
+        this.setShuffle(guildId, username)
+      })
+
+      socket.on('jumpToSong', (guildId, position) => {
+        this.jumpToSong(guildId, position)
+      })
+
+      socket.on('deleteSong', (guildId, position) => {
+        this.deleteSong(guildId, position)
+      })
+    }
   }
 
-  setEvents (socket) {
-    socket.on('joinAudioPlayer', guildId => {
-      socket.request.session.reload(function () {
-        // console.log(socket.request.session)
-      })
-      socket.rooms.forEach((room) => {
-        socket.leave(room)
-      })
-      const guilds = socket.request.session.guilds
-      if (guilds) {
-        if (guilds.some(guild => guild.id === guildId)) {
-          socket.join(guildId)
-        }
-      }
-    })
-
-    socket.on('requestPlaylist', guildId => {
-      this.sendPlaylistState(guildId)
-      this.sendPauseState(guildId)
-    })
-
-    socket.on('requestCurrentDuration', guildId => {
-      this.sendCurrentDuration(guildId)
-    })
-
-    socket.on('changePauseState', (guildId, pause) => {
-      this.setPauseState(guildId, pause)
-    })
-
-    socket.on('requestPauseState', guildId => {
-      this.sendPauseState(guildId)
-    })
-
-    socket.on('nextSong', (guildId, username) => {
-      this.setNextSong(guildId, username)
-    })
-
-    socket.on('requestRepeatState', guildId => {
-      this.sendRepeatState(guildId)
-    })
-
-    socket.on('changeRepeatState', guildId => {
-      this.setRepeatState(guildId)
-    })
-
-    socket.on('shuffleQueue', (guildId, username) => {
-      this.setShuffle(guildId, username)
-    })
+  sendPlayerState (guildId) {
+    this.sendPlaylistState(guildId)
+    this.sendPauseState(guildId)
+    this.sendRepeatState(guildId)
+    this.sendCurrentDuration(guildId)
   }
 
   sendPlaylistState (guildId) {
@@ -163,6 +178,24 @@ class AudioPlayerSocketHandler {
     const message = await AudioPlayer.getPlayerMessageInGuild(guildDiscord)
     if (!message) return
     await AudioPlayer.shuffle(message, username)
+  }
+
+  async jumpToSong (guildId, position) {
+    const guildDiscord = client.guilds.cache.get(guildId)
+    if (!guildDiscord) return
+    await AudioPlayer.distube.jump(guildDiscord, position)
+  }
+
+  async deleteSong (guildId, position) {
+    const guildDiscord = client.guilds.cache.get(guildId)
+    if (!guildDiscord) return
+    const queue = AudioPlayer.getQueue(guildDiscord)
+    if (!queue) return
+    const message = await AudioPlayer.getPlayerMessageInGuild(guildDiscord)
+    if (!message) return
+    await AudioPlayer.deleteSongFromQueue(queue, position, message)
+
+    this.sendPlaylistState(guildId)
   }
 }
 

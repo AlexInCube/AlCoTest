@@ -46,10 +46,7 @@ function AuthRoutes (app) {
         grantType: 'authorization_code'
       }).then(async (data) => {
         req.session.user = data
-        await fetchBotWithUserGuilds(req.session.user.access_token).then((botGuildList) => {
-          req.session.guilds = botGuildList
-          res.redirect('http://localhost:3000/app')
-        })
+        res.redirect('http://localhost:3000/app')
       })
     } catch (e) {
 

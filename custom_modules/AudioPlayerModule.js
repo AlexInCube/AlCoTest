@@ -608,6 +608,16 @@ class AudioPlayerModule {
       this.distube.emit('shuffleQueue', queue)
     }
   }
+
+  async deleteSongFromQueue (queue, position, message) {
+    if (position === 0) {
+      await this.distube.skip(queue)
+    } else {
+      queue.songs.splice(position, 1)
+    }
+    this.editField(queue.textChannel.guild.id, PLAYER_FIELDS.remaining_songs, (queue.songs.length - 1).toString())
+    await message.edit({ embeds: [this.musicPlayerMap[queue.textChannel.guild.id].PlayerEmbed] })
+  }
 }
 
 module.exports = { AudioPlayerModule }
