@@ -135,8 +135,6 @@ class AudioPlayerModule {
   }
 
   async play (queryMessage, queryArgs) {
-    if (await this.checkUserInVoice(queryMessage)) return
-
     let userSearch = ''// Эта переменная становится запросом который дал пользователь, ссылка (трек или плейлист), прикреплённый файл или любая белеберда будет работать как поиск
 
     if (queryMessage.attachments.size > 0) { // Если к сообщению прикреплены аудиофайлы
@@ -162,6 +160,14 @@ class AudioPlayerModule {
         })
       }
     }
+
+    const connection = getVoiceConnection(queryMessage.guild.id)
+
+    if (connection) {
+      if (!await this.checkUserInVoice(queryMessage.member, queryMessage)) return
+    }
+
+    if (queryMessage.member.voice.channel == null) { await queryMessage.reply('Зайди сначала в любой голосовой канал'); return }
 
     const options = {
       textChannel: queryMessage.channel,
@@ -189,22 +195,26 @@ class AudioPlayerModule {
     this.musicPlayerMap[guildID].PlayerEmbed.fields[field].value = value || 'Неизвестно'
   }
 
-  async checkUserInVoice (message) {
-    if (!message.member.voice.channel) {
-      await message.reply('Зайди сначала в любой голосовой канал')
-      return true
+  async checkUserInVoice (member, messageForReply = null) {
+    if (!member.voice.channel) {
+      if (messageForReply != null) await messageForReply.reply('Зайди сначала в любой голосовой канал')
+      return false
     }
 
-    const connection = getVoiceConnection(message.guild.id)
+    const connection = getVoiceConnection(member.guild.id)
     if (connection) {
-      if (connection.joinConfig.channelId !== message.member.voice.channel.id) {
+      if (connection.joinConfig.channelId !== member.voice.channel.id) {
         this.client.channels.fetch(connection.joinConfig.channelId)
-          .then(channel => message.reply({ content: `Зайди на канал ${channel.name} ` }))
-        return true
+          .then(channel => {
+            if (messageForReply != null) {
+              messageForReply.reply({ content: `Зайди на канал ${channel.name} ` })
+            }
+            return false
+          })
       }
     }
 
-    return false
+    return true
   }
 
   async getPlayerMessageInGuild (guild) {
@@ -241,7 +251,7 @@ class AudioPlayerModule {
 
   async skipSong (queue, message, username) {
     if (queue.songs.length > 1) {
-      await message.reply({ content: `По запросу от ${username} была пропущена песня ${queue.songs[0].name} - ${queue.songs[0].uploader.name}` })
+      await message.reply({ content: `${username} пропустил песню ${queue.songs[0].name} - ${queue.songs[0].uploader.name}` })
       await this.distube.skip(queue.textChannel.guild)
       if (queue.paused) {
         await this.distube.resume(queue.textChannel.guild)
@@ -380,8 +390,6 @@ class AudioPlayerModule {
     this.musicPlayerMap[guildId].Collector = collector
 
     collector.on('collect', async button => {
-      const connection = getVoiceConnection(guildId)
-
       if (button.customId === 'show_queue') {
         const showQueue = this.getQueue(button.guild)
         if (!showQueue) {
@@ -414,15 +422,9 @@ class AudioPlayerModule {
         await this.downloadSong(song, button.message, button.user.username)
       }
 
-      if (connection) {
-        if (connection.joinConfig.channelId !== button.member.voice.channelId) {
-          await button.message.channel.send({ content: `${button.user.username} попытался нажать на кнопки, но он не в голосовом чате со мной!` })
-          return
-        }
-      } else {
-        if (this.getQueue(queue.textChannel.guild)) {
-          await this.distube.stop(queue.textChannel.guild)
-        }
+      if (!await this.checkUserInVoice(button.member, button.message)) {
+        await button.message.channel.send({ content: `${button.user.username} попытался нажать на кнопки, но он не в голосовом чате со мной!` })
+        return
       }
 
       if (button.customId === 'stop_music') {
@@ -518,18 +520,23 @@ class AudioPlayerModule {
     await this.downloadSong(songData, message, message.author.username)
   }
 
-  async jump (message, queuePosition) {
-    if (await this.checkUserInVoice(message)) return
+  async jump (guild, queuePosition, queryMessage = null, username = null) {
+    const queue = this.getQueue(guild)
+    if (queryMessage != null) {
+      if (!queue) { await queryMessage.reply('Никакой очереди не существует'); return }
+      if (isNaN(queuePosition)) { await queryMessage.reply('Это не число'); return }
+    }
 
-    const queue = this.getQueue(message.guild)
-    if (!queue) { await message.reply('Никакой очереди не существует'); return }
-    if (isNaN(queuePosition)) { await message.reply('Это не число'); return }
-    queuePosition = clamp(queuePosition - 1, 1, queue.songs.length)
+    queuePosition = clamp(parseInt(queuePosition), 1, queue.songs.length - 1)
     try {
-      await this.distube.jump(message.guild, queuePosition)
-      await message.reply('Очередь перемещена')
+      await this.distube.jump(guild, queuePosition)
+      if (username) {
+        await this.getPlayerMessageInGuild(guild).then(async (playerMessage) => {
+          await playerMessage.reply(`${username} совершил прыжок в очереди, пропустив предыдущие песни`)
+        })
+      }
     } catch (e) {
-      await message.reply('Неверный номер песни')
+
     }
   }
 
@@ -551,9 +558,7 @@ class AudioPlayerModule {
     await message.delete()
   }
 
-  async position (message, queryArgs) {
-    if (await this.checkUserInVoice(message)) return
-
+  async position (message = null, queryArgs) {
     const queue = this.getQueue(message)
 
     if (!queue) { message.channel.send('Очереди не существует'); return }
@@ -599,8 +604,6 @@ class AudioPlayerModule {
   }
 
   async shuffle (message, username) {
-    if (await this.checkUserInVoice(message)) return
-
     const queue = this.getQueue(message)
     if (queue) {
       await this.distube.shuffle(queue)
@@ -609,14 +612,21 @@ class AudioPlayerModule {
     }
   }
 
-  async deleteSongFromQueue (queue, position, message) {
+  async deleteSongFromQueue (guild, position, username) {
+    const messageWithPlayer = await this.getPlayerMessageInGuild(guild)
+    if (!messageWithPlayer) return
+    const queue = this.distube.getQueue(guild)
+    if (!queue) return
+    position = clamp(parseInt(position), 0, queue.songs.length - 1)
     if (position === 0) {
-      await this.distube.skip(queue)
+      await this.skipSong(queue, messageWithPlayer, username)
     } else {
+      await messageWithPlayer.channel.send({ content: `${username} удалил песню ${queue.songs[position].name} - ${queue.songs[position].uploader.name}` })
       queue.songs.splice(position, 1)
     }
     this.editField(queue.textChannel.guild.id, PLAYER_FIELDS.remaining_songs, (queue.songs.length - 1).toString())
-    await message.edit({ embeds: [this.musicPlayerMap[queue.textChannel.guild.id].PlayerEmbed] })
+    await messageWithPlayer.edit({ embeds: [this.musicPlayerMap[queue.textChannel.guild.id].PlayerEmbed] })
+    this.distube.emit('songDeleted', queue)
   }
 }
 

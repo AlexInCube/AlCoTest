@@ -29,6 +29,9 @@ class AudioPlayerSocketHandler {
     AudioPlayer.distube.on('shuffleQueue', async (musicQueue) => {
       this.sendPlaylistState(musicQueue.textChannel.guild.id)
     })
+    AudioPlayer.distube.on('songDeleted', async (musicQueue) => {
+      this.sendPlaylistState(musicQueue.textChannel.guild.id)
+    })
 
     this.setEvents = (socket) => {
       socket.on('joinAudioPlayer', guildId => {
@@ -55,36 +58,42 @@ class AudioPlayerSocketHandler {
         this.sendCurrentDuration(guildId)
       })
 
-      socket.on('changePauseState', (guildId, pause) => {
-        this.setPauseState(guildId, pause)
+      socket.on('changePauseState', async (guildId, pause) => {
+        if (!await checkRequirements(socket, guildId)) return
+        await this.setPauseState(guildId, pause)
       })
 
       socket.on('requestPauseState', guildId => {
         this.sendPauseState(guildId)
       })
 
-      socket.on('nextSong', (guildId, username) => {
-        this.setNextSong(guildId, username)
+      socket.on('nextSong', async (guildId) => {
+        if (!await checkRequirements(socket, guildId)) return
+        await this.setNextSong(guildId, socket.request.session.user.detail.username)
       })
 
       socket.on('requestRepeatState', guildId => {
         this.sendRepeatState(guildId)
       })
 
-      socket.on('changeRepeatState', guildId => {
-        this.setRepeatState(guildId)
+      socket.on('changeRepeatState', async guildId => {
+        if (!await checkRequirements(socket, guildId)) return
+        await this.setRepeatState(guildId)
       })
 
-      socket.on('shuffleQueue', (guildId, username) => {
-        this.setShuffle(guildId, username)
+      socket.on('shuffleQueue', async (guildId, username) => {
+        if (!await checkRequirements(socket, guildId)) return
+        await this.setShuffle(guildId, username)
       })
 
-      socket.on('jumpToSong', (guildId, position) => {
-        this.jumpToSong(guildId, position)
+      socket.on('jumpToSong', async (guildId, position) => {
+        if (!await checkRequirements(socket, guildId)) return
+        await this.jumpToSong(guildId, position, socket.request.session.user.detail.username)
       })
 
-      socket.on('deleteSong', (guildId, position) => {
-        this.deleteSong(guildId, position)
+      socket.on('deleteSong', async (guildId, position) => {
+        if (!await checkRequirements(socket, guildId)) return
+        await this.deleteSong(guildId, position, socket.request.session.user.detail.username)
       })
     }
   }
@@ -180,23 +189,25 @@ class AudioPlayerSocketHandler {
     await AudioPlayer.shuffle(message, username)
   }
 
-  async jumpToSong (guildId, position) {
+  async jumpToSong (guildId, position, userName) {
     const guildDiscord = client.guilds.cache.get(guildId)
     if (!guildDiscord) return
-    await AudioPlayer.distube.jump(guildDiscord, position)
+    await AudioPlayer.jump(guildDiscord, position, null, userName)
   }
 
-  async deleteSong (guildId, position) {
+  async deleteSong (guildId, position, username) {
     const guildDiscord = client.guilds.cache.get(guildId)
     if (!guildDiscord) return
-    const queue = AudioPlayer.getQueue(guildDiscord)
-    if (!queue) return
-    const message = await AudioPlayer.getPlayerMessageInGuild(guildDiscord)
-    if (!message) return
-    await AudioPlayer.deleteSongFromQueue(queue, position, message)
-
-    this.sendPlaylistState(guildId)
+    await AudioPlayer.deleteSongFromQueue(guildDiscord, position, username)
   }
+}
+
+async function checkRequirements (socket, guildId) {
+  const guild = client.guilds.cache.get(guildId)
+  if (!guild) return false
+  const memberDiscord = guild.members.cache.get(socket.request.session.user.detail.id)
+  if (!memberDiscord) return false
+  return await AudioPlayer.checkUserInVoice(memberDiscord)
 }
 
 module.exports = { AudioPlayerSocketHandler }

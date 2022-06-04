@@ -1,7 +1,7 @@
 const { AudioPlayer } = require('../../main')
 const { Permissions } = require('discord.js')
 module.exports.help = {
-  name: 'move',
+  name: 'jump',
   group: 'audio',
   arguments: '(позиция в очереди)',
   description: 'Пропускает все песни до указанной позиции. Чтобы узнать позицию песни, нажмите "Показать очередь" в проигрывателе',
@@ -9,5 +9,6 @@ module.exports.help = {
 }
 
 module.exports.run = async (client, message, args) => {
-  await AudioPlayer.jump(message, parseInt(args[0]))
+  if (!await AudioPlayer.checkUserInVoice(message.member, message)) return
+  await AudioPlayer.jump(message.guild, parseInt(args[0]) - 1, message, message.author.username)
 }

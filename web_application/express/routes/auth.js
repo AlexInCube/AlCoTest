@@ -46,7 +46,10 @@ function AuthRoutes (app) {
         grantType: 'authorization_code'
       }).then(async (data) => {
         req.session.user = data
-        res.redirect('http://localhost:3000/app')
+        fetchUserdata(req.session.user.access_token).then((userData) => {
+          req.session.user.detail = userData
+          res.redirect('http://localhost:3000/app')
+        })
       })
     } catch (e) {
 
@@ -64,8 +67,9 @@ function AuthRoutes (app) {
 
   app.get('/getUser', async (req, res) => {
     if (req.session.user) {
-      oauth.getUser(req.session.user.access_token).then((data) => {
-        res.send({ userid: data.id, username: data.username, avatar: data.avatar })
+      fetchUserdata(req.session.user.access_token).then((userData) => {
+        req.session.user.detail = userData
+        res.send(userData)
       })
     } else {
       res.status(401).send({})
@@ -96,6 +100,10 @@ function AuthRoutes (app) {
       }
     })
     return botGuildsList
+  }
+
+  async function fetchUserdata (token) {
+    return await oauth.getUser(token)
   }
 }
 
