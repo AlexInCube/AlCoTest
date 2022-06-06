@@ -23,6 +23,9 @@ class AudioPlayerSocketHandler {
     AudioPlayer.distube.on('pause', async (musicQueue) => {
       this.sendPauseState(musicQueue.textChannel.guild.id)
     })
+    AudioPlayer.distube.on('resume', async (musicQueue) => {
+      this.sendPauseState(musicQueue.textChannel.guild.id, false)
+    })
     AudioPlayer.distube.on('repeatChanged', async (musicQueue) => {
       this.sendRepeatState(musicQueue.textChannel.guild.id)
     })
@@ -58,9 +61,14 @@ class AudioPlayerSocketHandler {
         this.sendCurrentDuration(guildId)
       })
 
-      socket.on('changePauseState', async (guildId, pause) => {
+      socket.on('changeCurrentDuration', async (guildId, duration) => {
         if (!await checkRequirements(socket, guildId)) return
-        await this.setPauseState(guildId, pause)
+        await this.setCurrentDuration(guildId, duration)
+      })
+
+      socket.on('changePauseState', async (guildId) => {
+        if (!await checkRequirements(socket, guildId)) return
+        await this.setPauseState(guildId)
       })
 
       socket.on('requestPauseState', guildId => {
@@ -135,13 +143,23 @@ class AudioPlayerSocketHandler {
     this.io.to(guildId).emit('responseCurrentDuration', Math.round(queue.currentTime))
   }
 
-  sendPauseState (guildId) {
+  async setCurrentDuration (guildId, duration) {
+    const guildDiscord = client.guilds.cache.get(guildId)
+    if (!guildDiscord) return
+    const message = await AudioPlayer.getPlayerMessageInGuild(guildDiscord)
+    if (!message) return
+    const queue = AudioPlayer.distube.getQueue(guildDiscord)
+    await AudioPlayer.distube.seek(queue, duration)
+    await AudioPlayer.resume(message)
+  }
+
+  sendPauseState (guildId, pauseState) {
     const guildDiscord = client.guilds.cache.get(guildId)
     if (!guildDiscord) return
 
     const queue = AudioPlayer.getQueue(guildDiscord)
     if (!queue) return
-    this.io.to(guildId).emit('responsePauseState', queue.paused)
+    this.io.to(guildId).emit('responsePauseState', pauseState || queue.paused)
   }
 
   async setPauseState (guildId) {

@@ -253,9 +253,7 @@ class AudioPlayerModule {
     if (queue.songs.length > 1) {
       await message.reply({ content: `${username} пропустил песню ${queue.songs[0].name} - ${queue.songs[0].uploader.name}` })
       await this.distube.skip(queue.textChannel.guild)
-      if (queue.paused) {
-        await this.distube.resume(queue.textChannel.guild)
-      }
+      await this.resume(queue.textChannel.guild)
     }
   }
 
@@ -288,13 +286,22 @@ class AudioPlayerModule {
   async pause (messageWithPlayer) {
     const queue = this.getQueue(messageWithPlayer)
     if (queue.paused) {
-      await this.distube.resume(messageWithPlayer)
-      await this.setPlayerEmbedState(messageWithPlayer.guild.id, PLAYER_STATES.playing)
+      await this.resume(messageWithPlayer)
     } else {
       await this.distube.pause(messageWithPlayer)
+      this.distube.emit('pause', queue)
       await this.setPlayerEmbedState(messageWithPlayer.guild.id, PLAYER_STATES.paused)
     }
-    this.distube.emit('pause', queue)
+
+    await messageWithPlayer.edit({ embeds: [this.musicPlayerMap[messageWithPlayer.guild.id].PlayerEmbed] })
+  }
+
+  async resume (messageWithPlayer) {
+    const queue = this.getQueue(messageWithPlayer)
+    if (!queue.paused) return
+    await this.distube.resume(messageWithPlayer)
+    await this.setPlayerEmbedState(messageWithPlayer.guild.id, PLAYER_STATES.playing)
+    this.distube.emit('resume', queue)
     await messageWithPlayer.edit({ embeds: [this.musicPlayerMap[messageWithPlayer.guild.id].PlayerEmbed] })
   }
 
@@ -522,6 +529,8 @@ class AudioPlayerModule {
 
   async jump (guild, queuePosition, queryMessage = null, username = null) {
     const queue = this.getQueue(guild)
+    await this.resume(queue.textChannel.guild)
+
     if (queryMessage != null) {
       if (!queue) { await queryMessage.reply('Никакой очереди не существует'); return }
       if (isNaN(queuePosition)) { await queryMessage.reply('Это не число'); return }
@@ -561,27 +570,27 @@ class AudioPlayerModule {
   async position (message = null, queryArgs) {
     const queue = this.getQueue(message)
 
-    if (!queue) { message.channel.send('Очереди не существует'); return }
+    if (!queue) { message?.channel.send('Очереди не существует'); return }
 
     if (queue.songs[0].isLive) {
-      message.reply({ content: 'Нельзя перематывать прямые трансляции' })
+      message?.reply({ content: 'Нельзя перематывать прямые трансляции' })
       return
     }
 
-    if (!queryArgs) { message.reply({ content: `А время указать? Не понимаешь как? Пиши ${this.prefix}help position` }); return }
+    if (!queryArgs) { message?.reply({ content: `А время указать? Не понимаешь как? Пиши ${this.prefix}help position` }); return }
 
     let totalTime = 0
     queryArgs.forEach(arg => {
       totalTime += parseTime(arg)
     })
 
-    if (!Number.isInteger(totalTime)) { message.reply({ content: 'Я не понял что ты написал' }); return }
+    if (!Number.isInteger(totalTime)) { message?.reply({ content: 'Я не понял что ты написал' }); return }
 
     const previousTime = queue.formattedCurrentTime
 
     await this.distube.seek(queue, Number(totalTime))
 
-    message.reply({ content: `Время изменено с ${previousTime} на ${queue.formattedCurrentTime}` })
+    message?.reply({ content: `Время изменено с ${previousTime} на ${queue.formattedCurrentTime}` })
 
     function parseTime (time) {
       const lastTimeChar = time.charAt(time.length - 1)
