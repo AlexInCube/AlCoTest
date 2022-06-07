@@ -529,12 +529,11 @@ class AudioPlayerModule {
 
   async jump (guild, queuePosition, queryMessage = null, username = null) {
     const queue = this.getQueue(guild)
-    await this.resume(queue.textChannel.guild)
 
-    if (queryMessage != null) {
-      if (!queue) { await queryMessage.reply('Никакой очереди не существует'); return }
-      if (isNaN(queuePosition)) { await queryMessage.reply('Это не число'); return }
-    }
+    if (!queue) { await queryMessage?.reply('Никакой очереди не существует'); return }
+    if (isNaN(queuePosition)) { await queryMessage?.reply('Это не число'); return }
+
+    await this.resume(queue.textChannel.guild)
 
     queuePosition = clamp(parseInt(queuePosition), 1, queue.songs.length - 1)
     try {

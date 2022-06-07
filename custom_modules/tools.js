@@ -1,5 +1,4 @@
 const { Permissions } = require('discord.js')
-const config = require('config')
 
 function getCurrentTimestamp () {
   let today = new Date()
@@ -58,7 +57,7 @@ function CheckAllNecessaryPermission (client, message, permissionsRequired) {
   const permissionProvided = bot.permissions.has(permissionsRequired)
   if (!permissionProvided) {
     if (bot.permissions.has(Permissions.FLAGS.SEND_MESSAGES)) {
-      message.channel.send(`У БОТА недостаточно прав, напишите ${config.BOT_PREFIX}help (название команды), чтобы увидеть недостающие права. А также попросите администрацию сервера их выдать.`)
+      message.channel.send(`У БОТА недостаточно прав, напишите ${process.env.BOT_PREFIX}help (название команды), чтобы увидеть недостающие права. А также попросите администрацию сервера их выдать.`)
     }
   }
   return permissionProvided

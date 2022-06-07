@@ -1,5 +1,5 @@
 const Discord = require('discord.js')
-const config = require('config')
+require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` })
 
 const { getCurrentTimestamp, loggerSend } = require('./custom_modules/tools')
 const { mySQLSetup } = require('./custom_modules/mySQLSetup')
@@ -22,17 +22,17 @@ const client = new Discord.Client({
 })
 
 const AudioPlayer = new AudioPlayerModule(client, {
-  prefix: config.get('BOT_PREFIX'),
-  ytcookie: config.get('YOUTUBE_COOKIE'),
+  prefix: process.env.BOT_PREFIX,
+  ytcookie: process.env.BOT_YOUTUBE_COOKIE,
   spotify: {
-    clientId: config.get('SPOTIFY_CLIENT_ID'),
-    clientSecret: config.get('SPOTIFY_CLIENT_SECRET')
+    clientId: process.env.BOT_SPOTIFY_CLIENT_ID,
+    clientSecret: process.env.BOT_SPOTIFY_CLIENT_SECRET
   }
 })
 
 module.exports = { AudioPlayer, client }
 
-CommandsSetup(client, config.get('BOT_PREFIX'))
+CommandsSetup(client, process.env.BOT_PREFIX)
 
 const { ExpressRun } = require('./web_application/express/ExpressServer.js')
 const { WebsocketRun } = require('./web_application/websockets/WebsocketServer')
@@ -40,11 +40,11 @@ const { WebsocketRun } = require('./web_application/websockets/WebsocketServer')
 // Когда бот запустился
 client.on('ready', () => {
   loggerSend(`Бот ${client.user.username} запустился`)
-  client.user.setActivity(`Напиши ${config.BOT_PREFIX}help`)
+  client.user.setActivity(`Напиши ${process.env.BOT_PREFIX}help`)
 
   ExpressRun()
   WebsocketRun()
 })
 
 // ЛОГИН БОТА ДЕЛАТЬ ВСЕГДА В КОНЦЕ main.js
-client.login(config.BOT_TOKEN)
+client.login(process.env.BOT_DISCORD_TOKEN)

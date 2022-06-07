@@ -1,4 +1,3 @@
-const config = require('config')
 const DiscordOauth2 = require('discord-oauth2')
 const session = require('express-session')
 const cookieParser = require('cookie-parser')
@@ -9,9 +8,9 @@ const RedisStore = require('connect-redis')(session)
 const redisClient = new Redis()
 
 const oauth = new DiscordOauth2({
-  clientId: config.get('BOT_CLIENT_ID'),
-  clientSecret: config.get('BOT_CLIENT_SECRET'),
-  redirectUri: config.get('BOT_REDIRECT_URI') + '/auth'
+  clientId: process.env.BOT_DISCORD_CLIENT_ID,
+  clientSecret: process.env.BOT_DISCORD_CLIENT_SECRET,
+  redirectUri: process.env.BOT_REST_API_URL + '/auth'
 })
 
 const sessionMiddleware = session({
@@ -36,7 +35,7 @@ function AuthRoutes (app) {
     try {
       const { code } = req.query
       if (!code) {
-        res.redirect('https://discord.com/api/oauth2/authorize?client_id=' + config.get('BOT_CLIENT_ID') + '&redirect_uri=' + encodeURI(config.get('BOT_REDIRECT_URI') + '/auth') + '&response_type=code&scope=identify')
+        res.redirect('https://discord.com/api/oauth2/authorize?client_id=' + process.env.BOT_DISCORD_CLIENT_ID + '&redirect_uri=' + encodeURI(process.env.BOT_REST_API_URL + '/auth') + '&response_type=code&scope=identify')
         return
       }
 
@@ -48,7 +47,7 @@ function AuthRoutes (app) {
         req.session.user = data
         fetchUserdata(req.session.user.access_token).then((userData) => {
           req.session.user.detail = userData
-          res.redirect('http://localhost:3000/app')
+          res.redirect(`${process.env.BOT_DASHBOARD_URL}/app`)
         })
       })
     } catch (e) {
@@ -61,7 +60,7 @@ function AuthRoutes (app) {
       if (err) {
         return console.log(err)
       }
-      res.redirect('http://localhost:3000/')
+      res.redirect(`${process.env.BOT_DASHBOARD_URL}/`)
     })
   })
 

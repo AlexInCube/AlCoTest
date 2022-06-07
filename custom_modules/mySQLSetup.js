@@ -1,12 +1,11 @@
 const { getCurrentTimestamp, loggerSend } = require('./tools')
 const mysql = require('mysql2')
-const config = require('config')
 
 const options = {
-  host: config.get('DB_IP'),
-  user: config.get('DB_USER'),
-  database: config.get('DB_DATABASE'),
-  password: config.get('DB_PASSWORD'),
+  host: process.env.BOT_MYSQL_IP,
+  user: process.env.BOT_MYSQL_USER,
+  password: process.env.BOT_MYSQL_PASSWORD,
+  database: process.env.BOT_MYSQL_DATABASE_NAME,
   supportBigNumbers: true,
   bigNumberStrings: true
 }

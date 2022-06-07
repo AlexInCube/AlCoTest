@@ -1,13 +1,12 @@
-const config = require('config')
 const { loggerSend } = require('../../custom_modules/tools')
 const { wrap, sessionMiddleware } = require('../express/routes/auth')
 const { AudioPlayerSocketHandler } = require('./AudioPlayerSocketHandler')
 
 module.exports.WebsocketRun = () => {
-  const PORT = config.get('SOCKET_IO_PORT')
+  const PORT = process.env.BOT_SOCKET_IO_PORT
   const io = require('socket.io')(PORT, {
     cors: {
-      origin: [config.get('USER_APPLICATION_ADDRESS')],
+      origin: [process.env.BOT_DASHBOARD_URL],
       credentials: true
     }
   })
