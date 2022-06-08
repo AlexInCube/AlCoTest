@@ -533,19 +533,24 @@ class AudioPlayerModule {
     if (!queue) { await queryMessage?.reply('Никакой очереди не существует'); return }
     if (isNaN(queuePosition)) { await queryMessage?.reply('Это не число'); return }
 
-    await this.resume(queue.textChannel.guild)
+    await this.resume(guild)
 
-    queuePosition = clamp(parseInt(queuePosition), 1, queue.songs.length - 1)
+    queuePosition = clamp(parseInt(queuePosition), 0 - queue.previousSongs.length, queue.songs.length - 1)
     try {
       await this.distube.jump(guild, queuePosition)
       if (username) {
         await this.getPlayerMessageInGuild(guild).then(async (playerMessage) => {
-          await playerMessage.reply(`${username} совершил прыжок в очереди, пропустив предыдущие песни`)
+          if (queuePosition >= 1) { await playerMessage.reply(`${username} совершил прыжок в очереди, пропустив предыдущие песни`); return }
+          if (queuePosition <= 0) { await playerMessage.reply(`${username} совершил прыжок в очереди, вернувшись назад на проигранные песни`) }
         })
       }
     } catch (e) {
 
     }
+  }
+
+  async previousSong (guild, message, username) {
+    await this.jump(guild, -1, message, username)
   }
 
   async getCurrentPlayingMessage (message) {
@@ -625,12 +630,16 @@ class AudioPlayerModule {
     if (!messageWithPlayer) return
     const queue = this.distube.getQueue(guild)
     if (!queue) return
-    position = clamp(parseInt(position), 0, queue.songs.length - 1)
+    position = clamp(parseInt(position), 0 - queue.previousSongs.length, queue.songs.length - 1)
     if (position === 0) {
       await this.skipSong(queue, messageWithPlayer, username)
-    } else {
-      await messageWithPlayer.channel.send({ content: `${username} удалил песню ${queue.songs[position].name} - ${queue.songs[position].uploader.name}` })
+    } else if (position > 0) {
+      await messageWithPlayer.channel.send({ content: `${username} удалил песню из очереди ${queue.songs[position].name} - ${queue.songs[position].uploader.name}` })
       queue.songs.splice(position, 1)
+    } else if (position < 0) {
+      position = queue.previousSongs.length - Math.abs(position)
+      await messageWithPlayer.channel.send({ content: `${username} удалил песню из списка прошлых песен ${queue.previousSongs[position].name} - ${queue.previousSongs[position].uploader.name}` })
+      queue.previousSongs.splice(position, 1)
     }
     this.editField(queue.textChannel.guild.id, PLAYER_FIELDS.remaining_songs, (queue.songs.length - 1).toString())
     await messageWithPlayer.edit({ embeds: [this.musicPlayerMap[queue.textChannel.guild.id].PlayerEmbed] })

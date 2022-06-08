@@ -4,8 +4,11 @@ const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const { client } = require('../../../main')
 const Redis = require('ioredis')
+const { loggerSend } = require('../../../custom_modules/tools')
 const RedisStore = require('connect-redis')(session)
 const redisClient = new Redis()
+redisClient.on('error', (err) => loggerSend('Ошибка при подключении к Redis', err))
+redisClient.on('connect', () => loggerSend('Подключение к Redis успешно установлено'))
 
 const oauth = new DiscordOauth2({
   clientId: process.env.BOT_DISCORD_CLIENT_ID,

@@ -10,5 +10,7 @@ module.exports.help = {
 
 module.exports.run = async (client, message, args) => {
   if (!await AudioPlayer.checkUserInVoice(message.member, message)) return
-  await AudioPlayer.jump(message.guild, parseInt(args[0]) - 1, message, message.author.username)
+  let pos = parseInt(args[0])
+  if (pos > 0) { pos-- }
+  await AudioPlayer.jump(message.guild, pos, message, message.author.username)
 }

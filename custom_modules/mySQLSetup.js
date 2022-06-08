@@ -18,7 +18,7 @@ module.exports.mySQLSetup = () => {
     if (err) {
       return console.error(getCurrentTimestamp() + 'Ошибка: ' + err.message)
     } else {
-      loggerSend('Подключение к серверу MySQL успешно установлено')
+      loggerSend('Подключение к MySQL успешно установлено')
     }
 
     let sqlQuery = 'CREATE TABLE IF NOT EXISTS guild_settings (`guild_id` BIGINT UNSIGNED NOT NULL UNIQUE, `settings` TEXT NOT NULL); '

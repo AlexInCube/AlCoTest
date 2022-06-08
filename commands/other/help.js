@@ -1,5 +1,4 @@
 const { Permissions } = require('discord.js')
-const { prefix } = require('../../custom_modules/CommandHandler')
 const Discord = module.require('discord.js')
 
 module.exports.help = {
@@ -13,7 +12,7 @@ module.exports.run = async (client, message, args) => {
   if (args[0] === undefined) {
     const helpEmbed = new Discord.MessageEmbed()// Создаём сообщение с плеером
       .setColor('#436df7')
-      .setTitle(`Введите ${prefix}help (название команды), чтобы узнать подробности`)
+      .setTitle(`Введите ${process.env.BOT_PREFIX}help (название команды), чтобы узнать подробности`)
       .setDescription('Обозначения в аргументах команд:\n() - обязательно\n[] - по желанию')
 
     client.commands_groups.forEach((values, keys) => {
@@ -43,7 +42,7 @@ module.exports.run = async (client, message, args) => {
 
     const helpEmbed = new Discord.MessageEmbed()// Создаём сообщение с плеером
       .setColor('#436df7')
-      .setTitle(prefix + commandData.name + ' ' + `${commandData.arguments || ''}`)
+      .setTitle(process.env.BOT_PREFIX + commandData.name + ' ' + `${commandData.arguments || ''}`)
       .setDescription(commandData.description || 'Описание не найдено')
       .addFields(
         { name: 'Права требуемые для БОТА, не для пользователя: ', value: permissionsString || 'Права не требуются' }
