@@ -490,7 +490,7 @@ class AudioPlayerModule {
   }
 
   async extractAudioToMessage (message, queryArgs) {
-    const url = queryArgs.first()
+    const url = queryArgs[0]
     if (!url) { message.reply('А ссылку указать? Мне что самому надо придумать что тебе надо?') }
     let songData
     let searchQuery = ''
