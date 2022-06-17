@@ -58,7 +58,7 @@ function handleDisconnect (client) {
     if (!error.fatal) return
     // if (error.code !== 'PROTOCOL_CONNECTION_LOST') throw err
 
-    loggerSend('Переподключение к базе данных')
+    loggerSend('Переподключение к MySQL')
 
     mySQLconnection = mysql.createConnection(options)
     handleDisconnect(mySQLconnection)
