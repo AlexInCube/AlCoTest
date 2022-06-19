@@ -16,7 +16,8 @@ function VotingRoutes (app) {
 
       const channel = guild.channels.cache.get(form.textChannelId)
       if (!channel) return
-
+      if (form.variantsList.length > 12) { response.status(403).send(undefined); return }
+      if (form.variantsList.length < 2) { response.status(403).send(undefined); return }
       let voteVariants = ''
       form.variantsList.forEach((variant, index) => {
         voteVariants += `${index + 1}. ${variant.emoji} - ${variant.name}\n`
@@ -30,7 +31,9 @@ function VotingRoutes (app) {
           name: `${request.session.user.detail.username}`,
           iconURL: `https://cdn.discordapp.com/avatars/${request.session.user.detail.id}/${request.session.user.detail.avatar}`
         })
-      const message = await channel.send({ embeds: [voteEmbed] })
+      const mention = form.mention ? '@everyone' : ' '
+      const message = await channel.send({ content: mention, embeds: [voteEmbed] })
+
       for (const variant of form.variantsList) {
         await message.react(variant.emoji)
       }
