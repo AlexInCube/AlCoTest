@@ -10,5 +10,5 @@ module.exports.help = {
 
 module.exports.run = async (client, message, args) => {
   if (!await AudioPlayer.checkUserInVoice(message.member, message)) return
-  await AudioPlayer.position(message.member, message, args)
+  await AudioPlayer.position(message, args)
 }

@@ -23,7 +23,8 @@ const PLAYER_FIELDS = {
   duration: 1,
   queue_duration: 2,
   remaining_songs: 3,
-  repeat_mode: 4
+  repeat_mode: 4,
+  requester: 5
 }
 
 class AudioPlayerModule {
@@ -77,6 +78,7 @@ class AudioPlayerModule {
       })
       .on('playSong', async (musicQueue, song) => {
         if (!this.musicPlayerMap[musicQueue.textChannel.guildId]) return
+        await this.restorePlayerMessage(musicQueue.textChannel.guild, musicQueue)
         await this.updateEmbedWithSong(musicQueue, song)
         await this.pushChangesToPlayerMessage(musicQueue.textChannel.guildId, musicQueue)
       })
@@ -84,7 +86,7 @@ class AudioPlayerModule {
         await musicQueue.textChannel.send({
           content: `Добавлено: ${song.name} - \`${song.formattedDuration}\` в очередь по запросу \`${song.member.user.username}\``
         })
-        await this.createPlayer(musicQueue, this.distube)
+        await this.restorePlayerMessage(musicQueue.textChannel.guild, musicQueue)
         await this.updateEmbedWithSong(musicQueue, musicQueue.songs[0])
         await this.pushChangesToPlayerMessage(musicQueue.textChannel.guildId, musicQueue)
       })
@@ -93,7 +95,7 @@ class AudioPlayerModule {
           content:
             `Добавлено \`${playlist.songs.length}\` песен из плейлиста \`${playlist.name}\` в очередь по запросу \`${playlist.member.user.username}\``
         })
-        await this.createPlayer(musicQueue, this.distube)
+        await this.restorePlayerMessage(musicQueue.textChannel.guild, musicQueue)
         await this.updateEmbedWithSong(musicQueue, musicQueue.songs[0])
         await this.pushChangesToPlayerMessage(musicQueue.textChannel.guildId, musicQueue)
       })
@@ -124,14 +126,21 @@ class AudioPlayerModule {
         await userMessage.channel.send({ embeds: [resultsEmbed] })
       }
       )
-      .on('searchNoResult', (message, query) => message.channel.send(`Ничего не найдено по запросу ${query}!`))
-      .on('searchInvalidAnswer', (message) => message.channel.send('Вы указали что-то неверное, поиск отменён!'))
-      .on('searchCancel', (message) => message.channel.send('Вы ничего не выбрали, поиск отменён'))
+      .on('searchNoResult', async (message, query) => { message.channel.send(`Ничего не найдено по запросу ${query}!`); await this._handleCancelSearch(message.guild) })
+      .on('searchInvalidAnswer', async (message) => { message.channel.send('Вы указали что-то неверное, поиск отменён!'); await this._handleCancelSearch(message.guild) })
+      .on('searchCancel', async (message) => { message.channel.send('Вы ничего не выбрали, поиск отменён'); await this._handleCancelSearch(message.guild) })
       .on('searchDone', () => {})
   }
 
   getQueue (guild) {
     return this.distube.getQueue(guild)
+  }
+
+  async _handleCancelSearch (guild) {
+    const queue = this.getQueue(guild)
+    if (queue === undefined) {
+      await this.stop(guild)
+    }
   }
 
   async play (queryMessage, queryArgs) {
@@ -220,8 +229,8 @@ class AudioPlayerModule {
   async getPlayerMessageInGuild (guild) {
     const guildId = guild.id
     const channel = await this.client.channels.cache.get(this.musicPlayerMap[guildId]?.ChannelID)
-    if (!channel) return
-    return await channel.messages.fetch(this.musicPlayerMap[guildId]?.MessageID)
+    if (!channel) return undefined
+    return channel.messages.cache.get(this.musicPlayerMap[guildId]?.MessageID)
   }
 
   async downloadSong (song, message, username) {
@@ -314,10 +323,10 @@ class AudioPlayerModule {
   async clearPlayerState (guild) {
     if (this.musicPlayerMap[guild.id]) {
       await this.musicPlayerMap[guild.id].Collector.stop()
-      const channel = guild.channels.cache.get(this.musicPlayerMap[guild.id].ChannelID)
-      await channel.messages.fetch(this.musicPlayerMap[guild.id].MessageID).then((m) => {
-        m.delete()
-      })
+      const playerMessage = await this.getPlayerMessageInGuild(guild)
+      if (playerMessage !== undefined) {
+        playerMessage.delete()
+      }
       delete this.musicPlayerMap[guild.id]
     }
   }
@@ -363,10 +372,25 @@ class AudioPlayerModule {
     }
   }
 
+  async restorePlayerMessage (guild, queue) {
+    if (this.musicPlayerMap[guild.id]) {
+      try {
+        const messagePlayer = await this.getPlayerMessageInGuild(guild)
+        if (messagePlayer === undefined) {
+          await this.clearPlayerState(guild)
+        }
+      } catch (e) {
+
+      }
+    }
+    await this.createPlayer(queue)
+  }
+
   async updateEmbedWithSong (queue, song) {
     const guild = queue.textChannel.guildId
     await this.setPlayerEmbedState(guild, PLAYER_STATES.playing)
     this.editField(guild, PLAYER_FIELDS.author, song.uploader.name)
+    this.editField(guild, PLAYER_FIELDS.requester, song.user.username)
     if (song.isLive) {
       this.editField(guild, PLAYER_FIELDS.duration, ':red_circle:' + ' Прямая трансляция')
     } else {
@@ -397,68 +421,76 @@ class AudioPlayerModule {
     this.musicPlayerMap[guildId].Collector = collector
 
     collector.on('collect', async button => {
-      if (button.customId === 'show_queue') {
-        const showQueue = this.getQueue(button.guild)
-        if (!showQueue) {
-          await button.reply({ content: 'Ничего не проигрывается', ephemeral: true })
-        } else {
-          let queueList = ''
+      try {
+        if (button.customId === 'show_queue') {
+          const showQueue = this.getQueue(button.guild)
+          if (!showQueue) {
+            await button.reply({ content: 'Ничего не проигрывается', ephemeral: true })
+          } else {
+            let queueList = ''
 
-          let song = ''
-          for (let i = 1; i < Math.min(31, showQueue.songs.length); i++) {
-            song = showQueue.songs[i]
-            queueList += `${i + 1}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`
+            let song = ''
+            for (let i = 1; i < Math.min(31, showQueue.songs.length); i++) {
+              song = showQueue.songs[i]
+              queueList += `${i + 1}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`
+            }
+
+            if (showQueue.songs.length > 32) {
+              queueList += `И ещё ${showQueue.songs.length - 33} песни ждут своего часа`
+            }
+
+            const queueEmbed = new Discord.MessageEmbed()
+              .setAuthor({ name: 'Сейчас играет: ' })
+              .setTitle('1. ' + showQueue.songs[0].name).setURL(showQueue.songs[0].url)
+              .setDescription(`**Оставшиеся песни: **\n${queueList}`.slice(0, 4096))
+            await button.reply({ embeds: [queueEmbed], ephemeral: true }
+            )
           }
-
-          if (showQueue.songs.length > 32) {
-            queueList += `И ещё ${showQueue.songs.length - 33} песни ждут своего часа`
-          }
-
-          const queueEmbed = new Discord.MessageEmbed()
-            .setAuthor({ name: 'Сейчас играет: ' })
-            .setTitle('1. ' + showQueue.songs[0].name).setURL(showQueue.songs[0].url)
-            .setDescription(`**Оставшиеся песни: **\n${queueList}`.slice(0, 4096))
-          await button.reply({ embeds: [queueEmbed], ephemeral: true }
-          )
         }
-      }
 
-      if (button.customId === 'download_song') {
-        const song = this.getQueue(queue.textChannel.guild).songs[0]
+        if (button.customId === 'download_song') {
+          const song = this.getQueue(queue.textChannel.guild).songs[0]
 
-        await this.downloadSong(song, button.message, button.user.username)
-      }
+          await this.downloadSong(song, button.message, button.user.username)
+        }
 
-      if (!await this.checkUserInVoice(button.member, button.message)) {
-        await button.message.channel.send({ content: `${button.user.username} попытался нажать на кнопки, но он не в голосовом чате со мной!` })
-        return
-      }
+        if (!await this.checkUserInVoice(button.member, button.message)) {
+          await button.message.channel.send({ content: `${button.user.username} попытался нажать на кнопки, но он не в голосовом чате со мной!` })
+          return
+        }
 
-      if (button.customId === 'stop_music') {
-        const vc = voice.getVoiceConnection(button.guild.id)
-        if (vc) await voice.getVoiceConnection(button.guild.id).destroy()
-        await button.message.channel.send({ content: `${button.user.username} выключил плеер` })
-      }
+        if (button.customId === 'stop_music') {
+          const vc = voice.getVoiceConnection(button.guild.id)
+          if (vc) await voice.getVoiceConnection(button.guild.id).destroy()
+          await button.message.channel.send({ content: `${button.user.username} выключил плеер` })
+        }
 
-      if (button.customId === 'pause_music') {
-        await this.pause(button.message)
-        await button.deferUpdate()
-      }
+        if (button.customId === 'pause_music') {
+          await this.pause(button.message)
+          await button.deferUpdate()
+        }
 
-      if (button.customId === 'toggle_repeat') {
-        await this.changeRepeatMode(button.message)
-        await button.deferUpdate()
-      }
+        if (button.customId === 'toggle_repeat') {
+          await this.changeRepeatMode(button.message)
+          await button.deferUpdate()
+        }
 
-      if (button.customId === 'skip_song') {
-        await this.skipSong(this.getQueue(queue.textChannel.guild), button.message, button.user.username)
-        await button.deferUpdate()
+        if (button.customId === 'skip_song') {
+          await this.skipSong(this.getQueue(queue.textChannel.guild), button.message, button.user.username)
+          await button.deferUpdate()
+        }
+      } catch (e) {
+        try {
+          await button.deferUpdate()
+        } catch (e) {
+
+        }
       }
     })
   }
 
   /**
-   * Создаёт embed сообщение с видом Аудио Плеера, но не отправляет его.
+   * Создаёт embed сообщение с интерфейсом Аудио Плеера, но не отправляет его.
    */
   createPlayerEmbed () {
     const musicPlayerEmbed = new Discord.MessageEmbed()// Создаём сообщение с плеером
@@ -467,9 +499,10 @@ class AudioPlayerModule {
       .addFields(
         { name: 'Автор', value: 'Неизвестно' },
         { name: 'Длительность песни', value: 'Неизвестно', inline: false },
-        { name: 'Оставшаяся длительность очереди', value: 'Неизвестно', inline: true },
+        { name: 'Оставшаяся длительность очереди', value: 'Неизвестно', inline: false },
         { name: 'Осталось песен в очереди', value: 'Неизвестно', inline: true },
-        { name: 'Режим повтора', value: 'Выключен', inline: true }
+        { name: 'Режим повтора', value: 'Выключен', inline: true },
+        { name: 'Эту песню запросил', value: 'Неизвестно', inline: true }
       )
 
     const musicPlayerRowPrimary = new MessageActionRow()// Создаём кнопки для плеера
