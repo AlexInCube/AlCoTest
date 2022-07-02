@@ -566,7 +566,8 @@ class AudioPlayerModule {
     if (!queue) { await queryMessage?.reply('Никакой очереди не существует'); return }
     if (isNaN(queuePosition)) { await queryMessage?.reply('Это не число'); return }
 
-    await this.resume(guild)
+    const messageWithPlayer = await this.getPlayerMessageInGuild(guild)
+    await this.resume(messageWithPlayer)
 
     queuePosition = clamp(parseInt(queuePosition), 0 - queue.previousSongs.length, queue.songs.length - 1)
     try {
