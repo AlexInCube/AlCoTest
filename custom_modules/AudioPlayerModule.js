@@ -213,17 +213,17 @@ class AudioPlayerModule {
     const connection = getVoiceConnection(member.guild.id)
     if (connection) {
       if (connection.joinConfig.channelId !== member.voice.channel.id) {
-        this.client.channels.fetch(connection.joinConfig.channelId)
+        await this.client.channels.fetch(connection.joinConfig.channelId)
           .then(channel => {
             if (messageForReply != null) {
-              messageForReply.reply({ content: `Зайди на канал ${channel.name} ` })
+              messageForReply.reply({ content: `Зайди на голосовой канал ${channel.name}, чтобы пользоваться мной.` })
             }
             return false
           })
+      } else {
+        return true
       }
     }
-
-    return true
   }
 
   async getPlayerMessageInGuild (guild) {
@@ -455,7 +455,7 @@ class AudioPlayerModule {
         }
 
         if (!await this.checkUserInVoice(button.member, button.message)) {
-          await button.message.channel.send({ content: `${button.user.username} попытался нажать на кнопки, но он не в голосовом чате со мной!` })
+          // await button.message.channel.send({ content: `${button.user.username} попытался нажать на кнопки, но он не в голосовом чате со мной!` })
           return
         }
 

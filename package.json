@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "development": "set NODE_ENV=development&& node main.js",
-    "production": "set NODE_ENV=production&& node main.js"
+    "production": "set NODE_ENV=production&& node main.js",
+    "linux_production": "export NODE_ENV=production&& node main.js"
   },
   "keywords": [],
   "author": "",
@@ -46,7 +47,6 @@
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.2.0",
-    "lyrics-finder": "^21.7.0"
+    "eslint-plugin-promise": "^5.2.0"
   }
 }

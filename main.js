@@ -1,6 +1,6 @@
-const Discord = require('discord.js')
 require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` })
 
+const Discord = require('discord.js')
 const { getCurrentTimestamp, loggerSend } = require('./custom_modules/tools')
 const { mySQLSetup } = require('./custom_modules/mySQLSetup')
 const { CommandsSetup } = require('./custom_modules/CommandHandler')
@@ -34,16 +34,20 @@ module.exports = { AudioPlayer, client }
 
 CommandsSetup(client, process.env.BOT_PREFIX)
 
-const { ExpressRun } = require('./web_application/express/ExpressServer.js')
-const { WebsocketRun } = require('./web_application/websockets/WebsocketServer')
+if (parseInt(process.env.BOT_DASHBOARD_ENABLE) === 1) {
+  const { ExpressRun } = require('./web_application/express/ExpressServer.js')
+  const { WebsocketRun } = require('./web_application/websockets/WebsocketServer')
+
+  ExpressRun()
+  WebsocketRun()
+} else {
+  loggerSend('Веб-панель бота была отключена')
+}
 
 // Когда бот запустился
 client.on('ready', () => {
   loggerSend(`Бот ${client.user.username} запустился`)
   client.user.setActivity(`Напиши ${process.env.BOT_PREFIX}help`)
-
-  ExpressRun()
-  WebsocketRun()
 })
 
 // ЛОГИН БОТА ДЕЛАТЬ ВСЕГДА В КОНЦЕ main.js
