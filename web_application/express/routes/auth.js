@@ -38,7 +38,7 @@ function AuthRoutes (app) {
     try {
       const { code } = req.query
       if (!code) {
-        const authUrl = ('https://discord.com/api/oauth2/authorize?client_id=' + process.env.BOT_DISCORD_CLIENT_ID + '&redirect_uri=' + encodeURI(process.env.BOT_REST_API_URL + '/auth') + '&response_type=code&scope=identify')
+        const authUrl = ('https://discord.com/api/oauth2/authorize?client_id=' + process.env.BOT_DISCORD_CLIENT_ID + '&redirect_uri=' + encodeURI(process.env.BOT_REST_API_URL + '/auth') + '&response_type=code&scope=identify%20guilds')
         res.redirect(authUrl)
         return
       }
