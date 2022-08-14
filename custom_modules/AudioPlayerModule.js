@@ -446,12 +446,15 @@ class AudioPlayerModule {
             await button.reply({ embeds: [queueEmbed], ephemeral: true }
             )
           }
+
+          return
         }
 
         if (button.customId === 'download_song') {
           const song = this.getQueue(queue.textChannel.guild).songs[0]
 
           await this.downloadSong(song, button.message, button.user.username)
+          return
         }
 
         if (!await this.checkUserInVoice(button.member, button.message)) {
@@ -463,21 +466,29 @@ class AudioPlayerModule {
           const vc = voice.getVoiceConnection(button.guild.id)
           if (vc) await voice.getVoiceConnection(button.guild.id).destroy()
           await button.message.channel.send({ content: `${button.user.username} выключил плеер` })
+
+          return
         }
 
         if (button.customId === 'pause_music') {
           await this.pause(button.message)
           await button.deferUpdate()
+
+          return
         }
 
         if (button.customId === 'toggle_repeat') {
           await this.changeRepeatMode(button.message)
           await button.deferUpdate()
+
+          return
         }
 
         if (button.customId === 'skip_song') {
           await this.skipSong(this.getQueue(queue.textChannel.guild), button.message, button.user.username)
           await button.deferUpdate()
+
+          return
         }
       } catch (e) {
         try {
