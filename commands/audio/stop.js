@@ -1,11 +1,10 @@
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js')
 const { AudioPlayer } = require('../../main')
-const { checkMemberInVoiceWithBotAndReply } = require('../../utilities/checkMemberInVoiceWithBot')
 module.exports.help = {
-  name: 'shuffle',
+  name: 'stop',
   group: 'audio',
   arguments: '',
-  description: 'Перемешивает все песни в очереди',
+  description: 'Выключает плеер',
   bot_permissions: [PermissionsBitField.Flags.SendMessages]
 }
 
@@ -14,7 +13,7 @@ module.exports.slashBuilder = new SlashCommandBuilder()
   .setDescription(module.exports.help.description)
 
 module.exports.run = async ({ client, interaction }) => {
-  if (!await checkMemberInVoiceWithBotAndReply(interaction.member, interaction)) return
-  client.guilds.cache.get(interaction.guildId)
-  await AudioPlayer.actions.shuffle(message, message.author.username)
+  if (!await AudioPlayer.checkMemberInVoiceWithBotAndReply(interaction.member, interaction)) return
+  await AudioPlayer.stop(client.guilds.cache.get(interaction.guildId))
+  await interaction.reply({ content: `${interaction.user.username} выключил плеер` })
 }

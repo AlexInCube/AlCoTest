@@ -1,35 +1,58 @@
-const { Permissions } = require('discord.js')
-const Discord = module.require('discord.js')
+const { PermissionsBitField, SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 
 module.exports.help = {
   name: 'help',
   group: 'other',
-  description: 'Всё таки кто-то догадался посмотреть помощь о помощи, раз ты такой умный, то возьми с полки пирожок.',
-  bot_permissions: [Permissions.FLAGS.SEND_MESSAGES]
+  description: 'Подробное описание команд',
+  bot_permissions: [PermissionsBitField.Flags.SendMessages]
 }
 
-module.exports.run = async (client, message, args) => {
-  if (args[0] === undefined) {
-    const helpEmbed = new Discord.MessageEmbed()// Создаём сообщение с плеером
-      .setColor('#436df7')
-      .setTitle(`Введите ${process.env.BOT_PREFIX}help (название команды), чтобы узнать подробности`)
-      .setDescription('Обозначения в аргументах команд:\n() - обязательно\n[] - по желанию')
+module.exports.slashBuilder = new SlashCommandBuilder()
+  .setName(module.exports.help.name)
+  .setDescription(module.exports.help.description)
+  .addStringOption(option =>
+    option.setName('command')
+      .setNameLocalizations({
+        ru: 'команда'
+      })
+      .setDescription('Подробности об указанной команде')
+      .setRequired(false)
+  )
 
-    client.commands_groups.forEach((values, keys) => {
+module.exports.run = async ({ client, interaction, guild }) => {
+  const commandName = interaction.options.get('command')?.value
+  if (commandName === undefined) { // Если конкретная команда не указана, то выводим список
+    await replyCommandsList()
+  } else { // Если указана конкретная команда
+    await replySpecificCommand()
+  }
+
+  async function replyCommandsList () {
+    const helpEmbed = new EmbedBuilder()
+      .setColor('#436df7')
+      .setTitle('Справка о командах')
+      .setDescription(`Обозначения в аргументах команд:\n() - обязательно\n[] - по желанию\nБольше информации на ${process.env.BOT_DASHBOARD_URL}`)
+
+    client.commands.groups.forEach((values, keys) => {
       let commandsList = ''
       values.forEach((value) => {
         commandsList += `\`${value}\` `
       })
-      helpEmbed.addField(convertGroupToLocaleString(keys), commandsList, false)
+      helpEmbed.addFields({ name: convertGroupToLocaleString(keys), value: commandsList, inline: false })
     })
 
-    await message.channel.send({ embeds: [helpEmbed] })
-  } else {
-    const commandData = client.commands.get(args[0])?.help
-    if (!commandData) { await message.reply({ content: 'Такой команды не существует', ephemeral: true }); return }
+    await interaction.reply({ embeds: [helpEmbed], ephemeral: true })
+  }
+
+  async function replySpecificCommand () {
+    const commandData = client.commands.executable.get(commandName)?.help
+    if (!commandData) {
+      await interaction.reply({ content: 'Такой команды не существует', ephemeral: true })
+      return
+    }
 
     let permissionsString = ''
-    const bot = message.guild.members.cache.get(client.user.id)// client.users.fetch(client.user.id)
+    const bot = guild.members.cache.get(client.user.id)
 
     commandData.bot_permissions.forEach(function (value) {
       if (bot.permissions.has(value)) {
@@ -40,25 +63,25 @@ module.exports.run = async (client, message, args) => {
       permissionsString += '  ' + convertPermissionsToLocaleString(value) + '\n'
     })
 
-    const helpEmbed = new Discord.MessageEmbed()// Создаём сообщение с плеером
+    const helpEmbed = new EmbedBuilder()
       .setColor('#436df7')
-      .setTitle(process.env.BOT_PREFIX + commandData.name + ' ' + `${commandData.arguments || ''}`)
+      .setTitle(`/${commandData.name} ${commandData.arguments || ''}`)
       .setDescription(commandData.description || 'Описание не найдено')
       .addFields(
         { name: 'Права требуемые для БОТА, не для пользователя: ', value: permissionsString || 'Права не требуются' }
       )
 
-    await message.channel.send({ embeds: [helpEmbed] })
+    await interaction.reply({ embeds: [helpEmbed], ephemeral: true })
   }
 
   function convertPermissionsToLocaleString (permission) {
     switch (permission) {
-      case Permissions.FLAGS.SEND_MESSAGES: return 'Отправлять сообщения'
-      case Permissions.FLAGS.MANAGE_MESSAGES: return 'Управлять сообщениями'
-      case Permissions.FLAGS.CONNECT: return 'Подключаться'
-      case Permissions.FLAGS.SPEAK: return 'Говорить'
-      case Permissions.FLAGS.VIEW_CHANNEL: return 'Просматривать каналы'
-      case Permissions.FLAGS.ATTACH_FILES: return 'Прикреплять файлы'
+      case PermissionsBitField.Flags.SendMessages: return 'Отправлять сообщения'
+      case PermissionsBitField.Flags.ManageMessages: return 'Управлять сообщениями'
+      case PermissionsBitField.Flags.Connect: return 'Подключаться'
+      case PermissionsBitField.Flags.Speak: return 'Говорить'
+      case PermissionsBitField.Flags.ViewChannel: return 'Просматривать каналы'
+      case PermissionsBitField.Flags.AttachFiles: return 'Прикреплять файлы'
       default: return 'Не найдено название прав: ' + permission
     }
   }
