@@ -2,6 +2,7 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('
 const { PLAYER_FIELDS, PLAYER_STATES } = require('./AudioPlayerEnums')
 const { checkMemberInVoiceWithBotAndReply } = require('../../utilities/checkMemberInVoiceWithBot')
 const { loggerSend } = require('../../utilities/logger')
+const { downloadSong, deleteSongFile } = require('./downloadSongHandling')
 
 class AudioPlayerDiscordGui {
   constructor (musicPlayerMap, distube, playerEmitter, client) {
@@ -135,9 +136,7 @@ class AudioPlayerDiscordGui {
         }
 
         if (button.customId === 'download_song') {
-          const song = this.distube.getQueue(queue.textChannel.guild).songs[0]
-
-          await this.downloadSong(song, button.message, button.user.username)
+          await this.extractAudioToMessage(button, this.distube.getQueue(queue.textChannel.guild).songs[0])
           return
         }
 
@@ -165,7 +164,7 @@ class AudioPlayerDiscordGui {
         }
 
         if (button.customId === 'skip_song') {
-          this.playerEmitter.emit('songSkipped', button.guild, button.user.username)
+          this.playerEmitter.emit('songSkipped', this.distube.getQueue(button.guild), button.user.username)
           await button.deferUpdate()
         }
       } catch (e) {
@@ -319,6 +318,37 @@ class AudioPlayerDiscordGui {
 
     // Возвращаем сообщение которое можно отправить в Discord
     return { embeds: [musicPlayerEmbed], components: [musicPlayerRowPrimary, musicPlayerRowSecondary] }
+  }
+
+  /**
+   * Ищет и отправляет аудиофайл в чат
+   * @param interaction
+   * @param song
+   */
+  async extractAudioToMessage (interaction, song) {
+    await interaction.reply({ content: `${interaction.user.username} ожидайте...` })
+
+    const downloadData = await downloadSong(song)
+    switch (downloadData) {
+      case 'songIsTooLarge':
+        await interaction.editReply({
+          content: 'Я не могу отправить файл, так как он весит больше чем 8мб.',
+          ephemeral: true
+        })
+        break
+      case 'songIsLive':
+        await interaction.editReply({ content: 'Это прямая трансляция, её нельзя скачать!', ephemeral: true })
+        break
+      case 'undefinedError':
+        await interaction.editReply({ content: 'Произошла непредвиденная ошибка', ephemeral: true })
+        break
+      default:
+        await interaction.channel.send({
+          content: `${interaction.user.username} я смог извлечь звук`,
+          files: [downloadData]
+        })
+        await deleteSongFile(downloadData)
+    }
   }
 }
 

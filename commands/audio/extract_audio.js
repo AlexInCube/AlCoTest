@@ -1,5 +1,6 @@
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js')
 const { AudioPlayer } = require('../../main')
+const { searchSong } = require('../../custom_modules/Audioplayer/downloadSongHandling')
 
 module.exports.help = {
   name: 'extract_audio',
@@ -22,6 +23,11 @@ module.exports.slashBuilder = new SlashCommandBuilder()
       .setRequired(true)
   )
 
-module.exports.run = async (client, message, args) => {
-  await AudioPlayer.extractAudioToMessage(message, args)
+module.exports.run = async ({ interaction }) => {
+  const song = await searchSong(interaction.options.getString('request'))
+  if (song === undefined) {
+    await interaction.reply({ content: `${interaction.user.username} я не смог ничего найти` })
+    return
+  }
+  await AudioPlayer.discordGui.extractAudioToMessage(interaction, song)
 }

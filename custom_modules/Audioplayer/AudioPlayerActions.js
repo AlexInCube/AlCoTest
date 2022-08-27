@@ -1,8 +1,4 @@
-const fs = require('fs')
-const ytdl = require('ytdl-core')
 const voice = require('@discordjs/voice')
-const { Song } = require('distube')
-const { getData } = require('spotify-url-info')
 const { checkMemberInVoiceWithBotAndReply, checkMemberInVoiceWithReply } = require('../../utilities/checkMemberInVoiceWithBot')
 const { clamp } = require('../../utilities/clamp')
 const { PLAYER_FIELDS } = require('./AudioPlayerEnums')
@@ -46,53 +42,25 @@ class AudioPlayerActions {
       userSearch = request
     }
 
+    interaction.reply({ content: 'Обработка запроса' })
+
     const txtChannel = this.client.channels.cache.get(interaction.channelId)
     await this.distube.play(interaction.member.voice.channel, userSearch, {
       member: interaction.member,
       textChannel: txtChannel
     })
-  }
 
-  /**
-   * Скачивает на хостинг выбранную песню и отправляет её в чат Discord`a
-   * @param song
-   * @param message
-   * @param username
-   */
-  async downloadSong (song, message, username) {
-    try {
-      if (song.isLive) {
-        await message.channel.send({ content: `${username} это прямая трансляция, её нельзя скачать!` })
-        return
-      }
-
-      const fileName = `${song.name.replaceAll(/[&/\\#,+()$~%.'":*?<>|{}]/g, '')}.mp3`
-      const filePath = await fs.createWriteStream(fileName)
-      ytdl(song.url, { filter: 'audioonly', format: 'mp3', quality: 'lowestaudio' }).on('end', async () => {
-        await fs.rename(filePath.path, fileName, err => { if (err) throw err })
-        const stats = fs.statSync(fileName)
-        if (stats.size >= 8388608) {
-          await message.channel.send({ content: `${username} я не могу отправить файл, так как он весит больше чем 8мб.` })
-        } else {
-          await message.channel.send({ content: `${username} я смог извлечь звук`, files: [fileName] })
-        }
-
-        fs.unlink(fileName, err => { if (err) throw err })
-      }).pipe(filePath)
-    } catch (e) {
-      await message.channel.send({ content: `${username} произошла ошибка, попробуйте ещё раз` })
-    }
+    interaction.deleteReply()
   }
 
   /**
    * Пропускает текущую проигрываемую песню
-   * @param guild
+   * @param queue
    */
-  async skipSong (guild) {
-    const queue = this.distube.getQueue(guild)
+  async skipSong (queue) {
     if (queue.songs.length > 1) {
-      await this.distube.skip(guild)
-      await this.resume(guild)
+      await this.distube.skip(queue)
+      await this.resume(queue.guild)
     }
   }
 
@@ -152,7 +120,11 @@ class AudioPlayerActions {
    * @param guild
    */
   async resume (guild) {
-    await this.distube.resume(guild)
+    try {
+      await this.distube.resume(guild)
+    } catch (e) {
+
+    }
   }
 
   /**
@@ -165,49 +137,6 @@ class AudioPlayerActions {
       await vc.destroy()
     }
     await this.playerEmitter.emit('destroyPlayer', guild)
-  }
-
-  /**
-   * Ищет и отправляет аудиофайл в чат
-   * @param message
-   * @param queryArgs
-   */
-  async extractAudioToMessage (message, queryArgs) {
-    const url = queryArgs[0]
-    if (!url) { message.reply('А ссылку указать? Мне что самому надо придумать что тебе надо?') }
-    let songData
-    let searchQuery = ''
-
-    const botMessage = await message.channel.send({ content: `${message.author} ожидайте...` })
-
-    if (url.startsWith('https://www.youtube.com')) {
-      songData = new Song(await ytdl.getBasicInfo(url))
-      await this.downloadSong(songData, message, message.author.username)
-      return
-    }
-
-    if (url.startsWith('https://open.spotify.com')) {
-      await getData(url).then(data => {
-        searchQuery = data.name
-      })
-    } else {
-      queryArgs.forEach((item) => {
-        searchQuery += `${item} `
-      })
-    }
-
-    searchQuery.slice(0, -1)
-
-    try {
-      songData = await this.distube.search(searchQuery, { limit: 1, type: 'video' }).then(function (result) {
-        return result[0]
-      })
-    } catch (e) {
-      await botMessage.edit({ content: `${message.author} я не смог ничего найти` })
-      return
-    }
-
-    await this.downloadSong(songData, message, message.author.username)
   }
 
   /**
