@@ -14,6 +14,7 @@ module.exports.slashBuilder = new SlashCommandBuilder()
   .setDescription(module.exports.help.description)
 
 module.exports.run = async ({ interaction }) => {
+  if (!await AudioPlayer.playerIsExists(interaction)) return
   if (!await checkMemberInVoiceWithBotAndReply(interaction.member, interaction)) return
-  await AudioPlayer.getCurrentPlayingMessage(message)
+  await AudioPlayer.getCurrentPlayingMessage(interaction)
 }

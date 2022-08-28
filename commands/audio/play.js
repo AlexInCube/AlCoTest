@@ -45,13 +45,21 @@ module.exports.slashBuilder = new SlashCommandBuilder()
 
 module.exports.autocomplete = async ({ interaction }) => {
   const focusedValue = interaction.options.getFocused()
+
   let finalResult = []
-  if (focusedValue && !isValidURL(focusedValue)) {
+  if (focusedValue && !isValidURL(focusedValue)) { // Если есть хоть какое-т значение и результат поиска не ссылка
     const choices = await AudioPlayer.distube.search(focusedValue, { limit: 10, type: 'video', safeSearch: false })
-    finalResult = choices.map(choice => ({
-      name: `${choice.formattedDuration} | ${truncateString(choice.uploader.name, 20)} | ${truncateString(choice.name, 70)}`,
-      value: choice.url
-    }))
+    // Превращаем результаты поиска в подсказки
+    finalResult = choices.map(function (choice) {
+      // Длина подсказки максимум 100 символов, поэтому пытаемся эффективно использовать это пространство
+      let choiceString = `${choice.formattedDuration} | ${truncateString(choice.uploader.name, 20)} | `
+      // Название видео пытается занять максимум символов, в то время как имя канала/автора может быть длиной только в 20 символов
+      choiceString += truncateString(choice.name, 100 - choiceString.length)
+      return {
+        name: choiceString,
+        value: choice.url
+      }
+    })
   }
   await interaction.respond(finalResult)
 }

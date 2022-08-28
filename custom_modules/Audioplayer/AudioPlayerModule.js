@@ -2,7 +2,7 @@ const DisTubeLib = require('distube')
 const { SpotifyPlugin } = require('@distube/spotify')
 const { YtDlpPlugin } = require('@distube/yt-dlp')
 const { SoundCloudPlugin } = require('@distube/soundcloud')
-const { MessageEmbed } = require('discord.js')
+const { EmbedBuilder } = require('discord.js')
 const { filledBar } = require('string-progressbar')
 const { DiscordGui } = require('./AudioPlayerDiscordGui')
 const { AudioPlayerActions } = require('./AudioPlayerActions')
@@ -75,6 +75,12 @@ class AudioPlayerModule {
       .on('playerPause', async (guild) => {
         await this.actions.pause(guild)
       })
+      .on('requestSwitchRepeatMode', async (guild) => {
+        await this.actions.changeRepeatMode(guild)
+      })
+      .on('queueJump', async (guild, queuePosition) => {
+        await this.actions.jump(guild, queuePosition)
+      })
   }
 
   /**
@@ -84,6 +90,14 @@ class AudioPlayerModule {
    */
   getQueue (guild) {
     return this.distube.getQueue(guild)
+  }
+
+  async playerIsExists (interaction) {
+    if (this.getQueue(interaction.guild) === undefined) {
+      await interaction.reply({ content: 'Плеера не существует', ephemeral: true })
+      return false
+    }
+    return true
   }
 
   /**
@@ -103,24 +117,20 @@ class AudioPlayerModule {
 
   /**
    * Отправляет в чат текущую проигрываемую песню и позицию времени
-   * @param message
+   * @param interaction
    */
-  async getCurrentPlayingMessage (message) {
-    const queue = this.getQueue(message.guild)
-
-    if (!queue) { message.channel.send('Очереди не существует'); return }
+  async getCurrentPlayingMessage (interaction) {
+    const queue = this.getQueue(interaction.guild)
 
     const progressBar = filledBar(queue.duration, queue.currentTime, 40, '-', '=')
     const durationString = queue.formattedCurrentTime + ` ${progressBar[0]} ` + queue.formattedDuration
 
-    const playingEmbed = new MessageEmbed()
+    const playingEmbed = new EmbedBuilder()
       .setTitle(queue.songs[0].name)
       .setURL(queue.songs[0].url)
       .setDescription(durationString)
 
-    await message.channel.send({ embeds: [playingEmbed], ephemeral: true })
-
-    await message.delete()
+    await interaction.reply({ embeds: [playingEmbed], ephemeral: true })
   }
 }
 

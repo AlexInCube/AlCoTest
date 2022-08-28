@@ -1,7 +1,6 @@
 const voice = require('@discordjs/voice')
 const { checkMemberInVoiceWithBotAndReply, checkMemberInVoiceWithReply } = require('../../utilities/checkMemberInVoiceWithBot')
 const { clamp } = require('../../utilities/clamp')
-const { PLAYER_FIELDS } = require('./AudioPlayerEnums')
 const { getVoiceConnection } = require('@discordjs/voice')
 
 class AudioPlayerActions {
@@ -66,32 +65,26 @@ class AudioPlayerActions {
 
   /**
    * Меняет режим повтора очереди (Выключен, Песня, Вся очередь), вызывает событие repeatChanged у distube
-   * @param message
+   * @param guild
    */
-  async changeRepeatMode (message) {
-    const queue = this.distube.getQueue(message)
+  async changeRepeatMode (guild) {
+    const queue = this.distube.getQueue(guild)
     if (queue) {
       const repeat = queue.repeatMode
-      let mode
       switch (repeat) {
         case 0:
           queue.setRepeatMode(1)
-          mode = 'Песня'
           break
         case 1:
           queue.setRepeatMode(2)
-          mode = 'Очередь'
           break
         case 2:
           queue.setRepeatMode(0)
-          mode = 'Выключен'
           break
       }
-      this.playerEmitter.emit('repeatChanged', queue)
-
-      this.editField(message.guild.id, PLAYER_FIELDS.repeat_mode, mode)
-      await message.edit({ embeds: [this.musicPlayerMap[message.guild.id].PlayerEmbed] })
     }
+
+    this.playerEmitter.emit('switchRepeatMode', guild, queue.repeatMode)
   }
 
   /**
@@ -143,27 +136,14 @@ class AudioPlayerActions {
    * Перемотка сразу на выбранную песню в очереди
    * @param guild
    * @param queuePosition
-   * @param queryMessage
-   * @param username
    */
-  async jump (guild, queuePosition, queryMessage = null, username = null) {
-    const queue = this.getQueue(guild)
-
-    if (!queue) { await queryMessage?.reply('Никакой очереди не существует'); return }
-    if (isNaN(queuePosition)) { await queryMessage?.reply('Это не число'); return }
-
-    const messageWithPlayer = await this.getPlayerMessageInGuild(guild)
-    await this.resume(messageWithPlayer)
+  async jump (guild, queuePosition) {
+    const queue = this.distube.getQueue(guild)
+    await this.resume(guild)
 
     queuePosition = clamp(parseInt(queuePosition), 0 - queue.previousSongs.length, queue.songs.length - 1)
     try {
       await this.distube.jump(guild, queuePosition)
-      if (username) {
-        await this.getPlayerMessageInGuild(guild).then(async (playerMessage) => {
-          if (queuePosition >= 1) { await playerMessage.reply(`${username} совершил прыжок в очереди, пропустив предыдущие песни`); return }
-          if (queuePosition <= 0) { await playerMessage.reply(`${username} совершил прыжок в очереди, вернувшись назад на проигранные песни`) }
-        })
-      }
     } catch (e) {
 
     }

@@ -21,7 +21,7 @@ class AudioPlayerDiscordGui {
         if (!this.musicPlayerMap[musicQueue.textChannel.guildId]) return
         await this.restorePlayerMessage(musicQueue.textChannel.guild, musicQueue)
         await this.updateEmbedWithSong(musicQueue, song)
-        await this.pushChangesToPlayerMessage(musicQueue.textChannel.guildId, musicQueue)
+        await this.pushChangesToPlayerMessage(musicQueue.textChannel.guild)
       })
       .on('addSong', async (musicQueue, song) => {
         await musicQueue.textChannel.send({
@@ -29,7 +29,7 @@ class AudioPlayerDiscordGui {
         })
         await this.restorePlayerMessage(musicQueue.textChannel.guild, musicQueue)
         await this.updateEmbedWithSong(musicQueue, musicQueue.songs[0])
-        await this.pushChangesToPlayerMessage(musicQueue.textChannel.guildId, musicQueue)
+        await this.pushChangesToPlayerMessage(musicQueue.textChannel.guild)
       })
       .on('addList', async (musicQueue, playlist) => {
         musicQueue.textChannel.send({
@@ -38,7 +38,7 @@ class AudioPlayerDiscordGui {
         })
         await this.restorePlayerMessage(musicQueue.textChannel.guild, musicQueue)
         await this.updateEmbedWithSong(musicQueue, musicQueue.songs[0])
-        await this.pushChangesToPlayerMessage(musicQueue.textChannel.guildId, musicQueue)
+        await this.pushChangesToPlayerMessage(musicQueue.textChannel.guild)
       })
       /*
       .on('finishSong', async musicQueue => {
@@ -80,6 +80,32 @@ class AudioPlayerDiscordGui {
         const messageWithPlayer = await this.getPlayerMessageInGuild(guild)
         await this.setPlayerEmbedState(messageWithPlayer.guild.id, PLAYER_STATES.paused)
         await messageWithPlayer.edit({ embeds: [this.musicPlayerMap[messageWithPlayer.guild.id].PlayerEmbed] })
+      })
+      .on('switchRepeatMode', async (guild, repeatMode) => {
+        const messageWithPlayer = await this.getPlayerMessageInGuild(guild)
+        let modeString
+        switch (repeatMode) {
+          case 0:
+            modeString = 'Песня'
+            break
+          case 1:
+            modeString = 'Очередь'
+            break
+          case 2:
+            modeString = 'Выключен'
+            break
+        }
+        this.editField(guild.id, PLAYER_FIELDS.repeat_mode, modeString)
+        await messageWithPlayer.edit({ embeds: [this.musicPlayerMap[guild.id].PlayerEmbed] })
+        await this.pushChangesToPlayerMessage(guild)
+      })
+      .on('queueJump', async (guild, position, username) => {
+        if (username) {
+          await this.getPlayerMessageInGuild(guild).then(async (playerMessage) => {
+            if (position >= 1) { await playerMessage.reply(`${username} совершил прыжок в очереди, пропустив предыдущие песни`); return }
+            if (position <= 0) { await playerMessage.reply(`${username} совершил прыжок в очереди, вернувшись назад на проигранные песни`) }
+          })
+        }
       })
   }
 
@@ -157,7 +183,7 @@ class AudioPlayerDiscordGui {
         }
 
         if (button.customId === 'toggle_repeat') {
-          await this.changeRepeatMode(button.message)
+          this.playerEmitter.emit('requestSwitchRepeatMode', button.guild)
           await button.deferUpdate()
 
           return
@@ -247,19 +273,19 @@ class AudioPlayerDiscordGui {
 
   /**
    * Применяет все изменения сделанные с полями плеера к сообщению в Discord
-   * @param guildID
-   * @param musicQueue
    * @returns {Promise<void>}
+   * @param guild
    */
-  async pushChangesToPlayerMessage (guildID, musicQueue) {
+  async pushChangesToPlayerMessage (guild) {
+    const musicQueue = this.distube.getQueue(guild)
     try {
       let message
       const channel = await musicQueue.textChannel
       if (channel) {
-        message = await channel.messages.cache.get(this.musicPlayerMap[guildID].MessageID)
+        message = await channel.messages.cache.get(this.musicPlayerMap[guild.id].MessageID)
       }
       if (message) {
-        await message.edit({ embeds: [this.musicPlayerMap[guildID].PlayerEmbed] })
+        await message.edit({ embeds: [this.musicPlayerMap[guild.id].PlayerEmbed] })
       }
     } catch (e) {
       loggerSend(e)

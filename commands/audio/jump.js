@@ -22,9 +22,10 @@ module.exports.slashBuilder = new SlashCommandBuilder()
       .setRequired(true)
   )
 
-module.exports.run = async ({ client, interaction }) => {
+module.exports.run = async ({ interaction }) => {
+  if (!await AudioPlayer.playerIsExists(interaction)) return
   if (!await checkMemberInVoiceWithBotAndReply(interaction.member, interaction)) return
-  let pos = parseInt(args[0])
-  if (pos > 0) { pos-- }
-  await AudioPlayer.jump(message.guild, pos, message, message.author.username)
+  let pos = interaction.options.getNumber('position')
+  if (pos > 1) { pos-- } else if (pos < -1) { pos++ }
+  await AudioPlayer.playerEmitter.emit('queueJump', interaction.guild, pos, interaction.member.user.username)
 }

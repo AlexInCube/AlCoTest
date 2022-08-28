@@ -13,7 +13,7 @@ module.exports.slashBuilder = new SlashCommandBuilder()
   .setDescription(module.exports.help.description)
 
 module.exports.run = async ({ client, interaction }) => {
-  if (!await AudioPlayer.checkMemberInVoiceWithBotAndReply(interaction.member, interaction)) return
-  await AudioPlayer.stop(client.guilds.cache.get(interaction.guildId))
+  if (!await AudioPlayer.playerIsExists(interaction)) return
+  await AudioPlayer.actions.stop(client.guilds.cache.get(interaction.guildId))
   await interaction.reply({ content: `${interaction.user.username} выключил плеер` })
 }
