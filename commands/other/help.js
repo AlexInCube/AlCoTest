@@ -17,14 +17,27 @@ module.exports.slashBuilder = new SlashCommandBuilder()
       })
       .setDescription('Подробности об указанной команде')
       .setRequired(false)
+      .setAutocomplete(true)
   )
 
+module.exports.autocomplete = async ({ client, interaction }) => {
+  // Превращаем результаты поиска в подсказки
+  const finalResult = [...client.commands.executable].map(function (command) {
+    return {
+      name: command[0],
+      value: command[0]
+    }
+  })
+
+  await interaction.respond(finalResult)
+}
+
 module.exports.run = async ({ client, interaction, guild }) => {
-  const commandName = interaction.options.get('command')?.value
-  if (commandName === undefined) { // Если конкретная команда не указана, то выводим список
-    await replyCommandsList()
-  } else { // Если указана конкретная команда
+  const commandName = interaction.options.getString('command')
+  if (commandName) { // Если конкретная команда не указана, то выводим список
     await replySpecificCommand()
+  } else { // Если указана конкретная команда
+    await replyCommandsList()
   }
 
   async function replyCommandsList () {

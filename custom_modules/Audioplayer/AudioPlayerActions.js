@@ -162,13 +162,11 @@ class AudioPlayerActions {
   /**
    * Перемешать все песни в очереди, при этом текущая проигрываемая песня перемешиваться не будет.
    * @param message
-   * @param username
    */
-  async shuffle (message, username) {
+  async shuffle (message) {
     const queue = this.distube.getQueue(message)
     if (queue) {
       await this.distube.shuffle(queue)
-      this.playerEmitter.emit('queueShuffle', queue, username)
     }
   }
 
@@ -181,16 +179,15 @@ class AudioPlayerActions {
   async deleteSongFromQueue (guild, position, username) {
     const queue = this.distube.getQueue(guild)
     if (!queue) return
-    position = clamp(parseInt(position), 0 - queue.previousSongs.length, queue.songs.length - 1)
-    if (position === 0) {
-      await this.playerEmitter.emit('songSkipped', guild, username)
-    } else if (position > 0) {
+    position = clamp(position, 0 - queue.previousSongs.length, queue.songs.length - 1)
+    if (position > 0) {
+      this.playerEmitter.emit('queueDeleteSong', guild, queue.songs[position], username)
       queue.songs.splice(position, 1)
     } else if (position < 0) {
       position = queue.previousSongs.length - Math.abs(position)
+      this.playerEmitter.emit('queueDeleteSong', guild, queue.previousSongs[position], username)
       queue.previousSongs.splice(position, 1)
     }
-    this.playerEmitter.emit('songDeleted', queue, position, username)
   }
 
   /**

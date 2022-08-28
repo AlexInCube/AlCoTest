@@ -17,5 +17,9 @@ module.exports.run = async ({ client, interaction }) => {
   if (!await AudioPlayer.playerIsExists(interaction)) return
   if (!await checkMemberInVoiceWithBotAndReply(interaction.member, interaction)) return
   client.guilds.cache.get(interaction.guildId)
-  await AudioPlayer.actions.shuffle(message, message.author.username)
+  interaction.reply({ content: 'Обработка запроса' })
+
+  await AudioPlayer.playerEmitter.emit('queueShuffle', interaction.guild, interaction.user.username)
+
+  interaction.deleteReply()
 }

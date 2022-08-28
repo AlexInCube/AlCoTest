@@ -56,8 +56,9 @@ class AudioPlayerDiscordGui {
       .on('songSkipped', async (queue, username) => {
         queue.textChannel.send({ content: `${username} пропустил песню ${queue.songs[0].name} - ${queue.songs[0].uploader.name}` })
       })
-      .on('queueShuffle', async (queue, username) => {
-        queue.textChannel.send(`${username} перемешал все песни`)
+      .on('queueShuffle', async (guild, username) => {
+        const messageWithPlayer = await this.getPlayerMessageInGuild(guild)
+        await messageWithPlayer.channel.send(`${username} перемешал все песни`)
       })
       .on('songDeleted', async (queue, position, username) => {
         const messageWithPlayer = await this.getPlayerMessageInGuild(queue.textChannel.guild)
@@ -102,8 +103,15 @@ class AudioPlayerDiscordGui {
       .on('queueJump', async (guild, position, username) => {
         if (username) {
           await this.getPlayerMessageInGuild(guild).then(async (playerMessage) => {
-            if (position >= 1) { await playerMessage.reply(`${username} совершил прыжок в очереди, пропустив предыдущие песни`); return }
-            if (position <= 0) { await playerMessage.reply(`${username} совершил прыжок в очереди, вернувшись назад на проигранные песни`) }
+            if (position >= 1) { await playerMessage.channel.send(`${username} совершил прыжок в очереди, пропустив предыдущие песни`); return }
+            if (position <= 0) { await playerMessage.channel.send(`${username} совершил прыжок в очереди, вернувшись назад на проигранные песни`) }
+          })
+        }
+      })
+      .on('queueDeleteSong', async (guild, song, username) => {
+        if (username) {
+          await this.getPlayerMessageInGuild(guild).then(async (playerMessage) => {
+            playerMessage.channel.send({ content: `${username} УДАЛИЛ из очереди песню ${song.name} - ${song.uploader.name}` })
           })
         }
       })

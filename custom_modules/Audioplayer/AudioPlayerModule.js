@@ -81,12 +81,18 @@ class AudioPlayerModule {
       .on('queueJump', async (guild, queuePosition) => {
         await this.actions.jump(guild, queuePosition)
       })
+      .on('requestDeleteSong', async (guild, queuePosition, username) => {
+        await this.actions.deleteSongFromQueue(guild, queuePosition, username)
+      })
+      .on('queueShuffle', async (guild) => {
+        await this.actions.shuffle(guild)
+      })
   }
 
   /**
    * Получение текущей очереди на сервере
    * @param guild
-   * @returns {Queue}
+   * @returns Queue
    */
   getQueue (guild) {
     return this.distube.getQueue(guild)

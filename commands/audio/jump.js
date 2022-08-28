@@ -27,5 +27,9 @@ module.exports.run = async ({ interaction }) => {
   if (!await checkMemberInVoiceWithBotAndReply(interaction.member, interaction)) return
   let pos = interaction.options.getNumber('position')
   if (pos > 1) { pos-- } else if (pos < -1) { pos++ }
+  interaction.reply({ content: 'Обработка запроса' })
+
   await AudioPlayer.playerEmitter.emit('queueJump', interaction.guild, pos, interaction.member.user.username)
+
+  interaction.deleteReply()
 }

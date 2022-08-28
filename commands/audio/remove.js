@@ -23,8 +23,13 @@ module.exports.slashBuilder = new SlashCommandBuilder()
       .setRequired(true)
   )
 
-module.exports.run = async ({ interaction, guild }) => {
+module.exports.run = async ({ interaction }) => {
   if (!await AudioPlayer.playerIsExists(interaction)) return
   if (!await checkMemberInVoiceWithBotAndReply(interaction.member, interaction)) return
-  await AudioPlayer.actions.deleteSongFromQueue(guild, interaction.options.get('position').value - 1, interaction.user.username)
+  interaction.reply({ content: 'Обработка запроса' })
+
+  const pos = interaction.options.getNumber('position') - 1
+  await AudioPlayer.playerEmitter.emit('requestDeleteSong', interaction.guild, pos, interaction.member.user.username)
+
+  interaction.deleteReply()
 }
