@@ -1,8 +1,18 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js')
-const { PLAYER_FIELDS, PLAYER_STATES } = require('./AudioPlayerEnums')
+const { PLAYER_STATES } = require('./AudioPlayerEnums')
 const { checkMemberInVoiceWithBotAndReply } = require('../../utilities/checkMemberInVoiceWithBot')
 const { loggerSend } = require('../../utilities/logger')
 const { downloadSong, deleteSongFile } = require('./downloadSongHandling')
+
+const PLAYER_FIELDS = {
+  author: 0,
+  duration: 1,
+  queue_duration: 2,
+  next_song: 3,
+  remaining_songs: 4,
+  repeat_mode: 5,
+  requester: 6
+}
 
 class AudioPlayerDiscordGui {
   constructor (musicPlayerMap, distube, playerEmitter, client) {
@@ -317,6 +327,7 @@ class AudioPlayerDiscordGui {
     }
     this.editField(guild, PLAYER_FIELDS.queue_duration, queue.formattedDuration)
     this.editField(guild, PLAYER_FIELDS.remaining_songs, (queue.songs.length - 1).toString())
+    this.editField(guild, PLAYER_FIELDS.next_song, queue.songs[1]?.name || 'Дальше пусто')
     await this.musicPlayerMap[guild].PlayerEmbed.setThumbnail(song.thumbnail).setTitle(song.name).setURL(song.url)
   }
 
@@ -331,6 +342,7 @@ class AudioPlayerDiscordGui {
         { name: 'Автор', value: 'Неизвестно' },
         { name: 'Длительность песни', value: 'Неизвестно', inline: false },
         { name: 'Оставшаяся длительность очереди', value: 'Неизвестно', inline: false },
+        { name: 'Следующая песня', value: 'Дальше пусто', inline: false },
         { name: 'Осталось песен в очереди', value: 'Неизвестно', inline: true },
         { name: 'Режим повтора', value: 'Выключен', inline: true },
         { name: 'Эту песню запросил', value: 'Неизвестно', inline: true }

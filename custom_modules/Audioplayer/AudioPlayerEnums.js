@@ -4,13 +4,4 @@ const PLAYER_STATES = {
   paused: 2
 }
 
-const PLAYER_FIELDS = {
-  author: 0,
-  duration: 1,
-  queue_duration: 2,
-  remaining_songs: 3,
-  repeat_mode: 4,
-  requester: 5
-}
-
-module.exports = { PLAYER_FIELDS, PLAYER_STATES }
+module.exports = { PLAYER_STATES }
