@@ -4,7 +4,7 @@ function CheckBotPermissions (client, interaction, permissionsRequired) {
   const bot = guild.members.cache.get(client.user.id)
   const permissionProvided = bot.permissions.has(permissionsRequired)
   if (!permissionProvided) {
-    if (bot.permissions.has(PermissionsBitField.FLAGS.SendMessages)) {
+    if (bot.permissions.has(PermissionsBitField.Flags.SendMessages)) {
       interaction.reply('У БОТА недостаточно прав, напишите /help (название команды), чтобы увидеть недостающие права. А также попросите администрацию сервера их выдать.')
     }
   }
