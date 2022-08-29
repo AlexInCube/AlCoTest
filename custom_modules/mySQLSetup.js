@@ -1,5 +1,5 @@
-const { getCurrentTimestamp, loggerSend } = require('./tools')
 const mysql = require('mysql2')
+const { getCurrentTimestamp, loggerSend } = require('../utilities/logger')
 
 const options = {
   host: process.env.BOT_MYSQL_IP,

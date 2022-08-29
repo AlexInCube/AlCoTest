@@ -1,32 +1,36 @@
-const { Permissions } = require('discord.js')
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js')
 const { setupUserData } = require('../../custom_modules/mySQLSetup')
 module.exports.help = {
   name: 'slot',
   group: 'fun',
   description: 'Автомат "Однорукий бандит", это такой рандом, что только бог знает как тут победить. ',
-  bot_permissions: [Permissions.FLAGS.SEND_MESSAGES]
+  bot_permissions: [PermissionsBitField.Flags.SendMessages]
 }
 
-module.exports.run = async (client, message) => {
+module.exports.slashBuilder = new SlashCommandBuilder()
+  .setName(module.exports.help.name)
+  .setDescription(module.exports.help.description)
+
+module.exports.run = async ({ interaction }) => {
   const a = randomItem()
   const b = randomItem()
   const c = randomItem()
-  const username = message.author.username
+  const username = interaction.user.username
   const randomResult = `${a} ${b} ${c}` + ''
-  const userId = message.author.id
+  const userId = interaction.user.id
   await setupUserData(userId, 'slot_stats')
   let win = 0
   let jackpot = 0
 
   if ((a === b) && (a === c) && (b === c)) {
-    message.reply(`${randomResult} ${username} ВЫИГРАЛ ДЖЕКПОТ, ЭТО ВООБЩЕ ЗАКОННО?`)
+    interaction.reply(`${randomResult} ${username} ВЫИГРАЛ ДЖЕКПОТ, ЭТО ВООБЩЕ ЗАКОННО?`)
     win = 1
     jackpot = 1
   } else if ((a === b) || (a === c) || (b === c)) {
-    message.reply(`${randomResult} ${username} выбил 2 совпадения.`)
+    interaction.reply(`${randomResult} ${username} выбил 2 совпадения.`)
     win = 1
   } else {
-    message.channel.send(`${randomResult} ${username} лох, он ничего не выбил.`)
+    interaction.reply(`${randomResult} ${username} лох, он ничего не выбил.`)
   }
 
   const query = `UPDATE slot_stats SET total_games = total_games+1, total_wins = total_wins+${win}, jackpots = jackpots+${jackpot} WHERE user_id = ${userId}`
@@ -37,6 +41,6 @@ module.exports.run = async (client, message) => {
 }
 
 function randomItem () {
-  const emojis = ['🍎', '🍊', '🍐', '🍋', '🍉', '🍇', '🍓', '🍒', '❤', '🚑', '💎', '🎮', '🎅']
+  const emojis = ['👻', '🐱', '🐷', '🐻', '😈', '🐔', '🍓', '🍒', '🐨', '🚑', '💎', '🎮', '💩']
   return emojis[Math.floor(Math.random() * emojis.length)]
 }

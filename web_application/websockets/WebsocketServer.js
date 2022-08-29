@@ -1,6 +1,6 @@
-const { loggerSend } = require('../../custom_modules/tools')
 const { wrap, sessionMiddleware } = require('../express/routes/auth')
 const { AudioPlayerSocketHandler } = require('./AudioPlayerSocketHandler')
+const { loggerSend } = require('../../utilities/logger')
 
 module.exports.WebsocketRun = () => {
   const PORT = process.env.BOT_SOCKET_IO_PORT

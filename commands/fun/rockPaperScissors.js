@@ -1,22 +1,34 @@
-const { MessageActionRow, MessageButton, Permissions } = require('discord.js')
+const { PermissionsBitField, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js')
 const { setupUserData } = require('../../custom_modules/mySQLSetup')
-const Discord = module.require('discord.js')
 
 module.exports.help = {
   name: 'rps',
   group: 'fun',
-  arguments: '(@имя_соперника)',
+  arguments: '(пользователь с сервера)',
   description: 'Киньте вызов в "Камень, Ножницы, Бумага!" против любого человека и уничтожьте своего врага!',
-  bot_permissions: [Permissions.FLAGS.SEND_MESSAGES]
+  bot_permissions: [PermissionsBitField.Flags.SendMessages]
 }
 
-module.exports.run = async (client, message) => {
-  const userAttacker = message.author
-  const userDefender = message.mentions.users.first()
+module.exports.slashBuilder = new SlashCommandBuilder()
+  .setName(module.exports.help.name)
+  .setDescription('Киньте вызов в "Камень, Ножницы, Бумага!" против любого человека и уничтожьте своего врага!')
+  .addUserOption(option =>
+    option
+      .setName('user')
+      .setNameLocalizations({
+        ru: 'пользователь'
+      })
+      .setDescription('Пользователь которому нужно кинуть вызов')
+      .setRequired(true)
+  )
 
-  if (!userDefender) { message.reply('Я не понял кого ты вызвал'); return }
-  if (userDefender.bot) { message.reply('С роботами играть нельзя, они тебе просто никогда не ответят, найди себе друзей.'); return }
-  if (userAttacker.id === userDefender.id) { message.reply('Нельзя кинуть вызов самому себе'); return }
+module.exports.run = async ({ client, interaction, channel, guild }) => {
+  const userAttacker = interaction.member.user
+  const userDefender = client.users.cache.get(interaction.options.get('user').value)
+
+  if (!userDefender) { interaction.reply({ content: 'Я не понял кого ты вызвал', ephemeral: true }); return }
+  if (userDefender.bot) { interaction.reply({ content: 'С роботами играть нельзя, они тебе просто никогда не ответят, найди себе друзей.', ephemeral: true }); return }
+  if (userAttacker.id === userDefender.id) { interaction.reply({ content: 'Нельзя кинуть вызов самому себе', ephemeral: true }); return }
 
   const items = {
     rock: '🗿',
@@ -24,25 +36,25 @@ module.exports.run = async (client, message) => {
     paper: '🧻'
   }
 
-  const duelEmbed = new Discord.MessageEmbed()
+  const duelEmbed = new EmbedBuilder()
     .setColor('#ffffff')
     .setTitle(`${userAttacker.username} кинул вызов ${userDefender.username}`)
     .setDescription('Выбирай оружие и жди оппонента, на ответ даётся 10 секунд.')
 
-  const duelButtons = new MessageActionRow()
+  const duelButtons = new ActionRowBuilder()
     .addComponents(
-      new MessageButton().setCustomId('rock').setLabel(items.rock + 'Камень').setStyle('PRIMARY'),
-      new MessageButton().setCustomId('paper').setLabel(items.paper + 'Бумага').setStyle('PRIMARY'),
-      new MessageButton().setCustomId('scissors').setLabel(items.scissors + 'Ножницы').setStyle('PRIMARY')
+      new ButtonBuilder().setCustomId('rock').setLabel(items.rock + 'Камень').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('paper').setLabel(items.paper + 'Бумага').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('scissors').setLabel(items.scissors + 'Ножницы').setStyle(ButtonStyle.Primary)
     )
 
-  const duelMessage = await message.channel.send({ embeds: [duelEmbed], components: [duelButtons] }) // Отправляем сообщение с плеером
+  await interaction.reply({ embeds: [duelEmbed], components: [duelButtons] })
 
   let attackerChoice, defenderChoice
 
   const filter = i => i.customId
 
-  const collector = message.channel.createMessageComponentCollector({ filter, time: 10000 })
+  const collector = channel.createMessageComponentCollector({ filter, time: 10000 })
 
   collector.on('collect', async i => {
     if (i.user.id !== userAttacker.id && i.user.id !== userDefender.id) {
@@ -51,31 +63,22 @@ module.exports.run = async (client, message) => {
     }
 
     if (i.customId === 'rock') {
-      if (i.user.id === userAttacker.id) { attackerChoice = items.rock }
-      if (i.user.id === userDefender.id) { defenderChoice = items.rock }
-
-      await i.reply({ content: `Вы выбрали ${items.rock}`, ephemeral: true })
+      await setItem(i, items.rock)
     }
 
     if (i.customId === 'paper') {
-      if (i.user.id === userAttacker.id) { attackerChoice = items.paper }
-      if (i.user.id === userDefender.id) { defenderChoice = items.paper }
-
-      await i.reply({ content: `Вы выбрали ${items.paper}`, ephemeral: true })
+      await setItem(i, items.paper)
     }
 
     if (i.customId === 'scissors') {
-      if (i.user.id === userAttacker.id) { attackerChoice = items.scissors }
-      if (i.user.id === userDefender.id) { defenderChoice = items.scissors }
-
-      await i.reply({ content: `Вы выбрали ${items.scissors}`, ephemeral: true })
+      await setItem(i, items.scissors)
     }
 
     if (attackerChoice !== undefined && defenderChoice !== undefined) {
       await setupUserData(userAttacker.id, 'rps_stats')
       await setupUserData(userDefender.id, 'rps_stats')
 
-      const resultEmbed = new Discord.MessageEmbed()// Создаём сообщение с плеером
+      const resultEmbed = new EmbedBuilder()// Создаём сообщение с плеером
         .setColor('#49f743')
 
       let attackerQuery = ''; let defenderQuery = ''
@@ -105,7 +108,8 @@ module.exports.run = async (client, message) => {
         if (err) throw err
       })
 
-      await message.channel.send({
+      const channel = client.channels.cache.get(interaction.channelId)
+      await channel.send({
         embeds: [resultEmbed.addFields(
           { name: `Выбор ${userAttacker.username}`, value: attackerChoice, inline: true },
           { name: `Выбор ${userDefender.username}`, value: defenderChoice, inline: true }
@@ -117,9 +121,15 @@ module.exports.run = async (client, message) => {
   })
 
   collector.on('end', async (i, reason) => {
-    duelMessage.delete()
-    if (reason && reason !== 'winner_decided') { await message.reply('Дуэль не состоялась, время истекло') }
+    if (reason && reason !== 'winner_decided') { await interaction.deleteReply(); await channel.send('Дуэль не состоялась, время истекло') }
   })
+
+  async function setItem (buttonInteraction, item) {
+    if (buttonInteraction.user.id === userAttacker.id) { attackerChoice = item }
+    if (buttonInteraction.user.id === userDefender.id) { defenderChoice = item }
+
+    await buttonInteraction.reply({ content: `Вы выбрали ${items.scissors}`, ephemeral: true })
+  }
 
   function getResult (attackChoice, defenderChoice) {
     if (attackChoice === items.rock && defenderChoice === items.scissors) {

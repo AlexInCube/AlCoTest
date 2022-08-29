@@ -1,32 +1,46 @@
-const { Permissions } = require('discord.js')
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js')
 
 module.exports.help = {
   name: 'roll',
   group: 'fun',
-  arguments: '[максимальное/минимальное число] [максимальное число]',
+  arguments: 'минимальное число, максимальное число',
   description: 'Выбирается случайное число из указанного диапазона, по умолчанию число 100',
-  bot_permissions: [Permissions.FLAGS.SEND_MESSAGES]
+  bot_permissions: [PermissionsBitField.Flags.SendMessages]
 }
 
-module.exports.run = async (client, message, args) => {
-  let rollContent = 'Ошибка, хрен пойми какая.'
-  switch (args.length) {
-    case 0:
-      rollContent = Math.ceil(Math.random() * 100)
-      break
-    case 1:
-      args[0] = parseInt(args[0])
-      rollContent = Math.ceil(Math.random() * args[0])
-      break
-    case 2:// arg0 - минимум, arg1 - максимум
-      args[0] = parseInt(args[0])
-      args[1] = parseInt(args[1])
-      rollContent = Math.ceil(Math.random() * (args[1] - args[0])) + args[0]
-      break
-  }
-  if (isNaN(rollContent)) {
-    rollContent = 'Это должно быть числом!'
+module.exports.slashBuilder = new SlashCommandBuilder()
+  .setName(module.exports.help.name)
+  .setDescription('Выбирается случайное число из указанного диапазона, по умолчанию число 100.')
+  .addNumberOption(option =>
+    option
+      .setName('min')
+      .setNameLocalizations({
+        ru: 'мин'
+      })
+      .setDescription('Минимальное число')
+      .setRequired(false)
+  )
+  .addNumberOption(option =>
+    option
+      .setName('max')
+      .setDescription('Максимальное число')
+      .setNameLocalizations({
+        ru: 'макс'
+      })
+      .setRequired(false)
+  )
+
+module.exports.run = async ({ interaction }) => {
+  let rollContent
+  let min = interaction.options.get('min')?.value || 0
+  const max = interaction.options.get('max')?.value || 100
+
+  if (min === undefined) { // Если не задано минимальное, то числа будут от 0 до max
+    rollContent = Math.ceil(Math.random() * max)
+  } else {
+    if (min > max) { min = max }
+    rollContent = Math.ceil(Math.random() * (max - min)) + min
   }
 
-  message.channel.send({ content: `${rollContent}` })
+  interaction.reply({ content: `Из диапазона ${min} - ${max} выпало ${rollContent}` })
 }

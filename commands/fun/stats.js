@@ -1,57 +1,83 @@
-const { Permissions, MessageEmbed } = require('discord.js')
+const { PermissionsBitField, SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 
 module.exports.help = {
   name: 'stats',
   group: 'fun',
-  arguments: '[Название игры (команда которая вызывает игру)]',
-  description: `Показывает вашу статистику в какой-то из игр. К примеру ${process.env.BOT_PREFIX}stats slot`,
-  bot_permissions: [Permissions.FLAGS.SEND_MESSAGES]
+  arguments: '[Название команды которая вызывает игру]',
+  description: 'Показывает вашу статистику в выбранной игре',
+  bot_permissions: [PermissionsBitField.Flags.SendMessages]
 }
 
-module.exports.run = async (client, message, args) => {
-  const userId = message.author.id
-  const statEmbed = new MessageEmbed()
+module.exports.slashBuilder = new SlashCommandBuilder()
+  .setName(module.exports.help.name)
+  .setDescription(module.exports.help.description)
+  .addStringOption(option =>
+    option.setName('game')
+      .setNameLocalizations({
+        ru: 'игра'
+      })
+      .setDescription('Выберите игру по которой хотите увидеть статистику')
+      .setRequired(true)
+      .addChoices(
+        { name: 'Однорукий бандит', value: 'slot' },
+        { name: 'Камень, ножницы, бумага!', value: 'rps' }
+      )
+  )
 
-  if (!args[0]) {
-    statEmbed.setAuthor({ name: 'Статистика существует для: ' }).setTitle(`Напишите ${process.env.BOT_PREFIX}stats [название игры]`).setDescription('`rps` `slot`')
-    await message.reply({ embeds: [statEmbed] })
-    return
-  }
+module.exports.run = async ({ interaction }) => {
+  const userId = interaction.user.id
+  const game = interaction.options.get('game').value
+  const statEmbed = new EmbedBuilder()
 
-  switch (args[0]) {
-    case 'slot':
-      mySQLconnection.promise().query(`SELECT total_games, total_wins, jackpots FROM slot_stats WHERE user_id = ${userId}`)
-        .then(async (results) => {
-          await setStatTitle('Однорукий Бандит')
-          const games = results[0][0].total_games; const wins = results[0][0].total_wins
-          statEmbed.addField('Всего игр:', `${games}`, true)
-          statEmbed.addField('Победная:', 'Всего побед: ' + `${wins}` + `\nПроцент побед: ${Math.round(wins / games * 100)}%`, true)
-          statEmbed.addField('Джекпотов:', `${results[0][0].jackpots}`, true)
-          await message.channel.send({ embeds: [statEmbed] })
-        })
-        .catch(() => {
-          message.reply('Ты ещё ни разу не играл в эту игру')
-        })
-      break
-    case 'rps':
-      mySQLconnection.promise().query(`SELECT total_games, wins, draws FROM rps_stats WHERE user_id = ${userId}`)
-        .then(async (results) => {
-          await setStatTitle('Камень, ножницы, бумага!')
-          const games = results[0][0].total_games; const wins = results[0][0].wins
-          statEmbed.addField('Всего игр:', `${games}`, true)
-          statEmbed.addField('Победная:', 'Всего побед: ' + `${wins}` + `\nПроцент побед: ${Math.round(wins / games * 100)}%`, true)
-          statEmbed.addField('Ничьих:', `${results[0][0].draws}`, true)
-          await message.channel.send({ embeds: [statEmbed] })
-        })
-        .catch(async () => {
-          await message.reply('Ты ещё ни разу не играл в эту игру')
-        })
-      break
-    default:
-      await message.reply('Такой статистики не существует')
+  await GetEmbedWithStats(game)
+  await interaction.reply({ embeds: [statEmbed] })
+
+  async function GetEmbedWithStats (game) {
+    switch (game) {
+      case 'slot':
+        await mySQLconnection.promise().query(`SELECT total_games, total_wins, jackpots FROM slot_stats WHERE user_id = ${userId}`)
+          .then(async (results) => {
+            await setStatTitle('Однорукий Бандит')
+            const games = results[0][0].total_games
+            const wins = results[0][0].total_wins
+            const jackpots = results[0][0].jackpots
+            statEmbed.setFields([
+              { name: 'Всего игр:', value: `${games}`, inline: true },
+              {
+                name: 'Победная:',
+                value: 'Всего побед: ' + `${wins}` + `\nПроцент побед: ${Math.round(wins / games * 100)}%`
+              },
+              { name: 'Джекпотов:', value: `${jackpots}`, inline: true }
+            ])
+          })
+          .catch(async () => {
+            await interaction.reply('Ты ещё ни разу не играл в эту игру')
+          })
+        break
+      case 'rps':
+        await mySQLconnection.promise().query(`SELECT total_games, wins, draws FROM rps_stats WHERE user_id = ${userId}`)
+          .then(async (results) => {
+            await setStatTitle('Камень, ножницы, бумага!')
+            const games = results[0][0].total_games
+            const wins = results[0][0].wins
+            const draws = results[0][0].draws
+            statEmbed.setFields([
+              { name: 'Всего игр:', value: `${games}`, inline: true },
+              {
+                name: 'Победная:',
+                value: 'Всего побед: ' + `${wins}` + `\nПроцент побед: ${Math.round(wins / games * 100)}%`
+              },
+              { name: 'Ничьих:', value: `${draws}`, inline: true }
+            ])
+          })
+          .catch(async () => {
+            await interaction.reply('Ты ещё ни разу не играл в эту игру')
+          })
+        break
+    }
   }
 
   async function setStatTitle (gameName) {
-    await statEmbed.setTitle(`Статистика ${message.author.username} по игре "${gameName}"`)
+    await statEmbed.setTitle(`Статистика ${interaction.user.username} по игре "${gameName}"`)
   }
 }

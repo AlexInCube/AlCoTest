@@ -1,5 +1,5 @@
 const express = require('express')
-const { loggerSend } = require('../../custom_modules/tools')
+const { loggerSend } = require('../../utilities/logger')
 
 module.exports.ExpressRun = () => {
   const app = express()
