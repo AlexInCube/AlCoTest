@@ -56,18 +56,15 @@ module.exports.CommandsSetup = async (client) => {
     if (interaction.isChatInputCommand()) {
       const { commandName } = interaction
       const commandFile = client.commands.executable.get(commandName) // получение команды из коллекции
-      try {
-        if (commandFile) {
-          if (!CheckBotPermissions(client, interaction, commandFile.help.bot_permissions)) { return }
-          commandFile.run({
-            interaction,
-            client,
-            guild: interaction.member.guild,
-            channel: client.channels.cache.get(interaction.channelId)
-          })
-        }
-      } catch (e) {
-        loggerSend(e)
+
+      if (commandFile) {
+        if (!CheckBotPermissions(client, interaction, commandFile.help.bot_permissions)) { return }
+        commandFile.run({
+          interaction,
+          client,
+          guild: interaction.member.guild,
+          channel: client.channels.cache.get(interaction.channelId)
+        })
       }
     } else if (interaction.isAutocomplete()) {
       const { commandName } = interaction
