@@ -19,9 +19,5 @@ module.exports = function (app) {
     response.send(commandsList)
   })
 
-  commandsRouter.use('/prefix', function (request, response) {
-    response.send({ prefix: client.prefix })
-  })
-
   app.use('/commands', commandsRouter)
 }

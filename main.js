@@ -21,7 +21,6 @@ const client = new Client({
 })
 
 const AudioPlayer = new AudioPlayerModule(client, {
-  prefix: process.env.BOT_PREFIX,
   ytcookie: process.env.BOT_YOUTUBE_COOKIE,
   spotify: {
     clientId: process.env.BOT_SPOTIFY_CLIENT_ID,

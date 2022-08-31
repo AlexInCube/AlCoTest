@@ -350,16 +350,16 @@ class AudioPlayerDiscordGui {
 
     const musicPlayerRowPrimary = new ActionRowBuilder()// Создаём кнопки для плеера
       .addComponents(
-        new ButtonBuilder().setCustomId('stop_music').setLabel('Выключить').setStyle(ButtonStyle.Danger),
-        new ButtonBuilder().setCustomId('pause_music').setLabel('Пауза / Возобновить').setStyle(ButtonStyle.Primary),
-        new ButtonBuilder().setCustomId('toggle_repeat').setLabel('Переключить режим повтора').setStyle(ButtonStyle.Primary),
-        new ButtonBuilder().setCustomId('skip_song').setLabel('Пропустить').setStyle(ButtonStyle.Primary)
+        new ButtonBuilder().setCustomId('stop_music').setStyle(ButtonStyle.Danger).setEmoji('<:stopwhite:1014551716043173989>'),
+        new ButtonBuilder().setCustomId('pause_music').setStyle(ButtonStyle.Primary).setEmoji('<:pausewhite:1014551696174764133>'),
+        new ButtonBuilder().setCustomId('toggle_repeat').setStyle(ButtonStyle.Primary).setEmoji('<:repeatmodewhite:1014551751858331731>'),
+        new ButtonBuilder().setCustomId('skip_song').setStyle(ButtonStyle.Primary).setEmoji('<:skipwhite:1014551792484372510>')
       )
 
     const musicPlayerRowSecondary = new ActionRowBuilder()// Создаём кнопки для плеера
       .addComponents(
-        new ButtonBuilder().setCustomId('show_queue').setLabel('Показать очередь').setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder().setCustomId('download_song').setLabel('Скачать песню').setStyle(ButtonStyle.Secondary)
+        new ButtonBuilder().setCustomId('show_queue').setStyle(ButtonStyle.Secondary).setEmoji('<:songlistwhite:1014551771705782405>'),
+        new ButtonBuilder().setCustomId('download_song').setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>')
       )
 
     // Возвращаем сообщение которое можно отправить в Discord
