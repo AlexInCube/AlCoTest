@@ -2,6 +2,7 @@ const voice = require('@discordjs/voice')
 const { checkMemberInVoiceWithBotAndReply, checkMemberInVoiceWithReply } = require('../../utilities/checkMemberInVoiceWithBot')
 const { clamp } = require('../../utilities/clamp')
 const { getVoiceConnection } = require('@discordjs/voice')
+const { loggerSend } = require('../../utilities/logger')
 
 class AudioPlayerActions {
   constructor (musicPlayerMap, distube, playerEmitter, client) {
@@ -43,13 +44,18 @@ class AudioPlayerActions {
 
     interaction.reply({ content: 'Обработка запроса' })
 
-    const txtChannel = this.client.channels.cache.get(interaction.channelId)
-    await this.distube.play(interaction.member.voice.channel, userSearch, {
-      member: interaction.member,
-      textChannel: txtChannel
-    })
+    try {
+      const txtChannel = this.client.channels.cache.get(interaction.channelId)
+      await this.distube.play(interaction.member.voice.channel, userSearch, {
+        member: interaction.member,
+        textChannel: txtChannel
+      })
 
-    interaction.deleteReply()
+      interaction.deleteReply()
+    } catch (e) {
+      loggerSend(e)
+      interaction.editReply({ content: `Произошла ошибка: ${e}`.slice(0, 2000) })
+    }
   }
 
   /**
