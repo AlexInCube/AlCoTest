@@ -8,7 +8,7 @@ const { loggerSend } = require('../../../utilities/logger')
 const Redis = require('ioredis')
 const RedisStore = require('connect-redis')(session)
 const redisClient = new Redis()
-redisClient.on('error', (err) => loggerSend('Ошибка при подключении к Redis', err))
+redisClient.on('error', () => loggerSend('Ошибка при подключении к Redis'))
 redisClient.on('connect', () => loggerSend('Подключение к Redis успешно установлено'))
 
 const oauth = new DiscordOauth2({
