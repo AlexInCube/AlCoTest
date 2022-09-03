@@ -7,11 +7,11 @@ module.exports = function (app) {
   commandsRouter.use('/list', async function (request, response) {
     const commandsList = { groups: ['all'], commands: [] }
 
-    client.commands_groups.forEach((value, key) => {
+    client.commands.groups.forEach((value, key) => {
       commandsList.groups.push(key)
     })
 
-    client.commands.forEach((value) => {
+    client.commands.executable.forEach((value) => {
       const command = Object.assign({}, value.help)
       delete command.bot_permissions
       commandsList.commands.push(command)

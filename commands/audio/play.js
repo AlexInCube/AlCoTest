@@ -8,7 +8,7 @@ module.exports.help = {
   name: 'play',
   group: 'audio',
   arguments: '(запрос)',
-  description: 'Проигрывает музыку указанную пользователем.' +
+  description: 'Проигрывает музыку указанную пользователем. ' +
         'Принимаются:\n Ссылка с Youtube/Spotify/Soundcloud\n1 прикреплённый аудиофайл (mp3, wav или ogg)\nЛюбая писанина, будет запросом на поиск',
   bot_permissions: [
     PermissionsBitField.Flags.SendMessages,

@@ -1,7 +1,7 @@
 const { client } = require('../../../main')
 require('express')
 const bodyParser = require('body-parser')
-const { MessageEmbed } = require('discord.js')
+const { ChannelType, PermissionsBitField, EmbedBuilder } = require('discord.js')
 
 function VotingRoutes (app) {
   app.use(bodyParser.urlencoded({ extended: true }))
@@ -23,7 +23,7 @@ function VotingRoutes (app) {
         voteVariants += `${index + 1}. ${variant.emoji} - ${variant.name}\n`
       })
 
-      const voteEmbed = new MessageEmbed()
+      const voteEmbed = new EmbedBuilder()
         .setColor('#EBFF11')
         .setTitle(form.voteName)
         .setDescription(voteVariants)
@@ -64,9 +64,9 @@ function VotingRoutes (app) {
           return
         }
         guild.channels.cache.forEach((channel) => {
-          if (channel.isText()) {
-            if (channel.permissionsFor(guild.me).has('SEND_MESSAGES', false)) {
-              if (channel.permissionsFor(member).has('SEND_MESSAGES', false)) {
+          if (channel.type === ChannelType.GuildText) {
+            if (channel.permissionsFor(guild.members.me).has(PermissionsBitField.Flags.SendMessages, true)) {
+              if (channel.permissionsFor(member).has(PermissionsBitField.Flags.SendMessages, true)) {
                 channels.push({ name: channel.name, id: channel.id })
               }
             }
