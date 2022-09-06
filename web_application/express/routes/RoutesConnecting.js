@@ -3,6 +3,7 @@ const leaderboardRoutes = require('./leaderboard')
 const commandsRoutes = require('./commands')
 const { VotingRoutes } = require('./voting')
 const statsRoutes = require('./stats')
+const patchNotesRoutes = require('./patchnotes')
 
 module.exports = function (app) {
   AuthRoutes(app)
@@ -10,4 +11,5 @@ module.exports = function (app) {
   commandsRoutes(app)
   VotingRoutes(app)
   statsRoutes(app)
+  patchNotesRoutes(app)
 }
