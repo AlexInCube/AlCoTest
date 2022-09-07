@@ -11,7 +11,7 @@ module.exports.ExpressRun = () => {
     next()
   })
 
-  require('./routes/RoutesConnecting')(app)
+  require('./RoutesConnecting')(app)
 
   const PORT = process.env.BOT_EXPRESS_PORT
   app.listen(PORT, () => loggerSend(`Express сервер запущен на порту ${PORT}`))

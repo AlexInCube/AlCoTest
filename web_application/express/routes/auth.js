@@ -6,6 +6,7 @@ const { client } = require('../../../main')
 
 const { loggerSend } = require('../../../utilities/logger')
 const Redis = require('ioredis')
+const { isOverpowered } = require('../../../utilities/isOverpowered')
 const RedisStore = require('connect-redis')(session)
 const redisClient = new Redis()
 redisClient.on('error', () => loggerSend('Ошибка при подключении к Redis'))
@@ -52,6 +53,7 @@ function AuthRoutes (app) {
         req.session.user = data
         fetchUserdata(req.session.user.access_token).then((userData) => {
           req.session.user.detail = userData
+          req.session.user.detail.overpower = isOverpowered(userData.id)
           res.redirect(`${process.env.BOT_DASHBOARD_URL}/app`)
         })
       })
@@ -73,7 +75,8 @@ function AuthRoutes (app) {
     if (req.session.user) {
       fetchUserdata(req.session.user.access_token).then((userData) => {
         req.session.user.detail = userData
-        res.send(userData)
+        req.session.user.detail.overpower = isOverpowered(userData.id)
+        res.send(req.session.user.detail)
       })
     } else {
       res.status(401).send({})

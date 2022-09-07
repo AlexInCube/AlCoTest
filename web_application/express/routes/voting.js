@@ -8,6 +8,8 @@ function VotingRoutes (app) {
   app.use(bodyParser.json())
 
   app.post('/voting/sendForm', async function (request, response) {
+    if (!request.session) { response.status(403); return }
+
     try {
       const guild = client.guilds.cache.get(request.body.guildId)
       if (!guild) { response.status(403).send(undefined); return }
