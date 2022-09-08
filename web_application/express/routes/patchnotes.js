@@ -76,9 +76,29 @@ module.exports = function (app) {
       response.status(403).send()
       return
     }
-    collection.deleteOne({ _id: new ObjectId(request.params.post_id) }, function () {
+    try {
+      collection.deleteOne({ _id: new ObjectId(request.params.post_id) }, function () {
+        response.status(200).send()
+      })
+    } catch (e) {
+      loggerSend(e)
+      response.status(500).send()
+    }
+  })
+
+  updatesRouter.put('/put_update/:post_id', async function (request, response) {
+    if (!request.session.user.detail.overpower) {
+      response.status(403).send()
+      return
+    }
+
+    try {
+      await collection.updateOne({ _id: new ObjectId(request.params.post_id) }, { $set: request.body })
       response.status(200).send()
-    })
+    } catch (e) {
+      loggerSend(e)
+      response.status(500).send()
+    }
   })
 
   app.use('/updates', updatesRouter)
