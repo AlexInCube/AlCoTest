@@ -2,6 +2,7 @@ const { loggerSend } = require('../../../utilities/logger')
 const express = require('express')
 const MongoClient = require('mongodb').MongoClient
 const bodyParser = require('body-parser')
+const { ObjectId } = require('mongodb')
 
 const mongoClient = new MongoClient('mongodb://localhost:27017/aicdb')
 let collection
@@ -44,12 +45,40 @@ module.exports = function (app) {
   })
 
   updatesRouter.post('/post_update', async function (request, response) {
-    if (!request.session.user.detail.overpower) response.status(403).send()
+    if (!request.session.user.detail.overpower) {
+      response.status(403).send()
+      return
+    }
     const data = request.body
-    collection.insertOne(data, function (error) {
-      if (error) throw error
+
+    const isNullish = Object.values(data).every(value => {
+      return !value
     })
-    response.status(200).send()
+
+    if (isNullish || data.content === '' || data.name === '') {
+      response.status(400).send()
+      return
+    }
+
+    try {
+      collection.insertOne(data, function (error) {
+        if (error) throw error
+        response.status(200).send()
+      })
+    } catch (e) {
+      loggerSend(e)
+      response.status(500).send()
+    }
+  })
+
+  updatesRouter.delete('/delete_update/:post_id', function (request, response) {
+    if (!request.session.user.detail.overpower) {
+      response.status(403).send()
+      return
+    }
+    collection.deleteOne({ _id: new ObjectId(request.params.post_id) }, function () {
+      response.status(200).send()
+    })
   })
 
   app.use('/updates', updatesRouter)
