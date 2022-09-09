@@ -34,14 +34,30 @@ module.exports = function (app) {
   app.use(bodyParser.urlencoded({ extended: true }))
   app.use(bodyParser.json())
 
-  updatesRouter.get('/get_latest', async function (request, response) {
-    try {
-      const updates = await collection.find({}).sort({ time: -1 }).toArray()
-      response.status(200).send(updates)
-    } catch (e) {
-      loggerSend(e)
-      response.status(500).send('error 500')
-    }
+  updatesRouter.get('/get_total_count', async function (request, response) {
+    const _count = await collection.estimatedDocumentCount()
+    response.status(200).send({ count: _count })
+  })
+
+  updatesRouter.get('/get_updates/:page/:updates_per_page', async function (request, response) {
+    const page = parseInt(request.params.page) - 1
+    const updatesPerPage = parseInt(request.params.updates_per_page)
+
+    await collection
+      .find()
+      .sort({ time: -1 })
+      .skip(page * updatesPerPage)
+      .limit(updatesPerPage)
+      .toArray()
+      .then((data) => {
+        if (data.length === 0) {
+          response.status(404).send('Data not found')
+          return
+        }
+        response.status(200).send(data)
+      }).catch(() => {
+        response.status(404).send('Data not found')
+      })
   })
 
   updatesRouter.post('/post_update', async function (request, response) {
