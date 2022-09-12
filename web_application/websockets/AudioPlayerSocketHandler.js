@@ -1,10 +1,11 @@
 const { client, AudioPlayer } = require('../../main')
-const { checkUserInVoiceWithBot } = require('../../utilities/checkMemberInVoiceWithBot')
+const { checkMemberInVoiceWithBot } = require('../../utilities/checkMemberInVoiceWithBot')
+const { AudioPlayerEvents } = require('../../custom_modules/Audioplayer/AudioPlayerEvents')
 
 class AudioPlayerSocketHandler {
   constructor (serverSocketIO) {
     this.io = serverSocketIO
-    AudioPlayer.distube.setMaxListeners(2)
+    // События Distub`a
     AudioPlayer.distube.on('playSong', async (musicQueue) => {
       this.sendPlaylistState(musicQueue.textChannel.guild.id)
     })
@@ -21,28 +22,31 @@ class AudioPlayerSocketHandler {
     AudioPlayer.distube.on('addSong', async (musicQueue) => {
       this.sendPlaylistState(musicQueue.textChannel.guild.id)
     })
-    AudioPlayer.distube.on('pause', async (musicQueue) => {
-      this.sendPauseState(musicQueue.textChannel.guild.id)
+    // События кастомного плеера
+    AudioPlayer.playerEmitter.on(AudioPlayerEvents.responsePlayerPause, async (guild) => {
+      this.sendPauseState(guild.id)
     })
-    AudioPlayer.distube.on('resume', async (musicQueue) => {
-      this.sendPauseState(musicQueue.textChannel.guild.id, false)
+    AudioPlayer.playerEmitter.on(AudioPlayerEvents.responsePlayerResume, async (guild) => {
+      this.sendPauseState(guild.id, false)
     })
-    AudioPlayer.distube.on('repeatChanged', async (musicQueue) => {
-      this.sendRepeatState(musicQueue.textChannel.guild.id)
+    AudioPlayer.playerEmitter.on(AudioPlayerEvents.responseToggleRepeatMode, async (guild) => {
+      this.sendRepeatState(guild.id)
     })
-    AudioPlayer.distube.on('queueShuffle', async (musicQueue) => {
-      this.sendPlaylistState(musicQueue.textChannel.guild.id)
+    AudioPlayer.playerEmitter.on(AudioPlayerEvents.responseQueueShuffle, async (guild) => {
+      this.sendPlaylistState(guild.id)
     })
-    AudioPlayer.distube.on('songDeleted', async (musicQueue) => {
-      this.sendPlaylistState(musicQueue.textChannel.guild.id)
+    AudioPlayer.playerEmitter.on(AudioPlayerEvents.responseDeleteSong, async (guild) => {
+      this.sendPlaylistState(guild.id)
     })
 
     this.setEvents = (socket) => {
       socket.on('joinAudioPlayer', guildId => {
         socket.request.session.reload(() => {
+          // Отключаем пользователя от всех комнат
           socket.rooms.forEach((room) => {
             socket.leave(room)
           })
+          // Подключаем пользователя к нужной
           const guilds = socket.request.session.guilds
           if (guilds) {
             if (guilds.some(guild => guild.id === guildId)) {
@@ -63,7 +67,7 @@ class AudioPlayerSocketHandler {
 
       socket.on('changeCurrentDuration', async (guildId, duration) => {
         if (!await checkRequirements(socket, guildId)) return
-        await this.setCurrentDuration(guildId, duration)
+        await this.setCurrentDuration(guildId, Math.round(duration), socket.request.session.user.detail.username)
       })
 
       socket.on('changePauseState', async (guildId) => {
@@ -94,7 +98,7 @@ class AudioPlayerSocketHandler {
         await this.setRepeatState(guildId)
       })
 
-      socket.on('queueShuffle', async (guildId, username) => {
+      socket.on('shuffleQueue', async (guildId, username) => {
         if (!await checkRequirements(socket, guildId)) return
         await this.setShuffle(guildId, username)
       })
@@ -158,14 +162,11 @@ class AudioPlayerSocketHandler {
     this.io.to(guildId).emit('responseCurrentDuration', Math.round(queue.currentTime))
   }
 
-  async setCurrentDuration (guildId, duration) {
+  async setCurrentDuration (guildId, duration, username) {
     const guildDiscord = client.guilds.cache.get(guildId)
     if (!guildDiscord) return
-    const message = await AudioPlayer.getPlayerMessageInGuild(guildDiscord)
-    if (!message) return
-    const queue = AudioPlayer.distube.getQueue(guildDiscord)
-    await AudioPlayer.distube.seek(queue, duration)
-    await AudioPlayer.actions.resume(message)
+
+    AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestChangeSongTime, guildDiscord, duration, username)
   }
 
   sendPauseState (guildId, pauseState) {
@@ -183,25 +184,21 @@ class AudioPlayerSocketHandler {
     const message = await AudioPlayer.discordGui.getPlayerMessageInGuild(guildDiscord)
     if (!message) return
 
-    await AudioPlayer.actions.pause(message)
+    await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestTogglePauseAndResume, guildDiscord)
   }
 
   async setNextSong (guildId, username) {
     const guildDiscord = client.guilds.cache.get(guildId)
     if (!guildDiscord) return
-    const queue = AudioPlayer.getQueue(guildDiscord)
 
-    const message = await AudioPlayer.discordGui.getPlayerMessageInGuild(guildDiscord)
-    if (!message) return
-    await AudioPlayer.actions.skipSong(queue, message, username)
+    await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestSongSkip, guildDiscord, username)
   }
 
   async setPreviousSong (guildId, username) {
     const guildDiscord = client.guilds.cache.get(guildId)
     if (!guildDiscord) return
-    const message = await AudioPlayer.discordGui.getPlayerMessageInGuild(guildDiscord)
-    if (!message) return
-    await AudioPlayer.actions.previousSong(guildDiscord, message, username)
+
+    await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestQueueJump, guildDiscord, -1, username)
   }
 
   sendRepeatState (guildId) {
@@ -216,32 +213,29 @@ class AudioPlayerSocketHandler {
   async setRepeatState (guildId) {
     const guildDiscord = client.guilds.cache.get(guildId)
     if (!guildDiscord) return
-    const message = await AudioPlayer.discordGui.getPlayerMessageInGuild(guildDiscord)
-    if (!message) return
 
-    await AudioPlayer.actions.changeRepeatMode(message)
+    await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestToggleRepeatMode, guildDiscord)
   }
 
   async setShuffle (guildId, username) {
     const guildDiscord = client.guilds.cache.get(guildId)
     if (!guildDiscord) return
-    const message = await AudioPlayer.discordGui.getPlayerMessageInGuild(guildDiscord)
-    if (!message) return
-    await AudioPlayer.actions.shuffle(message, username)
+
+    await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestQueueShuffle, guildDiscord, username)
   }
 
-  async jumpToSong (guildId, position, userName) {
+  async jumpToSong (guildId, position, username) {
     const guildDiscord = client.guilds.cache.get(guildId)
     if (!guildDiscord) return
-    const message = await AudioPlayer.discordGui.getPlayerMessageInGuild(guildDiscord)
-    if (!message) return
-    await AudioPlayer.actions.jump(guildDiscord, position, message, userName)
+
+    await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestQueueJump, guildDiscord, position, username)
   }
 
   async deleteSong (guildId, position, username) {
     const guildDiscord = client.guilds.cache.get(guildId)
     if (!guildDiscord) return
-    await AudioPlayer.actions.deleteSongFromQueue(guildDiscord, position, username)
+
+    await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestDeleteSong, guildDiscord, position, username)
   }
 }
 
@@ -250,7 +244,7 @@ async function checkRequirements (socket, guildId) {
   if (!guild) return false
   const memberDiscord = guild.members.cache.get(socket.request.session.user.detail.id)
   if (!memberDiscord) return false
-  return await checkUserInVoiceWithBot(memberDiscord)
+  return await checkMemberInVoiceWithBot(memberDiscord)
 }
 
 module.exports = { AudioPlayerSocketHandler }

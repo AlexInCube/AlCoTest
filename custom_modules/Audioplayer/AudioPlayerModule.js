@@ -8,6 +8,7 @@ const { DiscordGui } = require('./AudioPlayerDiscordGui')
 const { AudioPlayerActions } = require('./AudioPlayerActions')
 const events = require('events')
 const { loggerSend } = require('../../utilities/logger')
+const { AudioPlayerEvents } = require('./AudioPlayerEvents')
 
 class AudioPlayerModule {
   constructor (client, options = {}) {
@@ -44,48 +45,53 @@ class AudioPlayerModule {
     this.actions = new AudioPlayerActions(this.musicPlayerMap, this.distube, this.playerEmitter, client)
     this.discordGui = new DiscordGui(this.musicPlayerMap, this.distube, this.playerEmitter, client)
     this.setupEvents()
+
+    this.distube.setMaxListeners(2)
   }
 
   setupEvents () {
     this.distube
       .on('disconnect', async musicQueue => {
-        await this.actions.stop(musicQueue.textChannel.guild)
+        this.playerEmitter.emit(AudioPlayerEvents.requestStopPlayer, musicQueue.textChannel.guild)
       })
       .on('error', (channel, error) => {
         loggerSend(error)
-        channel.send(`An error encoutered: ${error.slice(0, 1979)}`) // Discord limits 2000 characters in a message
+        channel.send(`An error encoutered: ${error}`.slice(0, 2000))
       })
 
     this.playerEmitter
-      .on('destroyPlayer', async (guild) => {
+      .on(AudioPlayerEvents._destroyPlayer, async (guild) => {
         await this.clearPlayerState(guild)
       })
-      .on('stopPlayer', async (guild) => {
+      .on(AudioPlayerEvents.requestStopPlayer, async (guild) => {
         await this.actions.stop(guild)
       })
-      .on('songSkipped', async (guild) => {
-        await this.actions.skipSong(guild)
+      .on(AudioPlayerEvents.requestSongSkip, async (guild, username) => {
+        await this.actions.skipSong(guild, username)
       })
-      .on('playerSwitchPauseAndResume', async (guild) => {
+      .on(AudioPlayerEvents.requestTogglePauseAndResume, async (guild) => {
         await this.actions.switchPauseAndResume(guild)
       })
-      .on('playerResume', async (guild) => {
+      .on(AudioPlayerEvents.requestPlayerResume, async (guild) => {
         await this.actions.resume(guild)
       })
-      .on('playerPause', async (guild) => {
+      .on(AudioPlayerEvents.requestPlayerPause, async (guild) => {
         await this.actions.pause(guild)
       })
-      .on('requestSwitchRepeatMode', async (guild) => {
+      .on(AudioPlayerEvents.requestToggleRepeatMode, async (guild) => {
         await this.actions.changeRepeatMode(guild)
       })
-      .on('queueJump', async (guild, queuePosition) => {
-        await this.actions.jump(guild, queuePosition)
+      .on(AudioPlayerEvents.requestQueueJump, async (guild, queuePosition, username) => {
+        await this.actions.jump(guild, queuePosition, username)
       })
-      .on('requestDeleteSong', async (guild, queuePosition, username) => {
+      .on(AudioPlayerEvents.requestDeleteSong, async (guild, queuePosition, username) => {
         await this.actions.deleteSongFromQueue(guild, queuePosition, username)
       })
-      .on('queueShuffle', async (guild) => {
-        await this.actions.shuffle(guild)
+      .on(AudioPlayerEvents.requestQueueShuffle, async (guild, username) => {
+        await this.actions.shuffle(guild, username)
+      })
+      .on(AudioPlayerEvents.requestChangeSongTime, async (guild, time, username) => {
+        await this.actions.position(guild, time, username)
       })
   }
 
@@ -122,7 +128,7 @@ class AudioPlayerModule {
   }
 
   /**
-   * Отправляет в чат текущую проигрываемую песню и позицию времени
+   * Отправляет в чат текущую проигрываемую песню и временной отрезок
    * @param interaction
    */
   async getCurrentPlayingMessage (interaction) {

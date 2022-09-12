@@ -1,6 +1,7 @@
 const { AudioPlayer } = require('../../main')
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js')
 const { checkMemberInVoiceWithBotAndReply } = require('../../utilities/checkMemberInVoiceWithBot')
+const { AudioPlayerEvents } = require('../../custom_modules/Audioplayer/AudioPlayerEvents')
 module.exports.help = {
   name: 'jump',
   group: 'audio',
@@ -29,7 +30,7 @@ module.exports.run = async ({ interaction }) => {
   if (pos > 1) { pos-- } else if (pos < -1) { pos++ }
   interaction.reply({ content: 'Обработка запроса' })
 
-  await AudioPlayer.playerEmitter.emit('queueJump', interaction.guild, pos, interaction.member.user.username)
+  await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestQueueJump, interaction.guild, pos, interaction.member.user.username)
 
   interaction.deleteReply()
 }

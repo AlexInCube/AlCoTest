@@ -12,7 +12,13 @@ function getCurrentTimestamp () {
 }
 
 function loggerSend (message) {
-  console.log(getCurrentTimestamp() + message)
+  switch (typeof message) {
+    case 'object':
+      console.log(getCurrentTimestamp())
+      console.log(message)
+      break
+    default: console.log(getCurrentTimestamp() + message)
+  }
 }
 
 module.exports = { getCurrentTimestamp, loggerSend }

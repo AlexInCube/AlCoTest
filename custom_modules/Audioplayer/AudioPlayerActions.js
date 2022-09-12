@@ -2,7 +2,8 @@ const voice = require('@discordjs/voice')
 const { checkMemberInVoiceWithBotAndReply, checkMemberInVoiceWithReply } = require('../../utilities/checkMemberInVoiceWithBot')
 const { clamp } = require('../../utilities/clamp')
 const { getVoiceConnection } = require('@discordjs/voice')
-const { loggerSend } = require('../../utilities/logger')
+const { RepeatMode } = require('distube')
+const { AudioPlayerEvents } = require('./AudioPlayerEvents')
 
 class AudioPlayerActions {
   constructor (musicPlayerMap, distube, playerEmitter, client) {
@@ -53,24 +54,29 @@ class AudioPlayerActions {
 
       interaction.deleteReply()
     } catch (e) {
-      loggerSend(e)
-      interaction.editReply({ content: `Произошла ошибка: ${e}`.slice(0, 2000) })
+      // loggerSend(e)
+
+      interaction.editReply({ content: 'С этой песней произошла ошибка, попробуйте ещё раз. Возможно она находится на неподдерживаемом сервисе или в приватном плейлисте.' })
     }
   }
 
   /**
    * Пропускает текущую проигрываемую песню
-   * @param queue
+   * @param guild
+   * @param username
    */
-  async skipSong (queue) {
+  async skipSong (guild, username) {
+    const queue = this.distube.getQueue(guild)
     if (queue.songs.length > 1) {
+      const song = queue.songs[0]
       await this.distube.skip(queue)
-      await this.resume(queue.guild)
+      await this.resume(guild)
+      this.playerEmitter.emit(AudioPlayerEvents.responseSongSkip, guild, song, username)
     }
   }
 
   /**
-   * Меняет режим повтора очереди (Выключен, Песня, Вся очередь), вызывает событие repeatChanged у distube
+   * Меняет режим повтора очереди (Выключен, Песня, Вся очередь)
    * @param guild
    */
   async changeRepeatMode (guild) {
@@ -78,19 +84,19 @@ class AudioPlayerActions {
     if (queue) {
       const repeat = queue.repeatMode
       switch (repeat) {
-        case 0:
-          queue.setRepeatMode(1)
+        case RepeatMode.DISABLED:
+          await queue.setRepeatMode(RepeatMode.SONG)
           break
-        case 1:
-          queue.setRepeatMode(2)
+        case RepeatMode.SONG:
+          await queue.setRepeatMode(RepeatMode.QUEUE)
           break
-        case 2:
-          queue.setRepeatMode(0)
+        case RepeatMode.QUEUE:
+          await queue.setRepeatMode(RepeatMode.DISABLED)
           break
       }
     }
 
-    this.playerEmitter.emit('switchRepeatMode', guild, queue.repeatMode)
+    this.playerEmitter.emit(AudioPlayerEvents.responseToggleRepeatMode, guild, queue.repeatMode)
   }
 
   /**
@@ -100,9 +106,9 @@ class AudioPlayerActions {
   async switchPauseAndResume (guild) {
     const queue = this.distube.getQueue(guild)
     if (queue.paused) {
-      this.playerEmitter.emit('playerResume', guild)
+      this.playerEmitter.emit(AudioPlayerEvents.requestPlayerResume, guild)
     } else {
-      this.playerEmitter.emit('playerPause', guild)
+      this.playerEmitter.emit(AudioPlayerEvents.requestPlayerPause, guild)
     }
   }
 
@@ -111,7 +117,11 @@ class AudioPlayerActions {
    * @param guild
    */
   async pause (guild) {
-    await this.distube.pause(guild)
+    const queue = this.distube.getQueue(guild)
+    if (!queue.paused) {
+      await this.distube.pause(guild)
+      this.playerEmitter.emit(AudioPlayerEvents.responsePlayerPause, guild)
+    }
   }
 
   /**
@@ -119,10 +129,10 @@ class AudioPlayerActions {
    * @param guild
    */
   async resume (guild) {
-    try {
+    const queue = this.distube.getQueue(guild)
+    if (queue.paused) {
       await this.distube.resume(guild)
-    } catch (e) {
-
+      this.playerEmitter.emit(AudioPlayerEvents.responsePlayerResume, guild)
     }
   }
 
@@ -135,44 +145,38 @@ class AudioPlayerActions {
     if (vc) {
       await vc.destroy()
     }
-    await this.playerEmitter.emit('destroyPlayer', guild)
+    await this.playerEmitter.emit(AudioPlayerEvents._destroyPlayer, guild)
   }
 
   /**
    * Перемотка сразу на выбранную песню в очереди
    * @param guild
    * @param queuePosition
+   * @param username
    */
-  async jump (guild, queuePosition) {
+  async jump (guild, queuePosition, username) {
     const queue = this.distube.getQueue(guild)
-    await this.resume(guild)
+    await this.playerEmitter.emit(AudioPlayerEvents.requestPlayerResume)
 
     queuePosition = clamp(parseInt(queuePosition), 0 - queue.previousSongs.length, queue.songs.length - 1)
     try {
       await this.distube.jump(guild, queuePosition)
+      this.playerEmitter.emit(AudioPlayerEvents.responseQueueJump, guild, queuePosition, username)
     } catch (e) {
 
     }
   }
 
   /**
-   * Перемотка на предыдущую песню
+   * Перемешать все песни в очереди, при этом текущая проигрываемая песня перемешиваться не будет.
    * @param guild
-   * @param message
    * @param username
    */
-  async previousSong (guild, message, username) {
-    await this.jump(guild, -1, message, username)
-  }
-
-  /**
-   * Перемешать все песни в очереди, при этом текущая проигрываемая песня перемешиваться не будет.
-   * @param message
-   */
-  async shuffle (message) {
-    const queue = this.distube.getQueue(message)
+  async shuffle (guild, username) {
+    const queue = this.distube.getQueue(guild)
     if (queue) {
       await this.distube.shuffle(queue)
+      this.playerEmitter.emit(AudioPlayerEvents.responseQueueShuffle, guild, username)
     }
   }
 
@@ -187,63 +191,28 @@ class AudioPlayerActions {
     if (!queue) return
     position = clamp(position, 0 - queue.previousSongs.length, queue.songs.length - 1)
     if (position > 0) {
-      this.playerEmitter.emit('queueDeleteSong', guild, queue.songs[position], username)
+      const song = queue.songs[position]
       queue.songs.splice(position, 1)
+      this.playerEmitter.emit(AudioPlayerEvents.responseDeleteSong, guild, song, username)
     } else if (position < 0) {
       position = queue.previousSongs.length - Math.abs(position)
-      this.playerEmitter.emit('queueDeleteSong', guild, queue.previousSongs[position], username)
+      const song = queue.previousSongs[position]
       queue.previousSongs.splice(position, 1)
+      this.playerEmitter.emit(AudioPlayerEvents.responseDeleteSong, guild, song, username)
     }
   }
 
   /**
    * Меняет время с которого проигрывается песня
-   * @param message
-   * @param queryArgs
+   * @param guild
+   * @param seconds
+   * @param username
    */
-  async position (message = null, queryArgs) {
-    const queue = this.distube.getQueue(message)
+  async position (guild, seconds, username) {
+    const queue = this.distube.getQueue(guild)
+    await this.distube.seek(queue, seconds)
 
-    if (!queue) { message?.channel.send('Очереди не существует'); return }
-
-    if (queue.songs[0].isLive) {
-      message?.reply({ content: 'Нельзя перематывать прямые трансляции' })
-      return
-    }
-
-    if (!queryArgs) { message?.reply({ content: 'А время указать? Не понимаешь как? Пиши /help position' }); return }
-
-    let totalTime = 0
-    queryArgs.forEach(arg => {
-      totalTime += parseTime(arg)
-    })
-
-    if (!Number.isInteger(totalTime)) { message?.reply({ content: 'Я не понял что ты написал' }); return }
-
-    const previousTime = queue.formattedCurrentTime
-
-    await this.distube.seek(queue, Number(totalTime))
-
-    message?.reply({ content: `Время изменено с ${previousTime} на ${queue.formattedCurrentTime}` })
-
-    function parseTime (time) {
-      const lastTimeChar = time.charAt(time.length - 1)
-      try {
-        time = parseInt(time.slice(0, -1))
-        switch (lastTimeChar) {
-          case 'h':
-            return time * 60 * 60
-          case 'm':
-            return time * 60
-          case 's':
-            return time
-          default:
-            return 0
-        }
-      } catch (e) {
-        return undefined
-      }
-    }
+    this.playerEmitter.emit(AudioPlayerEvents.responseChangeSongTime, guild, seconds, username)
   }
 }
 

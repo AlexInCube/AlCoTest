@@ -1,6 +1,7 @@
 const { checkMemberInVoiceWithBotAndReply } = require('../../utilities/checkMemberInVoiceWithBot')
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js')
 const { AudioPlayer } = require('../../main')
+const { AudioPlayerEvents } = require('../../custom_modules/Audioplayer/AudioPlayerEvents')
 
 module.exports.help = {
   name: 'remove',
@@ -29,7 +30,7 @@ module.exports.run = async ({ interaction }) => {
   interaction.reply({ content: 'Обработка запроса' })
 
   const pos = interaction.options.getNumber('position') - 1
-  await AudioPlayer.playerEmitter.emit('requestDeleteSong', interaction.guild, pos, interaction.member.user.username)
+  await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestDeleteSong, interaction.guild, pos, interaction.member.user.username)
 
   interaction.deleteReply()
 }

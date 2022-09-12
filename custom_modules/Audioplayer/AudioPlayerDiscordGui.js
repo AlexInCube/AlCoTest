@@ -3,6 +3,8 @@ const { PLAYER_STATES } = require('./AudioPlayerEnums')
 const { checkMemberInVoiceWithBotAndReply } = require('../../utilities/checkMemberInVoiceWithBot')
 const { loggerSend } = require('../../utilities/logger')
 const { downloadSong, deleteSongFile } = require('./downloadSongHandling')
+const { RepeatMode } = require('distube')
+const { AudioPlayerEvents } = require('./AudioPlayerEvents')
 
 const PLAYER_FIELDS = {
   author: 0,
@@ -63,65 +65,63 @@ class AudioPlayerDiscordGui {
       .on('empty', queue => queue.textChannel.send('Все ушли от меня, значит я тоже ухожу.'))
 
     this.playerEmitter
-      .on('songSkipped', async (queue, username) => {
-        queue.textChannel.send({ content: `${username} пропустил песню ${queue.songs[0].name} - ${queue.songs[0].uploader.name}` })
+      .on(AudioPlayerEvents.responseSongSkip, async (guild, song, username) => {
+        const queue = this.distube.getQueue(guild)
+        queue.textChannel.send({ content: `${username} пропустил песню ${song.name} - ${song.uploader.name}` })
       })
-      .on('queueShuffle', async (guild, username) => {
+      .on(AudioPlayerEvents.responseQueueShuffle, async (guild, username) => {
         const messageWithPlayer = await this.getPlayerMessageInGuild(guild)
         await messageWithPlayer.channel.send(`${username} перемешал все песни`)
       })
-      .on('songDeleted', async (queue, position, username) => {
-        const messageWithPlayer = await this.getPlayerMessageInGuild(queue.textChannel.guild)
+      .on(AudioPlayerEvents.responseDeleteSong, async (guild, song, username) => {
+        const queue = this.distube.getQueue(guild)
+        const messageWithPlayer = await this.getPlayerMessageInGuild(guild)
         if (!messageWithPlayer) return
-        if (position > 0) {
-          await messageWithPlayer.channel.send({ content: `${username} удалил песню из очереди ${queue.songs[position].name} - ${queue.songs[position].uploader.name}` })
-        }
-        if (position < 0) {
-          await messageWithPlayer.channel.send({ content: `${username} удалил песню из списка прошлых песен ${queue.previousSongs[position].name} - ${queue.previousSongs[position].uploader.name}` })
-        }
+        await messageWithPlayer.channel.send({ content: `${username} удалил песню из очереди ${song.name} - ${song.uploader.name}` })
+
         this.editField(queue.textChannel.guild.id, PLAYER_FIELDS.remaining_songs, (queue.songs.length - 1).toString())
         await messageWithPlayer.edit({ embeds: [this.musicPlayerMap[queue.textChannel.guild.id].PlayerEmbed] })
       })
-      .on('playerResume', async (guild) => {
+      .on(AudioPlayerEvents.responsePlayerResume, async (guild) => {
         const messageWithPlayer = await this.getPlayerMessageInGuild(guild)
         await this.setPlayerEmbedState(messageWithPlayer.guild.id, PLAYER_STATES.playing)
         await messageWithPlayer.edit({ embeds: [this.musicPlayerMap[messageWithPlayer.guild.id].PlayerEmbed] })
       })
-      .on('playerPause', async (guild) => {
+      .on(AudioPlayerEvents.responsePlayerPause, async (guild) => {
         const messageWithPlayer = await this.getPlayerMessageInGuild(guild)
         await this.setPlayerEmbedState(messageWithPlayer.guild.id, PLAYER_STATES.paused)
         await messageWithPlayer.edit({ embeds: [this.musicPlayerMap[messageWithPlayer.guild.id].PlayerEmbed] })
       })
-      .on('switchRepeatMode', async (guild, repeatMode) => {
+      .on(AudioPlayerEvents.responseToggleRepeatMode, async (guild, repeatMode) => {
         const messageWithPlayer = await this.getPlayerMessageInGuild(guild)
         let modeString
         switch (repeatMode) {
-          case 0:
+          case RepeatMode.DISABLED:
+            modeString = 'Выключен'
+            break
+          case RepeatMode.SONG:
             modeString = 'Песня'
             break
-          case 1:
+          case RepeatMode.QUEUE:
             modeString = 'Очередь'
-            break
-          case 2:
-            modeString = 'Выключен'
             break
         }
         this.editField(guild.id, PLAYER_FIELDS.repeat_mode, modeString)
         await messageWithPlayer.edit({ embeds: [this.musicPlayerMap[guild.id].PlayerEmbed] })
         await this.pushChangesToPlayerMessage(guild)
       })
-      .on('queueJump', async (guild, position, username) => {
+      .on(AudioPlayerEvents.responseQueueJump, async (guild, position, username) => {
         if (username) {
           await this.getPlayerMessageInGuild(guild).then(async (playerMessage) => {
-            if (position >= 1) { await playerMessage.channel.send(`${username} совершил прыжок в очереди, пропустив предыдущие песни`); return }
-            if (position <= 0) { await playerMessage.channel.send(`${username} совершил прыжок в очереди, вернувшись назад на проигранные песни`) }
+            if (position >= 1) { await playerMessage.channel.send(`${username} совершил прыжок ВПЕРЁД в очереди, пропустив предыдущие песни`); return }
+            if (position <= 0) { await playerMessage.channel.send(`${username} совершил прыжок НАЗАД в очереди, вернувшись на уже проигранные песни`) }
           })
         }
       })
-      .on('queueDeleteSong', async (guild, song, username) => {
+      .on(AudioPlayerEvents.responseChangeSongTime, async (guild, time, username) => {
         if (username) {
           await this.getPlayerMessageInGuild(guild).then(async (playerMessage) => {
-            playerMessage.channel.send({ content: `${username} УДАЛИЛ из очереди песню ${song.name} - ${song.uploader.name}` })
+            playerMessage.channel.send({ content: `${username} перемотал время на ${time}` })
           })
         }
       })
@@ -132,7 +132,7 @@ class AudioPlayerDiscordGui {
    * @param queue
    */
   async createPlayer (queue) {
-    await this.playerEmitter.emit('destroyPlayer', queue.textChannel.guild)
+    await this.playerEmitter.emit(AudioPlayerEvents._destroyPlayer, queue.textChannel.guild)
     const Player = this.createPlayerEmbed()
 
     const guildId = queue.textChannel.guild.id
@@ -187,28 +187,28 @@ class AudioPlayerDiscordGui {
         if (!await checkMemberInVoiceWithBotAndReply(button.member, button)) { return }
 
         if (button.customId === 'stop_music') {
-          this.playerEmitter.emit('stopPlayer', button.guild)
+          this.playerEmitter.emit(AudioPlayerEvents.requestStopPlayer, button.guild)
           await button.message.channel.send({ content: `${button.user.username} выключил плеер` })
 
           return
         }
 
         if (button.customId === 'pause_music') {
-          this.playerEmitter.emit('playerSwitchPauseAndResume', button.guild)
+          this.playerEmitter.emit(AudioPlayerEvents.requestTogglePauseAndResume, button.guild)
           await button.deferUpdate()
 
           return
         }
 
         if (button.customId === 'toggle_repeat') {
-          this.playerEmitter.emit('requestSwitchRepeatMode', button.guild)
+          this.playerEmitter.emit(AudioPlayerEvents.requestToggleRepeatMode, button.guild)
           await button.deferUpdate()
 
           return
         }
 
         if (button.customId === 'skip_song') {
-          this.playerEmitter.emit('songSkipped', this.distube.getQueue(button.guild), button.user.username)
+          this.playerEmitter.emit(AudioPlayerEvents.requestSongSkip, button.guild, button.user.username)
           await button.deferUpdate()
         }
       } catch (e) {
@@ -326,6 +326,21 @@ class AudioPlayerDiscordGui {
       this.editField(guild, PLAYER_FIELDS.duration, song.formattedDuration)
     }
     this.editField(guild, PLAYER_FIELDS.queue_duration, queue.formattedDuration)
+
+    let modeString
+    switch (queue.repeatMode) {
+      case RepeatMode.DISABLED:
+        modeString = 'Выключен'
+        break
+      case RepeatMode.SONG:
+        modeString = 'Песня'
+        break
+      case RepeatMode.QUEUE:
+        modeString = 'Очередь'
+        break
+    }
+    this.editField(guild, PLAYER_FIELDS.repeat_mode, modeString)
+
     this.editField(guild, PLAYER_FIELDS.remaining_songs, (queue.songs.length - 1).toString())
     this.editField(guild, PLAYER_FIELDS.next_song, queue.songs[1]?.name || 'Дальше пусто')
     await this.musicPlayerMap[guild].PlayerEmbed.setThumbnail(song.thumbnail).setTitle(song.name).setURL(song.url)
