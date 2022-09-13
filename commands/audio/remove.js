@@ -7,7 +7,7 @@ module.exports.help = {
   name: 'remove',
   group: 'audio',
   arguments: '(позиция в очереди)',
-  description: 'Удалить песню по номеру.',
+  description: 'Удаляет песню из очереди по номеру.',
   bot_permissions: [PermissionsBitField.Flags.SendMessages]
 }
 
@@ -29,7 +29,10 @@ module.exports.run = async ({ interaction }) => {
   if (!await checkMemberInVoiceWithBotAndReply(interaction.member, interaction)) return
   interaction.reply({ content: 'Обработка запроса' })
 
-  const pos = interaction.options.getNumber('position') - 1
+  let pos = interaction.options.getNumber('position')
+  if (Math.sign(pos) === 1) {
+    pos -= 1
+  }
   await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestDeleteSong, interaction.guild, pos, interaction.member.user.username)
 
   interaction.deleteReply()

@@ -128,30 +128,32 @@ class AudioPlayerSocketHandler {
     if (guildDiscord) {
       const queue = AudioPlayer.getQueue(guildDiscord)
       if (queue) {
-        queue.songs.forEach((song) => {
+        queue.songs.forEach((song, index) => {
           playlist.queued.push({
             title: song.name,
             author: song.uploader.name,
             requester: song.user.username,
             duration: song.duration,
             img: song.thumbnail,
-            url: song.url
+            url: song.url,
+            position: index
           })
         })
-        queue.previousSongs.forEach((song) => {
+        queue.previousSongs.forEach((song, index) => {
           playlist.played.push({
             title: song.name,
             author: song.uploader.name,
             requester: song.user.username,
             duration: song.duration,
             img: song.thumbnail,
-            url: song.url
+            url: song.url,
+            position: -Math.abs(queue.previousSongs.length - index)
           })
         })
       }
-    }
 
-    this.io.to(guildId).emit('responsePlaylist', playlist)
+      this.io.to(guildId).emit('responsePlaylist', playlist)
+    }
   }
 
   sendCurrentDuration (guildId) {

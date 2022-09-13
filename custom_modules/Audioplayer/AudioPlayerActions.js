@@ -156,7 +156,7 @@ class AudioPlayerActions {
    */
   async jump (guild, queuePosition, username) {
     const queue = this.distube.getQueue(guild)
-    await this.playerEmitter.emit(AudioPlayerEvents.requestPlayerResume)
+    await this.playerEmitter.emit(AudioPlayerEvents.requestPlayerResume, guild)
 
     queuePosition = clamp(parseInt(queuePosition), 0 - queue.previousSongs.length, queue.songs.length - 1)
     try {
