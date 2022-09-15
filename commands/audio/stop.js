@@ -1,6 +1,7 @@
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js')
 const { AudioPlayer } = require('../../main')
 const { AudioPlayerEvents } = require('../../custom_modules/Audioplayer/AudioPlayerEvents')
+
 module.exports.help = {
   name: 'stop',
   group: 'audio',
@@ -15,9 +16,6 @@ module.exports.slashBuilder = new SlashCommandBuilder()
 
 module.exports.run = async ({ interaction, guild }) => {
   if (!await AudioPlayer.playerIsExists(interaction)) return
-  if (!await AudioPlayer.discordGui.isChannelWithPlayer(interaction)) {
-    return
-  }
 
   await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestStopPlayer, guild)
   await interaction.reply({ content: `${interaction.user.username} выключил плеер` })

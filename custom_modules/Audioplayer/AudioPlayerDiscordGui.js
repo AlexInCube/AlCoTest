@@ -5,6 +5,7 @@ const { loggerSend } = require('../../utilities/logger')
 const { downloadSong, deleteSongFile } = require('./downloadSongHandling')
 const { RepeatMode } = require('distube')
 const { AudioPlayerEvents } = require('./AudioPlayerEvents')
+const { secondsToFormattedTime } = require('../../utilities/secondsToFormattedTime')
 
 const PLAYER_FIELDS = {
   author: 0,
@@ -67,17 +68,17 @@ class AudioPlayerDiscordGui {
     this.playerEmitter
       .on(AudioPlayerEvents.responseSongSkip, async (guild, song, username) => {
         const queue = this.distube.getQueue(guild)
-        queue.textChannel.send({ content: `${username} пропустил песню ${song.name} - ${song.uploader.name}` })
+        queue.textChannel.send({ content: `:fast_forward: ${username} пропустил(-а) песню ${song.name} - ${song.uploader.name} :fast_forward:` })
       })
       .on(AudioPlayerEvents.responseQueueShuffle, async (guild, username) => {
         const messageWithPlayer = await this.getPlayerMessageInGuild(guild)
-        await messageWithPlayer.channel.send(`${username} перемешал все песни`)
+        await messageWithPlayer.channel.send(`${username} перемешал(-а) все песни`)
       })
       .on(AudioPlayerEvents.responseDeleteSong, async (guild, song, username) => {
         const queue = this.distube.getQueue(guild)
         const messageWithPlayer = await this.getPlayerMessageInGuild(guild)
         if (!messageWithPlayer) return
-        await messageWithPlayer.channel.send({ content: `${username} удалил песню из очереди ${song.name} - ${song.uploader.name}` })
+        await messageWithPlayer.channel.send({ content: `${username} удалил(-а) песню из очереди ${song.name} - ${song.uploader.name}` })
 
         this.editField(queue.textChannel.guild.id, PLAYER_FIELDS.remaining_songs, (queue.songs.length - 1).toString())
         await messageWithPlayer.edit({ embeds: [this.musicPlayerMap[queue.textChannel.guild.id].PlayerEmbed] })
@@ -113,15 +114,15 @@ class AudioPlayerDiscordGui {
       .on(AudioPlayerEvents.responseQueueJump, async (guild, position, username) => {
         if (username) {
           await this.getPlayerMessageInGuild(guild).then(async (playerMessage) => {
-            if (position >= 1) { await playerMessage.channel.send(`${username} совершил прыжок ВПЕРЁД в очереди, пропустив предыдущие песни`); return }
-            if (position <= 0) { await playerMessage.channel.send(`${username} совершил прыжок НАЗАД в очереди, вернувшись на уже проигранные песни`) }
+            if (position >= 1) { await playerMessage.channel.send(`:fast_forward: ${username} совершил(-а) прыжок ВПЕРЁД в очереди, пропустив предыдущие песни :fast_forward:`); return }
+            if (position <= 0) { await playerMessage.channel.send(`:rewind: ${username} совершил(-а) прыжок НАЗАД в очереди, вернувшись на уже проигранные песни :rewind:`) }
           })
         }
       })
       .on(AudioPlayerEvents.responseChangeSongTime, async (guild, time, username) => {
         if (username) {
           await this.getPlayerMessageInGuild(guild).then(async (playerMessage) => {
-            playerMessage.channel.send({ content: `${username} перемотал время на ${time}` })
+            playerMessage.channel.send({ content: `${username} перемотал(-а) время на ${secondsToFormattedTime(time)}` })
           })
         }
       })
@@ -260,7 +261,7 @@ class AudioPlayerDiscordGui {
       const channel = this.client.channels.cache.get(channelId)
       if (channel) {
         const channelName = channel.name
-        await interaction.reply({ content: `Плеер бота запущен на текстовом канале "${channelName}", поэтому музыкальные команды работают только там.`, ephemeral: true })
+        await interaction.reply({ content: `Плеер бота запущен на текстовом канале **#"${channelName}"**, поэтому музыкальные команды работают только там.`, ephemeral: true })
       }
 
       return false
