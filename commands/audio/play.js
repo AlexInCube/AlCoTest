@@ -65,5 +65,8 @@ module.exports.autocomplete = async ({ interaction }) => {
 }
 
 module.exports.run = async ({ interaction }) => {
+  if (!await AudioPlayer.discordGui.isChannelWithPlayer(interaction)) {
+    return
+  }
   await AudioPlayer.actions.play(interaction)
 }

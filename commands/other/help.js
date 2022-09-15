@@ -4,7 +4,7 @@ module.exports.help = {
   name: 'help',
   group: 'other',
   description: 'Подробное описание команд',
-  bot_permissions: [PermissionsBitField.Flags.SendMessages]
+  bot_permissions: []
 }
 
 module.exports.slashBuilder = new SlashCommandBuilder()

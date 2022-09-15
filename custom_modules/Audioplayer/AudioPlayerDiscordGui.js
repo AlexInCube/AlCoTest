@@ -133,7 +133,7 @@ class AudioPlayerDiscordGui {
    */
   async createPlayer (queue) {
     await this.playerEmitter.emit(AudioPlayerEvents._destroyPlayer, queue.textChannel.guild)
-    const Player = this.createPlayerEmbed()
+    const Player = this.createPlayerEmbed(queue.textChannel.guild.id)
 
     const guildId = queue.textChannel.guild.id
 
@@ -233,7 +233,7 @@ class AudioPlayerDiscordGui {
   }
 
   /**
-   * Возвращает сообщение где, находится плеер в Discord
+   * Возвращает сообщение с плеером из Discord
    *
    * @param guild
    */
@@ -242,6 +242,29 @@ class AudioPlayerDiscordGui {
     const channel = await this.client.channels.cache.get(this.musicPlayerMap[guildId]?.ChannelID)
     if (!channel) return undefined
     return channel.messages.cache.get(this.musicPlayerMap[guildId]?.MessageID)
+  }
+
+  /**
+   * Проверяет отправлено ли сообщение там же, где был создан плеер.
+   * Если плеера нет, возвращает true
+   * @param interaction
+   */
+  async isChannelWithPlayer (interaction) {
+    const channelId = this.musicPlayerMap[interaction.member.guild.id]?.ChannelID
+    if (!channelId) {
+      return true
+    }
+    if (interaction.channel.id === channelId) {
+      return true
+    } else {
+      const channel = this.client.channels.cache.get(channelId)
+      if (channel) {
+        const channelName = channel.name
+        await interaction.reply({ content: `Плеер бота запущен на текстовом канале "${channelName}", поэтому музыкальные команды работают только там.`, ephemeral: true })
+      }
+
+      return false
+    }
   }
 
   /**
@@ -349,7 +372,7 @@ class AudioPlayerDiscordGui {
   /**
    * Создаёт embed сообщение с интерфейсом Аудио Плеера, но не отправляет его.
    */
-  createPlayerEmbed () {
+  createPlayerEmbed (guildId) {
     const musicPlayerEmbed = new EmbedBuilder()// Создаём сообщение с плеером
       .setColor('#f7ee43')
       .setAuthor({ name: '⌛ Загрузка ⌛' })
@@ -371,10 +394,12 @@ class AudioPlayerDiscordGui {
         new ButtonBuilder().setCustomId('skip_song').setStyle(ButtonStyle.Primary).setEmoji('<:skipwhite:1014551792484372510>')
       )
 
+    const link = `${process.env.BOT_DASHBOARD_URL}/app/${guildId}/audioplayer`
     const musicPlayerRowSecondary = new ActionRowBuilder()// Создаём кнопки для плеера
       .addComponents(
         new ButtonBuilder().setCustomId('show_queue').setStyle(ButtonStyle.Secondary).setEmoji('<:songlistwhite:1014551771705782405>'),
-        new ButtonBuilder().setCustomId('download_song').setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>')
+        new ButtonBuilder().setCustomId('download_song').setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>'),
+        new ButtonBuilder().setLabel('Полная версия').setStyle(ButtonStyle.Link).setURL(link)
       )
 
     // Возвращаем сообщение которое можно отправить в Discord

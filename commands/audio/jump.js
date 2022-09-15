@@ -26,6 +26,9 @@ module.exports.slashBuilder = new SlashCommandBuilder()
 module.exports.run = async ({ interaction }) => {
   if (!await AudioPlayer.playerIsExists(interaction)) return
   if (!await checkMemberInVoiceWithBotAndReply(interaction.member, interaction)) return
+  if (!await AudioPlayer.discordGui.isChannelWithPlayer(interaction)) {
+    return
+  }
 
   let pos = interaction.options.getNumber('position')
   if (Math.sign(pos) === 1) {

@@ -26,6 +26,9 @@ module.exports.slashBuilder = new SlashCommandBuilder()
 module.exports.run = async ({ interaction, guild }) => {
   if (!await AudioPlayer.playerIsExists(interaction)) return
   if (!await checkMemberInVoiceWithBotAndReply(interaction.member, interaction)) return
+  if (!await AudioPlayer.discordGui.isChannelWithPlayer(interaction)) {
+    return
+  }
 
   if (AudioPlayer.getQueue(guild).songs[0].isLive) {
     interaction.reply({ content: 'Нельзя перематывать прямые трансляции' })

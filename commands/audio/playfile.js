@@ -31,5 +31,8 @@ module.exports.slashBuilder = new SlashCommandBuilder()
   )
 
 module.exports.run = async ({ interaction }) => {
+  if (!await AudioPlayer.discordGui.isChannelWithPlayer(interaction)) {
+    return
+  }
   await AudioPlayer.actions.play(interaction)
 }

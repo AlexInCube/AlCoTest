@@ -15,6 +15,9 @@ module.exports.slashBuilder = new SlashCommandBuilder()
 
 module.exports.run = async ({ interaction, guild }) => {
   if (!await AudioPlayer.playerIsExists(interaction)) return
+  if (!await AudioPlayer.discordGui.isChannelWithPlayer(interaction)) {
+    return
+  }
 
   await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestStopPlayer, guild)
   await interaction.reply({ content: `${interaction.user.username} выключил плеер` })

@@ -17,6 +17,9 @@ module.exports.slashBuilder = new SlashCommandBuilder()
 module.exports.run = async ({ interaction }) => {
   if (!await AudioPlayer.playerIsExists(interaction)) return
   if (!await checkMemberInVoiceWithBotAndReply(interaction.member, interaction)) return
+  if (!await AudioPlayer.discordGui.isChannelWithPlayer(interaction)) {
+    return
+  }
 
   interaction.reply({ content: 'Обработка запроса' })
 
