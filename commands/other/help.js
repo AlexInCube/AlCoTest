@@ -41,10 +41,16 @@ module.exports.run = async ({ client, interaction, guild }) => {
   }
 
   async function replyCommandsList () {
+    let description = 'Обозначения в аргументах команд:\n() - обязательно\n[] - по желанию'
+    if (process.env.BOT_DASHBOARD_ENABLE === '1') {
+      description += `\n
+      Больше информации на ${process.env.BOT_DASHBOARD_URL}`
+    }
+
     const helpEmbed = new EmbedBuilder()
       .setColor('#436df7')
       .setTitle('Справка о командах')
-      .setDescription(`Обозначения в аргументах команд:\n() - обязательно\n[] - по желанию\nБольше информации на ${process.env.BOT_DASHBOARD_URL}`)
+      .setDescription(description)
 
     client.commands.groups.forEach((values, keys) => {
       let commandsList = ''

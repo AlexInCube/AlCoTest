@@ -399,10 +399,12 @@ class AudioPlayerDiscordGui {
     const musicPlayerRowSecondary = new ActionRowBuilder()// Создаём кнопки для плеера
       .addComponents(
         new ButtonBuilder().setCustomId('show_queue').setStyle(ButtonStyle.Secondary).setEmoji('<:songlistwhite:1014551771705782405>'),
-        new ButtonBuilder().setCustomId('download_song').setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>'),
-        new ButtonBuilder().setLabel('Полная версия').setStyle(ButtonStyle.Link).setURL(link)
+        new ButtonBuilder().setCustomId('download_song').setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>')
       )
 
+    if (process.env.BOT_DASHBOARD_ENABLE === '1') {
+      musicPlayerRowSecondary.addComponents(new ButtonBuilder().setLabel('Полная версия').setStyle(ButtonStyle.Link).setURL(link))
+    }
     // Возвращаем сообщение которое можно отправить в Discord
     return { embeds: [musicPlayerEmbed], components: [musicPlayerRowPrimary, musicPlayerRowSecondary] }
   }
