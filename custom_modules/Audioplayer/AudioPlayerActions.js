@@ -18,7 +18,7 @@ class AudioPlayerActions {
    * @param interaction
    */
   async play (interaction) {
-    const connection = getVoiceConnection(interaction.member.guild.id)
+    const connection = getVoiceConnection(interaction.member.guild.id, interaction.guild.client.user?.id)
     if (!connection) { // Если бот никуда не подключён, то проверяем находится ли человек запросивший команду хоть где-то
       if (!await checkMemberInVoiceWithReply(interaction.member, interaction)) return
     } else {

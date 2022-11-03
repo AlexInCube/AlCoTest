@@ -43,7 +43,7 @@ async function checkMemberInVoiceWithBotAndReply (member, interaction) {
     if (connection.joinConfig.channelId === member.voice.channel.id) {
       return true
     }
-    await this.client.channels.cache.get(connection.joinConfig.channelId).then(channel => {
+    await interaction.client.channels.fetch(connection.joinConfig.channelId).then(channel => {
       interaction.reply({ content: `Зайди на голосовой канал ${channel.name}, чтобы пользоваться мной.`, ephemeral: true })
       return false
     })
