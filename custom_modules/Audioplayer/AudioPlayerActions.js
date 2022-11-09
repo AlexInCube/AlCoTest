@@ -43,7 +43,7 @@ class AudioPlayerActions {
       userSearch = request
     }
 
-    interaction.reply({ content: 'Обработка запроса' })
+    await interaction.reply({ content: 'Обработка запроса, это может занять некоторое время если плейлист большой' })
 
     try {
       const txtChannel = this.client.channels.cache.get(interaction.channelId)
@@ -52,11 +52,11 @@ class AudioPlayerActions {
         textChannel: txtChannel
       })
 
-      interaction.deleteReply()
+      await interaction.deleteReply()
     } catch (e) {
       // loggerSend(e)
 
-      interaction.editReply({ content: 'С этой песней произошла ошибка, попробуйте ещё раз. Возможно она находится на неподдерживаемом сервисе или в приватном плейлисте.' })
+      await interaction.editReply({ content: 'С этой песней произошла ошибка, попробуйте ещё раз. Возможно она находится на неподдерживаемом сервисе или в приватном плейлисте.' })
     }
   }
 

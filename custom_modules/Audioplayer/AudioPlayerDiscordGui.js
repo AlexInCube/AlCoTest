@@ -173,8 +173,7 @@ class AudioPlayerDiscordGui {
               .setAuthor({ name: 'Сейчас играет: ' })
               .setTitle('1. ' + showQueue.songs[0].name).setURL(showQueue.songs[0].url)
               .setDescription(`**Оставшиеся песни: **\n${queueList}`.slice(0, 4096))
-            await button.reply({ embeds: [queueEmbed], ephemeral: true }
-            )
+            await button.reply({ embeds: [queueEmbed], ephemeral: true })
           }
 
           return

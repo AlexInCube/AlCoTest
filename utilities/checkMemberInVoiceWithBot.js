@@ -38,11 +38,15 @@ async function checkMemberInVoiceWithBot (member) {
  * @param interaction
  */
 async function checkMemberInVoiceWithBotAndReply (member, interaction) {
-  const connection = await getVoiceConnection(interaction.guildId, interaction.client.user?.id)
-  if (connection) {
-    if (connection.joinConfig.channelId === member.voice.channel.id) {
-      return true
+  const connection = await getVoiceConnection(interaction.guildId, interaction.client.user?.id) ?? await getVoiceConnection(interaction.guildId)
+  if (connection) { // Проверяем, подключён ли бот хоть к какому-нибудь голосовому каналу
+    if (member.voice.channel) {
+      if (connection.joinConfig.channelId === member.voice?.channel.id) { // Если голосовой канал бота и пользователя совпадают
+        return true
+      }
     }
+
+    console.log('wtf')
     await interaction.client.channels.fetch(connection.joinConfig.channelId).then(channel => {
       interaction.reply({ content: `Зайди на голосовой канал ${channel.name}, чтобы пользоваться мной.`, ephemeral: true })
       return false

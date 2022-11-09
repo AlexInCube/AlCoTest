@@ -17,7 +17,7 @@ class AudioPlayerModule {
     // eslint-disable-next-line new-cap
     this.distube = new DisTubeLib.default(client, {
       leaveOnEmpty: true,
-      emptyCooldown: 20,
+      emptyCooldown: process.env.NODE_ENV === 'production' ? 20 : 999,
       leaveOnFinish: true,
       leaveOnStop: true,
       youtubeCookie: options.ytcookie || undefined,
