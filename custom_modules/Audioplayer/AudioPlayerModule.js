@@ -9,6 +9,7 @@ const { AudioPlayerActions } = require('./AudioPlayerActions')
 const events = require('events')
 const { loggerSend } = require('../../utilities/logger')
 const { AudioPlayerEvents } = require('./AudioPlayerEvents')
+const { checkBotInVoice } = require('../../utilities/checkMemberInVoiceWithBot')
 
 class AudioPlayerModule {
   constructor (client, options = {}) {
@@ -18,7 +19,7 @@ class AudioPlayerModule {
     this.distube = new DisTubeLib.default(client, {
       leaveOnEmpty: true,
       emptyCooldown: process.env.NODE_ENV === 'production' ? 20 : 999,
-      leaveOnFinish: true,
+      leaveOnFinish: false,
       leaveOnStop: true,
       youtubeCookie: options.ytcookie || undefined,
       joinNewVoiceChannel: true,
@@ -26,6 +27,9 @@ class AudioPlayerModule {
       emitAddListWhenCreatingQueue: true,
       emitAddSongWhenCreatingQueue: true,
       plugins: [
+        new YtDlpPlugin({
+          update: false
+        }),
         new SpotifyPlugin(
           {
             parallel: true,
@@ -35,29 +39,47 @@ class AudioPlayerModule {
               clientSecret: options.spotify.clientSecret || undefined
             }
           }),
-        new YtDlpPlugin({
-          update: false
-        }),
         new SoundCloudPlugin()
       ]
     })
+    this.distube.setMaxListeners(2)
     this.playerEmitter = new events.EventEmitter()
+    this.playerEmitter.setMaxListeners(2)
     this.actions = new AudioPlayerActions(this.musicPlayerMap, this.distube, this.playerEmitter, client)
     this.discordGui = new DiscordGui(this.musicPlayerMap, this.distube, this.playerEmitter, client)
     this.setupEvents()
-
-    this.distube.setMaxListeners(2)
+    this.finishCooldown = 20
   }
 
   setupEvents () {
     this.distube
       .on('disconnect', async musicQueue => {
-        this.playerEmitter.emit(AudioPlayerEvents.requestStopPlayer, musicQueue.textChannel.guild)
+        // this.playerEmitter.emit(AudioPlayerEvents.requestStopPlayer, musicQueue.textChannel.guild)
+        await this.playerEmitter.emit(AudioPlayerEvents._destroyPlayer, musicQueue.textChannel.guild)
       })
       .on('error', (channel, error) => {
         loggerSend(error)
         channel.send(`An error encoutered: ${error}`.slice(0, 2000))
       })
+    if (!this.distube.options.leaveOnFinish) {
+      this.distube.on('finishSong', async musicQueue => {
+        if (musicQueue.songs.length > 1) return
+        const guild = musicQueue.textChannel.guild
+
+        if (await checkBotInVoice(guild)) {
+          musicQueue._finishTimeout = setTimeout(async () => {
+            const queue = this.distube.getQueue(guild)
+            // loggerSend('try to stop player on cooldown')
+            if (queue) return
+            if (await checkBotInVoice(guild)) {
+              await this.playerEmitter.emit(AudioPlayerEvents.responseFinishCooldown, guild)
+              await this.playerEmitter.emit(AudioPlayerEvents.requestStopPlayer, guild)
+              // loggerSend('stop player on cooldown')
+            }
+          }, this.finishCooldown * 1000)
+        }
+      })
+    }
 
     this.playerEmitter
       .on(AudioPlayerEvents._destroyPlayer, async (guild) => {
@@ -117,14 +139,10 @@ class AudioPlayerModule {
    * @param guild
    */
   async clearPlayerState (guild) {
-    if (this.musicPlayerMap[guild.id]) {
-      await this.musicPlayerMap[guild.id].Collector.stop()
-      const playerMessage = await this.discordGui.getPlayerMessageInGuild(guild)
-      if (playerMessage !== undefined) {
-        playerMessage.delete()
-      }
-      delete this.musicPlayerMap[guild.id]
-    }
+    if (!this.musicPlayerMap[guild.id]) return
+
+    await this.discordGui.deletePlayerMessage(guild)
+    delete this.musicPlayerMap[guild.id]
   }
 
   /**

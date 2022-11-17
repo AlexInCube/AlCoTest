@@ -21,7 +21,6 @@ class AudioPlayerDiscordGui {
   constructor (musicPlayerMap, distube, playerEmitter, client) {
     this.musicPlayerMap = musicPlayerMap
     this.distube = distube
-    this.module = module
     this.playerEmitter = playerEmitter
     this.client = client
 
@@ -30,6 +29,12 @@ class AudioPlayerDiscordGui {
 
   setupGuiEvents () {
     this.distube
+      /*
+      .on('initQueue', async (musicQueue) => {
+        if (!this.musicPlayerMap[musicQueue.textChannel.guildId]) return
+        await this.restorePlayerMessage(musicQueue.textChannel.guild, musicQueue)
+      })
+       */
       .on('playSong', async (musicQueue, song) => {
         if (!this.musicPlayerMap[musicQueue.textChannel.guildId]) return
         await this.restorePlayerMessage(musicQueue.textChannel.guild, musicQueue)
@@ -37,32 +42,39 @@ class AudioPlayerDiscordGui {
         await this.pushChangesToPlayerMessage(musicQueue.textChannel.guild)
       })
       .on('addSong', async (musicQueue, song) => {
-        await musicQueue.textChannel.send({
-          content: `Добавлено: ${song.name} - \`${song.formattedDuration}\` в очередь по запросу \`${song.member.user.username}\``
-        })
+        const songEmbed = new EmbedBuilder()
+          .setTitle(song.name)
+          .setURL(song.url)
+          .setAuthor({ name: `🎵${song.member.user.username} добавил песню🎵` })
+          .setDescription(`Длительность - ${song.formattedDuration} | Автор - ${song.uploader.name}`)
+          .setThumbnail(song.thumbnail)
+        await musicQueue.textChannel.send({ embeds: [songEmbed] })
+
         await this.restorePlayerMessage(musicQueue.textChannel.guild, musicQueue)
-        await this.updateEmbedWithSong(musicQueue, musicQueue.songs[0])
+        await this.updateEmbedWithSong(musicQueue, song)
         await this.pushChangesToPlayerMessage(musicQueue.textChannel.guild)
       })
       .on('addList', async (musicQueue, playlist) => {
-        musicQueue.textChannel.send({
-          content:
-            `Добавлено \`${playlist.songs.length}\` песен из плейлиста \`${playlist.name}\` в очередь по запросу \`${playlist.member.user.username}\``
-        })
+        const playlistEmbed = new EmbedBuilder()
+          .setTitle(playlist.name)
+          .setURL(playlist.url)
+          .setAuthor({ name: `🎶${playlist.member.user.username} добавил плейлист🎶` })
+          .setDescription(`Количество песен - ${playlist.songs.length} | Длительность - ${playlist.formattedDuration}`)
+          .setThumbnail(playlist.thumbnail)
+
+        await musicQueue.textChannel.send({ embeds: [playlistEmbed] })
         await this.restorePlayerMessage(musicQueue.textChannel.guild, musicQueue)
         await this.updateEmbedWithSong(musicQueue, musicQueue.songs[0])
         await this.pushChangesToPlayerMessage(musicQueue.textChannel.guild)
       })
-      /*
       .on('finishSong', async musicQueue => {
-        const guild = musicQueue.textChannel.guildId
-        if (!this.musicPlayerMap[guild]) return
-        if (!musicQueue.next) {
-          await this.setPlayerEmbedState(guild, PLAYER_STATES.waiting)
-          await this.pushChangesToPlayerMessage(guild, musicQueue)
+        const guild = musicQueue.textChannel.guild
+        if (!this.musicPlayerMap[guild.id]) return
+        if (musicQueue.songs.length <= 1) {
+          await this.setPlayerEmbedState(guild.id, PLAYER_STATES.waiting)
+          await this.pushChangesToPlayerMessage(guild)
         }
       })
-       */
       .on('empty', queue => queue.textChannel.send('Все ушли от меня, значит я тоже ухожу.'))
 
     this.playerEmitter
@@ -120,11 +132,15 @@ class AudioPlayerDiscordGui {
         }
       })
       .on(AudioPlayerEvents.responseChangeSongTime, async (guild, time, username) => {
+        const channel = this.distube.getQueue(guild).textChannel
         if (username) {
-          await this.getPlayerMessageInGuild(guild).then(async (playerMessage) => {
-            playerMessage.channel.send({ content: `${username} перемотал(-а) время на ${secondsToFormattedTime(time)}` })
-          })
+          channel.send({ content: `${username} перемотал(-а) время на ${secondsToFormattedTime(time)}` })
         }
+      })
+      .on(AudioPlayerEvents.responseFinishCooldown, async (guild) => {
+        // loggerSend('responseFinishCD')
+        const playerMessage = await this.getPlayerMessageInGuild(guild)
+        playerMessage.channel.send({ content: 'Время ожидания истекло, я выключаю плеер' })
       })
   }
 
@@ -133,7 +149,7 @@ class AudioPlayerDiscordGui {
    * @param queue
    */
   async createPlayer (queue) {
-    await this.playerEmitter.emit(AudioPlayerEvents._destroyPlayer, queue.textChannel.guild)
+    await this.deletePlayerMessage(queue.textChannel.guild)
     const Player = this.createPlayerEmbed(queue.textChannel.guild.id)
 
     const guildId = queue.textChannel.guild.id
@@ -141,6 +157,8 @@ class AudioPlayerDiscordGui {
     const musicPlayerMessage = await queue.textChannel.send(Player) // Отправляем сообщение с плеером
 
     const filter = button => button.customId
+
+    delete this.musicPlayerMap[guildId]
     this.musicPlayerMap[guildId] = {
       MessageID: musicPlayerMessage.id,
       ChannelID: musicPlayerMessage.channel.id,
@@ -152,44 +170,47 @@ class AudioPlayerDiscordGui {
 
     collector.on('collect', async button => {
       try {
-        if (button.customId === 'show_queue') {
-          const showQueue = this.distube.getQueue(button.guild)
-          if (!showQueue) {
-            await button.reply({ content: 'Ничего не проигрывается', ephemeral: true })
-          } else {
-            let queueList = ''
-
-            let song = ''
-            for (let i = 1; i < Math.min(31, showQueue.songs.length); i++) {
-              song = showQueue.songs[i]
-              queueList += `${i + 1}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`
-            }
-
-            if (showQueue.songs.length > 32) {
-              queueList += `И ещё ${showQueue.songs.length - 33} песни ждут своего часа`
-            }
-
-            const queueEmbed = new EmbedBuilder()
-              .setAuthor({ name: 'Сейчас играет: ' })
-              .setTitle('1. ' + showQueue.songs[0].name).setURL(showQueue.songs[0].url)
-              .setDescription(`**Оставшиеся песни: **\n${queueList}`.slice(0, 4096))
-            await button.reply({ embeds: [queueEmbed], ephemeral: true })
-          }
-
-          return
-        }
-
-        if (button.customId === 'download_song') {
-          await this.extractAudioToMessage(button, this.distube.getQueue(queue.textChannel.guild).songs[0])
-          return
-        }
-
         if (!await checkMemberInVoiceWithBotAndReply(button.member, button)) { return }
 
         if (button.customId === 'stop_music') {
           this.playerEmitter.emit(AudioPlayerEvents.requestStopPlayer, button.guild)
           await button.message.channel.send({ content: `${button.user.username} выключил плеер` })
 
+          return
+        }
+
+        if (!this.distube.getQueue(button.guild)) {
+          await button.reply({ content: 'Плеер в режиме ожидания, ничего кроме полного выключения (красной кнопки) не работает', ephemeral: true })
+
+          return
+        }
+
+        if (button.customId === 'show_queue') {
+          const showQueue = this.distube.getQueue(button.guild)
+
+          let queueList = ''
+
+          let song = ''
+          for (let i = 1; i < Math.min(31, showQueue.songs.length); i++) {
+            song = showQueue.songs[i]
+            queueList += `${i + 1}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`
+          }
+
+          if (showQueue.songs.length > 32) {
+            queueList += `И ещё ${showQueue.songs.length - 33} песни ждут своего часа`
+          }
+
+          const queueEmbed = new EmbedBuilder()
+            .setAuthor({ name: 'Сейчас играет: ' })
+            .setTitle('1. ' + showQueue.songs[0].name).setURL(showQueue.songs[0].url)
+            .setDescription(`**Оставшиеся песни: **\n${queueList}`.slice(0, 4096))
+          await button.reply({ embeds: [queueEmbed], ephemeral: true })
+
+          return
+        }
+
+        if (button.customId === 'download_song') {
+          await this.extractAudioToMessage(button, this.distube.getQueue(queue.textChannel.guild).songs[0])
           return
         }
 
@@ -221,6 +242,16 @@ class AudioPlayerDiscordGui {
     })
   }
 
+  async deletePlayerMessage (guild) {
+    if (!this.musicPlayerMap[guild.id]) return
+
+    await this.musicPlayerMap[guild.id].Collector.stop()
+    const playerMessage = await this.getPlayerMessageInGuild(guild)
+    if (playerMessage !== undefined) {
+      await playerMessage.delete()
+    }
+  }
+
   /**
    * Редактирует значения поля в плеере, но не отправляет изменения в сообщение в Discord
    *
@@ -241,7 +272,7 @@ class AudioPlayerDiscordGui {
     const guildId = guild.id
     const channel = await this.client.channels.cache.get(this.musicPlayerMap[guildId]?.ChannelID)
     if (!channel) return undefined
-    return channel.messages.cache.get(this.musicPlayerMap[guildId]?.MessageID)
+    return channel.messages.fetch(this.musicPlayerMap[guildId]?.MessageID)
   }
 
   /**
@@ -284,7 +315,7 @@ class AudioPlayerDiscordGui {
         break
 
       case PLAYER_STATES.playing:
-        await this.musicPlayerMap[guildID].PlayerEmbed.setAuthor({ name: '🎵 Играет 🎵' }).setColor('#49f743')
+        await this.musicPlayerMap[guildID].PlayerEmbed.setAuthor({ name: '▶️ Играет ▶️' }).setColor('#49f743')
         break
 
       case PLAYER_STATES.paused:
@@ -318,15 +349,17 @@ class AudioPlayerDiscordGui {
    * @param guild
    */
   async pushChangesToPlayerMessage (guild) {
-    const musicQueue = this.distube.getQueue(guild)
     try {
-      let message
-      const channel = await musicQueue.textChannel
+      const player = this.musicPlayerMap[guild.id]
+      if (!player) return
+      const channel = await this.client.channels.cache.get(player.ChannelID)
+
       if (channel) {
-        message = await channel.messages.cache.get(this.musicPlayerMap[guild.id].MessageID)
-      }
-      if (message) {
-        await message.edit({ embeds: [this.musicPlayerMap[guild.id].PlayerEmbed] })
+        const message = await channel.messages.fetch(player.MessageID)
+
+        if (message) {
+          await message.edit({ embeds: [player.PlayerEmbed] })
+        }
       }
     } catch (e) {
       loggerSend(e)
@@ -394,7 +427,6 @@ class AudioPlayerDiscordGui {
         new ButtonBuilder().setCustomId('skip_song').setStyle(ButtonStyle.Primary).setEmoji('<:skipwhite:1014551792484372510>')
       )
 
-    const link = `${process.env.BOT_DASHBOARD_URL}/app/${guildId}/audioplayer`
     const musicPlayerRowSecondary = new ActionRowBuilder()// Создаём кнопки для плеера
       .addComponents(
         new ButtonBuilder().setCustomId('show_queue').setStyle(ButtonStyle.Secondary).setEmoji('<:songlistwhite:1014551771705782405>'),
@@ -402,6 +434,7 @@ class AudioPlayerDiscordGui {
       )
 
     if (process.env.BOT_DASHBOARD_ENABLE === '1') {
+      const link = `${process.env.BOT_DASHBOARD_URL}/app/${guildId}/audioplayer`
       musicPlayerRowSecondary.addComponents(new ButtonBuilder().setLabel('Полная версия').setStyle(ButtonStyle.Link).setURL(link))
     }
     // Возвращаем сообщение которое можно отправить в Discord

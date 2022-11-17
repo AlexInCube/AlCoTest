@@ -4,6 +4,7 @@ const { clamp } = require('../../utilities/clamp')
 const { getVoiceConnection } = require('@discordjs/voice')
 const { RepeatMode } = require('distube')
 const { AudioPlayerEvents } = require('./AudioPlayerEvents')
+const { loggerSend } = require('../../utilities/logger')
 
 class AudioPlayerActions {
   constructor (musicPlayerMap, distube, playerEmitter, client) {
@@ -43,9 +44,9 @@ class AudioPlayerActions {
       userSearch = request
     }
 
-    await interaction.reply({ content: 'Обработка запроса, это может занять некоторое время если плейлист большой' })
-
     try {
+      await interaction.reply({ content: 'Обработка запроса, это может занять некоторое время. Просто ждите, я не завис (возможно)!' })
+
       const txtChannel = this.client.channels.cache.get(interaction.channelId)
       await this.distube.play(interaction.member.voice.channel, userSearch, {
         member: interaction.member,
@@ -54,9 +55,9 @@ class AudioPlayerActions {
 
       await interaction.deleteReply()
     } catch (e) {
-      // loggerSend(e)
+      loggerSend(e)
 
-      await interaction.editReply({ content: 'С этой песней произошла ошибка, попробуйте ещё раз. Возможно она находится на неподдерживаемом сервисе или в приватном плейлисте.' })
+      await interaction.editReply({ content: 'С этой ссылкой/песней произошла ошибка, попробуйте ещё раз. Возможно это неподдерживаемый сервис или приватный плейлист.' })
     }
   }
 
@@ -141,11 +142,16 @@ class AudioPlayerActions {
    * @param guild
    */
   async stop (guild) {
-    const vc = voice.getVoiceConnection(guild.id, guild.client.user?.id)
-    if (vc) {
-      await vc.destroy()
+    if (this.distube.getQueue(guild)) {
+      await this.distube.stop(guild)
+    } else {
+      const vc = voice.getVoiceConnection(guild.id, guild.client.user?.id)
+      if (vc) {
+        await vc.destroy()
+      }
+
+      await this.playerEmitter.emit(AudioPlayerEvents._destroyPlayer, guild)
     }
-    await this.playerEmitter.emit(AudioPlayerEvents._destroyPlayer, guild)
   }
 
   /**

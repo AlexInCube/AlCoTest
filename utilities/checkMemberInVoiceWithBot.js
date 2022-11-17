@@ -1,6 +1,15 @@
 const { getVoiceConnection } = require('@discordjs/voice')
 
 /**
+ * Проверяет, есть ли в принципе БОТ в голосовом чате
+ * @param guild
+ * @returns {Promise<boolean>}
+ */
+async function checkBotInVoice (guild) {
+  const connection = await getVoiceConnection(guild.id, guild.client.user?.id)
+  return !!connection
+}
+/**
  * Проверяет, есть ли в принципе пользователь в голосовом чате
  * @param member
  * @param interaction
@@ -46,7 +55,6 @@ async function checkMemberInVoiceWithBotAndReply (member, interaction) {
       }
     }
 
-    console.log('wtf')
     await interaction.client.channels.fetch(connection.joinConfig.channelId).then(channel => {
       interaction.reply({ content: `Зайди на голосовой канал ${channel.name}, чтобы пользоваться мной.`, ephemeral: true })
       return false
@@ -62,4 +70,4 @@ async function checkMemberInVoiceWithBotAndReply (member, interaction) {
   }
 }
 
-module.exports = { checkMemberInVoiceWithReply, checkMemberInVoiceWithBotAndReply, checkMemberInVoiceWithBot }
+module.exports = { checkBotInVoice, checkMemberInVoiceWithReply, checkMemberInVoiceWithBotAndReply, checkMemberInVoiceWithBot }

@@ -103,7 +103,13 @@ const AudioPlayerEvents = {
    * Это событие ответ на requestChangeSongTime
    * Возвращает: guild, time, username
    */
-  responseChangeSongTime: 'responseChangeSongTime'
+  responseChangeSongTime: 'responseChangeSongTime',
+
+  /**
+   * Когда у плеер истекло время ожидания, вызывается это событие.
+   * Возвращает: guild
+   */
+  responseFinishCooldown: 'responseFinishCooldown'
 }
 
 module.exports = { AudioPlayerEvents }
