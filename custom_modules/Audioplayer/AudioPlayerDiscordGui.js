@@ -51,7 +51,7 @@ class AudioPlayerDiscordGui {
         await musicQueue.textChannel.send({ embeds: [songEmbed] })
 
         await this.restorePlayerMessage(musicQueue.textChannel.guild, musicQueue)
-        await this.updateEmbedWithSong(musicQueue, song)
+        await this.updateEmbedWithSong(musicQueue, musicQueue.songs[0])
         await this.pushChangesToPlayerMessage(musicQueue.textChannel.guild)
       })
       .on('addList', async (musicQueue, playlist) => {
@@ -70,7 +70,7 @@ class AudioPlayerDiscordGui {
       .on('finishSong', async musicQueue => {
         const guild = musicQueue.textChannel.guild
         if (!this.musicPlayerMap[guild.id]) return
-        if (musicQueue.songs.length <= 1) {
+        if (musicQueue.songs.length <= 1 && !musicQueue.stopped) {
           await this.setPlayerEmbedState(guild.id, PLAYER_STATES.waiting)
           await this.pushChangesToPlayerMessage(guild)
         }

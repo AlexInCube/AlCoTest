@@ -48,7 +48,7 @@ class AudioPlayerModule {
     this.actions = new AudioPlayerActions(this.musicPlayerMap, this.distube, this.playerEmitter, client)
     this.discordGui = new DiscordGui(this.musicPlayerMap, this.distube, this.playerEmitter, client)
     this.setupEvents()
-    this.finishCooldown = 20
+    this.finishCooldown = 60
   }
 
   setupEvents () {

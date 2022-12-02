@@ -44,7 +44,7 @@ if (parseInt(process.env.BOT_DASHBOARD_ENABLE) === 1) {
 
 // Когда бот запустился
 client.once('ready', () => {
-  loggerSend(`Бот ${client.user.username} запустился`)
+  loggerSend(`Бот ${client.user.username} запустился, версия ${process.env.npm_package_version}`)
   client.user.setActivity('Напиши /help')
 })
 
