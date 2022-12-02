@@ -36,7 +36,7 @@ module.exports.run = async ({ interaction }) => {
   if (Math.sign(pos) === 1) {
     pos -= 1
   }
-  await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestDeleteSong, interaction.guild, pos, interaction.member.user.username)
+  await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestDeleteSong, interaction.member.guild, pos, interaction.member.user.username)
 
-  interaction.deleteReply()
+  await interaction.deleteReply()
 }

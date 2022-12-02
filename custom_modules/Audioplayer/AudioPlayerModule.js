@@ -127,10 +127,11 @@ class AudioPlayerModule {
   }
 
   async playerIsExists (interaction) {
-    if (this.getQueue(interaction.guild) === undefined) {
+    if (this.getQueue(interaction.member.guild) === undefined) {
       await interaction.reply({ content: 'Плеера не существует', ephemeral: true })
       return false
     }
+
     return true
   }
 
@@ -148,7 +149,7 @@ class AudioPlayerModule {
    * @param interaction
    */
   async getCurrentPlayingMessage (interaction) {
-    const queue = this.getQueue(interaction.guild)
+    const queue = this.getQueue(interaction.member.guild)
 
     const progressBar = filledBar(queue.duration, queue.currentTime, 40, '-', '=')
     const durationString = queue.formattedCurrentTime + ` ${progressBar[0]} ` + queue.formattedDuration

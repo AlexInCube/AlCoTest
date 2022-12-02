@@ -37,7 +37,7 @@ module.exports.run = async ({ interaction }) => {
 
   interaction.reply({ content: 'Обработка запроса' })
 
-  await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestQueueJump, interaction.guild, pos, interaction.member.user.username)
+  await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestQueueJump, interaction.member.guild, pos, interaction.member.user.username)
 
-  interaction.deleteReply()
+  await interaction.deleteReply()
 }

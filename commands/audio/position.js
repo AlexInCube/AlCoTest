@@ -37,7 +37,7 @@ module.exports.run = async ({ interaction, guild }) => {
   interaction.reply({ content: 'Обработка запроса' })
 
   const time = interaction.options.getNumber('time')
-  await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestChangeSongTime, interaction.guild, time, interaction.member.user.username)
+  await AudioPlayer.playerEmitter.emit(AudioPlayerEvents.requestChangeSongTime, interaction.member.guild, time, interaction.member.user.username)
 
-  interaction.deleteReply()
+  await interaction.deleteReply()
 }
