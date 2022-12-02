@@ -281,17 +281,16 @@ class AudioPlayerDiscordGui {
    * @param interaction
    */
   async isChannelWithPlayer (interaction) {
-    const channelId = this.musicPlayerMap[interaction.member.guild.id]?.ChannelID
+    const channelId = this.musicPlayerMap[interaction.guildId]?.ChannelID
     if (!channelId) {
       return true
     }
     if (interaction.channel.id === channelId) {
       return true
     } else {
-      const channel = this.client.channels.cache.get(channelId)
+      const channel = await this.client.channels.fetch(channelId)
       if (channel) {
-        const channelName = channel.name
-        await interaction.reply({ content: `Плеер бота запущен на текстовом канале **#"${channelName}"**, поэтому музыкальные команды работают только там.`, ephemeral: true })
+        await interaction.reply({ content: `Плеер бота запущен на текстовом канале **<#${channel.id}>**, поэтому музыкальные команды работают только там.`, ephemeral: true })
       }
 
       return false

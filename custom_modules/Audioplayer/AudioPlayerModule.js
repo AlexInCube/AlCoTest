@@ -127,9 +127,11 @@ class AudioPlayerModule {
   }
 
   async playerIsExists (interaction) {
-    if (this.getQueue(interaction.member.guild) === undefined) {
-      await interaction.reply({ content: 'Плеера не существует', ephemeral: true })
-      return false
+    if (this.musicPlayerMap[interaction.guildId] === undefined) {
+      if (this.getQueue(interaction.member.guild) === undefined) {
+        await interaction.reply({ content: 'Плеера не существует', ephemeral: true })
+        return false
+      }
     }
 
     return true
