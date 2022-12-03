@@ -1,6 +1,6 @@
 {
   "name": "discord_js_bot",
-  "version": "1.45",
+  "version": "1.45.1",
   "description": "",
   "main": "main.js",
   "scripts": {

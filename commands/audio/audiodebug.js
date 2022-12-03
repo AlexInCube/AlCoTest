@@ -18,5 +18,6 @@ module.exports.run = async ({ interaction }) => {
     interaction.reply({ content: 'Эта команда только для разработчиков бота, забудьте про неё', ephemeral: true })
     return
   }
+
   await interaction.reply({ content: JSON.stringify(AudioPlayer.musicPlayerMap), ephemeral: true })
 }

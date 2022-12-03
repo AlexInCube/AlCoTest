@@ -143,6 +143,7 @@ class AudioPlayerModule {
    */
   async clearPlayerState (guild) {
     await this.discordGui.deletePlayerMessage(guild)
+    // loggerSend(`ClearPlayerState ${guild.id}`)
     delete this.musicPlayerMap[guild.id]
   }
 

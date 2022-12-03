@@ -247,6 +247,7 @@ class AudioPlayerDiscordGui {
 
     await this.musicPlayerMap[guild.id].Collector.stop()
     const playerMessage = await this.getPlayerMessageInGuild(guild)
+    // loggerSend(`DeletePlayerMessage + ${JSON.stringify(playerMessage)}`)
     if (playerMessage !== undefined) {
       await playerMessage.delete()
     }
@@ -272,7 +273,21 @@ class AudioPlayerDiscordGui {
     const guildId = guild.id
     const channel = await this.client.channels.cache.get(this.musicPlayerMap[guildId]?.ChannelID)
     if (!channel) return undefined
-    return channel.messages.fetch(this.musicPlayerMap[guildId]?.MessageID)
+
+    // loggerSend(`getPlayerMessageInGuild ${this.musicPlayerMap[guildId]?.MessageID}`)
+    const message = await channel.messages.fetch(this.musicPlayerMap[guildId]?.MessageID)
+
+    if (message) {
+      try {
+        const finalMessage = await message.fetch(true)
+
+        if (finalMessage) return finalMessage
+      } catch (e) {
+
+      }
+    }
+
+    return undefined
   }
 
   /**
@@ -285,12 +300,15 @@ class AudioPlayerDiscordGui {
     if (!channelId) {
       return true
     }
+
+    // loggerSend(`IsChannelWithPlayer - InteractionChannelID ${interaction.channel.id} playerChannelId ${channelId}`)
+
     if (interaction.channel.id === channelId) {
       return true
     } else {
       const channel = await this.client.channels.fetch(channelId)
       if (channel) {
-        await interaction.reply({ content: `Плеер бота запущен на текстовом канале **<#${channel.id}>**, поэтому музыкальные команды работают только там.`, ephemeral: true })
+        await interaction.reply({ content: `Плеер бота запущен на текстовом канале **#${channel.name}**, поэтому музыкальные команды работают только там.`, ephemeral: true })
       }
 
       return false
@@ -357,7 +375,13 @@ class AudioPlayerDiscordGui {
         const message = await channel.messages.fetch(player.MessageID)
 
         if (message) {
-          await message.edit({ embeds: [player.PlayerEmbed] })
+          try {
+            const finalMessage = await message.fetch(true)
+
+            if (finalMessage) return await finalMessage.edit({ embeds: [player.PlayerEmbed] })
+          } catch (e) {
+
+          }
         }
       }
     } catch (e) {
