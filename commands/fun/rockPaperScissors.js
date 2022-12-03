@@ -6,7 +6,8 @@ module.exports.help = {
   group: 'fun',
   arguments: '(пользователь с сервера)',
   description: 'Киньте вызов в "Камень, Ножницы, Бумага!" против любого человека и уничтожьте своего врага!',
-  bot_permissions: [PermissionsBitField.Flags.SendMessages]
+  bot_permissions: [PermissionsBitField.Flags.SendMessages],
+  guild_only: true
 }
 
 module.exports.slashBuilder = new SlashCommandBuilder()
@@ -22,7 +23,7 @@ module.exports.slashBuilder = new SlashCommandBuilder()
       .setRequired(true)
   )
 
-module.exports.run = async ({ client, interaction, channel, guild }) => {
+module.exports.run = async ({ client, interaction, channel }) => {
   const userAttacker = interaction.member.user
   const userDefender = client.users.cache.get(interaction.options.get('user').value)
 

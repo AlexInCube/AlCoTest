@@ -7,7 +7,8 @@ module.exports.help = {
   group: 'audio',
   arguments: '(позиция в очереди)',
   description: 'Пропускает все песни до указанной.',
-  bot_permissions: [PermissionsBitField.Flags.SendMessages]
+  bot_permissions: [PermissionsBitField.Flags.SendMessages],
+  guild_only: true
 }
 
 module.exports.slashBuilder = new SlashCommandBuilder()

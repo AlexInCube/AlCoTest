@@ -14,7 +14,8 @@ module.exports.help = {
     PermissionsBitField.Flags.Speak,
     PermissionsBitField.Flags.ManageMessages,
     PermissionsBitField.Flags.AttachFiles
-  ]
+  ],
+  guild_only: true
 }
 
 module.exports.slashBuilder = new SlashCommandBuilder()

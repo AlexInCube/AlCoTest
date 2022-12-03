@@ -8,7 +8,8 @@ module.exports.help = {
   group: 'audio',
   arguments: '(позиция в очереди)',
   description: 'Удаляет песню из очереди по номеру.',
-  bot_permissions: [PermissionsBitField.Flags.SendMessages]
+  bot_permissions: [PermissionsBitField.Flags.SendMessages],
+  guild_only: true
 }
 
 module.exports.slashBuilder = new SlashCommandBuilder()

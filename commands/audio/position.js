@@ -7,7 +7,8 @@ module.exports.help = {
   group: 'audio',
   arguments: '(время в секундах)',
   description: 'Меняет время с которого должна проигрываться песня.',
-  bot_permissions: [PermissionsBitField.Flags.SendMessages]
+  bot_permissions: [PermissionsBitField.Flags.SendMessages],
+  guild_only: true
 }
 
 module.exports.slashBuilder = new SlashCommandBuilder()

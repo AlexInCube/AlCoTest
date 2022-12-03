@@ -38,7 +38,7 @@ module.exports.CommandsSetup = async (client) => {
   })
 
   // Отправляем массив slashBuilder`ов в Discord
-  buildersArray.map(command => command.toJSON())
+  // buildersArray.map(command => command.toJSON())
   const rest = new REST({ version: '10' }).setToken(process.env.BOT_DISCORD_TOKEN)
 
   await rest.put(
@@ -58,6 +58,13 @@ module.exports.CommandsSetup = async (client) => {
       const commandFile = client.commands.executable.get(commandName) // получение команды из коллекции
 
       if (commandFile) {
+        if (commandFile.help.guild_only) {
+          if (!interaction.guild) {
+            interaction.reply({ content: 'Эта команда может выполняться только на серверах', ephemeral: true })
+            return
+          }
+        }
+
         if (!CheckBotPermissions(client, interaction, commandFile.help.bot_permissions)) { return }
         commandFile.run({
           interaction,
@@ -70,6 +77,7 @@ module.exports.CommandsSetup = async (client) => {
       const { commandName } = interaction
       const commandFile = client.commands.executable.get(commandName) // получение команды из коллекции
       if (!commandFile.autocomplete) return
+
       try {
         if (commandFile) {
           commandFile.autocomplete({

@@ -6,7 +6,8 @@ module.exports.help = {
   group: 'audio',
   arguments: '',
   description: 'Показывает текущее время проигрывания песни',
-  bot_permissions: [PermissionsBitField.Flags.SendMessages]
+  bot_permissions: [PermissionsBitField.Flags.SendMessages],
+  guild_only: true
 }
 
 module.exports.slashBuilder = new SlashCommandBuilder()

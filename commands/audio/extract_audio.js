@@ -7,8 +7,13 @@ module.exports.help = {
   group: 'audio',
   arguments: '(Ссылка на Youtube видео или Spotify трек)',
   description: 'Скачивает звук из видео и отправляет его в чат. Если трек из Spotify, то он ищется на Youtube.',
-  bot_permissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ManageMessages, PermissionsBitField.Flags.AttachFiles]
+  bot_permissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ManageMessages, PermissionsBitField.Flags.AttachFiles],
+  guild_only: true
 }
+
+module.exports.slashBuilder = new SlashCommandBuilder()
+  .setName(module.exports.help.name)
+  .setDescription(module.exports.help.description)
 
 module.exports.slashBuilder = new SlashCommandBuilder()
   .setName(module.exports.help.name)
