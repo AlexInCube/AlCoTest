@@ -1,0 +1,5 @@
+.idea
+.env.development
+.env.production
+package-lock.json
+build
