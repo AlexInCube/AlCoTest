@@ -1,4 +1,4 @@
-import {DiscordUser} from "../src/testsUtilities/discordUser";
+import {DiscordBotTestingUnit} from "../src/testsUtilities/DiscordBotTestingUnit";
 import alcotest from "../src/commands/fun/alcotest.command";
 import '../src/EnvironmentTypes'
 import {runBrowserAndLogin} from "../src/testsUtilities/runBrowserAndLogin";
@@ -6,19 +6,26 @@ import {loggerSend} from "../src/utilities/logger"
 import {Driver} from "selenium-webdriver/firefox";
 import inviteLinkCommand from "../src/commands/other/inviteLink.command";
 import {generateLinkMessage} from "../src/commands/other/inviteLink.command";
+import helpCommand from "../src/commands/other/help.command";
+import {fail} from "assert";
 
 let driver: Driver;
-let user: DiscordUser;
+let testingUnit: DiscordBotTestingUnit;
 
 beforeAll(async () => {
     await runBrowserAndLogin().then((r) => {
-        driver = r.driver
-        user = r.user
+        driver = r
     })
+
+    testingUnit = new DiscordBotTestingUnit(driver)
+    await testingUnit.runTestSuite()
+
+    await driver.sleep(1000)
 })
 
 afterAll(async () => {
     try {
+        testingUnit.testingBot.destroy()
         await driver.quit()
     } catch (e) {
         loggerSend(e)
@@ -27,22 +34,76 @@ afterAll(async () => {
 
 describe('commandsAll', () => {
     beforeEach(async () => {
-        return await driver.sleep(2000)
+        return await driver.sleep(1000)
     })
 
-    test(`${alcotest.name}`, async () => {
-        await user.sendMessage(driver, `${process.env.BOT_COMMAND_PREFIX}${alcotest.name}`)
-        await user.getLastMessageInChannel(driver).then((messageContent: string) => {
-            const isStarts: boolean = messageContent.startsWith("Вы состоите из пива на ")
-            expect(isStarts).toBe(true);
+    describe(`alcotestCommand`, () => {
+        beforeEach(async () => {
+            return await driver.sleep(1000)
+        })
+
+        test(`text`, async () => {
+            await testingUnit.sendMessage(`${process.env.BOT_COMMAND_PREFIX}${alcotest.name}`)
+            await testingUnit.getLastMessageInChannel().then((message) => {
+                if (!message) fail()
+                const isStarts: boolean = message.content.startsWith("🍻 Вы состоите из пива на ")
+                expect(isStarts).toBe(true);
+            })
+        })
+
+        test(`slash`, async () => {
+            await testingUnit.sendSlashCommand(`${alcotest.name}`)
+            await testingUnit.getLastMessageInChannel().then((message) => {
+                if (!message) fail()
+                const isStarts: boolean = message.content.startsWith("🍻 Вы состоите из пива на ")
+                expect(isStarts).toBe(true);
+            })
         })
     })
 
-    test(`${inviteLinkCommand.name}`, async () => {
-        await user.sendMessage(driver, `${process.env.BOT_COMMAND_PREFIX}${inviteLinkCommand.name}`)
-        await user.getLastMessageInChannel(driver).then((messageContent: string) => {
-            const isTheSameLink: boolean = messageContent === generateLinkMessage()
-            expect(isTheSameLink).toBe(true);
+    describe(`linkCommand`, () => {
+        beforeEach(async () => {
+            return await driver.sleep(1000)
+        })
+
+        test(`text`, async () => {
+            await testingUnit.sendMessage(`${process.env.BOT_COMMAND_PREFIX}${inviteLinkCommand.name}`)
+            await testingUnit.getLastMessageInChannel().then((message) => {
+                if (!message) fail()
+                expect(message.content).toEqual(generateLinkMessage())
+            })
+        })
+
+        test(`slash`, async () => {
+            await testingUnit.sendSlashCommand(`${inviteLinkCommand.name}`)
+            await testingUnit.getLastMessageInChannel().then((message) => {
+                if (!message) fail()
+                expect(message.content).toEqual(generateLinkMessage())
+            })
+        })
+    })
+
+    describe(`helpCommand`, () => {
+        describe(`text`, () => {
+            beforeEach(async () => {
+                return await driver.sleep(1000)
+            })
+
+            test('without_args', async () => {
+                await testingUnit.sendMessage(`${process.env.BOT_COMMAND_PREFIX}${helpCommand.name}`)
+                await testingUnit.getLastMessageInChannel().then((message) => {
+                    if (!message) fail()
+                    expect(message.embeds[0].title).toEqual('Справка о командах')
+                })
+            })
+
+            test('with_args', async () => {
+                await testingUnit.sendMessage(`${process.env.BOT_COMMAND_PREFIX}${helpCommand.name} ${alcotest.name}`)
+                await testingUnit.getLastMessageInChannel().then((message) => {
+                    if (!message) fail()
+                    expect(message.embeds[0].description).toEqual(alcotest.description)
+                })
+            })
         })
     })
 });

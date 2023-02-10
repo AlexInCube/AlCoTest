@@ -69,7 +69,7 @@ const command : ICommand = {
         }
     }
 }
-function generateSpecificCommandHelp (commandName: string, client: Client, guild?: Guild) {
+export function generateSpecificCommandHelp (commandName: string, client: Client, guild?: Guild) {
     const command = client.commands.get(commandName)
 
     const helpEmbed = new EmbedBuilder()
@@ -110,7 +110,7 @@ function generateSpecificCommandHelp (commandName: string, client: Client, guild
     return helpEmbed
 }
 
-function generateCommandsEmbedList (client: Client): EmbedBuilder {
+export function generateCommandsEmbedList (client: Client): EmbedBuilder {
     const helpEmbed = new EmbedBuilder()
         .setColor('#436df7')
         .setTitle('Справка о командах')
