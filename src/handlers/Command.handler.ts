@@ -1,4 +1,4 @@
-import {Client, Collection, Routes, REST} from "discord.js";
+import {Client, Collection, REST, Routes} from "discord.js";
 import {loggerSend} from "../utilities/logger";
 import {ICommand, SlashBuilder} from "../CommandTypes";
 import * as fs from "fs";
@@ -6,8 +6,10 @@ import * as path from "path";
 import "../Types"
 import * as process from "process";
 
-module.exports = async (client: Client) => {
-    loggerSend('Начинаем загружать команды.')
+export const loggerPrefixCommandHandler = "[ Commands ]"
+
+const handler = async (client: Client) => {
+    //loggerSend(`${loggerPrefixCommandHandler} Начинаем загружать команды.`)
 
     const commands = new Collection<string, ICommand>()
     const commandsGroups = new Collection<string, ICommand[]>()
@@ -43,11 +45,13 @@ module.exports = async (client: Client) => {
     await rest.put(Routes.applicationCommands(process.env.BOT_DISCORD_CLIENT_ID),
         { body: buildersArray }
     ).then(() => {
-        loggerSend(`Загружено команд: ${scanResult.length}`)
+        loggerSend(`${loggerPrefixCommandHandler} Загружено команд: ${scanResult.length}`)
     }).catch((error) => {
-        console.error(error)
+        loggerSend(`${loggerPrefixCommandHandler} ${error}`)
     })
 }
+
+export default handler
 
 function getAllCommandFilesInDir (dirPath: string, arrayOfFiles: string[] = []) {
     const files = fs.readdirSync(dirPath)
@@ -66,3 +70,4 @@ function getAllCommandFilesInDir (dirPath: string, arrayOfFiles: string[] = []) 
 
     return arrayOfFiles
 }
+

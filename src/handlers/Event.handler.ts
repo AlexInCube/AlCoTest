@@ -1,10 +1,12 @@
-import { Client } from "discord.js";
-import { readdirSync } from "fs";
-import { join } from "path";
-import { BotEvent } from "../Types";
+import {Client} from "discord.js";
+import {readdirSync} from "fs";
+import {join} from "path";
+import {BotEvent} from "../Types";
 import {loggerSend} from "../utilities/logger";
 
-module.exports = (client: Client) => {
+export const loggerPrefixEventHandler = "[ Events ]"
+
+const handler = (client: Client) => {
     const eventsDir: string = join(__dirname, "../events")
     let eventsCount = 0
 
@@ -21,5 +23,7 @@ module.exports = (client: Client) => {
         eventsCount++
     })
 
-    loggerSend(`Загружено событий: ${eventsCount}`)
+    loggerSend(`${loggerPrefixEventHandler} Загружено событий: ${eventsCount}`)
 }
+
+export default handler

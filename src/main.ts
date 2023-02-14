@@ -28,8 +28,8 @@ export const client = new Client({
 
 const handlersDir = path.join(__dirname, "./handlers")
 fs.readdirSync(handlersDir).forEach((handler: any) => {
-    if (!handler.endsWith(".js")) return
-    require(`${handlersDir}/${handler}`)(client)
+    if (!handler.endsWith(".handler.js")) return
+    require(`${handlersDir}/${handler}`).default(client)
 })
 
 loginBot()

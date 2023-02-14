@@ -1,5 +1,5 @@
 import {BotEvent} from "../Types";
-import {CheckBotPermissionsInChannel} from "../utilities/checkBotPermissionsInChannel";
+import {CheckBotPermissions} from "../utilities/checkPermissions";
 import {TextChannel} from "discord.js";
 import {loggerSend} from "../utilities/logger";
 
@@ -21,7 +21,7 @@ const event: BotEvent = {
                 }
 
                 if (interaction.guild){// Если мы пишем в личку боту, то никакого сервера/гильдии быть не может. Соответственно как и привилегий в личных сообщениях
-                    if (!CheckBotPermissionsInChannel(interaction.channel as TextChannel, command.bot_permissions)) {
+                    if (!CheckBotPermissions(interaction.channel as TextChannel, command.bot_permissions)) {
                         void await interaction.reply({
                             content: ':no_entry: У БОТА недостаточно прав на этом канале или сервере :no_entry:.\n' +
                                 'Напишите /help (название команды), чтобы увидеть недостающие права. \n' +

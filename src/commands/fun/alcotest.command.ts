@@ -1,4 +1,4 @@
-import {ICommand, CommandGroup} from "../../CommandTypes";
+import {CommandGroup, ICommand} from "../../CommandTypes";
 import {PermissionsBitField, SlashCommandBuilder} from "discord.js";
 
 const command : ICommand = {

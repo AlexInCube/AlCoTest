@@ -14,6 +14,9 @@ declare global{
             TEST_ENVIRONMENT_IS_HEADLESS: string
             TEST_ENVIRONMENT_DISCORD_CHAT_GUILD_ID: string;
             TEST_ENVIRONMENT_DISCORD_CHAT_CHANNEL_ID: string;
+
+            MONGO_URI: string;
+            MONGO_DATABASE_NAME: string
         }
     }
 }

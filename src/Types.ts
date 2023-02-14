@@ -13,3 +13,4 @@ export interface BotEvent {
     once?: boolean | false,
     execute: (...args: any) => void
 }
+

@@ -1,6 +1,5 @@
-import {Options} from "selenium-webdriver/firefox";
+import {Driver as FirefoxDriver, Options} from "selenium-webdriver/firefox";
 import {Browser, Builder, By, Key} from "selenium-webdriver";
-import {Driver as FirefoxDriver} from "selenium-webdriver/firefox";
 
 export async function runBrowserAndLogin() {
     const firefoxOptions = new Options()

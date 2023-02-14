@@ -1,10 +1,5 @@
 import {CommandGroup, ICommand} from "../../CommandTypes";
-import {
-    Client,
-    EmbedBuilder, Guild, PermissionResolvable,
-    PermissionsBitField,
-    SlashCommandBuilder
-} from "discord.js";
+import {Client, EmbedBuilder, Guild, PermissionResolvable, PermissionsBitField, SlashCommandBuilder} from "discord.js";
 import "../../Types"
 import * as process from "process";
 

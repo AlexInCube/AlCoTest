@@ -1,4 +1,4 @@
-import {ICommand, CommandGroup} from "../../CommandTypes";
+import {CommandGroup, ICommand} from "../../CommandTypes";
 import {PermissionsBitField, SlashCommandBuilder} from "discord.js";
 
 const command : ICommand = {
@@ -24,7 +24,7 @@ const command : ICommand = {
 }
 
 export function generateLinkMessage(): string{
-    return `https://discord.com/api/oauth2/authorize?client_id=813750165789343764&permissions=8&scope=bot`
+    return `https://discord.com/api/oauth2/authorize?client_id=${process.env.BOT_DISCORD_CLIENT_ID}&permissions=8&scope=bot%20applications.commands`
 }
 
 export default command
