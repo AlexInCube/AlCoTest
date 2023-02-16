@@ -4,9 +4,9 @@ import '../src/EnvironmentTypes'
 import {runBrowserAndLogin} from "../src/testsUtilities/runBrowserAndLogin";
 import {loggerSend} from "../src/utilities/logger"
 import {Driver} from "selenium-webdriver/firefox";
-import inviteLinkCommand from "../src/commands/other/inviteLink.command";
-import {generateLinkMessage} from "../src/commands/other/inviteLink.command";
-import helpCommand from "../src/commands/other/help.command";
+import inviteLinkCommand from "../src/commands/info/inviteLink.command";
+import {generateLinkMessage} from "../src/commands/info/inviteLink.command";
+import helpCommand from "../src/commands/info/help.command";
 import {fail} from "assert";
 
 let driver: Driver;

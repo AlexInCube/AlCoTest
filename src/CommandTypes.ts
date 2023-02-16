@@ -6,10 +6,10 @@ import {
     SlashCommandBuilder
 } from "discord.js";
 
-export enum CommandGroup {
-    Audio = "audio",
-    Fun = "fun",
-    Other = "other"
+export interface ICommandGroup {
+    name: string;
+    icon_emoji: string;
+    commands: Array<ICommand>
 }
 
 export type SlashBuilder =
@@ -19,7 +19,7 @@ export interface ICommand{
     name: string,
     description: string;
     arguments? : string[],
-    group: CommandGroup;
+    group: ICommandGroup;
     slash_builder: SlashBuilder,
     execute: (interaction: ChatInputCommandInteraction) => Promise<void>,
     executeText: (message: Message, args: Array<string>) => Promise<void>,

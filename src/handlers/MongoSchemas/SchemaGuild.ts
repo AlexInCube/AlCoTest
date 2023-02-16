@@ -17,7 +17,7 @@ export type GuildOption = keyof GuildOptions
 const GuildSchema = new Schema<IGuild>({
     guildID: {required:true, type: String},
     options: {
-        prefix: {type: String, default: process.env.PREFIX}
+        prefix: {type: String, default: process.env.BOT_COMMAND_PREFIX}
     }
 })
 
@@ -49,8 +49,7 @@ export async function setGuildOption(guild: Guild, option: GuildOption, value: a
 
 export async function setupSettings(guild: Guild) {
     const newGuild = new GuildModel({
-        guildID: guild.id,
-        options: {},
+        guildID: guild.id
     })
     await newGuild.save()
 }

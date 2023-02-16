@@ -12,7 +12,7 @@ export async function runBrowserAndLogin() {
     await driver.sleep(100)
     await driver.get(`https://discord.com/channels/${process.env.TEST_ENVIRONMENT_DISCORD_CHAT_GUILD_ID}/${process.env.TEST_ENVIRONMENT_DISCORD_CHAT_CHANNEL_ID}`)
     await driver.sleep(800)
-    await driver.findElement(By.className('marginTop8-24uXGp marginCenterHorz-574Oxy linkButton-2ax8wP button-f2h6uQ lookLink-15mFoz lowSaturationUnderline-Z6CW6z colorLink-1Md3RZ sizeMin-DfpWCE grow-2sR_-F'))
+    await driver.findElement(By.className('marginTop8-24uXGp marginCenterHorz-574Oxy linkButton-2ax8wP button-ejjZWC lookLink-13iF2K lowSaturationUnderline-Z6CW6z colorLink-34zig_ sizeMin-3Yqxk5 grow-2T4nbg'))
         .click()
 
     const emailField = driver.findElement(By.name('email'))

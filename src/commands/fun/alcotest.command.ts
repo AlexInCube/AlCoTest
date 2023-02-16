@@ -1,5 +1,6 @@
-import {CommandGroup, ICommand} from "../../CommandTypes";
+import {ICommand} from "../../CommandTypes";
 import {PermissionsBitField, SlashCommandBuilder} from "discord.js";
+import {GroupFun} from "./FunTypes";
 
 const command : ICommand = {
     name: "alcotest",
@@ -7,7 +8,7 @@ const command : ICommand = {
     slash_builder: new SlashCommandBuilder()
         .setName('alcotest')
         .setDescription('Пишет процент пива в твоей крови'),
-    group: CommandGroup.Fun,
+    group: GroupFun,
     bot_permissions: [PermissionsBitField.Flags.SendMessages],
     execute: async (interaction) => {
         await interaction.reply({

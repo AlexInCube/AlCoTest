@@ -3,7 +3,6 @@ import {CheckBotPermissions, CheckMemberPermissions} from "../utilities/checkPer
 import {TextChannel} from "discord.js";
 import process from "process";
 import {MongoCheckConnection} from "../handlers/Mongo.handler";
-import {loggerSend} from "../utilities/logger";
 import {getGuildOption} from "../handlers/MongoSchemas/SchemaGuild";
 
 const event: BotEvent = {
@@ -12,13 +11,15 @@ const event: BotEvent = {
         if (!message.author || message.author.bot) return;
 
         let prefix = process.env.BOT_COMMAND_PREFIX
-        if (MongoCheckConnection()) {
-            const guildPrefix = await getGuildOption(message.guild, "prefix")
-            loggerSend(prefix)
-            if (guildPrefix) prefix = guildPrefix;
+
+        if (message.guild){
+            if (MongoCheckConnection()) {
+                const guildPrefix = await getGuildOption(message.guild, "prefix")
+                if (guildPrefix) prefix = guildPrefix;
+            }
         }
 
-        if (!message.content.startsWith(prefix)) return;//Проверка префикса сообщения
+        if (!message.content.startsWith(prefix) && !message.content.startsWith(process.env.BOT_COMMAND_PREFIX)) return;//Проверка префикса сообщения
 
         const args = message.content.substring(prefix.length).toLowerCase().split(" ")
         const command = message.client.commands.get(args[0])
@@ -41,13 +42,13 @@ const event: BotEvent = {
                 })
                 return
             }
-        }
 
-        if (!CheckMemberPermissions(message.guild.members.cache.get(message.author.id), command.user_permissions)){
-            void await message.reply({
-                content: ':no_entry: У вас недостаточно прав на этом канале или сервере :no_entry:'
-            })
-            return
+            if (!CheckMemberPermissions(message.guild.members.cache.get(message.author.id), command.user_permissions)){
+                void await message.reply({
+                    content: ':no_entry: У вас недостаточно прав на этом канале или сервере :no_entry:'
+                })
+                return
+            }
         }
 
         await command.executeText(message, args)

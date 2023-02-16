@@ -1,6 +1,7 @@
-import {CommandGroup, ICommand} from "../../CommandTypes";
+import {ICommand} from "../../CommandTypes";
 import {Guild, PermissionsBitField, SlashCommandBuilder} from "discord.js";
 import {setGuildOption} from "../../handlers/MongoSchemas/SchemaGuild";
+import {GroupAdmin} from "./AdminTypes";
 
 const command : ICommand = {
     name: "setprefix",
@@ -18,7 +19,7 @@ const command : ICommand = {
                 .setRequired(true)
         ),
     guild_only: true,
-    group: CommandGroup.Fun,
+    group: GroupAdmin,
     user_permissions: [PermissionsBitField.Flags.Administrator],
     bot_permissions: [PermissionsBitField.Flags.SendMessages],
     execute: async (interaction) => {
@@ -39,7 +40,7 @@ const command : ICommand = {
 }
 
 async function changePrefixTo(guild: Guild, prefix: string): Promise<string> {
-    if (prefix === "/" || prefix === "@") return "Нельзя указывать \"/ и @\" в качестве префикса"
+    if (prefix === "/" || prefix === "@" || prefix === "#") return "Нельзя указывать \"/ и @\" в качестве префикса"
     if (prefix.length >= 2) return "Префикс не может быть длиннее двух символов"
     await setGuildOption(guild, "prefix", prefix)
     return `Префикс на этом сервере успешно изменён на ${prefix}`

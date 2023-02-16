@@ -1,4 +1,4 @@
-import {Client, GatewayIntentBits} from "discord.js";
+import {Client, GatewayIntentBits, Partials} from "discord.js";
 import {loggerSend} from "./utilities/logger";
 import * as path from "path";
 import * as fs from "fs";
@@ -23,6 +23,7 @@ export const client = new Client({
         GatewayIntentBits.DirectMessages,
         GatewayIntentBits.DirectMessageTyping
     ],
+    partials: [Partials.Message, Partials.Channel, Partials.Reaction],
     shards: 'auto'
 })
 

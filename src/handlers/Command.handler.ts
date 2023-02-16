@@ -1,6 +1,6 @@
 import {Client, Collection, REST, Routes} from "discord.js";
 import {loggerSend} from "../utilities/logger";
-import {ICommand, SlashBuilder} from "../CommandTypes";
+import {ICommand, ICommandGroup, SlashBuilder} from "../CommandTypes";
 import * as fs from "fs";
 import * as path from "path";
 import "../Types"
@@ -12,29 +12,28 @@ const handler = async (client: Client) => {
     //loggerSend(`${loggerPrefixCommandHandler} Начинаем загружать команды.`)
 
     const commands = new Collection<string, ICommand>()
-    const commandsGroups = new Collection<string, ICommand[]>()
+    const commandsGroups = new Collection<string, ICommandGroup>()
+
+    client.commands = commands
+    client.commandsGroups = commandsGroups
 
     const commandsPath = path.join(__dirname,"../commands")
 
     const scanResult = getAllCommandFilesInDir(commandsPath)
     const buildersArray: SlashBuilder[] = []
 
-    client.commands = commands
-    client.commandsGroups = commandsGroups
-
     scanResult.forEach((filePath) => {
         const command: ICommand = require(filePath).default
-        const groupName = command.group
+        const group: ICommandGroup = command.group
 
         commands.set(command.slash_builder.name, command)
 
-        if (!commandsGroups.has(groupName)) {
-            commandsGroups.set(groupName, [])
-        }
-
-        const commandsArray = commandsGroups.get(groupName)
-        if (commandsArray){
-            commandsArray.push(command)
+        if (!commandsGroups.has(group.name)) {
+            commandsGroups.set(group.name, group)
+            group.commands = [command]
+        }else{
+            const groupInGroups = commandsGroups.get(group.name)
+            groupInGroups?.commands?.push(command)
         }
 
         buildersArray.push(command.slash_builder)

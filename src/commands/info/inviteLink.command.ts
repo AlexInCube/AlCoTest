@@ -1,13 +1,14 @@
-import {CommandGroup, ICommand} from "../../CommandTypes";
+import {ICommand} from "../../CommandTypes";
 import {PermissionsBitField, SlashCommandBuilder} from "discord.js";
+import {GroupInfo} from "./InfoTypes";
 
 const command : ICommand = {
-    name: "link",
+    name: "invite",
     description: 'Ссылка на приглашение этого бота',
     slash_builder: new SlashCommandBuilder()
-        .setName('link')
+        .setName('invite')
         .setDescription('Ссылка на приглашение этого бота'),
-    group: CommandGroup.Other,
+    group: GroupInfo,
     bot_permissions: [PermissionsBitField.Flags.SendMessages],
     execute: async (interaction) => {
         await interaction.reply({

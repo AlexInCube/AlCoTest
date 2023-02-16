@@ -3,12 +3,11 @@ import {GuildMember, PermissionResolvable, PermissionsBitField, TextChannel} fro
 export function CheckBotPermissions (channel: TextChannel, permissionsRequired: Array<PermissionResolvable>): boolean {
     const bot = channel.guild.members.me
     if (!bot) return false
-    permissionsRequired.push(PermissionsBitField.Flags.ViewChannel)
+
     const channelPermissions = bot.permissionsIn(channel)
-    return channelPermissions.has(permissionsRequired)
+    return channelPermissions.has([...permissionsRequired, PermissionsBitField.Flags.ViewChannel])
 }
 
 export function CheckMemberPermissions (member: GuildMember, permissionsRequired: Array<PermissionResolvable> = []): boolean {
-    permissionsRequired.push(PermissionsBitField.Flags.ViewChannel)
-    return member.permissions.has(permissionsRequired)
+    return member.permissions.has([...permissionsRequired, PermissionsBitField.Flags.ViewChannel])
 }
