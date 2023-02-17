@@ -1,4 +1,4 @@
-import {ICommand, ICommandGroup} from "../../CommandTypes";
+import {CommandArgument, ICommand, ICommandGroup} from "../../CommandTypes";
 import {
     Client,
     EmbedBuilder,
@@ -16,6 +16,7 @@ import {getGuildOption} from "../../handlers/MongoSchemas/SchemaGuild";
 const command : ICommand = {
     name: "help",
     description: "Подробное описание команд",
+    arguments: [new CommandArgument("название команды")],
     group: GroupInfo,
     bot_permissions: [PermissionsBitField.Flags.SendMessages],
     slash_builder: new SlashCommandBuilder()
@@ -60,7 +61,7 @@ const command : ICommand = {
         }
     },
     executeText: async (message, args) => {
-        const commandName: string = args[1]
+        const commandName: string = args[0]
         if (commandName) { // Если конкретная команда не указана, то выводим список
             if (message.guild && message.member) {
                 await message.reply({
@@ -92,8 +93,20 @@ export function generateSpecificCommandHelp (commandName: string, client: Client
         return helpEmbed
     }
 
+    let argument_string = ""
+
+    if (command.arguments){
+        command.arguments.forEach((value) => {
+            if (value.required){
+                argument_string += `${value.name} `
+            }else{
+                argument_string += `<${value.name}> `
+            }
+        })
+    }
+
     helpEmbed
-        .setTitle(`/${command.name} ${command.arguments ?? ""}`)
+        .setTitle(`/${command.name} ${argument_string}`)
         .setDescription(command.description)
 
     helpEmbed.addFields({ name: '✉️ Разрешено в личных сообщениях', value: command.guild_only ? "❌ Нет" : "✅ Да", inline: false })
@@ -151,7 +164,9 @@ export async function generateCommandsEmbedList(client: Client, guild?: Guild | 
         .setDescription(
             `Вы можете писать команды через ординарный / (тогда в большинстве случаев ваши сообщения никто не увидит) 
             или используйте префиксы: ${prefixes_string}\n
-            Напишите help <название команды> чтобы увидеть подробности`
+            Напишите help <название команды> чтобы увидеть подробности\n
+            <параметр> - Параметр команды в кавычках необязателен 
+            `
         )
 
     client.commandsGroups.forEach((group) => {

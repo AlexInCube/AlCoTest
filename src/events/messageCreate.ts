@@ -4,6 +4,9 @@ import {TextChannel} from "discord.js";
 import process from "process";
 import {MongoCheckConnection} from "../handlers/Mongo.handler";
 import {getGuildOption} from "../handlers/MongoSchemas/SchemaGuild";
+import {ICommand} from "../CommandTypes";
+import {generateSpecificCommandHelp} from "../commands/info/help.command";
+import {client} from "../main";
 
 const event: BotEvent = {
     name: "messageCreate",
@@ -22,9 +25,24 @@ const event: BotEvent = {
         if (!message.content.startsWith(prefix) && !message.content.startsWith(process.env.BOT_COMMAND_PREFIX)) return;//Проверка префикса сообщения
 
         const args = message.content.substring(prefix.length).toLowerCase().split(" ")
-        const command = message.client.commands.get(args[0])
+        const command: ICommand | undefined = message.client.commands.get(args.shift())
 
         if (!command) return;
+
+        if (command.arguments){
+            let requiredArgsCount = 0
+
+            command.arguments.forEach((arg) => {if (arg.required){requiredArgsCount++}})
+
+            if (requiredArgsCount > args){
+                if (message.guild){
+                    await message.reply({embeds: [generateSpecificCommandHelp(command.name, client, {guild: message.guild, member: message.member})]})
+                    return
+                }
+                await message.reply({embeds: [generateSpecificCommandHelp(command.name, client)]})
+                return
+            }
+        }
 
         if (command.guild_only) {
             if (!message.guild) {

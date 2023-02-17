@@ -1,4 +1,4 @@
-import {ICommand} from "../../CommandTypes";
+import {CommandArgument, ICommand} from "../../CommandTypes";
 import {Guild, PermissionsBitField, SlashCommandBuilder} from "discord.js";
 import {setGuildOption} from "../../handlers/MongoSchemas/SchemaGuild";
 import {GroupAdmin} from "./AdminTypes";
@@ -6,6 +6,7 @@ import {GroupAdmin} from "./AdminTypes";
 const command : ICommand = {
     name: "setprefix",
     description: 'Меняет префикс для ТЕКСТОВЫХ команд (которые пишутся не через / ) и только для текущего сервера',
+    arguments: [new CommandArgument("символ", true)],
     slash_builder: new SlashCommandBuilder()
         .setName('setprefix')
         .setDescription('Меняет префикс для ТЕКСТОВЫХ команд (которые пишутся не через / ) и только для текущего сервера')
@@ -32,15 +33,15 @@ const command : ICommand = {
         })
     },
     executeText: async (message, args) => {
-        const prefix = args[1]
-        if (!prefix) await message.reply("Префикс не указан")
+        const prefix = args[0]
+        if (!prefix) return;
         if (!message.guild) return;
         await message.reply({content: await changePrefixTo(message.guild, prefix)})
     }
 }
 
 async function changePrefixTo(guild: Guild, prefix: string): Promise<string> {
-    if (prefix === "/" || prefix === "@" || prefix === "#") return "Нельзя указывать \"/ и @\" в качестве префикса"
+    if (prefix === "/" || prefix === "@" || prefix === "#") return "Нельзя указывать символы \"/ @ #\" в качестве префикса"
     if (prefix.length >= 2) return "Префикс не может быть длиннее двух символов"
     await setGuildOption(guild, "prefix", prefix)
     return `Префикс на этом сервере успешно изменён на ${prefix}`
