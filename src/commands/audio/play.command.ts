@@ -1,7 +1,16 @@
 import {ICommand, CommandArgument} from "../../CommandTypes";
-import {PermissionsBitField, SlashCommandBuilder, User} from "discord.js";
+import {
+    GuildMember,
+    PermissionsBitField,
+    SlashCommandBuilder,
+    TextChannel,
+    User,
+    VoiceChannel
+} from "discord.js";
 import {GroupAudio} from "./AudioTypes";
 import {AudioPlayerEmbedBuilder} from "./audioPlayer/AudioPlayerEmbedBuilder";
+import {Audio} from "../../main";
+import {checkMemberInVoice} from "./audioPlayer/util/checkMemberInVoice";
 
 const command : ICommand = {
     name: "play",
@@ -28,26 +37,29 @@ const command : ICommand = {
         PermissionsBitField.Flags.ManageMessages,
         PermissionsBitField.Flags.AttachFiles
     ],
-    execute: async (interaction) => {
-        await interaction.reply({
-            embeds: [BuildEmbed(interaction.user)]
-        })
+    execute: async (interaction, ) => {
+        const songQuery = interaction.options.getString('request')
+
+        const member = interaction.member as GuildMember
+        if (checkMemberInVoice(member) && songQuery) {
+            await Audio.play(member.voice.channel as VoiceChannel, interaction.channel as TextChannel, songQuery, {
+                member: interaction.member as GuildMember,
+                textChannel:  interaction.channel as TextChannel
+            })
+        }
     },
-    executeText: async (message) => {
-        await message.reply({
-            embeds: [BuildEmbed(message!.member!.user!)]
-        })
+    executeText: async (message, args) => {
+        args.shift()
+        const songQuery = args.join(" ")
+
+        const member = message.member as GuildMember
+        if (checkMemberInVoice(member)) {
+            await Audio.play(member.voice.channel as VoiceChannel, message.channel as TextChannel, songQuery, {
+                member: message.member as GuildMember,
+                textChannel:  message.channel as TextChannel
+            })
+        }
     }
-}
-
-function BuildEmbed(user: User){
-    const builder = new AudioPlayerEmbedBuilder()
-    builder.setPlayerState("playing")
-    builder.setSongTitle("КИШ - ДЖОКЕР", "https://www.youtube.com/watch?v=NdtZFrSHDd4")
-    builder.setRequester(user)
-    builder.setThumbnail("https://sun9-19.userapi.com/impg/T4DP3HRr5wJ5glwdmX-PHWxWMkw9uR_ApwZcCQ/w0z1kcfbUYE.jpg?size=453x604&quality=96&sign=dc142311a6ef2b833c6db43303857af4&type=album")
-
-    return builder.getEmbed()
 }
 
 export default command

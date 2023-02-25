@@ -3,6 +3,7 @@ import {loggerSend} from "./utilities/logger";
 import * as path from "path";
 import * as fs from "fs";
 import {loginBot} from "./utilities/loginBot";
+import {AudioPlayer} from "./commands/audio/audioPlayer/AudioPlayer";
 
 require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` })
 
@@ -26,6 +27,8 @@ export const client = new Client({
     partials: [Partials.Message, Partials.Channel, Partials.Reaction],
     shards: 'auto'
 })
+
+export const Audio = new AudioPlayer(client)
 
 const handlersDir = path.join(__dirname, "./handlers")
 fs.readdirSync(handlersDir).forEach((handler: any) => {
