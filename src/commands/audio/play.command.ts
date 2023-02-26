@@ -15,7 +15,7 @@ import {checkMemberInVoice} from "./audioPlayer/util/checkMemberInVoice";
 const command : ICommand = {
     name: "play",
     description: 'Проигрывает музыку указанную пользователем',
-    arguments: [new CommandArgument('Ссылка с Youtube/Spotify/Soundcloud или любой текст', false)],
+    arguments: [new CommandArgument('Ссылка с Youtube/Spotify/Soundcloud или любой текст', true)],
     slash_builder: new SlashCommandBuilder()
         .setName("play")
         .setDescription('Проигрывает музыку указанную пользователем.')
@@ -40,6 +40,9 @@ const command : ICommand = {
     execute: async (interaction, ) => {
         const songQuery = interaction.options.getString('request')
 
+        await interaction.reply("ok")
+        await interaction.deleteReply()
+
         const member = interaction.member as GuildMember
         if (checkMemberInVoice(member) && songQuery) {
             await Audio.play(member.voice.channel as VoiceChannel, interaction.channel as TextChannel, songQuery, {
@@ -49,7 +52,6 @@ const command : ICommand = {
         }
     },
     executeText: async (message, args) => {
-        args.shift()
         const songQuery = args.join(" ")
 
         const member = message.member as GuildMember

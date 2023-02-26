@@ -1,43 +1,8 @@
 import {Client, Collection, Message, TextChannel} from "discord.js";
-import {AudioPlayerState} from "./AudioPlayerTypes";
-import {AudioPlayerEmbedBuilder} from "./AudioPlayerEmbedBuilder";
 import {loggerSend} from "../../../utilities/logger";
 import {Queue} from "distube";
+import {PlayerGuild} from "./PlayerGuild";
 
-export class PlayerGuild{
-    private client: Client
-    state: AudioPlayerState = "waiting"
-    textChannel: TextChannel
-    embedBuilder: AudioPlayerEmbedBuilder = new AudioPlayerEmbedBuilder()
-    private messageWithPlayer: Message | undefined
-
-    queue: Queue
-    private readonly updaterInterval: NodeJS.Timeout
-
-    constructor(_client: Client, txtChannel: TextChannel, _queue: Queue) {
-        this.client = _client
-        this.textChannel = txtChannel
-        this.queue = _queue
-        this.updaterInterval = setInterval(async () => {
-            this.embedBuilder.setSongDuration(this.queue.currentTime)
-            await this.update()
-        }, 1000)
-    }
-
-    async init() {
-        loggerSend("Player Init")
-        this.messageWithPlayer = await this.textChannel.send({embeds: [this.embedBuilder.getEmbed()]})
-    }
-
-    async update() {
-        if (!this.messageWithPlayer) return
-        await this.messageWithPlayer.edit({embeds: [this.embedBuilder.getEmbed()]})
-    }
-    async destroy() {
-        clearInterval(this.updaterInterval)
-        await this.messageWithPlayer?.delete()
-    }
-}
 export class PlayersManager{
     private readonly client: Client;
     private readonly collection = new Collection<string, PlayerGuild>();

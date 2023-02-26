@@ -4,7 +4,7 @@ import {getNoun} from "../../../utilities/getNoun";
 import progressBar from "string-progressbar"
 import {formatSecondsToTime} from "../../../utilities/formatSecondsToTime";
 
-export class AudioPlayerEmbedBuilder {
+export class AudioPlayerEmbedBuilder extends EmbedBuilder{
     private playerState: AudioPlayerState = "loading"
     private requester: User | undefined = undefined
     private uploader = "Неизвестно"
@@ -19,29 +19,28 @@ export class AudioPlayerEmbedBuilder {
     private formattedMaxDuration = "00:00"
     private duration_bar = ""
 
-    private readonly embed: EmbedBuilder = new EmbedBuilder();
-
     constructor() {
+        super();
         this.setPlayerState("loading")
         this.setSongDuration(1, 1, false)
         this.setNextSong(undefined)
     }
 
-    getEmbed() {
-        this.embed.setFields([]) // Reset all fields
-        if (this.playerState != "waiting" && this.playerState != "loading"){
+    update() {
+        this.setFields([]) // Reset all fields
+        if (this.playerState !== "waiting" && this.playerState !== "loading"){
             if (this.requester){
-                this.embed.addFields({name: "Запросил", value: this.requester.toString(), inline: true})
+                this.addFields({name: "Запросил", value: this.requester.toString(), inline: true})
             }
 
-            this.embed.addFields({name: "Автор", value: `\`${this.uploader}\``, inline: true})
-            this.embed.addFields({name: "Очередь", value: `
+            this.addFields({name: "Автор", value: `\`${this.uploader}\``, inline: true})
+            this.addFields({name: "Очередь", value: `
                 \`${this.songsCount} ${getNoun(this.songsCount, "песня", "песни", "песен")}\`
                  \`${this.queueDuration}\`
                  `, inline: true})
-            this.embed.addFields({name: "Режим повтора", value: `\`${this.loop}\``, inline: true})
-            this.embed.addFields({name: "Следующая песня", value: `\`${this.nextSong}\``, inline: true})
-            this.embed.addFields({
+            this.addFields({name: "Режим повтора", value: `\`${this.loop}\``, inline: true})
+            this.addFields({name: "Следующая песня", value: `\`${this.nextSong}\``, inline: true})
+            this.addFields({
                 name: "Длительность: ",
                 value: `${this.duration_bar}
                     \`[${this.formattedCurrentDuration} / ${this.formattedMaxDuration}]\``,
@@ -49,32 +48,29 @@ export class AudioPlayerEmbedBuilder {
             })
         }
 
-        return this.embed
+        return this
     }
 
     setSongTitle(name: string, url: string){
-        this.embed.setTitle(name)
-        this.embed.setURL(url)
+        this.setTitle(name)
+        this.setURL(url)
     }
 
-    setThumbnail(url: string){
-        this.embed.setThumbnail(url)
-    }
     setPlayerState(state: AudioPlayerState){
         this.playerState = state
 
         switch (this.playerState){
             case "waiting":
-                this.embed.setAuthor({name: '💿 Ожидание 💿'}).setColor('#43f7f7').setURL(null).setTitle(null).setThumbnail(null)
+                this.setAuthor({name: '💿 Ожидание 💿'}).setColor('#43f7f7').setURL(null).setTitle(null).setThumbnail(null)
                 break
             case "pause":
-                this.embed.setAuthor({name: '⏸️ Пауза ⏸️ '}).setColor('#f74343')
+                this.setAuthor({name: '⏸️ Пауза ⏸️ '}).setColor('#f74343')
                 break
             case "playing":
-                this.embed.setAuthor({name: '▶️ Играет ▶️'}).setColor('#49f743')
+                this.setAuthor({name: '▶️ Играет ▶️'}).setColor('#49f743')
                 break
             case "loading":
-                this.embed.setAuthor({name: '⌚ Пожалуйста, подождите... ⌚'}).setColor('#f1f743').setURL(null).setTitle(null).setThumbnail(null)
+                this.setAuthor({name: '⌚ Пожалуйста, подождите... ⌚'}).setColor('#f1f743').setURL(null).setTitle(null).setThumbnail(null)
                 break
         }
     }
@@ -123,7 +119,7 @@ export class AudioPlayerEmbedBuilder {
             this.duration_bar = `|${progressBar.splitBar(1, 1, 1, undefined, '🔷')[0]}|`
         }else{
             this.formattedMaxDuration = formatSecondsToTime(maxSeconds)
-            this.duration_bar = `|${progressBar.splitBar(maxSeconds, currentSeconds, 26, undefined, '🔷')[0]}|`
+            this.duration_bar = `|${progressBar.splitBar(maxSeconds, Math.max(currentSeconds, 1), 26, undefined, '🔷')[0]}|`
         }
     }
 }
