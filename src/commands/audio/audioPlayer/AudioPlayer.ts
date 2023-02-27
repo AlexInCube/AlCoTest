@@ -38,11 +38,15 @@ export class AudioPlayer{
                 new SoundCloudPlugin()
             ]
         })
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.client.distube = this.distube
 
         this.setupEvents()
     }
 
     async play(voiceChannel: VoiceBasedChannel, textChannel: TextChannel, song: string | Song | SearchResult, options?: PlayOptions) {
+        await this.distube.voices.join(voiceChannel)
         await this.distube.play(voiceChannel, song, options)
     }
 

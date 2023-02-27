@@ -1,7 +1,7 @@
 import {Client, Message, TextChannel} from "discord.js";
 import {AudioPlayerState} from "./AudioPlayerTypes";
 import {AudioPlayerEmbedBuilder} from "./AudioPlayerEmbedBuilder";
-import {Queue} from "distube";
+import {DisTube, Queue} from "distube";
 import {loggerSend} from "../../../utilities/logger";
 
 export class PlayerGuild{
@@ -14,10 +14,10 @@ export class PlayerGuild{
     queue: Queue
     private readonly updaterInterval: NodeJS.Timeout
 
-    constructor(_client: Client, txtChannel: TextChannel, _queue: Queue) {
-        this.client = _client
+    constructor(client: Client, txtChannel: TextChannel, queue: Queue) {
+        this.client = client
         this.textChannel = txtChannel
-        this.queue = _queue
+        this.queue = queue
         this.updaterInterval = setInterval(async () => {
             this.embedBuilder.setSongDuration(this.queue.currentTime)
             await this.update()
@@ -31,6 +31,12 @@ export class PlayerGuild{
     }
     async update() {
         if (!this.messageWithPlayer) return
+        if (!this.client.distube.voices.get(this.messageWithPlayer.guild!)){
+            loggerSend("I am not in channel, so destroy")
+            await this.destroy()
+            return
+        }
+
         try{
             this.embedBuilder.update()
             await this.messageWithPlayer.edit({embeds: [this.embedBuilder]})
