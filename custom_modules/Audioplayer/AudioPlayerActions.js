@@ -1,7 +1,7 @@
 const voice = require('@discordjs/voice')
 const { checkMemberInVoiceWithBotAndReply, checkMemberInVoiceWithReply } = require('../../utilities/checkMemberInVoiceWithBot')
 const { clamp } = require('../../utilities/clamp')
-const { getVoiceConnection } = require('@discordjs/voice')
+const { getVoiceConnection, VoiceConnectionStatus } = require('@discordjs/voice')
 const { RepeatMode } = require('distube')
 const { AudioPlayerEvents } = require('./AudioPlayerEvents')
 const { loggerSend } = require('../../utilities/logger')
@@ -19,7 +19,7 @@ class AudioPlayerActions {
    * @param interaction
    */
   async play (interaction) {
-    const connection = getVoiceConnection(interaction.member.guild.id, interaction.member.guild.client.user?.id)
+    const connection = await getVoiceConnection(interaction.member.guild.id, interaction.member.guild.client.user?.id)
     if (!connection) { // Если бот никуда не подключён, то проверяем находится ли человек запросивший команду хоть где-то
       if (!await checkMemberInVoiceWithReply(interaction.member, interaction)) return
     } else {
@@ -53,6 +53,14 @@ class AudioPlayerActions {
         textChannel: txtChannel
       })
 
+      const connection = await getVoiceConnection(interaction.member.guild.id, interaction.member.guild.client.user?.id)
+      if (connection) {
+        connection.on('stateChange', (oldState, newState) => {
+          if (oldState.status === VoiceConnectionStatus.Ready && newState.status === VoiceConnectionStatus.Connecting) {
+            connection.configureNetworking()
+          }
+        })
+      }
       await interaction.deleteReply()
     } catch (e) {
       loggerSend(e)
