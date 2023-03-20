@@ -1,10 +1,11 @@
-import {Client, EmbedBuilder, TextChannel, VoiceBasedChannel} from "discord.js";
-import {DisTube, PlayOptions, SearchResult, Song} from 'distube';
+import {Client, EmbedBuilder, Guild, TextChannel, VoiceBasedChannel} from "discord.js";
+import {DisTube, PlayOptions, SearchResult, Song, RepeatMode} from 'distube';
 import {PlayersManager} from "./PlayersManager";
 import {loggerSend} from "../../../utilities/logger";
 import SpotifyPlugin from "@distube/spotify";
 import {YtDlpPlugin} from "@distube/yt-dlp";
 import SoundCloudPlugin from "@distube/soundcloud";
+import { getVoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
 
 export class AudioPlayer{
     client: Client
@@ -12,6 +13,7 @@ export class AudioPlayer{
     distube: DisTube
     constructor(_client: Client) {
         this.client = _client
+        this.client.audioPlayer = this
         this.playersManager = new PlayersManager(this.client)
         this.distube = new DisTube(this.client, {
             leaveOnEmpty: true,
@@ -47,10 +49,76 @@ export class AudioPlayer{
 
     async play(voiceChannel: VoiceBasedChannel, textChannel: TextChannel, song: string | Song | SearchResult, options?: PlayOptions) {
         await this.distube.voices.join(voiceChannel)
-        await this.distube.play(voiceChannel, song, options)
+
+        try{
+            await this.distube.play(voiceChannel, song, options)
+        } catch (e) {
+            await textChannel.send({content: "Произошла ошибка, попробуйте другую ссылку"})
+        }
+
+        // This block of code must be removed in the future. For now 20.03.2023 bug with 1 minute voice connection is still present in Discord.js/Voice.
+        // So code below need to bypass the bug
+        const connection = await getVoiceConnection(textChannel.guild.id, textChannel.guild.client.user.id)
+        if (connection) {
+            connection.on('stateChange', (oldState, newState) => {
+                if (oldState.status === VoiceConnectionStatus.Ready && newState.status === VoiceConnectionStatus.Connecting) {
+                    connection.configureNetworking()
+                }
+            })
+        }
     }
 
-    setupEvents(){
+    async stop(guild: Guild){
+        if (this.distube.getQueue(guild)) {
+            await this.distube.stop(guild)
+        } else {
+            await this.distube.voices.leave(guild)
+        }
+    }
+
+    async pause(guild: Guild){
+        const queue = this.distube.getQueue(guild)
+        if (!queue) return
+        const player = this.playersManager.get(queue.id)
+        if (!player) return
+        if (queue.paused){
+            await this.distube.resume(guild)
+            await player.setState("playing")
+        }else{
+            await this.distube.pause(guild)
+            await player.setState("pause")
+        }
+    }
+
+    async changeLoopMode (guild: Guild) {
+        const queue = this.distube.getQueue(guild)
+        if (!queue) return
+        const player = this.playersManager.get(queue.id)
+        if (!player) return
+
+        switch (queue.repeatMode) {
+            case RepeatMode.DISABLED:
+                await queue.setRepeatMode(RepeatMode.SONG)
+                player.embedBuilder.setLoopMode("song")
+                break
+            case RepeatMode.SONG:
+                await queue.setRepeatMode(RepeatMode.QUEUE)
+                player.embedBuilder.setLoopMode("queue")
+                break
+            case RepeatMode.QUEUE:
+                await queue.setRepeatMode(RepeatMode.DISABLED)
+                player.embedBuilder.setLoopMode("disabled")
+                break
+        }
+    }
+
+    async skip (guild: Guild){
+        const queue = this.distube.getQueue(guild)
+        if (queue){
+            await this.distube.skip(guild)
+        }
+    }
+    private setupEvents(){
         this.distube
             .on("empty", async (queue) => {
                 loggerSend("Distube Empty")
@@ -63,12 +131,13 @@ export class AudioPlayer{
                 const player = this.playersManager.get(queue.id)
                 if (player) {
                     await player.init()
+                    await player.setState("playing")
                 }
             })
             .on("playSong", async (queue, song) => {
                 const player = this.playersManager.get(queue.id)
                 if (player) {
-                    player.embedBuilder.setPlayerState("playing")
+                    await player.setState("playing")
                     player.embedBuilder.setSongTitle(song.name ?? "Неизвестно", song.url)
                     player.embedBuilder.setQueueData(queue.songs.length, queue.duration)
                     if (song.thumbnail) {
@@ -76,9 +145,6 @@ export class AudioPlayer{
                     }
                     if (song.member) {
                         player.embedBuilder.setRequester(song.user!)
-                    }
-                    if (queue.songs.length > 1){
-                        player.embedBuilder.setNextSong(queue.songs[1].name)
                     }
                     player.embedBuilder.setUploader(song.uploader.name)
                     player.embedBuilder.setSongDuration(0, song.duration, song.isLive)
@@ -124,8 +190,8 @@ export class AudioPlayer{
             })
             .on('finishSong', async (queue) => {
                 if (!this.playersManager.has(queue.id)) return
-                if (queue.songs.length > 1 && queue.stopped) return
-                this.playersManager.get(queue.id)?.embedBuilder.setPlayerState("waiting")
+                if (queue.songs.length > 1 || queue.stopped) return
+                this.playersManager.get(queue.id)?.setState("waiting")
             })
             .on("error", async (channel, error) => {
                 loggerSend("Distube Error")

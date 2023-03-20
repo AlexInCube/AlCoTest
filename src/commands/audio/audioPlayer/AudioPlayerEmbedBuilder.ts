@@ -61,7 +61,7 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
 
         switch (this.playerState){
             case "waiting":
-                this.setAuthor({name: '💿 Ожидание 💿'}).setColor('#43f7f7').setURL(null).setTitle(null).setThumbnail(null)
+                this.setAuthor({name: '💿 Жду следующую песню 💿'}).setColor('#43f7f7').setURL(null).setTitle(null).setThumbnail(null)
                 break
             case "pause":
                 this.setAuthor({name: '⏸️ Пауза ⏸️ '}).setColor('#f74343')
@@ -116,7 +116,7 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
         this.formattedCurrentDuration = formatSecondsToTime(currentSeconds)
         if (isLive){
             this.formattedMaxDuration = "Прямая трансляция"
-            this.duration_bar = `|${progressBar.splitBar(1, 1, 1, undefined, '🔷')[0]}|`
+            this.duration_bar = `|${progressBar.splitBar(1, 1, 26, undefined, '🔷')[0]}|`
         }else{
             this.formattedMaxDuration = formatSecondsToTime(maxSeconds)
             this.duration_bar = `|${progressBar.splitBar(maxSeconds, Math.max(currentSeconds, 1), 26, undefined, '🔷')[0]}|`
