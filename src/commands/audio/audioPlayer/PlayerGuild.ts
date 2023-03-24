@@ -6,28 +6,54 @@ import {AudioPlayerState} from "./AudioPlayerTypes";
 
 export class PlayerGuild{
     private readonly client: Client
-    textChannel: TextChannel
-    state: AudioPlayerState = "loading"
+    private readonly textChannel: TextChannel
+    private state: AudioPlayerState = "loading"
     embedBuilder: AudioPlayerEmbedBuilder = new AudioPlayerEmbedBuilder()
-    buttonsHandler: AudioPlayerButtonsHandler
+    private buttonsHandler: AudioPlayerButtonsHandler
     private messageWithPlayer: Message | undefined
-    queue: Queue
-    private readonly updaterInterval: NodeJS.Timeout
+    private queue: Queue
+    private updaterInterval: NodeJS.Timeout | undefined
     constructor(client: Client, txtChannel: TextChannel, queue: Queue) {
         this.client = client
         this.textChannel = txtChannel
         this.queue = queue
-        this.updaterInterval = setInterval(async () => {
-            this.embedBuilder.setSongDuration(this.queue.currentTime, this.queue.songs[0].duration, this.queue.songs[0].isLive)
-            await this.update()
-        }, 1000)
         this.buttonsHandler = new AudioPlayerButtonsHandler(this.client, this.textChannel)
     }
 
+    private resetUpdater(){
+        clearInterval(this.updaterInterval)
+        //loggerSend("Interval Cleared")
+        this.updaterInterval = setInterval(async () => {
+            //loggerSend(`Interval Tick`)
+            if (this.queue.songs[0]){
+                //loggerSend(`Update: ${this.queue.currentTime}`)
+                this.embedBuilder.setSongDuration(this.queue.currentTime, this.queue.songs[0].duration, this.queue.songs[0].isLive)
+            }
+
+            await this.update()
+        }, 1250)
+    }
     async init() {
-        //loggerSend("Player Init")
-        this.embedBuilder.update()
-        this.messageWithPlayer = await this.textChannel.send({embeds: [this.embedBuilder]})
+        try{
+            this.embedBuilder.update()
+
+            if (!this.messageWithPlayer) {
+                //loggerSend("Player Init")
+                this.messageWithPlayer = await this.textChannel.send({embeds: [this.embedBuilder]})
+                this.resetUpdater()
+            } else {
+                const messages = await this.textChannel.messages.fetch({ limit: 1 })
+                const lastMessage = messages.first();
+
+                if (lastMessage?.id !== this.messageWithPlayer.id){
+                    if (await this.messageWithPlayer.delete()){
+                        //loggerSend("Player Recreate")
+                        this.messageWithPlayer = await this.textChannel.send({embeds: [this.embedBuilder]})
+                        this.resetUpdater()
+                    }
+                }
+            }
+        } catch (e) { /* empty */ }
     }
 
     async update() {
@@ -39,37 +65,22 @@ export class PlayerGuild{
         }
 
         try{
-            // Recreate player if is not the last message in channel
-            const messages = await this.textChannel.messages.fetch({ limit: 1 })
-            const lastMessage = messages.first();
-            if (this.queue.stopped) return
-
-            if (lastMessage?.id !== this.messageWithPlayer.id){
-                await this.messageWithPlayer.delete()
-                await this.init()
-                return
-            }
-
+            await this.init()
             this.embedBuilder.setNextSong(this.queue.songs[1]?.name) //Temporary Shit
             this.embedBuilder.update()
 
             // Add buttons if needed
-            if (this.state == "playing" || this.state == "pause"){
-                await this.messageWithPlayer.edit({embeds: [this.embedBuilder], components: this.buttonsHandler.getComponents()})
-            }else{
-                await this.messageWithPlayer.edit({embeds: [this.embedBuilder], components: this.buttonsHandler.getComponentsOnlyStop()})
+            switch (this.state){
+                case "playing":
+                case "pause":
+                    await this.messageWithPlayer.edit({embeds: [this.embedBuilder], components: this.buttonsHandler.getComponents()})
+                    break
+                case "waiting":
+                case "loading":
+                    await this.messageWithPlayer.edit({embeds: [this.embedBuilder], components: this.buttonsHandler.getComponentsOnlyStop()})
+                    break
             }
-        }catch (e) {
-            //loggerSend("try to recovery player")
-            try {
-                const msg = await this.messageWithPlayer.channel.messages.fetch(this.messageWithPlayer.id)
-                if (!msg) {
-                    await this.init()
-                }
-            }catch (e) {
-                await this.init()
-            }
-        }
+        }catch (e) { /* empty */ }
     }
     async destroy() {
         //loggerSend("Player Destroy")
@@ -83,6 +94,15 @@ export class PlayerGuild{
 
     async setState(state: AudioPlayerState){
         this.state = state
+        // When Distube is waiting the song, they remove their Queue object. So when we try to play a new song, we need to receive new Queue
+        const queue = this.client.audioPlayer.distube.getQueue(this.textChannel.guild)
+        if (queue){
+            this.queue = queue
+        }
         this.embedBuilder.setPlayerState(state)
+    }
+
+    debug(): string{
+        return `Guild: ${this.textChannel.guildId}, Player State: ${this.state}, Message ID: ${this.messageWithPlayer?.id}\n`
     }
 }

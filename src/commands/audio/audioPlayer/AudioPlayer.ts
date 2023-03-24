@@ -1,11 +1,14 @@
-import {Client, EmbedBuilder, Guild, TextChannel, VoiceBasedChannel} from "discord.js";
-import {DisTube, PlayOptions, SearchResult, Song, RepeatMode} from 'distube';
+import {Client, Embed, EmbedBuilder, Guild, TextChannel, VoiceBasedChannel} from "discord.js";
+import {DisTube, PlayOptions, Queue, RepeatMode, SearchResult, Song} from 'distube';
 import {PlayersManager} from "./PlayersManager";
 import {loggerSend} from "../../../utilities/logger";
 import SpotifyPlugin from "@distube/spotify";
 import {YtDlpPlugin} from "@distube/yt-dlp";
 import SoundCloudPlugin from "@distube/soundcloud";
-import { getVoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
+import {getVoiceConnection, VoiceConnectionStatus} from "@discordjs/voice";
+import {pagination} from "../../../utilities/pagination/pagination";
+import {ButtonStyles, ButtonTypes} from "../../../utilities/pagination/pagination.i";
+
 
 export class AudioPlayer{
     client: Client
@@ -74,6 +77,7 @@ export class AudioPlayer{
         } else {
             await this.distube.voices.leave(guild)
         }
+        await this.playersManager.remove(guild.id)
     }
 
     async pause(guild: Guild){
@@ -117,6 +121,68 @@ export class AudioPlayer{
         if (queue){
             await this.distube.skip(guild)
         }
+    }
+
+    async showQueue (interaction: any){
+        const queue = this.distube.getQueue(interaction.guild)
+        if (!queue) {
+            return
+        }
+
+        function buildPage(queue: Queue, pageNumber: number, entriesPerPage: number){
+            let queueList = ''
+
+            const startingIndex = pageNumber * entriesPerPage
+            
+            for (let i = startingIndex; i < Math.min(startingIndex + entriesPerPage, queue.songs.length); i++) {
+                const song = queue.songs[i]
+                queueList += `${i + 1}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`
+            }
+
+            return new EmbedBuilder()
+                .setAuthor({name: 'Сейчас играет: '})
+                .setTitle(queue.songs[0].name!).setURL(queue.songs[0].url)
+                .setDescription(`**Песни в очереди: **\n${queueList}`.slice(0, 4096))
+        }
+
+        const arrayEmbeds: Array<EmbedBuilder> = []
+        const entriesPerPage = 20
+        const pages = Math.ceil( queue.songs.length / entriesPerPage)
+
+        for (let i = 0; i < pages; i++) {
+            arrayEmbeds.push(buildPage(queue, i, entriesPerPage))
+        }
+
+        await pagination({
+            embeds: arrayEmbeds as unknown as Embed[],
+            author: interaction.member.user,
+            interaction: interaction,
+            ephemeral: true,
+            fastSkip: true,
+            pageTravel: false,
+            buttons: [
+                {
+                    type: ButtonTypes.first,
+                    emoji: "⬅️",
+                    style: ButtonStyles.Secondary
+                },
+                {
+                    type: ButtonTypes.previous,
+                    emoji: "◀️",
+                    style: ButtonStyles.Secondary
+                },
+                {
+                    type: ButtonTypes.next,
+                    emoji: "▶️",
+                    style: ButtonStyles.Secondary
+                },
+                {
+                    type: ButtonTypes.last,
+                    emoji: "➡️",
+                    style: ButtonStyles.Secondary
+                },
+            ]
+        });
     }
     private setupEvents(){
         this.distube

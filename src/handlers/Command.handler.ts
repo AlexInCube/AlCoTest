@@ -26,7 +26,7 @@ const handler = async (client: Client) => {
         const command: ICommand = require(filePath).default
         const group: ICommandGroup = command.group
 
-        commands.set(command.slash_builder.name, command)
+        commands.set(command.name, command)
 
         if (!commandsGroups.has(group.name)) {
             commandsGroups.set(group.name, group)
@@ -36,7 +36,9 @@ const handler = async (client: Client) => {
             groupInGroups?.commands?.push(command)
         }
 
-        buildersArray.push(command.slash_builder)
+        if (command.slash_builder){
+            buildersArray.push(command.slash_builder)
+        }
     })
 
     const rest = new REST({ version: '10' }).setToken(process.env.BOT_DISCORD_TOKEN)

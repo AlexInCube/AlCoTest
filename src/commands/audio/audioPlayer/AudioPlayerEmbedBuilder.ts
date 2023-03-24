@@ -1,8 +1,9 @@
 import {EmbedBuilder, User} from "discord.js";
 import {AudioPlayerLoopMode, AudioPlayerState} from "./AudioPlayerTypes";
 import {getNoun} from "../../../utilities/getNoun";
-import progressBar from "string-progressbar"
 import {formatSecondsToTime} from "../../../utilities/formatSecondsToTime";
+import {loggerSend} from "../../../utilities/logger";
+import {splitBar} from "../../../utilities/splitBar";
 
 export class AudioPlayerEmbedBuilder extends EmbedBuilder{
     private playerState: AudioPlayerState = "loading"
@@ -58,6 +59,8 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
 
     setPlayerState(state: AudioPlayerState){
         this.playerState = state
+
+        loggerSend(state)
 
         switch (this.playerState){
             case "waiting":
@@ -116,10 +119,10 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
         this.formattedCurrentDuration = formatSecondsToTime(currentSeconds)
         if (isLive){
             this.formattedMaxDuration = "Прямая трансляция"
-            this.duration_bar = `|${progressBar.splitBar(1, 1, 26, undefined, '🔷')[0]}|`
+            this.duration_bar = `|${splitBar(1, 1, 25, undefined, '🔷')[0]}|`
         }else{
             this.formattedMaxDuration = formatSecondsToTime(maxSeconds)
-            this.duration_bar = `|${progressBar.splitBar(maxSeconds, Math.max(currentSeconds, 1), 26, undefined, '🔷')[0]}|`
+            this.duration_bar = `|${splitBar(maxSeconds, Math.max(currentSeconds, 1), 25, undefined, '🔷')[0]}|`
         }
     }
 }

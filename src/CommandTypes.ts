@@ -20,8 +20,8 @@ export interface ICommand{
     description: string;
     arguments? : Array<CommandArgument>,
     group: ICommandGroup;
-    slash_builder: SlashBuilder,
-    execute: (interaction: ChatInputCommandInteraction) => Promise<void>,
+    slash_builder?: SlashBuilder,
+    execute?: (interaction: ChatInputCommandInteraction) => Promise<void>,
     executeText: (message: Message, args: Array<string>) => Promise<void>,
     user_permissions?: Array<PermissionResolvable>,
     bot_permissions: Array<PermissionResolvable>,

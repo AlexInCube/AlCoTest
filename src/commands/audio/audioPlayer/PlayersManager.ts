@@ -1,4 +1,4 @@
-import {Client, Collection, Message, TextChannel} from "discord.js";
+import {Client, Collection, TextChannel} from "discord.js";
 import {loggerSend} from "../../../utilities/logger";
 import {Queue} from "distube";
 import {PlayerGuild} from "./PlayerGuild";
@@ -36,5 +36,14 @@ export class PlayersManager{
 
     has(guildId: string): boolean{
         return this.collection.has(guildId)
+    }
+
+    debug(): string {
+        let str = `Players Count: ${this.collection.size}\n`
+        this.collection.forEach((player) => {
+            str += player.debug()
+        })
+
+        return str
     }
 }
