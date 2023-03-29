@@ -8,6 +8,8 @@ import SoundCloudPlugin from "@distube/soundcloud";
 import {getVoiceConnection, VoiceConnectionStatus} from "@discordjs/voice";
 import {pagination} from "../../../utilities/pagination/pagination";
 import {ButtonStyles, ButtonTypes} from "../../../utilities/pagination/pagination.i";
+import {clamp} from "../../../utilities/clamp";
+import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed";
 
 
 export class AudioPlayer{
@@ -123,6 +125,30 @@ export class AudioPlayer{
         }
     }
 
+    async shuffle(guild: Guild){
+        const queue = this.distube.getQueue(guild)
+        if (queue){
+            await this.distube.shuffle(guild)
+        }
+    }
+
+    async jump(guild: Guild, position: number){
+        try{
+            const queue = this.distube.getQueue(guild)
+            if (queue){
+                await this.distube.jump(guild, clamp(position, 1, queue.songs.length))
+            }
+        }catch (e) { /* empty */ }
+    }
+
+    async rewind(guild: Guild, time: number){
+        const queue = this.distube.getQueue(guild)
+        if (!queue) return
+        const player = this.playersManager.get(queue.id)
+        if (!player) return
+        await this.distube.seek(guild, time)
+        await player.setState("playing")
+    }
     async showQueue (interaction: any){
         const queue = this.distube.getQueue(interaction.guild)
         if (!queue) {
@@ -205,7 +231,7 @@ export class AudioPlayer{
                 if (player) {
                     await player.setState("playing")
                     player.embedBuilder.setSongTitle(song.name ?? "Неизвестно", song.url)
-                    player.embedBuilder.setQueueData(queue.songs.length, queue.duration)
+
                     if (song.thumbnail) {
                         player.embedBuilder.setThumbnail(song.thumbnail)
                     }
@@ -213,7 +239,6 @@ export class AudioPlayer{
                         player.embedBuilder.setRequester(song.user!)
                     }
                     player.embedBuilder.setUploader(song.uploader.name)
-                    player.embedBuilder.setSongDuration(0, song.duration, song.isLive)
                 }
             })
             .on("disconnect", async (queue) => {
@@ -228,11 +253,6 @@ export class AudioPlayer{
                     .setDescription(`Длительность - ${song.formattedDuration} | Автор - ${song.uploader.name}`)
                     .setThumbnail(song.thumbnail ?? null)
 
-                const player = this.playersManager.get(queue.id)
-                if (player){
-                    player.embedBuilder.setQueueData(queue.songs.length, queue.duration)
-                }
-
                 if (queue.textChannel){
                     await queue.textChannel.send({ embeds: [songEmbed] })
                 }
@@ -244,11 +264,6 @@ export class AudioPlayer{
                     .setAuthor({ name: `🎵${playlist.member!.user.username} добавил песню🎵` })
                     .setDescription(`Количество песен - ${playlist.songs.length} | Длительность - ${playlist.formattedDuration}`)
                     .setThumbnail(playlist.thumbnail ?? null)
-
-                const player = this.playersManager.get(queue.id)
-                if (player){
-                    player.embedBuilder.setQueueData(queue.songs.length, queue.duration)
-                }
 
                 if (queue.textChannel){
                     await queue.textChannel.send({ embeds: [songEmbed] })
@@ -262,7 +277,7 @@ export class AudioPlayer{
             .on("error", async (channel, error) => {
                 loggerSend("Distube Error")
 
-                channel?.send(`Произошла ошибка: ${error}`.slice(0, 2000))
+                channel?.send({embeds: [generateErrorEmbed(`${error.name} + \n\n + ${error.message} \n\n + ${error.stack}`)]})
             })
     }
 }

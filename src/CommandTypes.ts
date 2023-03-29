@@ -27,7 +27,8 @@ export interface ICommand{
     bot_permissions: Array<PermissionResolvable>,
     autocomplete?: (interaction: AutocompleteInteraction) => Promise<void>,
     guild_only?: boolean,
-    voice_channel_only?: boolean
+    voice_required?: boolean
+    voice_with_bot_only?: boolean
 }
 
 export class CommandArgument {

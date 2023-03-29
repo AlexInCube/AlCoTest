@@ -1,6 +1,6 @@
 {
   "name": "aic_discord_bot_on_typescript",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "",
   "main": "build/main.js",
   "scripts": {

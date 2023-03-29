@@ -7,6 +7,8 @@ import {
     ComponentType,
     Client
 } from "discord.js";
+import {checkMemberInVoiceWithBot} from "../../../utilities/checkMemberInVoiceWithBot";
+import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed";
 
 enum ButtonIDs{
     stopMusic = "stopMusic",
@@ -51,10 +53,16 @@ export class AudioPlayerButtonsHandler {
 
         this.collector.on("collect", async (ButtonInteraction) => {
             try{
+                const checkObj = await checkMemberInVoiceWithBot(ButtonInteraction.member)
+                if (!checkObj.channelTheSame){
+                    ButtonInteraction.reply({embeds: [generateErrorEmbed(checkObj.errorMessage)], ephemeral: true})
+                    return
+                }
+
                 switch (ButtonInteraction.customId){
                     case ButtonIDs.stopMusic:
                         await this.client.audioPlayer.stop(ButtonInteraction.guild)
-                        ButtonInteraction.deferUpdate()
+                        await ButtonInteraction.reply({content: "Аудиоплеер выключен"})
                         break
 
                     case ButtonIDs.pauseMusic:

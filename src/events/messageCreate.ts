@@ -8,6 +8,10 @@ import {ICommand} from "../CommandTypes";
 import {generateSpecificCommandHelp} from "../commands/info/help.command";
 import {client} from "../main";
 import {loggerSend} from "../utilities/logger";
+import {checkMemberInVoice} from "../utilities/checkMemberInVoice";
+import {checkMemberInVoiceWithBot} from "../utilities/checkMemberInVoiceWithBot";
+import {checkBotInVoice} from "../utilities/checkBotInVoice";
+import {generateErrorEmbed} from "../utilities/generateErrorEmbed";
 
 const event: BotEvent = {
     name: "messageCreate",
@@ -48,25 +52,40 @@ const event: BotEvent = {
 
             if (command.guild_only) {
                 if (!message.guild) {
-                    await message.reply({content: 'Эта команда может выполняться только на серверах'})
+                    await message.reply({embeds: [generateErrorEmbed('Эта команда может выполняться только на серверах')], ephemeral: true})
                     return
+                }
+
+                if (command.voice_required){
+                    if (command.voice_with_bot_only){
+                        if (checkBotInVoice(message.member.guild)){
+                            const checkObj = await checkMemberInVoiceWithBot(message.member)
+                            if (!checkObj.channelTheSame){
+                                await message.reply({content: checkObj.errorMessage})
+                                return
+                            }
+                        }
+                    }
+
+                    if (!checkMemberInVoice(message.member)){
+                        await message.reply({embeds: [generateErrorEmbed('Вы должны быть в любом голосовом канале для выполнения этой команды')]})
+                        return
+                    }
                 }
             }
 
             if (message.guild){// Если мы пишем в личку боту, то никакого сервера/гильдии быть не может. Соответственно как и привилегий в личных сообщениях
                 if (!CheckBotPermissions(message.channel as TextChannel, command.bot_permissions)) {
-                    void await message.reply({
-                        content: ':no_entry: У БОТА недостаточно прав на этом канале или сервере :no_entry:.\n' +
+                    await message.reply({
+                        embeds: [generateErrorEmbed(':no_entry: У БОТА недостаточно прав на этом канале или сервере :no_entry:.\n' +
                             'Напишите /help (название команды), чтобы увидеть недостающие права. \n' +
-                            'А также попросите администрацию сервера их выдать боту.'
+                            'А также попросите администрацию сервера их выдать боту.')]
                     })
                     return
                 }
 
                 if (!CheckMemberPermissions(message.guild.members.cache.get(message.author.id), command.user_permissions)){
-                    void await message.reply({
-                        content: ':no_entry: У вас недостаточно прав на этом канале или сервере :no_entry:'
-                    })
+                    await message.reply({embeds: [generateErrorEmbed('У вас недостаточно прав на этом канале или сервере')]})
                     return
                 }
             }

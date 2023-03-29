@@ -31,7 +31,7 @@ export class PlayerGuild{
             }
 
             await this.update()
-        }, 1250)
+        }, 1370)
     }
     async init() {
         try{
@@ -67,6 +67,7 @@ export class PlayerGuild{
         try{
             await this.init()
             this.embedBuilder.setNextSong(this.queue.songs[1]?.name) //Temporary Shit
+            this.embedBuilder.setQueueData(this.queue.songs.length, this.queue.duration)
             this.embedBuilder.update()
 
             // Add buttons if needed

@@ -6,7 +6,7 @@ import {GroupAudio} from "./AudioTypes";
 
 const command : ICommand = {
     name: "audiodebug",
-    description: 'Проигрывает музыку указанную пользователем',
+    description: 'Отладочная информация о плеерах',
     group: GroupAudio,
     bot_permissions: [
         PermissionsBitField.Flags.SendMessages,

@@ -5,6 +5,7 @@ import {GroupInfo} from "./InfoTypes";
 // @ts-ignore
 import packageJSON from "../../../package.json";
 import {cpu, mem, os} from "node-os-utils";
+import {client} from "../../main";
 
 const command : ICommand = {
     name: "status",
@@ -47,7 +48,7 @@ export async function generateStatusEmbed(): Promise<EmbedBuilder> {
     addState("Процессор", cpu.model())
     addState("Нагрузка на процессор", `${await cpu.usage()} %`)
     addState("Используемая оперативка", `${memoryInfo.usedMemMb} mb / ${memoryInfo.totalMemMb} mb`)
-
+    addState("Количество серверов", `${client.guilds.cache.size}`)
 
     return new EmbedBuilder()
         .addFields({name: "Состояние бота: ", value: stateString})

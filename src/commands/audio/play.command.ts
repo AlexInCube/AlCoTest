@@ -8,7 +8,6 @@ import {
 } from "discord.js";
 import {GroupAudio} from "./AudioTypes";
 import {Audio} from "../../main";
-import {checkMemberInVoice} from "./audioPlayer/util/checkMemberInVoice";
 import {isValidURL} from "../../utilities/isValidURL";
 import {truncateString} from "../../utilities/truncateString";
 import { SearchResultType, SearchResultVideo } from "distube";
@@ -51,6 +50,8 @@ const command : ICommand = {
         }
     },
     group: GroupAudio,
+    guild_only: true,
+    voice_required: true,
     bot_permissions: [
         PermissionsBitField.Flags.SendMessages,
         PermissionsBitField.Flags.Connect,
@@ -62,11 +63,13 @@ const command : ICommand = {
     execute: async (interaction, ) => {
         const songQuery = interaction.options.getString('request')
 
-        await interaction.reply("ok")
-        await interaction.deleteReply()
+        await interaction.reply({
+            content: `Я думаю`,
+        });
+        await interaction.deleteReply();
 
         const member = interaction.member as GuildMember
-        if (checkMemberInVoice(member) && songQuery) {
+        if (songQuery) {
             await Audio.play(member.voice.channel as VoiceChannel, interaction.channel as TextChannel, songQuery, {
                 member: interaction.member as GuildMember,
                 textChannel:  interaction.channel as TextChannel
@@ -77,12 +80,12 @@ const command : ICommand = {
         const songQuery = args.join(" ")
 
         const member = message.member as GuildMember
-        if (checkMemberInVoice(member)) {
-            await Audio.play(member.voice.channel as VoiceChannel, message.channel as TextChannel, songQuery, {
-                member: message.member as GuildMember,
-                textChannel:  message.channel as TextChannel
-            })
-        }
+        await Audio.play(member.voice.channel as VoiceChannel, message.channel as TextChannel, songQuery, {
+            member: message.member as GuildMember,
+            textChannel:  message.channel as TextChannel
+        })
+
+        await message.delete()
     }
 }
 
