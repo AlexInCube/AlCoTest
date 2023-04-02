@@ -4,7 +4,7 @@ import {setupSettings} from "../handlers/MongoSchemas/SchemaGuild";
 import {Events} from "discord.js";
 
 const event: BotEvent = {
-    name: Events.GuildCreate,
+    name: Events.GuildDelete,
     execute: async (guild: Guild) => {
         await setupSettings(guild)
     }

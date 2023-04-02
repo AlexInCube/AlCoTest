@@ -203,6 +203,7 @@ function convertPermissionsToLocaleString (permission: PermissionResolvable): st
         case PermissionsBitField.Flags.Speak: return 'Говорить'
         case PermissionsBitField.Flags.ViewChannel: return 'Просматривать каналы'
         case PermissionsBitField.Flags.AttachFiles: return 'Прикреплять файлы'
+        case PermissionsBitField.Flags.ViewAuditLog: return 'Просмотр журнала аудита'
         default: return 'Не найдено название прав: ' + permission
     }
 }

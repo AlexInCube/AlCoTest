@@ -1,8 +1,9 @@
 import {BotEvent} from "../Types";
 import {loggerSend} from "../utilities/logger";
+import {Events} from "discord.js";
 
 const event: BotEvent = {
-    name: "ready",
+    name: Events.ClientReady,
     once: true,
     execute: (client) => {
         if (!client.user) return

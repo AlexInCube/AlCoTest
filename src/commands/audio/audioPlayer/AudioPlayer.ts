@@ -29,6 +29,7 @@ export class AudioPlayer{
             nsfw: true,
             emitAddListWhenCreatingQueue: false,
             emitAddSongWhenCreatingQueue: false,
+            savePreviousSongs: true,
             plugins: [
                 new YtDlpPlugin({
                     update: true
@@ -58,7 +59,7 @@ export class AudioPlayer{
         try{
             await this.distube.play(voiceChannel, song, options)
         } catch (e) {
-            await textChannel.send({content: "Произошла ошибка, попробуйте другую ссылку"})
+            await textChannel.send({embeds: [generateErrorEmbed("Произошла ошибка, попробуйте другую ссылку")]})
         }
 
         // This block of code must be removed in the future. For now 20.03.2023 bug with 1 minute voice connection is still present in Discord.js/Voice.
@@ -94,6 +95,8 @@ export class AudioPlayer{
             await this.distube.pause(guild)
             await player.setState("pause")
         }
+
+        await player.update()
     }
 
     async changeLoopMode (guild: Guild) {
@@ -116,13 +119,17 @@ export class AudioPlayer{
                 player.embedBuilder.setLoopMode("disabled")
                 break
         }
+
+        await player.update()
     }
 
     async skip (guild: Guild){
-        const queue = this.distube.getQueue(guild)
-        if (queue){
-            await this.distube.skip(guild)
-        }
+        try{
+            const queue = this.distube.getQueue(guild)
+            if (queue) {
+                await this.distube.skip(guild)
+            }
+        } catch (e) { /* empty */ }
     }
 
     async shuffle(guild: Guild){
@@ -137,6 +144,15 @@ export class AudioPlayer{
             const queue = this.distube.getQueue(guild)
             if (queue){
                 await this.distube.jump(guild, clamp(position, 1, queue.songs.length))
+            }
+        }catch (e) { /* empty */ }
+    }
+
+    async previous(guild: Guild){
+        try{
+            const queue = this.distube.getQueue(guild)
+            if (queue){
+                await this.distube.previous(guild)
             }
         }catch (e) { /* empty */ }
     }
@@ -226,19 +242,11 @@ export class AudioPlayer{
                     await player.setState("playing")
                 }
             })
-            .on("playSong", async (queue, song) => {
+            .on("playSong", async (queue) => {
                 const player = this.playersManager.get(queue.id)
                 if (player) {
                     await player.setState("playing")
-                    player.embedBuilder.setSongTitle(song.name ?? "Неизвестно", song.url)
-
-                    if (song.thumbnail) {
-                        player.embedBuilder.setThumbnail(song.thumbnail)
-                    }
-                    if (song.member) {
-                        player.embedBuilder.setRequester(song.user!)
-                    }
-                    player.embedBuilder.setUploader(song.uploader.name)
+                    await player.update()
                 }
             })
             .on("disconnect", async (queue) => {
@@ -256,6 +264,11 @@ export class AudioPlayer{
                 if (queue.textChannel){
                     await queue.textChannel.send({ embeds: [songEmbed] })
                 }
+
+                const player = this.playersManager.get(queue.id)
+                if (player){
+                    await player.update()
+                }
             })
             .on("addList", async (queue, playlist) => {
                 const songEmbed = new EmbedBuilder()
@@ -268,10 +281,16 @@ export class AudioPlayer{
                 if (queue.textChannel){
                     await queue.textChannel.send({ embeds: [songEmbed] })
                 }
+
+                const player = this.playersManager.get(queue.id)
+                if (player){
+                    await player.update()
+                }
             })
             .on('finishSong', async (queue) => {
                 if (!this.playersManager.has(queue.id)) return
-                if (queue.songs.length > 1 || queue.stopped) return
+                if (queue._next || queue._prev || queue.stopped || queue.songs.length > 1) return
+                loggerSend("finishSong")
                 this.playersManager.get(queue.id)?.setState("waiting")
             })
             .on("error", async (channel, error) => {

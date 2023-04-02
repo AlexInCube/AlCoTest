@@ -22,10 +22,16 @@ export const client = new Client({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.DirectMessages,
-        GatewayIntentBits.DirectMessageTyping
+        GatewayIntentBits.DirectMessageTyping,
+        GatewayIntentBits.GuildModeration
     ],
     partials: [Partials.Message, Partials.Channel, Partials.Reaction],
     shards: 'auto'
+})
+
+client.rest.on('rateLimited', (rateLimited) => {
+    loggerSend(`RATE LIMIT, PLEASE SLOWDOWN`)
+    loggerSend(rateLimited)
 })
 
 export const Audio = new AudioPlayer(client)

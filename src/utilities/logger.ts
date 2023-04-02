@@ -7,15 +7,19 @@ export function getCurrentTimestamp(): string {
     const minute = String(today.getMinutes()).padStart(2, '0')
     const seconds = String(today.getSeconds()).padStart(2, '0')
 
-    return `[ ${dd + '/' + mm + '/' + yyyy + ' | ' + hour + ':' + minute + ':' + seconds} ] `
+    return `${dd + '/' + mm + '/' + yyyy + ' | ' + hour + ':' + minute + ':' + seconds}`
 }
 
 export function loggerSend(message: any): void {
+    let finalOutput = ""
+
     switch (typeof message) {
         case 'object':
-            console.log(getCurrentTimestamp())
-            console.log(message)
+            finalOutput += JSON.stringify(message)
             break
-        default: console.log(getCurrentTimestamp() + message)
+        default:
+            finalOutput += message
     }
+
+    console.log(`[ ${getCurrentTimestamp()} ] ${finalOutput}`)
 }

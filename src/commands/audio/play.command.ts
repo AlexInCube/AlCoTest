@@ -58,7 +58,8 @@ const command : ICommand = {
         PermissionsBitField.Flags.ViewChannel,
         PermissionsBitField.Flags.Speak,
         PermissionsBitField.Flags.ManageMessages,
-        PermissionsBitField.Flags.AttachFiles
+        PermissionsBitField.Flags.AttachFiles,
+        PermissionsBitField.Flags.ViewAuditLog
     ],
     execute: async (interaction, ) => {
         const songQuery = interaction.options.getString('request')

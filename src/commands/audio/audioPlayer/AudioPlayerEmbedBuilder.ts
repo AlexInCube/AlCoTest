@@ -2,7 +2,6 @@ import {EmbedBuilder, User} from "discord.js";
 import {AudioPlayerLoopMode, AudioPlayerState} from "./AudioPlayerTypes";
 import {getNoun} from "../../../utilities/getNoun";
 import {formatSecondsToTime} from "../../../utilities/formatSecondsToTime";
-import {loggerSend} from "../../../utilities/logger";
 import {splitBar} from "../../../utilities/splitBar";
 
 export class AudioPlayerEmbedBuilder extends EmbedBuilder{
@@ -13,7 +12,9 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
     private queueDuration = "00:00"
     private loop = "Выключено"
     private nextSong = ""
-
+    private title: string | null = null
+    private titleUrl: string | null = null
+    private thumbnailURL: string | null = null
     private currentDuration = 0
     private formattedCurrentDuration = "00:00"
     private maxDuration = 0
@@ -29,11 +30,14 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
 
     update() {
         this.setFields([]) // Reset all fields
+        this.setThumbnail(null)
         if (this.playerState !== "waiting" && this.playerState !== "loading"){
             if (this.requester){
                 this.addFields({name: "Запросил", value: this.requester.toString(), inline: true})
             }
-
+            this.setThumbnail(this.thumbnailURL)
+            this.setTitle(this.title)
+            this.setURL(this.titleUrl)
             this.addFields({name: "Автор", value: `\`${this.uploader}\``, inline: true})
             this.addFields({name: "Очередь", value: `
                 \`${this.songsCount} ${getNoun(this.songsCount, "песня", "песни", "песен")}\`
@@ -53,14 +57,14 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
     }
 
     setSongTitle(name: string, url: string){
-        this.setTitle(name)
-        this.setURL(url)
+        this.title = name
+        this.titleUrl = url
     }
 
     setPlayerState(state: AudioPlayerState){
         this.playerState = state
 
-        loggerSend(state)
+        //loggerSend(state)
 
         switch (this.playerState){
             case "waiting":
@@ -89,6 +93,10 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
     setQueueData(songs_count: number, queue_duration: number){
         this.songsCount = songs_count
         this.queueDuration = formatSecondsToTime(queue_duration)
+    }
+
+    setThumbnailURL(url: string | null) {
+        this.thumbnailURL = url
     }
 
     setLoopMode(mode: AudioPlayerLoopMode){

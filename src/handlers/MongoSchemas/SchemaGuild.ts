@@ -4,15 +4,14 @@ import {MongoCheckConnection} from "../Mongo.handler";
 
 interface GuildOptions {
     prefix: string,
-    allowTextCommands: boolean
 }
 
-export interface IGuild extends Document {
+interface IGuild extends Document {
     guildID: string,
     options: GuildOptions
 }
 
-export type GuildOption = keyof GuildOptions
+type GuildOption = keyof GuildOptions
 
 const GuildSchema = new Schema<IGuild>({
     guildID: {required:true, type: String},
@@ -23,7 +22,7 @@ const GuildSchema = new Schema<IGuild>({
 
 GuildSchema.set('collection', 'guilds')
 
-export const GuildModel = model("guild", GuildSchema)
+const GuildModel = model("guild", GuildSchema)
 
 export async function getGuildOption(guild: Guild, option: GuildOption): Promise<any>{
     if (!MongoCheckConnection()) return undefined
