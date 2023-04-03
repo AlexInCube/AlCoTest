@@ -5,11 +5,14 @@ import {
     InteractionCollector,
     TextChannel,
     ComponentType,
-    Client
+    Client, GuildMember
 } from "discord.js";
 import {checkMemberInVoiceWithBot} from "../../../utilities/checkMemberInVoiceWithBot";
 import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed";
 import {loggerSend} from "../../../utilities/logger";
+import {generateSkipMessage, generateSkipMessageFailure} from "../skip.command";
+import {generateMessageAudioPlayerStop} from "../stop.command";
+import {generateMessageAudioPlayerPrevious, generateMessageAudioPlayerPreviousFailure} from "../previous.command";
 
 enum ButtonIDs{
     stopMusic = "stopMusic",
@@ -39,6 +42,7 @@ export class AudioPlayerButtonsHandler {
 
         this.rowSecondary.addComponents(
             new ButtonBuilder().setCustomId(ButtonIDs.showQueue).setStyle(ButtonStyle.Secondary).setEmoji('<:songlistwhite:1014551771705782405>'),
+            //new ButtonBuilder().setCustomId(ButtonIDs.downloadSong).setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>')
         )
 
         this.rowWithOnlyStop.addComponents(
@@ -63,7 +67,7 @@ export class AudioPlayerButtonsHandler {
                 switch (ButtonInteraction.customId){
                     case ButtonIDs.stopMusic:
                         await this.client.audioPlayer.stop(ButtonInteraction.guild)
-                        await ButtonInteraction.reply({content: "Аудиоплеер выключен"})
+                        await ButtonInteraction.reply({content: generateMessageAudioPlayerStop(ButtonInteraction.member)})
                         break
 
                     case ButtonIDs.pauseMusic:
@@ -71,15 +75,26 @@ export class AudioPlayerButtonsHandler {
                         ButtonInteraction.deferUpdate()
                         break
 
-                    case ButtonIDs.previousSong:
-                        await this.client.audioPlayer.previous(ButtonInteraction.guild)
-                        ButtonInteraction.deferUpdate()
+                    case ButtonIDs.previousSong: {
+                        const song = await this.client.audioPlayer.previous(ButtonInteraction.guild)
+                        if (song) {
+                            await ButtonInteraction.reply({content: generateMessageAudioPlayerPrevious(ButtonInteraction.member as GuildMember, song)})
+                        }else{
+                            await ButtonInteraction.reply({content: generateMessageAudioPlayerPreviousFailure(), ephemeral: true})
+                        }
                         break
+                    }
 
-                    case ButtonIDs.skipSong:
-                        await this.client.audioPlayer.skip(ButtonInteraction.guild)
-                        ButtonInteraction.deferUpdate()
+                    case ButtonIDs.skipSong: {
+                        const song = await this.client.audioPlayer.skip(ButtonInteraction.guild)
+
+                        if (song){
+                            await ButtonInteraction.reply({content: generateSkipMessage(song)})
+                        }else{
+                            await ButtonInteraction.reply({content: generateSkipMessageFailure(), ephemeral: true})
+                        }
                         break
+                    }
 
                     case ButtonIDs.toggleLoopMode:
                         await this.client.audioPlayer.changeLoopMode(ButtonInteraction.guild)
@@ -88,6 +103,10 @@ export class AudioPlayerButtonsHandler {
 
                     case ButtonIDs.showQueue:
                         await this.client.audioPlayer.showQueue(ButtonInteraction)
+                        break
+
+                    case ButtonIDs.downloadSong:
+                        ButtonInteraction.deferUpdate()
                         break
                 }
             }catch (e) { loggerSend(e) }

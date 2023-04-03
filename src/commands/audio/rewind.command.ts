@@ -1,5 +1,6 @@
 import {CommandArgument, ICommand} from "../../CommandTypes";
 import {
+    GuildMember,
     PermissionsBitField,
     SlashCommandBuilder,
 } from "discord.js";
@@ -7,6 +8,7 @@ import {GroupAudio} from "./AudioTypes";
 import {Audio} from "../../main";
 import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers";
 import {generateErrorEmbed} from "../../utilities/generateErrorEmbed";
+import {getNoun} from "../../utilities/getNoun";
 
 const command : ICommand = {
     name: "rewind",
@@ -32,11 +34,14 @@ const command : ICommand = {
         PermissionsBitField.Flags.SendMessages,
     ],
     execute: async (interaction) => {
-        const time = interaction.options.getNumber('time')
+        const time = interaction.options.getNumber('time')!
 
         await AudioCommandWrapperInteraction(interaction, async () => {
-            await Audio.rewind(interaction.guild!, time!)
-            await interaction.reply({content: `Песня перемотана на ${time}`})
+            if (await Audio.rewind(interaction.guild!, time)){
+                await interaction.reply({content: generateMessageAudioPlayerRewind(interaction.member as GuildMember, time)})
+            }else{
+                await interaction.reply({content: generateMessageAudioPlayerRewindFailure(), ephemeral: true})
+            }
         })
     },
     executeText: async (message, args) => {
@@ -49,9 +54,20 @@ const command : ICommand = {
         }
 
         await AudioCommandWrapperText(message, async () => {
-            await Audio.rewind(message.guild!, time!)
-            await message.reply({content: `Песня перемотана на ${time}`})
+            if (await Audio.rewind(message.guild!, time)) {
+                await message.reply({content: generateMessageAudioPlayerRewind(message.member!, time)})
+            }else{
+                await message.reply({content: generateMessageAudioPlayerRewindFailure()})
+            }
         })
     }
+}
+
+export function generateMessageAudioPlayerRewind(member: GuildMember, time: number){
+    return `${member} перемотал песню на ${time} ${getNoun(time, "секунду", "секунды", "секунд")}`
+}
+
+export function generateMessageAudioPlayerRewindFailure(){
+    return `Перемотка не удалась`
 }
 export default command

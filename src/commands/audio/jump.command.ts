@@ -1,5 +1,6 @@
 import {CommandArgument, ICommand} from "../../CommandTypes";
 import {
+    GuildMember,
     PermissionsBitField,
     SlashCommandBuilder,
 } from "discord.js";
@@ -7,6 +8,7 @@ import {GroupAudio} from "./AudioTypes";
 import {Audio} from "../../main";
 import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers";
 import {generateErrorEmbed} from "../../utilities/generateErrorEmbed";
+import {Song} from "distube";
 
 const command : ICommand = {
     name: "jump",
@@ -39,8 +41,12 @@ const command : ICommand = {
         }
         
         await AudioCommandWrapperInteraction(interaction, async () => {
-            await Audio.jump(interaction.guild!, pos)
-            await interaction.reply({content: "Прыжок совершён"})
+            const song = await Audio.jump(interaction.guild!, pos!)
+            if (song){
+                await interaction.reply(generateMessageAudioPlayerJump(interaction.member as GuildMember, song))
+            }else{
+                await interaction.reply(generateMessageAudioPlayerJumpFailure())
+            }
         })
     },
     executeText: async (message, args) => {
@@ -56,9 +62,21 @@ const command : ICommand = {
         }
 
         await AudioCommandWrapperText(message, async () => {
-            await Audio.jump(message.guild!, pos!)
-            await message.reply({content: "Прыжок совершён"})
+            const song = await Audio.jump(message.guild!, pos!)
+            if (song){
+                await message.reply(generateMessageAudioPlayerJump(message.member!, song))
+            }else{
+                await message.reply(generateMessageAudioPlayerJumpFailure())
+            }
         })
     }
+}
+
+function generateMessageAudioPlayerJump(member: GuildMember, song: Song){
+    return `:fast_forward: ${member} перескочил на песню ${song.name} :fast_forward:`
+}
+
+function generateMessageAudioPlayerJumpFailure(){
+    return `Прыжок не удался`
 }
 export default command

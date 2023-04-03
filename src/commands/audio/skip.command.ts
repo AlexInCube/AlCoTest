@@ -6,6 +6,7 @@ import {
 import {GroupAudio} from "./AudioTypes";
 import {Audio} from "../../main";
 import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers";
+import {Song} from "distube";
 
 const command : ICommand = {
     name: "skip",
@@ -22,13 +23,31 @@ const command : ICommand = {
     ],
     execute: async (interaction) => {
         await AudioCommandWrapperInteraction(interaction, async () => {
-            await Audio.skip(interaction.guild!)
+            const song = await Audio.skip(interaction.guild!)
+            if (song){
+                await interaction.reply({content: generateSkipMessage(song)})
+            }else{
+                await interaction.reply({content: generateSkipMessageFailure(), ephemeral: true})
+            }
         })
     },
     executeText: async (message) => {
         await AudioCommandWrapperText(message, async () => {
-            await Audio.skip(message.guild!)
+            const song = await Audio.skip(message.guild!)
+            if (song){
+                await message.reply({content: generateSkipMessage(song)})
+            }else{
+                await message.reply({content: generateSkipMessageFailure()})
+            }
         })
     }
+}
+
+export function generateSkipMessage(song: Song): string{
+    return `:fast_forward: ${song.member} пропустил(-а) песню ${song.name} - ${song.uploader.name} :fast_forward:`
+}
+
+export function generateSkipMessageFailure(): string{
+    return `Дальше в очереди ничего нет, пропуск невозможен`
 }
 export default command

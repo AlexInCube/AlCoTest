@@ -11,13 +11,12 @@ import {ButtonStyles, ButtonTypes} from "../../../utilities/pagination/paginatio
 import {clamp} from "../../../utilities/clamp";
 import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed";
 
-
 export class AudioPlayer{
     client: Client
     playersManager: PlayersManager
     distube: DisTube
-    constructor(_client: Client) {
-        this.client = _client
+    constructor(client: Client) {
+        this.client = client
         this.client.audioPlayer = this
         this.playersManager = new PlayersManager(this.client)
         this.distube = new DisTube(this.client, {
@@ -123,47 +122,55 @@ export class AudioPlayer{
         await player.update()
     }
 
-    async skip (guild: Guild){
+    async skip (guild: Guild): Promise<Song | undefined>{
         try{
             const queue = this.distube.getQueue(guild)
             if (queue) {
                 await this.distube.skip(guild)
+                return queue.songs[0]
             }
         } catch (e) { /* empty */ }
+        return undefined
     }
 
-    async shuffle(guild: Guild){
-        const queue = this.distube.getQueue(guild)
-        if (queue){
-            await this.distube.shuffle(guild)
-        }
-    }
-
-    async jump(guild: Guild, position: number){
+    async shuffle(guild: Guild): Promise<Queue | undefined>{
         try{
             const queue = this.distube.getQueue(guild)
             if (queue){
-                await this.distube.jump(guild, clamp(position, 1, queue.songs.length))
+                return await this.distube.shuffle(guild)
             }
-        }catch (e) { /* empty */ }
+        } catch (e) { /* empty */ }
+        return undefined
     }
 
-    async previous(guild: Guild){
+    async jump(guild: Guild, position: number): Promise<Song | undefined>{
         try{
             const queue = this.distube.getQueue(guild)
             if (queue){
-                await this.distube.previous(guild)
+                return this.distube.jump(guild, clamp(position, 1, queue.songs.length))
             }
         }catch (e) { /* empty */ }
+        return undefined
     }
 
-    async rewind(guild: Guild, time: number){
+    async previous(guild: Guild): Promise<Song | undefined>{
+        try{
+            const queue = this.distube.getQueue(guild)
+            if (queue){
+                return await this.distube.previous(guild)
+            }
+        }catch (e) { /* empty */ }
+        return undefined
+    }
+
+    async rewind(guild: Guild, time: number): Promise<boolean>{
         const queue = this.distube.getQueue(guild)
-        if (!queue) return
+        if (!queue) return false
         const player = this.playersManager.get(queue.id)
-        if (!player) return
+        if (!player) return false
         await this.distube.seek(guild, time)
         await player.setState("playing")
+        return true
     }
     async showQueue (interaction: any){
         const queue = this.distube.getQueue(interaction.guild)
@@ -239,7 +246,7 @@ export class AudioPlayer{
                 const player = this.playersManager.get(queue.id)
                 if (player) {
                     await player.init()
-                    await player.setState("playing")
+                    //await player.setState("playing")
                 }
             })
             .on("playSong", async (queue) => {

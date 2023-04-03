@@ -1,5 +1,6 @@
 import {ICommand} from "../../CommandTypes";
 import {
+    GuildMember,
     PermissionsBitField,
     SlashCommandBuilder,
 } from "discord.js";
@@ -22,15 +23,29 @@ const command : ICommand = {
     ],
     execute: async (interaction) => {
         await AudioCommandWrapperInteraction(interaction, async () => {
-            await Audio.shuffle(interaction.guild!)
-            await interaction.reply({content: "Песни перемешаны"})
+            if (await Audio.shuffle(interaction.guild!)){
+                await interaction.reply({content: generateMessageAudioPlayerShuffle(interaction.member as GuildMember)})
+            }else{
+                await interaction.reply(generateMessageAudioPlayerShuffleFailure())
+            }
         })
     },
     executeText: async (message) => {
         await AudioCommandWrapperText(message, async () => {
-            await Audio.shuffle(message.guild!)
-            await message.reply({content: "Песни перемешаны"})
+            if (await Audio.shuffle(message.guild!)){
+                await message.reply({content: generateMessageAudioPlayerShuffle(message.member!)})
+            }else{
+                await message.reply(generateMessageAudioPlayerShuffleFailure())
+            }
         })
     }
+}
+
+function generateMessageAudioPlayerShuffle(member: GuildMember){
+    return `${member} перемешал песни`
+}
+
+function generateMessageAudioPlayerShuffleFailure(){
+    return `Не удалось перемешать песни`
 }
 export default command

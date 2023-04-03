@@ -56,6 +56,26 @@ export class PlayerGuild{
 
         this.embedBuilder.update()
     }
+
+    private async updateButtonsState() {
+        if (!this.messageWithPlayer) return
+        switch (this.state) {
+            case "playing":
+            case "pause":
+                await this.messageWithPlayer.edit({
+                    embeds: [this.embedBuilder],
+                    components: this.buttonsHandler.getComponents()
+                })
+                break
+            case "waiting":
+            case "loading":
+                await this.messageWithPlayer.edit({
+                    embeds: [this.embedBuilder],
+                    components: this.buttonsHandler.getComponentsOnlyStop()
+                })
+                break
+        }
+    }
     async init() {
         try{
             this.updateEmbedState()
@@ -87,6 +107,7 @@ export class PlayerGuild{
                 } finally {
                     this.messageWithPlayer = await this.textChannel.send({embeds: [this.embedBuilder]})
                     this.resetUpdater()
+                    await this.updateButtonsState()
                 }
             }
         }, 4000)
@@ -103,18 +124,7 @@ export class PlayerGuild{
 
         try{
             this.updateEmbedState()
-
-            // Add buttons if needed
-            switch (this.state){
-                case "playing":
-                case "pause":
-                    await this.messageWithPlayer.edit({embeds: [this.embedBuilder], components: this.buttonsHandler.getComponents()})
-                    break
-                case "waiting":
-                case "loading":
-                    await this.messageWithPlayer.edit({embeds: [this.embedBuilder], components: this.buttonsHandler.getComponentsOnlyStop()})
-                    break
-            }
+            await this.updateButtonsState()
         }catch (e) { /* empty */ }
     }
     async destroy() {

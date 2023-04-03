@@ -1,11 +1,13 @@
 import {ICommand} from "../../CommandTypes";
 import {
+    GuildMember,
     PermissionsBitField,
     SlashCommandBuilder,
 } from "discord.js";
 import {GroupAudio} from "./AudioTypes";
 import {Audio} from "../../main";
 import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers";
+import {Song} from "distube";
 
 const command : ICommand = {
     name: "previous",
@@ -22,13 +24,31 @@ const command : ICommand = {
     ],
     execute: async (interaction) => {
         await AudioCommandWrapperInteraction(interaction, async () => {
-            await Audio.previous(interaction.guild!)
+            const song = await Audio.previous(interaction.guild!)
+            if (song) {
+                await interaction.reply({content: generateMessageAudioPlayerPrevious(interaction.member as GuildMember, song)})
+            }else{
+                await interaction.reply({content: generateMessageAudioPlayerPreviousFailure(), ephemeral: true})
+            }
         })
     },
     executeText: async (message) => {
         await AudioCommandWrapperText(message, async () => {
-            await Audio.previous(message.guild!)
+            const song = await Audio.previous(message.guild!)
+            if (song) {
+                await message.reply({content: generateMessageAudioPlayerPrevious(message.member as GuildMember, song)})
+            }else{
+                await message.reply({content: generateMessageAudioPlayerPreviousFailure()})
+            }
         })
     }
+}
+
+export function generateMessageAudioPlayerPrevious(member: GuildMember, song: Song){
+    return `:rewind: ${member} вернулся на предыдущую песню ${song.name} :rewind:`
+}
+
+export function generateMessageAudioPlayerPreviousFailure(){
+    return "Предыдущих песен не существует"
 }
 export default command

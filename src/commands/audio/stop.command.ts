@@ -1,5 +1,6 @@
 import {ICommand} from "../../CommandTypes";
 import {
+    GuildMember,
     PermissionsBitField,
     SlashCommandBuilder,
 } from "discord.js";
@@ -23,15 +24,19 @@ const command : ICommand = {
     execute: async (interaction) => {
         await AudioCommandWrapperInteraction(interaction, async () => {
             await Audio.stop(interaction.guild!)
-            await interaction.reply({content: "Аудиоплеер выключен"})
+            await interaction.reply({content: generateMessageAudioPlayerStop(interaction.member as GuildMember)})
         })
     },
     executeText: async (message) => {
         await AudioCommandWrapperText(message, async () => {
             await Audio.stop(message.guild!)
-            await message.reply({content: "Аудиоплеер выключен"})
+            await message.reply({content: generateMessageAudioPlayerStop(message.member!)})
         })
     }
+}
+
+export function generateMessageAudioPlayerStop(member: GuildMember): string{
+    return `${member} выключил плеер`
 }
 export default command
 
