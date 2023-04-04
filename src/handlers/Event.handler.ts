@@ -11,7 +11,7 @@ const handler = (client: Client) => {
     let eventsCount = 0
 
     readdirSync(eventsDir).forEach(file => {
-        if (!file.endsWith(".js")) return;
+        if (!file.endsWith(".event.js")) return;
         const event: BotEvent = require(`${eventsDir}/${file}`).default
 
         if (event.once) {

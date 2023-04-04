@@ -253,7 +253,6 @@ export class AudioPlayer{
                 const player = this.playersManager.get(queue.id)
                 if (player) {
                     await player.setState("playing")
-                    await player.update()
                 }
             })
             .on("disconnect", async (queue) => {
@@ -297,7 +296,6 @@ export class AudioPlayer{
             .on('finishSong', async (queue) => {
                 if (!this.playersManager.has(queue.id)) return
                 if (queue._next || queue._prev || queue.stopped || queue.songs.length > 1) return
-                loggerSend("finishSong")
                 this.playersManager.get(queue.id)?.setState("waiting")
             })
             .on("error", async (channel, error) => {

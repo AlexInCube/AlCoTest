@@ -4,8 +4,12 @@ import {Queue} from "distube";
 import {AudioPlayerButtonsHandler} from "./AudioPlayerButtonsHandler";
 import {AudioPlayerState} from "./AudioPlayerTypes";
 import {loggerSend} from "../../../utilities/logger";
+import {checkBotInVoice} from "../../../utilities/checkBotInVoice";
+
 
 export class PlayerGuild{
+    private finishTime = 20000
+    private updateTime = 3500
     private readonly client: Client
     readonly textChannel: TextChannel
     private state: AudioPlayerState = "loading"
@@ -16,6 +20,7 @@ export class PlayerGuild{
     private queue: Queue
     private updaterInterval: NodeJS.Timeout | undefined // Timer for update state of the message
     private recreationTimer: NodeJS.Timeout | undefined // Timer for "recreationPlayer"
+    private finishTimer: NodeJS.Timeout | undefined // Timer for waiting
     constructor(client: Client, txtChannel: TextChannel, queue: Queue) {
         this.client = client
         this.textChannel = txtChannel
@@ -23,6 +28,28 @@ export class PlayerGuild{
         this.buttonsHandler = new AudioPlayerButtonsHandler(this.client, this.textChannel)
     }
 
+    async startFinishTimer() {
+        try{
+            if (await checkBotInVoice(this.textChannel.guild)) {
+                await this.stopFinishTimer()
+                this.finishTimer = setTimeout(async () => {
+                    const queue = this.client.audioPlayer.distube.getQueue(this.textChannel.guild)
+                    // loggerSend('try to stop player on cooldown')
+                    if (queue) return
+                    if (await checkBotInVoice(this.textChannel.guild)) {
+                        await this.client.audioPlayer.stop(this.textChannel.guild)
+                        await this.textChannel.send("Время прошло, никто не смог дать мне новую песню. Я ухожу от вас.")
+                    }
+                }, this.finishTime)
+            }
+        }catch (e) { /* empty */ }
+    }
+
+    async stopFinishTimer(){
+        if (this.finishTimer){
+            clearTimeout(this.finishTimer)
+        }
+    }
     private resetUpdater(){
         clearInterval(this.updaterInterval)
         //loggerSend("Interval Cleared")
@@ -30,7 +57,7 @@ export class PlayerGuild{
             this.updateEmbedState()
 
             await this.update()
-        }, 3000)
+        }, this.updateTime)
     }
 
     private updateEmbedState(){
@@ -57,7 +84,7 @@ export class PlayerGuild{
         this.embedBuilder.update()
     }
 
-    private async updateButtonsState() {
+    private async updateMessageState() {
         if (!this.messageWithPlayer) return
         switch (this.state) {
             case "playing":
@@ -107,10 +134,10 @@ export class PlayerGuild{
                 } finally {
                     this.messageWithPlayer = await this.textChannel.send({embeds: [this.embedBuilder]})
                     this.resetUpdater()
-                    await this.updateButtonsState()
+                    await this.updateMessageState()
                 }
             }
-        }, 4000)
+        }, this.updateTime)
     }
 
     async update() {
@@ -124,7 +151,7 @@ export class PlayerGuild{
 
         try{
             this.updateEmbedState()
-            await this.updateButtonsState()
+            await this.updateMessageState()
         }catch (e) { /* empty */ }
     }
     async destroy() {
@@ -132,6 +159,7 @@ export class PlayerGuild{
         await this.setState("destroying")
         clearInterval(this.updaterInterval)
         if (this.recreationTimer) clearTimeout(this.recreationTimer)
+        await this.stopFinishTimer()
         if (!this.messageWithPlayer) return
         try{
             this.buttonsHandler.destroy()
@@ -146,6 +174,14 @@ export class PlayerGuild{
         const queue = this.client.audioPlayer.distube.getQueue(this.textChannel.guild)
         if (queue) {
             this.queue = queue
+
+            if (state === "waiting"){
+                await this.startFinishTimer()
+            } else {
+                if (this.finishTimer){
+                    clearTimeout(this.finishTimer)
+                }
+            }
         }
 
         await this.update()
