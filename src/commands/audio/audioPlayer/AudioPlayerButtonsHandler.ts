@@ -42,7 +42,7 @@ export class AudioPlayerButtonsHandler {
 
         this.rowSecondary.addComponents(
             new ButtonBuilder().setCustomId(ButtonIDs.showQueue).setStyle(ButtonStyle.Secondary).setEmoji('<:songlistwhite:1014551771705782405>'),
-            //new ButtonBuilder().setCustomId(ButtonIDs.downloadSong).setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>')
+            new ButtonBuilder().setCustomId(ButtonIDs.downloadSong).setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>')
         )
 
         this.rowWithOnlyStop.addComponents(
@@ -105,11 +105,13 @@ export class AudioPlayerButtonsHandler {
                         await this.client.audioPlayer.showQueue(ButtonInteraction)
                         break
 
-                    case ButtonIDs.downloadSong:
-                        ButtonInteraction.deferUpdate()
+                    case ButtonIDs.downloadSong: {
+                        const url = await this.client.audioPlayer.getCurrentSongDownloadLink(ButtonInteraction.guild)
+                        ButtonInteraction.reply({content: url, ephemeral: true})
                         break
+                    }
                 }
-            }catch (e) { loggerSend(e) }
+            } catch (e) { loggerSend(e) }
         })
     }
 

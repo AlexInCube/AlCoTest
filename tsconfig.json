@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "module": "CommonJs",
-    "target": "es2016",
+    "target": "es2021",
     //"types": ["node", "jest"],
     "sourceMap": true,
     "rootDir": "./src",

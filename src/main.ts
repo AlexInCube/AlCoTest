@@ -5,6 +5,7 @@ import * as fs from "fs";
 import {loginBot} from "./utilities/loginBot";
 import {AudioPlayer} from "./commands/audio/audioPlayer/AudioPlayer";
 
+
 require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` })
 
 if (process.env.NODE_ENV == "development"){
@@ -35,6 +36,7 @@ client.rest.on('rateLimited', (rateLimited) => {
 })
 
 export const Audio = new AudioPlayer(client)
+//export const Downloads = new DownloadsManager()
 
 const handlersDir = path.join(__dirname, "./handlers")
 fs.readdirSync(handlersDir).forEach((handler: any) => {

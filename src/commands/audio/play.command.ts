@@ -1,5 +1,6 @@
 import {ICommand, CommandArgument} from "../../CommandTypes";
 import {
+    AutocompleteInteraction,
     GuildMember,
     PermissionsBitField,
     SlashCommandBuilder,
@@ -28,27 +29,7 @@ const command : ICommand = {
                 .setDescription('Ссылка с Youtube/Spotify/Soundcloud или любой текст')
                 .setAutocomplete(true)
                 .setRequired(true)),
-    autocomplete: async (interaction) => {
-        const focusedValue = interaction.options.getFocused()
-
-        if (focusedValue && !isValidURL(focusedValue)) { // Если есть хоть какое-т значение и результат поиска не ссылка
-            const choices = await Audio.distube.search(focusedValue, { limit: 10, type: SearchResultType.VIDEO, safeSearch: false })
-            // Превращаем результаты поиска в подсказки
-            const finalResult = choices.map((choice: SearchResultVideo) => {
-                // Длина подсказки максимум 100 символов, поэтому пытаемся эффективно использовать это пространство
-                const duration = choice.isLive ? 'Стрим' : choice.formattedDuration
-                let choiceString = `${duration} | ${truncateString(choice.uploader.name ?? "", 20)} | `
-                // Название видео пытается занять максимум символов, в то время как имя канала/автора может быть длиной только в 20 символов
-                choiceString += truncateString(choice.name, 100 - choiceString.length)
-                return {
-                    name: choiceString,
-                    value: choice.url
-                }
-            })
-
-            await interaction.respond(finalResult)
-        }
-    },
+    autocomplete: songSearchAutocomplete,
     group: GroupAudio,
     guild_only: true,
     voice_required: true,
@@ -87,6 +68,32 @@ const command : ICommand = {
         })
 
         await message.delete()
+    }
+}
+
+export async function songSearchAutocomplete(interaction: AutocompleteInteraction) {
+    const focusedValue = interaction.options.getFocused()
+
+    if (focusedValue && !isValidURL(focusedValue)) { // Если есть хоть какое-т значение и результат поиска не ссылка
+        const choices = await Audio.distube.search(focusedValue, {
+            limit: 10,
+            type: SearchResultType.VIDEO,
+            safeSearch: false
+        })
+        // Превращаем результаты поиска в подсказки
+        const finalResult = choices.map((choice: SearchResultVideo) => {
+            // Длина подсказки максимум 100 символов, поэтому пытаемся эффективно использовать это пространство
+            const duration = choice.isLive ? 'Стрим' : choice.formattedDuration
+            let choiceString = `${duration} | ${truncateString(choice.uploader.name ?? "", 20)} | `
+            // Название видео пытается занять максимум символов, в то время как имя канала/автора может быть длиной только в 20 символов
+            choiceString += truncateString(choice.name, 100 - choiceString.length)
+            return {
+                name: choiceString,
+                value: choice.url
+            }
+        })
+
+        await interaction.respond(finalResult)
     }
 }
 

@@ -8,6 +8,7 @@ declare global{
             BOT_DISCORD_TOKEN: string,
             BOT_DISCORD_CLIENT_ID: string,
             BOT_DISCORD_CLIENT_SECRET: string,
+            BOT_DISCORD_OVERPOWERED_ID: string,
             BOT_YOUTUBE_COOKIE: string,
             BOT_SPOTIFY_REDIRECT_URL: string,
             BOT_SPOTIFY_CLIENT_SECRET: string,

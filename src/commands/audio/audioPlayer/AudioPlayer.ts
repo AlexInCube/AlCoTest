@@ -10,6 +10,7 @@ import {pagination} from "../../../utilities/pagination/pagination";
 import {ButtonStyles, ButtonTypes} from "../../../utilities/pagination/pagination.i";
 import {clamp} from "../../../utilities/clamp";
 import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed";
+import {getDownloadLink} from "./getDownloadLink";
 
 export class AudioPlayer{
     client: Client
@@ -232,6 +233,15 @@ export class AudioPlayer{
                 },
             ]
         });
+    }
+
+    async getCurrentSongDownloadLink(guild: Guild): Promise<string | undefined> {
+        const queue = this.distube.getQueue(guild)
+        if (!queue) {
+            return undefined
+        }
+
+        return await getDownloadLink(queue.songs[0].url)
     }
     private setupEvents(){
         this.distube
