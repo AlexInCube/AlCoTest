@@ -1,7 +1,7 @@
-import {DiscordBotTestingUnit} from "../src/testsUtilities/DiscordBotTestingUnit";
+import {DiscordBotTestingUnit} from "./testsUtilities/DiscordBotTestingUnit";
 import alcotest from "../src/commands/fun/alcotest.command";
 import '../src/EnvironmentTypes'
-import {runBrowserAndLogin} from "../src/testsUtilities/runBrowserAndLogin";
+import {runBrowserAndLogin} from "./testsUtilities/runBrowserAndLogin";
 import {loggerSend} from "../src/utilities/logger"
 import {Driver} from "selenium-webdriver/firefox";
 import inviteLinkCommand from "../src/commands/info/inviteLink.command";

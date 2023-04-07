@@ -8,10 +8,17 @@ import {AudioPlayer} from "./commands/audio/audioPlayer/AudioPlayer";
 
 require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` })
 
-if (process.env.NODE_ENV == "development"){
-    loggerSend("Включен режим РАЗРАБОТКИ")
-}else{
-    loggerSend("Включен режим РЕЛИЗ (молимся чтобы всё хорошо работало)")
+switch (process.env.NODE_ENV){
+    case "development": {
+        loggerSend("Включен режим РАЗРАБОТКИ")
+        break
+    }
+    case "production": {
+        loggerSend("Включен режим РЕЛИЗ (молимся чтобы всё хорошо работало)")
+        break
+    }
+    default:
+        loggerSend(`НЕИЗВЕСТНЫЙ РЕЖИМ: ${process.env.NODE_ENV}`)
 }
 
 export const client = new Client({

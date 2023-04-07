@@ -4,6 +4,7 @@ declare global{
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace NodeJS {
         interface ProcessEnv {
+            NODE_ENV: string,
             BOT_COMMAND_PREFIX: string,
             BOT_DISCORD_TOKEN: string,
             BOT_DISCORD_CLIENT_ID: string,

@@ -1,12 +1,13 @@
 {
   "name": "aic_discord_bot_on_typescript",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "description": "",
   "main": "build/main.js",
   "scripts": {
     "development": "tsc&& set NODE_ENV=development&& node build/main.js",
-    "production": "set NODE_ENV=production&& node build/main.js",
-    "test": "concurrently --kill-others \"npm run development\" \"jest\""
+    "production": "export NODE_ENV=production&& node build/main.js",
+    "test": "concurrently --kill-others \"npm run development\" \"jest\"",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",

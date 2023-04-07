@@ -5,6 +5,7 @@ import {checkMemberInVoiceWithBot} from "../../utilities/checkMemberInVoiceWithB
 import {checkMemberInVoice} from "../../utilities/checkMemberInVoice";
 import {CheckBotPermissions} from "../../utilities/checkPermissions";
 import {loggerSend} from "../../utilities/logger";
+import {loggerPrefixCommandHandler} from "../../handlers/Command.handler";
 
 export async function slashCommandHandler(interaction: any) {
     if (!interaction.isChatInputCommand()) return
@@ -59,6 +60,6 @@ export async function slashCommandHandler(interaction: any) {
 
         await command.execute(interaction)
     } catch (e) {
-        loggerSend(e)
+        loggerSend(`${loggerPrefixCommandHandler}` + e)
     }
 }

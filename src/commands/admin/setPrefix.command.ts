@@ -42,7 +42,7 @@ const command : ICommand = {
 
 async function changePrefixTo(guild: Guild, prefix: string): Promise<string> {
     if (prefix === "/" || prefix === "@" || prefix === "#") return "Нельзя указывать символы \"/ @ #\" в качестве префикса"
-    if (prefix.length >= 2) return "Префикс не может быть длиннее двух символов"
+    if (prefix.length >= 2) return "Префикс не может быть длиннее одного символов"
     await setGuildOption(guild, "prefix", prefix)
     return `Префикс на этом сервере успешно изменён на ${prefix}`
 }

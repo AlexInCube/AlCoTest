@@ -40,10 +40,10 @@ export async function setGuildOption(guild: Guild, option: GuildOption, value: a
     let foundGuild: any = await GuildModel.findOne({ guildID: guild.id })
     if (!foundGuild) {
         await setupSettings(guild)
-        foundGuild = GuildModel.findOne({ guildID: guild.id })
+        foundGuild = await GuildModel.findOne({ guildID: guild.id })
     }
     foundGuild.options[option] = value
-    foundGuild.save()
+    await foundGuild.save()
 }
 
 export async function setupSettings(guild: Guild) {
