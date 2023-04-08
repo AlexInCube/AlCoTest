@@ -1,5 +1,13 @@
 version: "3"
 services:
+  mongo:
+    container_name: mongo
+    image: bitnami/mongodb:latest
+    restart: always
+    volumes:
+      - ./data:/data/db
+    ports:
+      - '27018:27017'
   bot:
     container_name: bot
     image: bot
@@ -9,10 +17,3 @@ services:
       - mongo
     depends_on:
       - mongo
-  mongo:
-    container_name: mongo
-    image: mongo
-    volumes:
-      - ./data:/data/db
-    ports:
-      - '27018:27017'
