@@ -40,7 +40,6 @@ const command : ICommand = {
         PermissionsBitField.Flags.Speak,
         PermissionsBitField.Flags.ManageMessages,
         PermissionsBitField.Flags.AttachFiles,
-        PermissionsBitField.Flags.ViewAuditLog
     ],
     execute: async (interaction, ) => {
         const songQuery = interaction.options.getString('request')
@@ -72,7 +71,7 @@ const command : ICommand = {
 }
 
 export async function songSearchAutocomplete(interaction: AutocompleteInteraction) {
-    const focusedValue = interaction.options.getFocused()
+    const focusedValue = interaction.options.getFocused(false)
 
     if (focusedValue && !isValidURL(focusedValue)) { // Если есть хоть какое-т значение и результат поиска не ссылка
         const choices = await Audio.distube.search(focusedValue, {
@@ -94,7 +93,10 @@ export async function songSearchAutocomplete(interaction: AutocompleteInteractio
         })
 
         await interaction.respond(finalResult)
+        return
     }
+
+    await interaction.respond([])
 }
 
 export default command

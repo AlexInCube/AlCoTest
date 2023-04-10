@@ -174,13 +174,13 @@ export class PlayerGuild{
         const queue = this.client.audioPlayer.distube.getQueue(this.textChannel.guild)
         if (queue) {
             this.queue = queue
+        }
 
-            if (state === "waiting"){
-                await this.startFinishTimer()
-            } else {
-                if (this.finishTimer){
-                    clearTimeout(this.finishTimer)
-                }
+        if (state === "waiting"){
+            await this.startFinishTimer()
+        } else {
+            if (this.finishTimer && queue){
+                clearTimeout(this.finishTimer)
             }
         }
 
@@ -188,6 +188,6 @@ export class PlayerGuild{
     }
 
     debug(): string{
-        return `Guild: ${this.textChannel.guildId}, Player State: ${this.state}, Message ID: ${this.messageWithPlayer?.id}\n`
+        return `GuildID: ${this.textChannel.guildId}, GuildName: ${this.textChannel.guild.name}, Player State: ${this.state}, Message ID: ${this.messageWithPlayer?.id}\n`
     }
 }
