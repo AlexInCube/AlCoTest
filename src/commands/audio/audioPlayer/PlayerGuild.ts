@@ -188,6 +188,6 @@ export class PlayerGuild{
     }
 
     debug(): string{
-        return `GuildID: ${this.textChannel.guildId}, GuildName: ${this.textChannel.guild.name}, Player State: ${this.state}, Message ID: ${this.messageWithPlayer?.id}\n`
+        return `GuildName: ${this.textChannel.guild.name}, Player State: ${this.state}, GuildID: ${this.textChannel.guildId},  VoiceChannelID: ${this.queue.voice.channel.id}, VoiceChannelName: ${this.queue.voice.channel.name}, TextChannelId: ${this.textChannel.id}, TextChannelName: ${this.textChannel.name} Message ID: ${this.messageWithPlayer?.id}\n`
     }
 }

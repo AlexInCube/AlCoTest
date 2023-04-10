@@ -3,3 +3,4 @@
 .env.production
 package-lock.json
 build
+data
