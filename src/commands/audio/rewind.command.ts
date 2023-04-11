@@ -7,22 +7,20 @@ import {
 import {GroupAudio} from "./AudioTypes";
 import {Audio} from "../../main";
 import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers";
-import {generateErrorEmbed} from "../../utilities/generateErrorEmbed";
-import {getNoun} from "../../utilities/getNoun";
 
 const command : ICommand = {
     name: "rewind",
-    description: 'Перематывает песню на указанное время',
-    arguments: [new CommandArgument("время в секундах", true)],
+    description: 'Перематывает песню на указанное время в формате ЧЧ:ММ:CC или ММ:СС или СС',
+    arguments: [new CommandArgument("время в формате ЧЧ:ММ:CC", true)],
     slash_builder: new SlashCommandBuilder()
         .setName("rewind")
-        .setDescription('Перематывает песню на указанное время')
-        .addNumberOption(option =>
+        .setDescription('Перематывает песню на указанное время в формате ЧЧ:ММ:CC или ММ:СС или СС')
+        .addStringOption(option =>
             option
                 .setName('time')
-                .setDescription('Секунды')
+                .setDescription('ЧЧ:ММ:CC или ММ:СС или СС')
                 .setNameLocalizations({
-                    ru: 'секунды'
+                    ru: 'время'
                 })
                 .setRequired(true)
         ),
@@ -34,40 +32,63 @@ const command : ICommand = {
         PermissionsBitField.Flags.SendMessages,
     ],
     execute: async (interaction) => {
-        const time = interaction.options.getNumber('time')!
+        const time = hmsToSeconds(interaction.options.getString('time')!)
 
         await AudioCommandWrapperInteraction(interaction, async () => {
-            if (await Audio.rewind(interaction.guild!, time)){
-                await interaction.reply({content: generateMessageAudioPlayerRewind(interaction.member as GuildMember, time)})
-            }else{
+            if (time){
+                if (await Audio.rewind(interaction.guild!, time)){
+                    await interaction.reply({content: generateMessageAudioPlayerRewind(interaction.member as GuildMember, time)})
+                }
+            } else {
                 await interaction.reply({content: generateMessageAudioPlayerRewindFailure(), ephemeral: true})
             }
         })
     },
     executeText: async (message, args) => {
-        let time = 0
-        try{
-            time = parseInt(args[0])
-        }catch (e) {
-            await message.reply({embeds: [generateErrorEmbed("Это не число, а белеберда")]})
-            return
-        }
+        const time = hmsToSeconds(args[0])
 
         await AudioCommandWrapperText(message, async () => {
-            if (await Audio.rewind(message.guild!, time)) {
-                await message.reply({content: generateMessageAudioPlayerRewind(message.member!, time)})
-            }else{
+            if (time){
+                if (await Audio.rewind(message.guild!, time)) {
+                    await message.reply({content: generateMessageAudioPlayerRewind(message.member!, time)})
+                }
+            } else {
                 await message.reply({content: generateMessageAudioPlayerRewindFailure()})
             }
         })
     }
 }
 
+function hmsToSeconds(str: string): number | undefined{
+    const p = str.split(':')
+    let s = 0
+    let m = 1
+
+    if (p.length > 3) return undefined
+
+    try{
+        while (p.length > 0) {
+            s += m * parseInt(p.pop() as string, 10);
+            m *= 60;
+        }
+    } catch (e) {
+        return undefined
+    }
+
+    if (s < 0) s = 0
+
+    return s;
+}
+
+function secondsToHms(seconds: number): string{
+    return new Date(seconds * 1000).toISOString().slice(11, 19)
+}
+
 export function generateMessageAudioPlayerRewind(member: GuildMember, time: number){
-    return `${member} перемотал песню на ${time} ${getNoun(time, "секунду", "секунды", "секунд")}`
+    return `${member} перемотал песню на ${secondsToHms(time)}`
 }
 
 export function generateMessageAudioPlayerRewindFailure(){
-    return `Перемотка не удалась`
+    return `Ты неправильно написал время, что мне делать с этой белибердой?`
 }
 export default command

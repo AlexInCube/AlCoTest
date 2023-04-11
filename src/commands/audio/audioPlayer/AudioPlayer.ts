@@ -165,13 +165,18 @@ export class AudioPlayer{
     }
 
     async rewind(guild: Guild, time: number): Promise<boolean>{
-        const queue = this.distube.getQueue(guild)
-        if (!queue) return false
-        const player = this.playersManager.get(queue.id)
-        if (!player) return false
-        await this.distube.seek(guild, time)
-        await player.setState("playing")
-        return true
+        try{
+            const queue = this.distube.getQueue(guild)
+            if (!queue) return false
+            const player = this.playersManager.get(queue.id)
+            if (!player) return false
+            if (time < 0) time = 0
+            await this.distube.seek(guild, time)
+            await player.setState("playing")
+            return true
+        } catch (e) {
+            return false
+        }
     }
     async showQueue (interaction: any){
         const queue = this.distube.getQueue(interaction.guild)
@@ -266,7 +271,7 @@ export class AudioPlayer{
                 }
             })
             .on("disconnect", async (queue) => {
-                loggerSend("Distube Disconnect")
+               // loggerSend("Distube Disconnect")
                 await this.playersManager.remove(queue.id)
             })
             .on("addSong", async (queue, song) => {

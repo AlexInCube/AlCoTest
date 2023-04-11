@@ -1,5 +1,4 @@
 import {Client, Collection, TextChannel} from "discord.js";
-import {loggerSend} from "../../../utilities/logger";
 import {Queue} from "distube";
 import {PlayerGuild} from "./PlayerGuild";
 
@@ -12,7 +11,7 @@ export class PlayersManager{
     async add(guildId: string, textChannel: TextChannel, queue: Queue): Promise<PlayerGuild | undefined> {
         if (await this.client.guilds.cache.get(guildId)) {
             if (!this.collection.has(guildId)) {
-                loggerSend("Player Added")
+                //loggerSend("Player Added")
                 this.collection.set(guildId, new PlayerGuild(this.client, textChannel, queue))
             }
 
