@@ -2,7 +2,6 @@ import {EmbedBuilder, User} from "discord.js";
 import {AudioPlayerLoopMode, AudioPlayerState} from "./AudioPlayerTypes";
 import {getNoun} from "../../../utilities/getNoun";
 import {formatSecondsToTime} from "../../../utilities/formatSecondsToTime";
-import {splitBar} from "../../../utilities/splitBar";
 
 export class AudioPlayerEmbedBuilder extends EmbedBuilder{
     private playerState: AudioPlayerState = "loading"
@@ -15,16 +14,11 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
     private title: string | null = null
     private titleUrl: string | null = null
     private thumbnailURL: string | null = null
-    private currentDuration = 0
-    private formattedCurrentDuration = "00:00"
-    private maxDuration = 0
-    private formattedMaxDuration = "00:00"
-    private duration_bar = ""
+    private formattedDuration = "00:00"
 
     constructor() {
         super();
         this.setPlayerState("loading")
-        this.setSongDuration(1, 1, false)
         this.setNextSong(undefined)
     }
 
@@ -44,13 +38,12 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
                  \`${this.queueDuration}\`
                  `, inline: true})
             this.addFields({name: "Режим повтора", value: `\`${this.loop}\``, inline: true})
-            this.addFields({name: "Следующая песня", value: `\`${this.nextSong}\``, inline: true})
             this.addFields({
-                name: "Длительность: ",
-                value: `${this.duration_bar}
-                    \`[${this.formattedCurrentDuration} / ${this.formattedMaxDuration}]\``,
-                inline: false
+                name: "Длительность песни: ",
+                value: `\`${this.formattedDuration}\``,
+                inline: true
             })
+            this.addFields({name: "Следующая песня", value: `\`${this.nextSong}\``, inline: false})
         }
 
         return this
@@ -121,16 +114,11 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
         this.nextSong = songName
     }
 
-    setSongDuration(currentSeconds: number, maxSeconds: number = this.maxDuration, isLive = false){
-        this.currentDuration = currentSeconds
-        this.maxDuration = maxSeconds
-        this.formattedCurrentDuration = formatSecondsToTime(currentSeconds)
+    setSongDuration(formattedDuration: number, isLive = false){
         if (isLive){
-            this.formattedMaxDuration = "Прямая трансляция"
-            this.duration_bar = `|${splitBar(1, 1, 25, undefined, '🔷')[0]}|`
+            this.formattedDuration = "Прямая трансляция"
         }else{
-            this.formattedMaxDuration = formatSecondsToTime(maxSeconds)
-            this.duration_bar = `|${splitBar(maxSeconds, Math.max(currentSeconds, 1), 25, undefined, '🔷')[0]}|`
+            this.formattedDuration = formatSecondsToTime(formattedDuration)
         }
     }
 }

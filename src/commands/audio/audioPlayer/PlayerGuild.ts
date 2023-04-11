@@ -18,7 +18,6 @@ export class PlayerGuild{
     private messageWithPlayer: Message | undefined
     lastDeletedMessage: Message | undefined
     private queue: Queue
-    private updaterInterval: NodeJS.Timeout | undefined // Timer for update state of the message
     private recreationTimer: NodeJS.Timeout | undefined // Timer for "recreationPlayer"
     private finishTimer: NodeJS.Timeout | undefined // Timer for waiting
     constructor(client: Client, txtChannel: TextChannel, queue: Queue) {
@@ -50,16 +49,6 @@ export class PlayerGuild{
             clearTimeout(this.finishTimer)
         }
     }
-    private resetUpdater(){
-        clearInterval(this.updaterInterval)
-        //loggerSend("Interval Cleared")
-        this.updaterInterval = setInterval(async () => {
-            this.updateEmbedState()
-
-            await this.update()
-        }, this.updateTime)
-    }
-
     private updateEmbedState(){
         const queue = this.client.audioPlayer.distube.getQueue(this.textChannel.guild)
         if (queue) {
@@ -69,7 +58,7 @@ export class PlayerGuild{
 
         const currentSong = this.queue.songs[0]
         if (currentSong){
-            this.embedBuilder.setSongDuration(this.queue.currentTime, currentSong.duration, currentSong.isLive)
+            this.embedBuilder.setSongDuration(currentSong.duration, currentSong.isLive)
             this.embedBuilder.setSongTitle(currentSong.name ?? "Неизвестно", currentSong.url)
             this.embedBuilder.setThumbnailURL(currentSong.thumbnail ?? null)
             this.embedBuilder.setUploader(currentSong.uploader.name)
@@ -110,7 +99,6 @@ export class PlayerGuild{
             if (!this.messageWithPlayer) {
                 //loggerSend("Player Init")
                 this.messageWithPlayer = await this.textChannel.send({embeds: [this.embedBuilder]})
-                this.resetUpdater()
             } else {
                 await this.recreatePlayer()
             }
@@ -133,7 +121,6 @@ export class PlayerGuild{
                     await this.messageWithPlayer.delete()
                 } finally {
                     this.messageWithPlayer = await this.textChannel.send({embeds: [this.embedBuilder]})
-                    this.resetUpdater()
                     await this.updateMessageState()
                 }
             }
@@ -157,7 +144,6 @@ export class PlayerGuild{
     async destroy() {
         //loggerSend("Player Destroy")
         await this.setState("destroying")
-        clearInterval(this.updaterInterval)
         if (this.recreationTimer) clearTimeout(this.recreationTimer)
         await this.stopFinishTimer()
         if (!this.messageWithPlayer) return

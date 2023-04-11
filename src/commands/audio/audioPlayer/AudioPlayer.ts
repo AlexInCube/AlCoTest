@@ -261,7 +261,7 @@ export class AudioPlayer{
                 const player = this.playersManager.get(queue.id)
                 if (player) {
                     await player.init()
-                    //await player.setState("playing")
+                    await player.setState("playing")
                 }
             })
             .on("playSong", async (queue) => {

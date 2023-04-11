@@ -7,6 +7,7 @@ import {
 import {GroupAudio} from "./AudioTypes";
 import {Audio} from "../../main";
 import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers";
+import {formatSecondsToTime} from "../../utilities/formatSecondsToTime";
 
 const command : ICommand = {
     name: "rewind",
@@ -80,12 +81,8 @@ function hmsToSeconds(str: string): number | undefined{
     return s;
 }
 
-function secondsToHms(seconds: number): string{
-    return new Date(seconds * 1000).toISOString().slice(11, 19)
-}
-
 export function generateMessageAudioPlayerRewind(member: GuildMember, time: number){
-    return `${member} перемотал песню на ${secondsToHms(time)}`
+    return `${member} перемотал песню на ${formatSecondsToTime(time)}`
 }
 
 export function generateMessageAudioPlayerRewindFailure(){
