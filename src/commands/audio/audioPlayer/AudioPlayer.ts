@@ -27,8 +27,8 @@ export class AudioPlayer{
             leaveOnStop: true,
             youtubeCookie: process.env.BOT_YOUTUBE_COOKIE,
             nsfw: true,
-            emitAddListWhenCreatingQueue: false,
-            emitAddSongWhenCreatingQueue: false,
+            emitAddListWhenCreatingQueue: true,
+            emitAddSongWhenCreatingQueue: true,
             savePreviousSongs: true,
             plugins: [
                 new YtDlpPlugin({

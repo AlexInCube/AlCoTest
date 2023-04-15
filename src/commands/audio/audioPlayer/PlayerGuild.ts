@@ -38,6 +38,7 @@ export class PlayerGuild{
                     if (await checkBotInVoice(this.textChannel.guild)) {
                         await this.client.audioPlayer.stop(this.textChannel.guild)
                         await this.textChannel.send("Время прошло, никто не смог дать мне новую песню. Я ухожу от вас.")
+                        await this.stopFinishTimer()
                     }
                 }, this.finishTime)
             }
@@ -75,22 +76,24 @@ export class PlayerGuild{
 
     private async updateMessageState() {
         if (!this.messageWithPlayer) return
-        switch (this.state) {
-            case "playing":
-            case "pause":
-                await this.messageWithPlayer.edit({
-                    embeds: [this.embedBuilder],
-                    components: this.buttonsHandler.getComponents()
-                })
-                break
-            case "waiting":
-            case "loading":
-                await this.messageWithPlayer.edit({
-                    embeds: [this.embedBuilder],
-                    components: this.buttonsHandler.getComponentsOnlyStop()
-                })
-                break
-        }
+        try{
+            switch (this.state) {
+                case "playing":
+                case "pause":
+                    await this.messageWithPlayer.edit({
+                        embeds: [this.embedBuilder],
+                        components: this.buttonsHandler.getComponents()
+                    })
+                    break
+                case "waiting":
+                case "loading":
+                    await this.messageWithPlayer.edit({
+                        embeds: [this.embedBuilder],
+                        components: this.buttonsHandler.getComponentsOnlyStop()
+                    })
+                    break
+            }
+        } catch (e) { /* empty */ }
     }
     async init() {
         try{
