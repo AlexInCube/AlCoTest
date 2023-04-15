@@ -89,7 +89,7 @@ export class AudioPlayerButtonsHandler {
                         const song = await this.client.audioPlayer.skip(ButtonInteraction.guild)
 
                         if (song){
-                            await ButtonInteraction.reply({content: generateSkipMessage(song)})
+                            await ButtonInteraction.reply({content: generateSkipMessage(song, ButtonInteraction.member as GuildMember)})
                         }else{
                             await ButtonInteraction.reply({content: generateSkipMessageFailure(), ephemeral: true})
                         }

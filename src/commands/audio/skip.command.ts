@@ -1,5 +1,6 @@
 import {ICommand} from "../../CommandTypes";
 import {
+    GuildMember,
     PermissionsBitField,
     SlashCommandBuilder,
 } from "discord.js";
@@ -25,7 +26,7 @@ const command : ICommand = {
         await AudioCommandWrapperInteraction(interaction, async () => {
             const song = await Audio.skip(interaction.guild!)
             if (song){
-                await interaction.reply({content: generateSkipMessage(song)})
+                await interaction.reply({content: generateSkipMessage(song, interaction.member as GuildMember)})
             }else{
                 await interaction.reply({content: generateSkipMessageFailure(), ephemeral: true})
             }
@@ -35,7 +36,7 @@ const command : ICommand = {
         await AudioCommandWrapperText(message, async () => {
             const song = await Audio.skip(message.guild!)
             if (song){
-                await message.reply({content: generateSkipMessage(song)})
+                await message.reply({content: generateSkipMessage(song, message.member!)})
             }else{
                 await message.reply({content: generateSkipMessageFailure()})
             }
@@ -43,8 +44,8 @@ const command : ICommand = {
     }
 }
 
-export function generateSkipMessage(song: Song): string{
-    return `:fast_forward: ${song.member} пропустил(-а) песню ${song.name} - ${song.uploader.name} :fast_forward:`
+export function generateSkipMessage(song: Song, member: GuildMember): string{
+    return `:fast_forward: ${member} пропустил(-а) песню ${song.name} - ${song.uploader.name} :fast_forward:`
 }
 
 export function generateSkipMessageFailure(): string{
