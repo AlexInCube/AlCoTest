@@ -5,9 +5,8 @@ import {loggerPrefixDJSWS} from "./ShardError.event";
 
 const event: BotEvent = {
     name: Events.ShardReady,
-    once: true,
     execute: () => {
-        loggerSend(loggerPrefixDJSWS + `Попытка переподключения к Websocket!`)
+        loggerSend(loggerPrefixDJSWS + `Подключение прошло успешно`)
     }
 }
 

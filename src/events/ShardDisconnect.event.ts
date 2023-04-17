@@ -5,9 +5,8 @@ import {loggerPrefixDJSWS} from "./ShardError.event";
 
 const event: BotEvent = {
     name: Events.ShardDisconnect,
-    once: true,
     execute: () => {
-        loggerSend(loggerPrefixDJSWS + `Произошло отключение!`)
+        loggerSend(loggerPrefixDJSWS + `Отключение`)
     }
 }
 

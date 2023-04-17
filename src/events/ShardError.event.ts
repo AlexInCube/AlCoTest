@@ -6,7 +6,6 @@ export const loggerPrefixDJSWS = "[ Discord.js / Websocket ] "
 
 const event: BotEvent = {
     name: Events.ShardError,
-    once: true,
     execute: (error) => {
         loggerSend(loggerPrefixDJSWS + `Произошла ошибка: ${error}`)
     }
