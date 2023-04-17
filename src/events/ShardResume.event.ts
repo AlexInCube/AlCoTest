@@ -8,9 +8,9 @@ const event: BotEvent = {
     name: Events.ShardResume,
     execute: async (c, g) => {
         loggerSend(loggerPrefixDJSWS + `Переподключение успешно`)
-        // setTimeout(async () => {
-        //     await Audio.playersManager.reconnect()
-        // }, 2000)
+        setTimeout(async () => {
+            await Audio.playersManager.reconnect()
+        }, 2000)
     }
 }
 

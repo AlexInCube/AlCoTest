@@ -52,3 +52,7 @@ fs.readdirSync(handlersDir).forEach((handler: any) => {
 })
 
 loginBot()
+
+process.on('uncaughtException', (err, origin) => {
+    loggerSend(err);
+});

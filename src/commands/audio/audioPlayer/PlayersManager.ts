@@ -44,17 +44,18 @@ export class PlayersManager{
         loggerSend("playersManager reconnect")
 
         this.collection.forEach((player) => {
+            Audio.distube.stop(player.textChannel.guild)
+        })
+        /*
+        this.collection.forEach((player) => {
             const queue = Audio.distube.getQueue(player.textChannel.guild)
 
             if (queue){
                 try{
                     const voice = Audio.distube.voices.get(player.textChannel.guild)
-
                     const connection = getVoiceConnection(player.textChannel.guild.id, player.textChannel.guild.client.user.id)
-
                     if (!voice) return
                     loggerSend(`Status: ${connection?.state.status}`)
-
                     if (!connection) return
 
                     connection.once('stateChange', (oldState, newState) => {
@@ -99,6 +100,7 @@ export class PlayersManager{
                 Audio.playersManager.remove(player.textChannel.guild.id)
             }
         })
+         */
     }
 
     debug(): string {
