@@ -21,6 +21,8 @@ switch (process.env.NODE_ENV){
         loggerSend(`НЕИЗВЕСТНЫЙ РЕЖИМ: ${process.env.NODE_ENV}`)
 }
 
+loggerSend(`Установлен часовой пояс: ${process.env.TZ}`)
+
 export const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -53,6 +55,6 @@ fs.readdirSync(handlersDir).forEach((handler: any) => {
 
 loginBot()
 
-process.on('uncaughtException', (err, origin) => {
+process.on('uncaughtException', (err) => {
     loggerSend(err);
 });

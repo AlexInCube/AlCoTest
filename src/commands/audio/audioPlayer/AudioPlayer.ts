@@ -188,7 +188,7 @@ export class AudioPlayer{
             let queueList = ''
 
             const startingIndex = pageNumber * entriesPerPage
-            
+
             for (let i = startingIndex; i < Math.min(startingIndex + entriesPerPage, queue.songs.length); i++) {
                 const song = queue.songs[i]
                 queueList += `${i + 1}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`
@@ -251,7 +251,6 @@ export class AudioPlayer{
     private setupEvents(){
         this.distube
             .on("empty", async (queue) => {
-                loggerSend("Distube Empty")
                 await queue.textChannel?.send('Все ушли от меня, значит я тоже ухожу.')
                 await this.playersManager.remove(queue.id)
             })
@@ -261,7 +260,7 @@ export class AudioPlayer{
                 const player = this.playersManager.get(queue.id)
                 if (player) {
                     await player.init()
-                    await player.setState("playing")
+                    //await player.setState("playing")
                 }
             })
             .on("playSong", async (queue) => {

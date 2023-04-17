@@ -9,6 +9,7 @@ import {GroupAudio} from "./AudioTypes";
 import {Audio} from "../../main";
 import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers";
 import {splitBar} from "../../utilities/splitBar";
+import {Queue} from "distube";
 
 const command : ICommand = {
     name: "playing",
@@ -45,22 +46,26 @@ export function generatePlayingMessage(guild: Guild): EmbedBuilder{
         embed.setTitle(song.name!)
         embed.setURL(song.url)
         embed.setAuthor({name: "Сейчас играет:"})
-
-        let durationValue: string
-
-        if (song.isLive){
-            durationValue = `Прямая трансляция [${queue.formattedCurrentTime}]`
-        }else{
-            durationValue = `|${splitBar(song.duration, Math.max(queue.currentTime, 1), 25, undefined, '🔷')[0]}|\n\`[${queue.formattedCurrentTime}/${song.formattedDuration}]\``
-        }
-
-        embed.addFields({name: "Длительность:", value: durationValue, inline: true})
+        embed.addFields({name: "Длительность:", value: generateTimeline(queue), inline: true})
     }else{
         embed.setColor("#FF0022")
         embed.setTitle("В плеере сейчас ничего не проигрывается")
     }
 
     return embed
+}
+
+export function generateTimeline(queue: Queue): string{
+    const song = queue.songs[0]
+    let durationValue: string
+
+    if (song.isLive){
+        durationValue = `\`Прямая трансляция [${queue.formattedCurrentTime}]\``
+    }else{
+        durationValue = `|${splitBar(song.duration, Math.max(queue.currentTime, 1), 25, undefined, '🔷')[0]}|\n\`[${queue.formattedCurrentTime}/${song.formattedDuration}]\``
+    }
+
+    return durationValue
 }
 
 export default command
