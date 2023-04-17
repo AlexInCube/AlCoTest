@@ -1,6 +1,5 @@
 # syntax=docker/dockerfile:1
 FROM node:19
-ENV TZ=Ukraine/Kyiv
 RUN apt update
 RUN apt install git
 RUN apt install -y ffmpeg

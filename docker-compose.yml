@@ -8,8 +8,6 @@ services:
       - ./data:/data/db
     ports:
       - '27018:27017'
-    environment:
-      - TZ=Ukraine/Kyiv
   bot:
     container_name: bot
     image: bot
@@ -19,5 +17,6 @@ services:
       - mongo
     depends_on:
       - mongo
-    environment:
-      - TZ=TZ=Ukraine/Kyiv
+    dns:
+      - 8.8.8.8
+      - 4.4.4.4
