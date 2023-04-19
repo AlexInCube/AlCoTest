@@ -6,10 +6,10 @@ import {Audio} from "../main";
 
 const event: BotEvent = {
     name: Events.ShardResume,
-    execute: async (c, g) => {
+    execute: async () => {
         loggerSend(loggerPrefixDJSWS + `Переподключение успешно`)
         setTimeout(async () => {
-            await Audio.playersManager.reconnect()
+            await Audio.playersManager.stopAll()
         }, 2000)
     }
 }

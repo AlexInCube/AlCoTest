@@ -1,8 +1,8 @@
-import {Client, Collection, TextChannel, VoiceChannel} from "discord.js";
+import {Client, Collection, TextChannel} from "discord.js";
 import {Queue} from "distube";
 import {PlayerGuild} from "./PlayerGuild";
 import {Audio} from "../../../main";
-import {entersState, getVoiceConnection, joinVoiceChannel, VoiceConnectionStatus} from "@discordjs/voice";
+import {getVoiceConnection, VoiceConnectionStatus} from "@discordjs/voice";
 import {loggerSend} from "../../../utilities/logger";
 
 export class PlayersManager{
@@ -40,13 +40,16 @@ export class PlayersManager{
         return this.collection.has(guildId)
     }
 
+    async stopAll(){
+        loggerSend("Stop All Players")
+        this.collection.forEach((player) => {
+            Audio.distube.stop(player.textChannel.guild)
+         })
+    }
+
     async reconnect(){
         loggerSend("playersManager reconnect")
 
-        this.collection.forEach((player) => {
-            Audio.distube.stop(player.textChannel.guild)
-        })
-        /*
         this.collection.forEach((player) => {
             const queue = Audio.distube.getQueue(player.textChannel.guild)
 
@@ -100,7 +103,7 @@ export class PlayersManager{
                 Audio.playersManager.remove(player.textChannel.guild.id)
             }
         })
-         */
+
     }
 
     debug(): string {
