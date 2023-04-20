@@ -35,8 +35,7 @@ export const client = new Client({
         GatewayIntentBits.DirectMessageTyping,
         GatewayIntentBits.GuildModeration
     ],
-    partials: [Partials.Message, Partials.Channel, Partials.Reaction],
-    shards: 'auto'
+    partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 })
 
 client.rest.on('rateLimited', (rateLimited) => {

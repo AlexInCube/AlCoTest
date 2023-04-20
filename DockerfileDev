@@ -1,0 +1,12 @@
+# syntax=docker/dockerfile:1
+FROM node:19
+RUN apt update
+RUN apt install -y ffmpeg
+RUN npm i -g pnpm@latest
+RUN mkdir -p /bot
+WORKDIR /bot
+COPY /build /bot/build
+COPY package.json /bot
+RUN pnpm install
+COPY .env.developmentDocker /bot
+CMD ["pnpm", "run", "developmentDocker"]

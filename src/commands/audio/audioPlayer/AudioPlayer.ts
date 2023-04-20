@@ -136,9 +136,13 @@ export class AudioPlayer{
 
     async shuffle(guild: Guild): Promise<Queue | undefined>{
         try{
-            const queue = this.distube.getQueue(guild)
+            let queue = this.distube.getQueue(guild)
             if (queue){
-                return await this.distube.shuffle(guild)
+                queue = await this.distube.shuffle(guild)
+                const player = this.playersManager.get(queue.id)
+                if (!player) return undefined
+                await player.update()
+                return queue
             }
         } catch (e) { /* empty */ }
         return undefined

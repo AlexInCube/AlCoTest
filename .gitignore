@@ -1,6 +1,7 @@
 .idea
 .env.development
 .env.production
+.env.developmentDocker
 package-lock.json
 build
 data
