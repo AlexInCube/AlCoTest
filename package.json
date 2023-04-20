@@ -1,12 +1,12 @@
 {
   "name": "aic_discord_bot_on_typescript",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "description": "",
   "main": "build/main.js",
   "scripts": {
-    "development": "tsc&& cross-env TZ=Europe/Kiev&& cross-env NODE_ENV=development&& node build/main.js",
-    "developmentDocker": "cross-env TZ=Europe/Kiev&& cross-env NODE_ENV=developmentDocker&& node build/main.js",
-    "production": "cross-env TZ=Europe/Kiev&& cross-env NODE_ENV=production&& node build/main.js",
+    "development": "tsc&& cross-env TZ=Europe/Kiev NODE_ENV=development node build/main.js",
+    "developmentDocker": "cross-env TZ=Europe/Kiev NODE_ENV=developmentDocker node build/main.js",
+    "production": "cross-env TZ=Europe/Kiev NODE_ENV=production node build/main.js",
     "test": "concurrently --kill-others \"npm run development\" \"jest\"",
     "build": "tsc"
   },
