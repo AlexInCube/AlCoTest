@@ -64,14 +64,14 @@ export class AudioPlayer{
 
         // This block of code must be removed in the future. For now 20.03.2023 bug with 1 minute voice connection is still present in Discord.js/Voice.
         // So code below need to bypass the bug
-        const connection = await getVoiceConnection(textChannel.guild.id, textChannel.guild.client.user.id)
-        if (connection) {
-            connection.on('stateChange', (oldState, newState) => {
-                if (oldState.status === VoiceConnectionStatus.Ready && newState.status === VoiceConnectionStatus.Connecting) {
-                    connection.configureNetworking()
-                }
-            })
-        }
+        // const connection = await getVoiceConnection(textChannel.guild.id, textChannel.guild.client.user.id)
+        // if (connection) {
+        //     connection.on('stateChange', (oldState, newState) => {
+        //         if (oldState.status === VoiceConnectionStatus.Ready && newState.status === VoiceConnectionStatus.Connecting) {
+        //             connection.configureNetworking()
+        //         }
+        //     })
+        // }
     }
 
     async stop(guild: Guild){
