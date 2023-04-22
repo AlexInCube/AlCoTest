@@ -43,9 +43,9 @@ client.rest.on('rateLimited', (rateLimited) => {
     loggerSend(rateLimited)
 })
 
-client
-    .on("debug", loggerSend)
-    .on("warn", loggerSend)
+// client
+//     .on("debug", loggerSend)
+//     .on("warn", loggerSend)
 
 export const Audio = new AudioPlayer(client)
 //export const Downloads = new DownloadsManager()

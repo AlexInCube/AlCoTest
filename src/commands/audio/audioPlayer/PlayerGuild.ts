@@ -176,6 +176,10 @@ export class PlayerGuild{
         await this.update()
     }
 
+    getState(){
+        return this.state
+    }
+
     debug(): string{
         return `GuildName: ${this.textChannel.guild.name}, Player State: ${this.state}, GuildID: ${this.textChannel.guildId},  VoiceChannelID: ${this.queue.voice.channel.id}, VoiceChannelName: ${this.queue.voice.channel.name}, TextChannelId: ${this.textChannel.id}, TextChannelName: ${this.textChannel.name} Message ID: ${this.messageWithPlayer?.id}\n`
     }

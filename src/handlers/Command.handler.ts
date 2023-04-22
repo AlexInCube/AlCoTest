@@ -6,7 +6,7 @@ import * as path from "path";
 import "../Types"
 import * as process from "process";
 
-export const loggerPrefixCommandHandler = "[ Commands ]"
+export const loggerPrefixCommandHandler = "[ Commands ] "
 
 const handler = async (client: Client) => {
     //loggerSend(`${loggerPrefixCommandHandler} Начинаем загружать команды.`)
