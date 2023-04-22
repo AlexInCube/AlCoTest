@@ -13,6 +13,8 @@ import {loggerSend} from "../../../utilities/logger";
 import {generateSkipMessage, generateSkipMessageFailure} from "../skip.command";
 import {generateMessageAudioPlayerStop} from "../stop.command";
 import {generateMessageAudioPlayerPrevious, generateMessageAudioPlayerPreviousFailure} from "../previous.command";
+import {Audio} from "../../../main";
+import {generateMessageAudioPlayerShuffle, generateMessageAudioPlayerShuffleFailure} from "../shuffle.command";
 
 enum ButtonIDs{
     stopMusic = "stopMusic",
@@ -20,8 +22,9 @@ enum ButtonIDs{
     toggleLoopMode = "toggleLoopMode",
     previousSong = "previousSong",
     skipSong = "skipSong",
-    showQueue = "showQueue",
     downloadSong = "downloadSong",
+    shuffle = "shuffle",
+    showQueue = "showQueue",
 }
 export class AudioPlayerButtonsHandler {
     rowPrimary = new ActionRowBuilder<ButtonBuilder>()
@@ -41,8 +44,9 @@ export class AudioPlayerButtonsHandler {
         )
 
         this.rowSecondary.addComponents(
+            new ButtonBuilder().setCustomId(ButtonIDs.downloadSong).setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>'),
+            new ButtonBuilder().setCustomId(ButtonIDs.shuffle).setStyle(ButtonStyle.Primary).setEmoji('<:shufflebutton:1092107651384614912>'),
             new ButtonBuilder().setCustomId(ButtonIDs.showQueue).setStyle(ButtonStyle.Secondary).setEmoji('<:songlistwhite:1014551771705782405>'),
-            new ButtonBuilder().setCustomId(ButtonIDs.downloadSong).setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>')
         )
 
         this.rowWithOnlyStop.addComponents(
@@ -101,13 +105,23 @@ export class AudioPlayerButtonsHandler {
                         ButtonInteraction.deferUpdate()
                         break
 
+                    case ButtonIDs.downloadSong: {
+                        const url = await this.client.audioPlayer.getCurrentSongDownloadLink(ButtonInteraction.guild)
+                        ButtonInteraction.reply({content: url, ephemeral: true})
+                        break
+                    }
+
                     case ButtonIDs.showQueue:
                         await this.client.audioPlayer.showQueue(ButtonInteraction)
                         break
 
-                    case ButtonIDs.downloadSong: {
-                        const url = await this.client.audioPlayer.getCurrentSongDownloadLink(ButtonInteraction.guild)
-                        ButtonInteraction.reply({content: url, ephemeral: true})
+                    case ButtonIDs.shuffle: {
+                        await this.client.audioPlayer.shuffle(ButtonInteraction.guild)
+                        if (await Audio.shuffle(ButtonInteraction.guild!)){
+                            await ButtonInteraction.reply({content: generateMessageAudioPlayerShuffle(ButtonInteraction.member as GuildMember)})
+                        }else{
+                            await ButtonInteraction.reply(generateMessageAudioPlayerShuffleFailure())
+                        }
                         break
                     }
                 }

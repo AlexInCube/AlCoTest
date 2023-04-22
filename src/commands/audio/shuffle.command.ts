@@ -41,11 +41,11 @@ const command : ICommand = {
     }
 }
 
-function generateMessageAudioPlayerShuffle(member: GuildMember){
+export function generateMessageAudioPlayerShuffle(member: GuildMember){
     return `${member} перемешал песни`
 }
 
-function generateMessageAudioPlayerShuffleFailure(){
+export function generateMessageAudioPlayerShuffleFailure(){
     return `Не удалось перемешать песни`
 }
 export default command
