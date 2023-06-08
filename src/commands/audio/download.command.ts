@@ -1,11 +1,11 @@
-import {ICommand} from "../../CommandTypes";
+import {ICommand} from "../../CommandTypes.js";
 import {
     PermissionsBitField,
     SlashCommandBuilder,
 } from "discord.js";
-import {GroupAudio} from "./AudioTypes";
-import {songSearchAutocomplete} from "./play.command";
-import {getDownloadLink} from "./audioPlayer/getDownloadLink";
+import {GroupAudio} from "./AudioTypes.js";
+import {songSearchAutocomplete} from "./play.command.js";
+import {getDownloadLink} from "./audioPlayer/getDownloadLink.js";
 
 const command : ICommand = {
     name: "download",
@@ -30,12 +30,12 @@ const command : ICommand = {
     execute: async (interaction) => {
         const songQuery = interaction.options.getString('request')!
 
-        await interaction.reply({content: await getDownloadLink(songQuery)})
+        await interaction.reply({content: await getDownloadLink(interaction.client, songQuery)})
     },
     executeText: async (message, args) => {
         const songQuery = args.join(" ")
 
-        await message.reply({content: await getDownloadLink(songQuery)})
+        await message.reply({content: await getDownloadLink(message.client, songQuery)})
     }
 }
 

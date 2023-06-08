@@ -1,6 +1,6 @@
 import {Document, model, Schema} from "mongoose";
 import {Guild} from "discord.js";
-import {MongoCheckConnection} from "../Mongo.handler";
+import {MongoCheckConnection} from "../Mongo.handler.js";
 
 interface GuildOptions {
     prefix: string,

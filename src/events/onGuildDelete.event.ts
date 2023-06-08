@@ -1,11 +1,11 @@
-import {BotEvent} from "../Types";
-import {Guild} from "discord.js";
-import {setupSettings} from "../handlers/MongoSchemas/SchemaGuild";
+import {BotEvent} from "../Types.js";
+import {Client, Guild} from "discord.js";
+import {setupSettings} from "../handlers/MongoSchemas/SchemaGuild.js";
 import {Events} from "discord.js";
 
 const event: BotEvent = {
     name: Events.GuildDelete,
-    execute: async (guild: Guild) => {
+    execute: async (client: Client, guild: Guild) => {
         await setupSettings(guild)
     }
 }

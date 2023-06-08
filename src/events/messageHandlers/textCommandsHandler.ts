@@ -1,18 +1,16 @@
-import process from "process";
-import {MongoCheckConnection} from "../../handlers/Mongo.handler";
-import {getGuildOption} from "../../handlers/MongoSchemas/SchemaGuild";
-import {ICommand} from "../../CommandTypes";
-import {generateSpecificCommandHelp} from "../../commands/info/help.command";
-import {client} from "../../main";
-import {generateErrorEmbed} from "../../utilities/generateErrorEmbed";
-import {checkBotInVoice} from "../../utilities/checkBotInVoice";
-import {checkMemberInVoiceWithBot} from "../../utilities/checkMemberInVoiceWithBot";
-import {checkMemberInVoice} from "../../utilities/checkMemberInVoice";
-import {CheckBotPermissions, CheckMemberPermissions} from "../../utilities/checkPermissions";
-import {Message, TextChannel} from "discord.js";
-import {loggerSend} from "../../utilities/logger";
+import {MongoCheckConnection} from "../../handlers/Mongo.handler.js";
+import {getGuildOption} from "../../handlers/MongoSchemas/SchemaGuild.js";
+import {ICommand} from "../../CommandTypes.js";
+import {generateSpecificCommandHelp} from "../../commands/info/help.command.js";
+import {generateErrorEmbed} from "../../utilities/generateErrorEmbed.js";
+import {checkBotInVoice} from "../../utilities/checkBotInVoice.js";
+import {checkMemberInVoiceWithBot} from "../../utilities/checkMemberInVoiceWithBot.js";
+import {checkMemberInVoice} from "../../utilities/checkMemberInVoice.js";
+import {CheckBotPermissions, CheckMemberPermissions} from "../../utilities/checkPermissions.js";
+import {Client, Message, TextChannel} from "discord.js";
+import {loggerSend} from "../../utilities/logger.js";
 
-export async function textCommandsHandler(message: Message){
+export async function textCommandsHandler(client: Client, message: Message){
     try{
         if (!message.author || message.author.bot) return;
 

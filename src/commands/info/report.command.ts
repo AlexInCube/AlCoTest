@@ -1,4 +1,4 @@
-import {ICommand} from "../../CommandTypes";
+import {ICommand} from "../../CommandTypes.js";
 import {
     ActionRowBuilder, ModalActionRowComponentBuilder,
     ModalBuilder,
@@ -7,7 +7,7 @@ import {
     TextInputBuilder,
     TextInputStyle
 } from "discord.js";
-import {GroupInfo} from "./InfoTypes";
+import {GroupInfo} from "./InfoTypes.js";
 
 const command : ICommand = {
     name: "report",

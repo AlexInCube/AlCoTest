@@ -1,10 +1,9 @@
-import {BotEvent} from "../Types";
-import {Events, Message, TextChannel} from "discord.js";
-import {client} from "../main";
+import {BotEvent} from "../Types.js";
+import {Client, Events, Message, TextChannel} from "discord.js";
 
 const event: BotEvent = {
     name: Events.MessageDelete,
-    execute: async (message: Message) => {
+    execute: async (client: Client, message: Message) => {
         if (message.guild) return
 
         const textChannel = message.channel as TextChannel

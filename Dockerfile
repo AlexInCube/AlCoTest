@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM bitnami/node
+FROM bitnami/node:18.16.0
 RUN apt update
 RUN apt install git
 RUN apt install -y ffmpeg

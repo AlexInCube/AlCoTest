@@ -1,4 +1,4 @@
-import {ICommand, CommandArgument} from "../../CommandTypes";
+import {CommandArgument, ICommand} from "../../CommandTypes.js";
 import {
     AutocompleteInteraction,
     GuildMember,
@@ -7,13 +7,13 @@ import {
     TextChannel,
     VoiceChannel
 } from "discord.js";
-import {GroupAudio} from "./AudioTypes";
-import {Audio} from "../../main";
-import {isValidURL} from "../../utilities/isValidURL";
-import {truncateString} from "../../utilities/truncateString";
-import { SearchResultType, SearchResultVideo } from "distube";
+import {GroupAudio} from "./AudioTypes.js";
+import {isValidURL} from "../../utilities/isValidURL.js";
+import {SearchResultType, SearchResultVideo} from "distube";
+import {truncateString} from "../../utilities/truncateString.js";
 
-const command : ICommand = {
+
+const command: ICommand = {
     name: "play",
     description: 'Проигрывает музыку указанную пользователем',
     arguments: [new CommandArgument('Ссылка с Youtube/Spotify/Soundcloud или любой текст', true)],
@@ -51,7 +51,7 @@ const command : ICommand = {
 
         const member = interaction.member as GuildMember
         if (songQuery) {
-            await Audio.play(member.voice.channel as VoiceChannel, interaction.channel as TextChannel, songQuery, {
+            await interaction.client.audioPlayer.play(member.voice.channel as VoiceChannel, interaction.channel as TextChannel, songQuery, {
                 member: interaction.member as GuildMember,
                 textChannel:  interaction.channel as TextChannel
             })
@@ -61,7 +61,7 @@ const command : ICommand = {
         const songQuery = args.join(" ")
 
         const member = message.member as GuildMember
-        await Audio.play(member.voice.channel as VoiceChannel, message.channel as TextChannel, songQuery, {
+        await message.client.audioPlayer.play(member.voice.channel as VoiceChannel, message.channel as TextChannel, songQuery, {
             member: message.member as GuildMember,
             textChannel:  message.channel as TextChannel
         })
@@ -74,7 +74,7 @@ export async function songSearchAutocomplete(interaction: AutocompleteInteractio
     const focusedValue = interaction.options.getFocused(false)
 
     if (focusedValue && !isValidURL(focusedValue)) { // Если есть хоть какое-т значение и результат поиска не ссылка
-        const choices = await Audio.distube.search(focusedValue, {
+        const choices = await interaction.client.audioPlayer.distube.search(focusedValue, {
             limit: 10,
             type: SearchResultType.VIDEO,
             safeSearch: false

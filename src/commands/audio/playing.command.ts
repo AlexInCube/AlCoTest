@@ -1,14 +1,13 @@
-import {ICommand} from "../../CommandTypes";
+import {ICommand} from "../../CommandTypes.js";
 import {
     EmbedBuilder,
     Guild,
     PermissionsBitField,
     SlashCommandBuilder,
 } from "discord.js";
-import {GroupAudio} from "./AudioTypes";
-import {Audio} from "../../main";
-import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers";
-import {splitBar} from "../../utilities/splitBar";
+import {GroupAudio} from "./AudioTypes.js";
+import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers.js";
+import {splitBar} from "../../utilities/splitBar.js";
 import {Queue} from "distube";
 
 const command : ICommand = {
@@ -37,7 +36,7 @@ const command : ICommand = {
 }
 
 export function generatePlayingMessage(guild: Guild): EmbedBuilder{
-    const queue = Audio.distube.getQueue(guild)
+    const queue = guild.client.audioPlayer.distube.getQueue(guild)
     const embed = new EmbedBuilder()
         .setColor('#4F51FF')
 

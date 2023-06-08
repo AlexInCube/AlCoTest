@@ -1,4 +1,4 @@
-import {ICommand} from "../../CommandTypes";
+import {ICommand} from "../../CommandTypes.js";
 import {
     GuildMember,
     PermissionsBitField,
@@ -6,10 +6,9 @@ import {
     TextChannel,
     VoiceChannel
 } from "discord.js";
-import {GroupAudio} from "./AudioTypes";
-import {Audio} from "../../main";
-import {isAudioFile} from "./util/isAudioFile";
-import {generateErrorEmbed} from "../../utilities/generateErrorEmbed";
+import {GroupAudio} from "./AudioTypes.js";
+import {isAudioFile} from "./util/isAudioFile.js";
+import {generateErrorEmbed} from "../../utilities/generateErrorEmbed.js";
 
 const command : ICommand = {
     name: "playfile",
@@ -52,7 +51,7 @@ const command : ICommand = {
 
         const member = interaction.member as GuildMember
         if (musicFile) {
-            await Audio.play(member.voice.channel as VoiceChannel, interaction.channel as TextChannel, musicFile.url, {
+            await interaction.client.audioPlayer.play(member.voice.channel as VoiceChannel, interaction.channel as TextChannel, musicFile.url, {
                 member: interaction.member as GuildMember,
                 textChannel:  interaction.channel as TextChannel
             })
@@ -72,7 +71,7 @@ const command : ICommand = {
         }
 
         const member = message.member as GuildMember
-        await Audio.play(member.voice.channel as VoiceChannel, message.channel as TextChannel, musicFile.url, {
+        await message.client.audioPlayer.play(member.voice.channel as VoiceChannel, message.channel as TextChannel, musicFile.url, {
             member: message.member as GuildMember,
             textChannel:  message.channel as TextChannel
         })

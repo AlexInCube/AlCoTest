@@ -1,6 +1,6 @@
-import {Collection} from "discord.js";
-import {ICommand, ICommandGroup} from "./CommandTypes";
-import {AudioPlayer} from "./commands/audio/audioPlayer/AudioPlayer";
+import {Client, Collection} from "discord.js";
+import {ICommand, ICommandGroup} from "./CommandTypes.js";
+import {AudioPlayer} from "./commands/audio/audioPlayer/AudioPlayer.js";
 
 declare module "discord.js" {
     export interface Client {
@@ -13,6 +13,6 @@ declare module "discord.js" {
 export interface BotEvent {
     name: string,
     once?: boolean | false,
-    execute: (...args: any) => void
+    execute: (client: Client, ...args: any) => void
 }
 

@@ -1,12 +1,11 @@
-import {ICommand} from "../../CommandTypes";
+import {ICommand} from "../../CommandTypes.js";
 import {
     GuildMember,
     PermissionsBitField,
     SlashCommandBuilder,
 } from "discord.js";
-import {GroupAudio} from "./AudioTypes";
-import {Audio} from "../../main";
-import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers";
+import {GroupAudio} from "./AudioTypes.js";
+import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers.js";
 
 const command : ICommand = {
     name: "shuffle",
@@ -23,7 +22,7 @@ const command : ICommand = {
     ],
     execute: async (interaction) => {
         await AudioCommandWrapperInteraction(interaction, async () => {
-            if (await Audio.shuffle(interaction.guild!)){
+            if (await interaction.client.audioPlayer.shuffle(interaction.guild!)){
                 await interaction.reply({content: generateMessageAudioPlayerShuffle(interaction.member as GuildMember)})
             }else{
                 await interaction.reply(generateMessageAudioPlayerShuffleFailure())
@@ -32,7 +31,7 @@ const command : ICommand = {
     },
     executeText: async (message) => {
         await AudioCommandWrapperText(message, async () => {
-            if (await Audio.shuffle(message.guild!)){
+            if (await message.client.audioPlayer.shuffle(message.guild!)){
                 await message.reply({content: generateMessageAudioPlayerShuffle(message.member!)})
             }else{
                 await message.reply(generateMessageAudioPlayerShuffleFailure())

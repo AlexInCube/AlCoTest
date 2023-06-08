@@ -1,12 +1,11 @@
-import {ICommand} from "../../CommandTypes";
+import {ICommand} from "../../CommandTypes.js";
 import {
     GuildMember,
     PermissionsBitField,
     SlashCommandBuilder,
 } from "discord.js";
-import {GroupAudio} from "./AudioTypes";
-import {Audio} from "../../main";
-import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers";
+import {GroupAudio} from "./AudioTypes.js";
+import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers.js";
 
 const command : ICommand = {
     name: "stop",
@@ -23,13 +22,13 @@ const command : ICommand = {
     ],
     execute: async (interaction) => {
         await AudioCommandWrapperInteraction(interaction, async () => {
-            await Audio.stop(interaction.guild!)
+            await interaction.client.audioPlayer.stop(interaction.guild!)
             await interaction.reply({content: generateMessageAudioPlayerStop(interaction.member as GuildMember)})
         })
     },
     executeText: async (message) => {
         await AudioCommandWrapperText(message, async () => {
-            await Audio.stop(message.guild!)
+            await message.client.audioPlayer.stop(message.guild!)
             await message.reply({content: generateMessageAudioPlayerStop(message.member!)})
         })
     }

@@ -7,14 +7,13 @@ import {
     ComponentType,
     Client, GuildMember
 } from "discord.js";
-import {checkMemberInVoiceWithBot} from "../../../utilities/checkMemberInVoiceWithBot";
-import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed";
-import {loggerSend} from "../../../utilities/logger";
-import {generateSkipMessage, generateSkipMessageFailure} from "../skip.command";
-import {generateMessageAudioPlayerStop} from "../stop.command";
-import {generateMessageAudioPlayerPrevious, generateMessageAudioPlayerPreviousFailure} from "../previous.command";
-import {Audio} from "../../../main";
-import {generateMessageAudioPlayerShuffle, generateMessageAudioPlayerShuffleFailure} from "../shuffle.command";
+import {checkMemberInVoiceWithBot} from "../../../utilities/checkMemberInVoiceWithBot.js";
+import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed.js";
+import {loggerSend} from "../../../utilities/logger.js";
+import {generateSkipMessage, generateSkipMessageFailure} from "../skip.command.js";
+import {generateMessageAudioPlayerStop} from "../stop.command.js";
+import {generateMessageAudioPlayerPrevious, generateMessageAudioPlayerPreviousFailure} from "../previous.command.js";
+import {generateMessageAudioPlayerShuffle, generateMessageAudioPlayerShuffleFailure} from "../shuffle.command.js";
 
 enum ButtonIDs{
     stopMusic = "stopMusic",
@@ -116,8 +115,7 @@ export class AudioPlayerButtonsHandler {
                         break
 
                     case ButtonIDs.shuffle: {
-                        await this.client.audioPlayer.shuffle(ButtonInteraction.guild)
-                        if (await Audio.shuffle(ButtonInteraction.guild!)){
+                        if (await this.client.audioPlayer.shuffle(ButtonInteraction.guild)){
                             await ButtonInteraction.reply({content: generateMessageAudioPlayerShuffle(ButtonInteraction.member as GuildMember)})
                         }else{
                             await ButtonInteraction.reply(generateMessageAudioPlayerShuffleFailure())

@@ -1,13 +1,12 @@
-import {CommandArgument, ICommand} from "../../CommandTypes";
+import {CommandArgument, ICommand} from "../../CommandTypes.js";
 import {
     GuildMember,
     PermissionsBitField,
     SlashCommandBuilder,
 } from "discord.js";
-import {GroupAudio} from "./AudioTypes";
-import {Audio} from "../../main";
-import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers";
-import {formatSecondsToTime} from "../../utilities/formatSecondsToTime";
+import {GroupAudio} from "./AudioTypes.js";
+import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers.js";
+import {formatSecondsToTime} from "../../utilities/formatSecondsToTime.js";
 
 const command : ICommand = {
     name: "rewind",
@@ -37,7 +36,7 @@ const command : ICommand = {
 
         await AudioCommandWrapperInteraction(interaction, async () => {
             if (time){
-                if (await Audio.rewind(interaction.guild!, time)){
+                if (await interaction.client.audioPlayer.rewind(interaction.guild!, time)){
                     await interaction.reply({content: generateMessageAudioPlayerRewind(interaction.member as GuildMember, time)})
                 }
             } else {
@@ -50,7 +49,7 @@ const command : ICommand = {
 
         await AudioCommandWrapperText(message, async () => {
             if (time){
-                if (await Audio.rewind(message.guild!, time)) {
+                if (await message.client.audioPlayer.rewind(message.guild!, time)) {
                     await message.reply({content: generateMessageAudioPlayerRewind(message.member!, time)})
                 }
             } else {

@@ -1,9 +1,8 @@
-import {Audio} from "../../../main";
-import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed";
+import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed.js";
 import {ChatInputCommandInteraction, Message} from "discord.js";
 
 export async function AudioCommandWrapperText(message: Message, callback: () => void) {
-    const player = Audio.playersManager.get(message.guildId!)
+    const player = message.client.audioPlayer.playersManager.get(message.guildId!)
     if (player) {
         if (player.getState() == "loading"){
             await message.reply({embeds: [generateErrorEmbed("Песни всё ещё обрабатываются, подожди")]})
@@ -15,7 +14,7 @@ export async function AudioCommandWrapperText(message: Message, callback: () => 
     }
 }
 export async function AudioCommandWrapperInteraction(interaction: ChatInputCommandInteraction, callback: () => void) {
-    const player = Audio.playersManager.get(interaction.guildId!)
+    const player = interaction.client.audioPlayer.playersManager.get(interaction.guildId!)
     if (player) {
         if (player.getState() == "loading"){
             await interaction.reply({embeds: [generateErrorEmbed("Песни всё ещё обрабатываются, подожди")], ephemeral: true})

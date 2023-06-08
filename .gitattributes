@@ -1,2 +1,3 @@
 * text=auto
-*.ts linguist-language=Typescript
+*.ts linguist-language=TypeScript
+*.js linguist-detectable=false

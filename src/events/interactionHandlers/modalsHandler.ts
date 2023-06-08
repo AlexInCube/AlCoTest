@@ -1,4 +1,4 @@
-import {submitReport} from "../../handlers/MongoSchemas/SchemaReport";
+import {submitReport} from "../../handlers/MongoSchemas/SchemaReport.js";
 import {Interaction} from "discord.js";
 
 export async function modalsHandler(interaction: Interaction) {

@@ -1,8 +1,8 @@
-import {ICommand} from "../../CommandTypes";
+import {ICommand} from "../../CommandTypes.js";
 import {
     PermissionsBitField,
 } from "discord.js";
-import {GroupAudio} from "./AudioTypes";
+import {GroupAudio} from "./AudioTypes.js";
 
 const command : ICommand = {
     name: "audiodebug",

@@ -1,12 +1,11 @@
-import {ICommand} from "../../CommandTypes";
+import {ICommand} from "../../CommandTypes.js";
 import {
     GuildMember,
     PermissionsBitField,
     SlashCommandBuilder,
 } from "discord.js";
-import {GroupAudio} from "./AudioTypes";
-import {Audio} from "../../main";
-import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers";
+import {GroupAudio} from "./AudioTypes.js";
+import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers.js";
 import {Song} from "distube";
 
 const command : ICommand = {
@@ -24,7 +23,7 @@ const command : ICommand = {
     ],
     execute: async (interaction) => {
         await AudioCommandWrapperInteraction(interaction, async () => {
-            const song = await Audio.skip(interaction.guild!)
+            const song = await interaction.client.audioPlayer.skip(interaction.guild!)
             if (song){
                 await interaction.reply({content: generateSkipMessage(song, interaction.member as GuildMember)})
             }else{
@@ -34,7 +33,7 @@ const command : ICommand = {
     },
     executeText: async (message) => {
         await AudioCommandWrapperText(message, async () => {
-            const song = await Audio.skip(message.guild!)
+            const song = await message.client.audioPlayer.skip(message.guild!)
             if (song){
                 await message.reply({content: generateSkipMessage(song, message.member!)})
             }else{

@@ -1,6 +1,6 @@
-import {ICommand} from "../../CommandTypes";
+import {ICommand} from "../../CommandTypes.js";
 import {PermissionsBitField, SlashCommandBuilder} from "discord.js";
-import {GroupFun} from "./FunTypes";
+import {GroupFun} from "./FunTypes.js";
 
 const command : ICommand = {
     name: "alcotest",

@@ -1,11 +1,11 @@
-import {ICommand} from "../../CommandTypes";
-import {EmbedBuilder, PermissionsBitField, SlashCommandBuilder} from "discord.js";
-import {GroupInfo} from "./InfoTypes";
+import {ICommand} from "../../CommandTypes.js";
+import {Client, EmbedBuilder, PermissionsBitField, SlashCommandBuilder} from "discord.js";
+import {GroupInfo} from "./InfoTypes.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import packageJSON from "../../../package.json";
-import {cpu, mem, os} from "node-os-utils";
-import {client} from "../../main";
+import node_os_pkg from "node-os-utils";
+
+const { cpu, mem, os } = node_os_pkg;
 
 const command : ICommand = {
     name: "status",
@@ -17,33 +17,30 @@ const command : ICommand = {
     bot_permissions: [PermissionsBitField.Flags.SendMessages],
     execute: async (interaction) => {
         await interaction.reply({
-            embeds: [await generateStatusEmbed()],
+            embeds: [await generateStatusEmbed(interaction.client)],
             allowedMentions: { users : []},
             ephemeral: true
         })
     },
     executeText: async (message) => {
         await message.reply({
-            embeds: [await generateStatusEmbed()],
+            embeds: [await generateStatusEmbed(message.client)],
             allowedMentions: { users : []}
         })
     }
 }
 
-export async function generateStatusEmbed(): Promise<EmbedBuilder> {
+export async function generateStatusEmbed(client: Client): Promise<EmbedBuilder> {
     let stateString = ""
 
     const memoryInfo = await mem.info();
-    // prettier-ignore
-    //const operatingSystem = `${os.type()} ${await os.oos().then(o => o)} ${os.arch()}`;
 
     function addState(name: string, value: string) {
         stateString += `${name}: \`${value}\`\n`
     }
 
     addState("Версия бота", `${process.env.npm_package_version}`)
-    addState("NodeJS версия", process.version.slice(1).split(".").join("."))
-    addState("DiscordJS версия", packageJSON.dependencies["discord.js"].slice(1).split(".").join("."))
+    addState("Websocket Heartbeat", `${client.ws.ping}`)
     addState("Операционная система", `${os.platform()}`)
     addState("Процессор", cpu.model())
     addState("Нагрузка на процессор", `${await cpu.usage()} %`)

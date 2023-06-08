@@ -1,7 +1,7 @@
-import {CommandArgument, ICommand} from "../../CommandTypes";
+import {CommandArgument, ICommand} from "../../CommandTypes.js";
 import {Guild, PermissionsBitField, SlashCommandBuilder} from "discord.js";
-import {setGuildOption} from "../../handlers/MongoSchemas/SchemaGuild";
-import {GroupAdmin} from "./AdminTypes";
+import {setGuildOption} from "../../handlers/MongoSchemas/SchemaGuild.js";
+import {GroupAdmin} from "./AdminTypes.js";
 
 const command : ICommand = {
     name: "setprefix",

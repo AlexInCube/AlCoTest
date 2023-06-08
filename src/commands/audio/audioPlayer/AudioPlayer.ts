@@ -1,16 +1,15 @@
 import {Client, Embed, EmbedBuilder, Guild, TextChannel, VoiceBasedChannel} from "discord.js";
 import {DisTube, PlayOptions, Queue, RepeatMode, SearchResult, Song} from 'distube';
-import {PlayersManager} from "./PlayersManager";
-import {loggerSend} from "../../../utilities/logger";
-import SpotifyPlugin from "@distube/spotify";
+import {PlayersManager} from "./PlayersManager.js";
+import {SpotifyPlugin} from "@distube/spotify";
 import {YtDlpPlugin} from "@distube/yt-dlp";
-import SoundCloudPlugin from "@distube/soundcloud";
-import {getVoiceConnection, VoiceConnectionStatus} from "@discordjs/voice";
-import {pagination} from "../../../utilities/pagination/pagination";
-import {ButtonStyles, ButtonTypes} from "../../../utilities/pagination/pagination.i";
-import {clamp} from "../../../utilities/clamp";
-import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed";
-import {getDownloadLink} from "./getDownloadLink";
+import {SoundCloudPlugin} from "@distube/soundcloud";
+import {pagination} from "../../../utilities/pagination/pagination.js";
+import {ButtonStyles, ButtonTypes} from "../../../utilities/pagination/paginationTypes.js";
+import {clamp} from "../../../utilities/clamp.js";
+import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed.js";
+import {getDownloadLink} from "./getDownloadLink.js";
+import {joinVoiceChannel} from "@discordjs/voice";
 
 export class AudioPlayer{
     client: Client
@@ -56,22 +55,13 @@ export class AudioPlayer{
     async play(voiceChannel: VoiceBasedChannel, textChannel: TextChannel, song: string | Song | SearchResult, options?: PlayOptions) {
         await this.distube.voices.join(voiceChannel)
 
+        joinVoiceChannel({channelId: voiceChannel.id, guildId: voiceChannel.guildId, adapterCreator: voiceChannel.guild.voiceAdapterCreator})
+
         try{
             await this.distube.play(voiceChannel, song, options)
         } catch (e) {
             await textChannel.send({embeds: [generateErrorEmbed("Произошла ошибка, попробуйте другую ссылку")]})
         }
-
-        // This block of code must be removed in the future. For now 20.03.2023 bug with 1 minute voice connection is still present in Discord.js/Voice.
-        // So code below need to bypass the bug
-        // const connection = await getVoiceConnection(textChannel.guild.id, textChannel.guild.client.user.id)
-        // if (connection) {
-        //     connection.on('stateChange', (oldState, newState) => {
-        //         if (oldState.status === VoiceConnectionStatus.Ready && newState.status === VoiceConnectionStatus.Connecting) {
-        //             connection.configureNetworking()
-        //         }
-        //     })
-        // }
     }
 
     async stop(guild: Guild){
@@ -250,7 +240,7 @@ export class AudioPlayer{
             return undefined
         }
 
-        return await getDownloadLink(queue.songs[0].url)
+        return await getDownloadLink(guild.client, queue.songs[0].url)
     }
     private setupEvents(){
         this.distube
@@ -264,7 +254,6 @@ export class AudioPlayer{
                 const player = this.playersManager.get(queue.id)
                 if (player) {
                     await player.init()
-                    //await player.setState("playing")
                 }
             })
             .on("playSong", async (queue) => {
@@ -274,7 +263,6 @@ export class AudioPlayer{
                 }
             })
             .on("disconnect", async (queue) => {
-               // loggerSend("Distube Disconnect")
                 await this.playersManager.remove(queue.id)
             })
             .on("addSong", async (queue, song) => {
@@ -317,8 +305,6 @@ export class AudioPlayer{
                 this.playersManager.get(queue.id)?.setState("waiting")
             })
             .on("error", async (channel, error) => {
-                loggerSend("Distube Error")
-
                 channel?.send({embeds: [generateErrorEmbed(`${error.name} + \n\n + ${error.message} \n\n + ${error.stack}`)]})
             })
     }

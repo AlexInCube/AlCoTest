@@ -1,0 +1,8 @@
+{
+  "bot_is_running": "Bot {{botName}} is running, on version {{version}}",
+  "mode_is_developer": "DEVELOPER MODE ON",
+  "mode_is_production": "PRODUCTION MODE ON",
+  "mode_is_unknown": "MODE IS UNKNOWN: ",
+  "handlers_loaded": "Handlers loaded: {{total}} total",
+  "commands_loaded": "Commands loaded: {{total}} total"
+}

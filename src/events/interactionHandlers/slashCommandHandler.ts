@@ -1,11 +1,11 @@
 import {TextChannel} from "discord.js";
-import {generateErrorEmbed} from "../../utilities/generateErrorEmbed";
-import {checkBotInVoice} from "../../utilities/checkBotInVoice";
-import {checkMemberInVoiceWithBot} from "../../utilities/checkMemberInVoiceWithBot";
-import {checkMemberInVoice} from "../../utilities/checkMemberInVoice";
-import {CheckBotPermissions} from "../../utilities/checkPermissions";
-import {loggerSend} from "../../utilities/logger";
-import {loggerPrefixCommandHandler} from "../../handlers/Command.handler";
+import {generateErrorEmbed} from "../../utilities/generateErrorEmbed.js";
+import {checkBotInVoice} from "../../utilities/checkBotInVoice.js";
+import {checkMemberInVoiceWithBot} from "../../utilities/checkMemberInVoiceWithBot.js";
+import {checkMemberInVoice} from "../../utilities/checkMemberInVoice.js";
+import {CheckBotPermissions} from "../../utilities/checkPermissions.js";
+import {loggerSend} from "../../utilities/logger.js";
+import {loggerPrefixCommandHandler} from "../../handlers/Command.handler.js";
 
 export async function slashCommandHandler(interaction: any) {
     if (!interaction.isChatInputCommand()) return

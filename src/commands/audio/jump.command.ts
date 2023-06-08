@@ -1,13 +1,12 @@
-import {CommandArgument, ICommand} from "../../CommandTypes";
+import {CommandArgument, ICommand} from "../../CommandTypes.js";
 import {
     GuildMember,
     PermissionsBitField,
     SlashCommandBuilder,
 } from "discord.js";
-import {GroupAudio} from "./AudioTypes";
-import {Audio} from "../../main";
-import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers";
-import {generateErrorEmbed} from "../../utilities/generateErrorEmbed";
+import {GroupAudio} from "./AudioTypes.js";
+import {AudioCommandWrapperInteraction, AudioCommandWrapperText} from "./util/AudioCommandWrappers.js";
+import {generateErrorEmbed} from "../../utilities/generateErrorEmbed.js";
 import {Song} from "distube";
 
 const command : ICommand = {
@@ -39,9 +38,9 @@ const command : ICommand = {
         if (pos < 1){
             return
         }
-        
+
         await AudioCommandWrapperInteraction(interaction, async () => {
-            const song = await Audio.jump(interaction.guild!, pos!)
+            const song = await interaction.client.audioPlayer.jump(interaction.guild!, pos!)
             if (song){
                 await interaction.reply(generateMessageAudioPlayerJump(interaction.member as GuildMember, song))
             }else{
@@ -62,7 +61,7 @@ const command : ICommand = {
         }
 
         await AudioCommandWrapperText(message, async () => {
-            const song = await Audio.jump(message.guild!, pos!)
+            const song = await message.client.audioPlayer.jump(message.guild!, pos!)
             if (song){
                 await message.reply(generateMessageAudioPlayerJump(message.member!, song))
             }else{

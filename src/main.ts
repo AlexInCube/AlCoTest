@@ -1,27 +1,33 @@
 import {Client, GatewayIntentBits, Partials} from "discord.js";
-import {loggerSend} from "./utilities/logger";
-import * as path from "path";
-import * as fs from "fs";
-import {loginBot} from "./utilities/loginBot";
-import {AudioPlayer} from "./commands/audio/audioPlayer/AudioPlayer";
+import {loggerSend} from "./utilities/logger.js";
+import {loginBot} from "./utilities/loginBot.js";
+import {AudioPlayer} from "./commands/audio/audioPlayer/AudioPlayer.js";
 
+import * as dotenv from 'dotenv'
+dotenv.config({ path: `.env.${process.env.NODE_ENV}` })
 
-require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` })
+import i18next from "i18next";
+import {handlersLoad} from "./handlers/handlersLoad.js";
+
+async function run() {
+    const loadLocale = await import('./locales/Locale.js')
+    await loadLocale.load()
+}
+
+await run()
 
 switch (process.env.NODE_ENV){
     case "development": {
-        loggerSend("Включен режим РАЗРАБОТКИ")
+        loggerSend(i18next.t("mode_is_developer"))
         break
     }
     case "production": {
-        loggerSend("Включен режим РЕЛИЗ (молимся чтобы всё хорошо работало)")
+        loggerSend(i18next.t("mode_is_production"))
         break
     }
     default:
-        loggerSend(`НЕИЗВЕСТНЫЙ РЕЖИМ: ${process.env.NODE_ENV}`)
+        loggerSend(`${i18next.t("mode_is_unknown")} ${process.env.NODE_ENV}`)
 }
-
-loggerSend(`Установлен часовой пояс: ${process.env.TZ}`)
 
 export const client = new Client({
     intents: [
@@ -38,23 +44,13 @@ export const client = new Client({
     partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 })
 
-client.rest.on('rateLimited', (rateLimited) => {
+client.rest.on('rateLimited', () => {
     loggerSend(`RATE LIMIT, PLEASE SLOWDOWN`)
-    loggerSend(rateLimited)
 })
 
-// client
-//     .on("debug", loggerSend)
-//     .on("warn", loggerSend)
+export const audioPlayerManager = new AudioPlayer(client)
 
-export const Audio = new AudioPlayer(client)
-//export const Downloads = new DownloadsManager()
-
-const handlersDir = path.join(__dirname, "./handlers")
-fs.readdirSync(handlersDir).forEach((handler: any) => {
-    if (!handler.endsWith(".handler.js")) return
-    require(`${handlersDir}/${handler}`).default(client)
-})
+await handlersLoad(client)
 
 loginBot()
 

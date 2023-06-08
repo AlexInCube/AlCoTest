@@ -1,7 +1,7 @@
 import {EmbedBuilder, User} from "discord.js";
-import {AudioPlayerLoopMode, AudioPlayerState} from "./AudioPlayerTypes";
-import {getNoun} from "../../../utilities/getNoun";
-import {formatSecondsToTime} from "../../../utilities/formatSecondsToTime";
+import {AudioPlayerLoopMode, AudioPlayerState} from "./AudioPlayerTypes.js";
+import {getNoun} from "../../../utilities/getNoun.js";
+import {formatSecondsToTime} from "../../../utilities/formatSecondsToTime.js";
 
 export class AudioPlayerEmbedBuilder extends EmbedBuilder{
     private playerState: AudioPlayerState = "loading"

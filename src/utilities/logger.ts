@@ -10,7 +10,7 @@ export function getCurrentTimestamp(): string {
     return `${dd + '/' + mm + '/' + yyyy + ' | ' + hour + ':' + minute + ':' + seconds}`
 }
 
-export function loggerSend(message: any): void {
+export function loggerSend(message: unknown, prefix?: string): void {
     let finalOutput = ""
 
     switch (typeof message) {
@@ -21,5 +21,9 @@ export function loggerSend(message: any): void {
             finalOutput += message
     }
 
-    console.log(`[ ${getCurrentTimestamp()} ] ${finalOutput}`)
+    if (prefix){
+        console.log(`[ ${getCurrentTimestamp()} ] [ ${prefix} ] ${finalOutput}`)
+    }else{
+        console.log(`[ ${getCurrentTimestamp()} ] [ UNKNOWN ] ${finalOutput}`)
+    }
 }

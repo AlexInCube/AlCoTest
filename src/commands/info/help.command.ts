@@ -1,4 +1,4 @@
-import {CommandArgument, ICommand, ICommandGroup} from "../../CommandTypes";
+import {CommandArgument, ICommand, ICommandGroup} from "../../CommandTypes.js";
 import {
     Client,
     EmbedBuilder,
@@ -8,10 +8,10 @@ import {
     PermissionsBitField,
     SlashCommandBuilder
 } from "discord.js";
-import "../../Types"
+import "../../Types.js"
 import * as process from "process";
-import {GroupInfo} from "./InfoTypes";
-import {getGuildOption} from "../../handlers/MongoSchemas/SchemaGuild";
+import {GroupInfo} from "./InfoTypes.js";
+import {getGuildOption} from "../../handlers/MongoSchemas/SchemaGuild.js";
 
 const command : ICommand = {
     name: "help",
@@ -96,7 +96,7 @@ export function generateSpecificCommandHelp (commandName: string, client: Client
     let argument_string = ""
 
     if (command.arguments){
-        command.arguments.forEach((value) => {
+        command.arguments.forEach((value: { required: any; name: any; }) => {
             if (value.required){
                 argument_string += `${value.name} `
             }else{
@@ -117,7 +117,7 @@ export function generateSpecificCommandHelp (commandName: string, client: Client
         let permissionsBotString = ''
         const bot = guildData.guild.members.me
 
-        command.bot_permissions.forEach(function (value) {
+        command.bot_permissions.forEach(function (value: PermissionResolvable) {
             if (bot.permissions.has(value)) {
                 permissionsBotString += '✅'
             } else {
@@ -132,7 +132,7 @@ export function generateSpecificCommandHelp (commandName: string, client: Client
 
         if (command.user_permissions){
             permissionsMemberString = ''
-            command.user_permissions.forEach(function (value) {
+            command.user_permissions.forEach(function (value: PermissionResolvable) {
                 if (guildData.member.permissions.has(value)) {
                     permissionsMemberString += '✅'
                 } else {
@@ -171,7 +171,7 @@ export async function generateCommandsEmbedList(client: Client, guild?: Guild | 
 
     client.commandsGroups.forEach((group) => {
         let commandsList = ''
-        group.commands.forEach((value) => {
+        group.commands.forEach((value: ICommand) => {
             commandsList += `\`${value.name}\`, `
         })
         helpEmbed.addFields({

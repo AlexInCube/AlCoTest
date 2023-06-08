@@ -1,5 +1,5 @@
 import {Document, model, Schema} from "mongoose";
-import {getCurrentTimestamp} from "../../utilities/logger";
+import {getCurrentTimestamp} from "../../utilities/logger.js";
 
 export interface IReport extends Document {
     userID: string,

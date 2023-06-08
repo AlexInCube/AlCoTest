@@ -1,10 +1,10 @@
 import {Client, Message, TextChannel} from "discord.js";
-import {AudioPlayerEmbedBuilder} from "./AudioPlayerEmbedBuilder";
+import {AudioPlayerEmbedBuilder} from "./AudioPlayerEmbedBuilder.js";
 import {Queue} from "distube";
-import {AudioPlayerButtonsHandler} from "./AudioPlayerButtonsHandler";
-import {AudioPlayerState} from "./AudioPlayerTypes";
-import {loggerSend} from "../../../utilities/logger";
-import {checkBotInVoice} from "../../../utilities/checkBotInVoice";
+import {AudioPlayerButtonsHandler} from "./AudioPlayerButtonsHandler.js";
+import {AudioPlayerState} from "./AudioPlayerTypes.js";
+import {loggerSend} from "../../../utilities/logger.js";
+import {checkBotInVoice} from "../../../utilities/checkBotInVoice.js";
 
 
 export class PlayerGuild{

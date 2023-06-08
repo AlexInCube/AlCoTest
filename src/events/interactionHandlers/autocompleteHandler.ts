@@ -1,6 +1,7 @@
-import {loggerSend} from "../../utilities/logger";
+import {loggerSend} from "../../utilities/logger.js";
+import {Interaction} from "discord.js";
 
-export async function autocompleteHandler(interaction: any) {
+export async function autocompleteHandler(interaction: Interaction) {
     if (!interaction.isAutocomplete()) return;
     const {commandName} = interaction
     const command = interaction.client.commands.get(commandName) // получение команды из коллекции

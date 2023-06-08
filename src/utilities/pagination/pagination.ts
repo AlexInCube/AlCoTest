@@ -13,7 +13,7 @@ import {
     ModalActionRowComponentBuilder,
     ModalSubmitInteraction
 } from "discord.js";
-import {ButtonTypes, ButtonStyles, ButtonsTypes, PaginationOptions} from "./pagination.i";
+import {ButtonTypes, ButtonStyles, ButtonsTypes, PaginationOptions} from "./paginationTypes.js";
 
 const defaultEmojis = {
     first: "⬅️",

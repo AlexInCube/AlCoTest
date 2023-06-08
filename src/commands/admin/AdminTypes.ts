@@ -1,4 +1,4 @@
-import {ICommandGroup} from "../../CommandTypes";
+import {ICommandGroup} from "../../CommandTypes.js";
 
 export const GroupAdmin : ICommandGroup = {
     name: "admin",
