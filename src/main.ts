@@ -2,19 +2,16 @@ import {Client, GatewayIntentBits, Partials} from "discord.js";
 import {loggerSend} from "./utilities/logger.js";
 import {loginBot} from "./utilities/loginBot.js";
 import {AudioPlayer} from "./commands/audio/audioPlayer/AudioPlayer.js";
+import loadLocale from "./locales/Locale.js"
 
 import * as dotenv from 'dotenv'
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` })
 
 import i18next from "i18next";
+
+await loadLocale()
+
 import {handlersLoad} from "./handlers/handlersLoad.js";
-
-async function run() {
-    const loadLocale = await import('./locales/Locale.js')
-    await loadLocale.load()
-}
-
-await run()
 
 switch (process.env.NODE_ENV){
     case "development": {
@@ -44,12 +41,10 @@ export const client = new Client({
     partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 })
 
-client.rest.on('rateLimited', () => {
-    loggerSend(`RATE LIMIT, PLEASE SLOWDOWN`)
+client.rest.on("rateLimited", data => {
+    console.log(`Client encountered a rate limit: `, data)
 })
-
-export const audioPlayerManager = new AudioPlayer(client)
-
+new AudioPlayer(client);
 await handlersLoad(client)
 
 loginBot()

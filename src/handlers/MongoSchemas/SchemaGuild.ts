@@ -35,7 +35,7 @@ export async function getGuildOption(guild: Guild, option: GuildOption): Promise
     return foundGuild.options[option]
 }
 
-export async function setGuildOption(guild: Guild, option: GuildOption, value: any): Promise<void>{
+export async function setGuildOption(guild: Guild, option: GuildOption, value: unknown): Promise<void>{
     if (!MongoCheckConnection()) return undefined
     let foundGuild: any = await GuildModel.findOne({ guildID: guild.id })
     if (!foundGuild) {

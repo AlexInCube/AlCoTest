@@ -3,6 +3,7 @@
   "mode_is_developer": "ВКЛЮЧЕН РЕЖИМ РАЗРАБОТЧИКА",
   "mode_is_production": "ВКЛЮЧЁН РЕЖИМ РЕЛИЗА",
   "mode_is_unknown": "НЕИЗВЕСТНЫЙ РЕЖИМ: ",
+  "events_loaded": "Загружено событий: {{total}} total",
   "handlers_loaded": "Загружено обработчиков: {{total}} всего",
   "commands_loaded": "Загружено команд: {{total}} всего"
 }

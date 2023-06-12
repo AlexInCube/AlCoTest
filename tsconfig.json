@@ -9,6 +9,7 @@
     "allowJs": true,
     "esModuleInterop": true,
     "useUnknownInCatchVariables": false,
+    "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": false,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true

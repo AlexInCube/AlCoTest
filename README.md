@@ -1,6 +1,6 @@
-<div style="text-align: center;">
+<p align="center">
     <img width="96" src="src/logo.png" alt="BotLogo">
-</div>
+</p>
 <h1 align="center">AICTest</h1>
 <p align="center">
 Cool audiobot for Discord created by <a href="https://vk.com/alexincube"><b>@AlexInCube</b></a></p>
@@ -40,7 +40,7 @@ BOT_SPOTIFY_CLIENT_SECRET=<spotify secret>
 BOT_SPOTIFY_CLIENT_ID=<spotify id>
 
 MONGO_URI=<ip to mongodb> If you run bot locally, use mongodb://localhost:27017. If you run in Docker, use mongodb://mongo:27017
-MONGO_DATABASE_NAME=<any name you want> Collection name in MongoDB, for example: aicbot
+MONGO_DATABASE_NAME=<any name you want> Database name in MongoDB, for example: aicbot
 ```
 
 ### Run locally
@@ -52,4 +52,4 @@ npm run production
 ### Run in Docker
 - Copy docker-compose.yml, Dockerfile, runInDocker.bat (for Windows) or runInDocker.sh (for Linux) in empty folder
 - Copy .env file in this folder and follow steps above
-- Run .bar or .sh
+- Run .bat or .sh

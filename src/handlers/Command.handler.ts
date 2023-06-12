@@ -11,8 +11,6 @@ import i18next from "i18next";
 export const loggerPrefixCommandHandler = "Commands"
 
 const handler = async (client: Client) => {
-    //loggerSend(`${loggerPrefixCommandHandler} Начинаем загружать команды.`)
-
     const commands = new Collection<string, ICommand>()
     const commandsGroups = new Collection<string, ICommandGroup>()
 
@@ -28,23 +26,24 @@ const handler = async (client: Client) => {
         const importPath = `file:///${filePath}`
 
         //loggerSend(`Try Load Command ${importPath}`, loggerPrefixCommandHandler)
+
         const commandModule = await import(importPath)
 
-        const command: ICommand = commandModule.default
+        const command: ICommand = commandModule.default()
         const group: ICommandGroup = command.group
 
-        commands.set(command.name, command)
+        commands.set(command.text_data.name, command)
 
-        if (!commandsGroups.has(group.name)) { // If group not exists, let create it
+        if (!commandsGroups.has(group.name)) { // If a group not exists, let create it
             commandsGroups.set(group.name, group)
             group.commands.push(command)
-        }else{ // If group exists, add command
+        }else{ // If a group exists, add command
             const groupInGroups = commandsGroups.get(group.name)
             groupInGroups?.commands?.push(command)
         }
 
-        if (command.slash_builder){
-            buildersArray.push(command.slash_builder)
+        if (command?.slash_data && !command.hidden){
+            buildersArray.push(command.slash_data.slash_builder)
         }
 
         //loggerSend(`Command Loaded ${importPath}`, loggerPrefixCommandHandler)

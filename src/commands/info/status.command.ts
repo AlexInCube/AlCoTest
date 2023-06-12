@@ -1,32 +1,46 @@
 import {ICommand} from "../../CommandTypes.js";
-import {Client, EmbedBuilder, PermissionsBitField, SlashCommandBuilder} from "discord.js";
+import {
+    ChatInputCommandInteraction,
+    Client,
+    EmbedBuilder,
+    Message,
+    PermissionsBitField,
+    SlashCommandBuilder
+} from "discord.js";
 import {GroupInfo} from "./InfoTypes.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import node_os_pkg from "node-os-utils";
+import i18next from "i18next";
 
 const { cpu, mem, os } = node_os_pkg;
 
-const command : ICommand = {
-    name: "status",
-    description: 'Просмотр состояния бота',
-    slash_builder: new SlashCommandBuilder()
-        .setName('status')
-        .setDescription('Просмотр состояния бота'),
-    group: GroupInfo,
-    bot_permissions: [PermissionsBitField.Flags.SendMessages],
-    execute: async (interaction) => {
-        await interaction.reply({
-            embeds: [await generateStatusEmbed(interaction.client)],
-            allowedMentions: { users : []},
-            ephemeral: true
-        })
-    },
-    executeText: async (message) => {
-        await message.reply({
-            embeds: [await generateStatusEmbed(message.client)],
-            allowedMentions: { users : []}
-        })
+export default function(): ICommand {
+    return {
+        text_data: {
+            name: "status",
+            description: i18next.t("commands:status_desc"),
+            execute: async (message: Message) => {
+                await message.reply({
+                    embeds: [await generateStatusEmbed(message.client)],
+                    allowedMentions: { users : []}
+                })
+            }
+        },
+        slash_data: {
+            slash_builder: new SlashCommandBuilder()
+                .setName('status')
+                .setDescription(i18next.t("commands:status_desc")),
+            execute: async (interaction: ChatInputCommandInteraction) => {
+                await interaction.reply({
+                    embeds: [await generateStatusEmbed(interaction.client)],
+                    allowedMentions: { users : []},
+                    ephemeral: true
+                })
+            },
+        },
+        group: GroupInfo,
+        bot_permissions: [PermissionsBitField.Flags.SendMessages],
     }
 }
 
@@ -39,16 +53,14 @@ export async function generateStatusEmbed(client: Client): Promise<EmbedBuilder>
         stateString += `${name}: \`${value}\`\n`
     }
 
-    addState("Версия бота", `${process.env.npm_package_version}`)
+    addState(i18next.t("commands:status_embed_bot_version"), `${process.env.npm_package_version}`)
     addState("Websocket Heartbeat", `${client.ws.ping}`)
-    addState("Операционная система", `${os.platform()}`)
-    addState("Процессор", cpu.model())
-    addState("Нагрузка на процессор", `${await cpu.usage()} %`)
-    addState("Используемая оперативка", `${memoryInfo.usedMemMb} mb / ${memoryInfo.totalMemMb} mb`)
-    addState("Количество серверов", `${client.guilds.cache.size}`)
+    addState(i18next.t("commands:status_embed_os"), `${os.platform()}`)
+    addState(i18next.t("commands:status_embed_cpu"), cpu.model())
+    addState(i18next.t("commands:status_embed_cpu_usage"), `${await cpu.usage()} %`)
+    addState(i18next.t("commands:status_embed_ram_usage"), `${memoryInfo.usedMemMb} mb / ${memoryInfo.totalMemMb} mb`)
+    addState(i18next.t("commands:status_embed_guilds_count"), `${client.guilds.cache.size}`)
 
     return new EmbedBuilder()
-        .addFields({name: "Состояние бота: ", value: stateString})
+        .addFields({name: `${i18next.t("commands:status_embed_title")}: `, value: stateString})
 }
-
-export default command

@@ -1,4 +1,4 @@
-import {TextChannel} from "discord.js";
+import {GuildMember, Interaction, TextChannel} from "discord.js";
 import {generateErrorEmbed} from "../../utilities/generateErrorEmbed.js";
 import {checkBotInVoice} from "../../utilities/checkBotInVoice.js";
 import {checkMemberInVoiceWithBot} from "../../utilities/checkMemberInVoiceWithBot.js";
@@ -6,27 +6,31 @@ import {checkMemberInVoice} from "../../utilities/checkMemberInVoice.js";
 import {CheckBotPermissions} from "../../utilities/checkPermissions.js";
 import {loggerSend} from "../../utilities/logger.js";
 import {loggerPrefixCommandHandler} from "../../handlers/Command.handler.js";
+import i18next from "i18next";
+import {ICommand} from "../../CommandTypes.js";
 
-export async function slashCommandHandler(interaction: any) {
+export async function slashCommandHandler(interaction: Interaction) {
     if (!interaction.isChatInputCommand()) return
     try {
         const {commandName} = interaction
-        const command = interaction.client.commands.get(commandName) // получение команды из коллекции
+        const command: ICommand | undefined = interaction.client.commands.get(commandName)
 
         if (!command) return
-        if (command.guild_only) {
+        if (!command.slash_data) return
+
+        if (command.guild_data?.guild_only) {
             if (!interaction.guild) {
                 await interaction.reply({
-                    embeds: [generateErrorEmbed('Эта команда может выполняться только на серверах')],
+                    embeds: [generateErrorEmbed(i18next.t("commandshandlers:command_only_in_guilds"))],
                     ephemeral: true
                 })
                 return
             }
 
-            if (command.voice_required) {
-                if (command.voice_with_bot_only) {
-                    if (checkBotInVoice(interaction.member.guild)) {
-                        const checkObj = await checkMemberInVoiceWithBot(interaction.member)
+            if (command.guild_data.voice_required) {
+                if (command.guild_data.voice_with_bot_only) {
+                    if (checkBotInVoice(interaction.guild)) {
+                        const checkObj = await checkMemberInVoiceWithBot(<GuildMember>interaction.member)
                         if (!checkObj.channelTheSame) {
                             await interaction.reply({
                                 embeds: [generateErrorEmbed(checkObj.errorMessage)],
@@ -37,9 +41,9 @@ export async function slashCommandHandler(interaction: any) {
                     }
                 }
 
-                if (!checkMemberInVoice(interaction.member)) {
+                if (!checkMemberInVoice(<GuildMember>interaction.member)) {
                     await interaction.reply({
-                        embeds: [generateErrorEmbed('Вы должны быть в любом голосовом канале для выполнения этой команды')],
+                        embeds: [generateErrorEmbed(i18next.t("commandshandlers:command_only_in_voice"))],
                         ephemeral: true
                     })
                     return
@@ -50,16 +54,16 @@ export async function slashCommandHandler(interaction: any) {
         if (interaction.guild) {// Если мы пишем в личку боту, то никакого сервера/гильдии быть не может. Соответственно как и привилегий в личных сообщениях
             if (!CheckBotPermissions(interaction.channel as TextChannel, command.bot_permissions)) {
                 await interaction.reply({
-                    embeds: [generateErrorEmbed(':no_entry: У БОТА недостаточно прав на этом канале или сервере :no_entry:.\n' +
-                        'Напишите /help (название команды), чтобы увидеть недостающие права. \n' +
-                        'А также попросите администрацию сервера их выдать боту.')], ephemeral: true
+                    embeds: [generateErrorEmbed(`:no_entry: ${i18next.t("commandshandlers:bot_not_enough_permissions_1")} :no_entry:.\n` +
+                        `${i18next.t("commandshandlers:bot_not_enough_permissions_2")} \n` +
+                        `${i18next.t("commandshandlers:bot_not_enough_permissions_3")}`)], ephemeral: true
                 })
                 return
             }
         }
 
-        await command.execute(interaction)
+        await command.slash_data.execute(interaction)
     } catch (e) {
-        loggerSend(`${loggerPrefixCommandHandler}` + e)
+        loggerSend(`${i18next.t("commandshandlers:text_command_error")}: ${e}`, loggerPrefixCommandHandler)
     }
 }

@@ -1,31 +1,37 @@
 import {ICommand} from "../../CommandTypes.js";
-import {PermissionsBitField, SlashCommandBuilder} from "discord.js";
+import {Message, PermissionsBitField, SlashCommandBuilder} from "discord.js";
 import {GroupFun} from "./FunTypes.js";
+import i18next from "i18next";
 
-const command : ICommand = {
-    name: "alcotest",
-    description: 'Пишет процент пива в твоей крови',
-    slash_builder: new SlashCommandBuilder()
-        .setName('alcotest')
-        .setDescription('Пишет процент пива в твоей крови'),
-    group: GroupFun,
-    bot_permissions: [PermissionsBitField.Flags.SendMessages],
-    execute: async (interaction) => {
-        await interaction.reply({
-            content: generateAlcoTestMessage(),
-            allowedMentions: { users : []}
-        })
-    },
-    executeText: async (message) => {
-        await message.reply({
-            content: generateAlcoTestMessage(),
-            allowedMentions: { users : []}
-        })
+export default function(): ICommand {
+    return {
+        text_data: {
+            name: "alcotest",
+            description: i18next.t("commands:alcotest_desc"),
+            execute: async (message: Message) => {
+                await message.reply({
+                    content: generateAlcoTestMessage(),
+                    allowedMentions: { users : []}
+                })
+            }
+        },
+        slash_data: {
+            slash_builder: new SlashCommandBuilder()
+                .setName('alcotest')
+                .setDescription(i18next.t("commands:alcotest_desc")),
+            execute: async (interaction) => {
+                await interaction.reply({
+                    content: generateAlcoTestMessage(),
+                    allowedMentions: { users : []}
+                })
+            },
+        },
+        group: GroupFun,
+        bot_permissions: [PermissionsBitField.Flags.SendMessages],
     }
 }
 
 function generateAlcoTestMessage(): string{
-    return `🍻 Вы состоите из пива на ${Math.round(Math.random() * 100)}% 🍻 `
+    return `🍻 ${i18next.t("commands:alcotest_success")} ${Math.round(Math.random() * 100)}% 🍻 `
 }
 
-export default command

@@ -5,7 +5,7 @@ import {
     InteractionCollector,
     TextChannel,
     ComponentType,
-    Client, GuildMember
+    Client, GuildMember, ButtonInteraction, Guild
 } from "discord.js";
 import {checkMemberInVoiceWithBot} from "../../../utilities/checkMemberInVoiceWithBot.js";
 import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed.js";
@@ -29,7 +29,7 @@ export class AudioPlayerButtonsHandler {
     rowPrimary = new ActionRowBuilder<ButtonBuilder>()
     rowSecondary = new ActionRowBuilder<ButtonBuilder>()
     rowWithOnlyStop = new ActionRowBuilder<ButtonBuilder>()
-    collector: InteractionCollector<any>
+    collector: InteractionCollector<ButtonInteraction>
     client: Client
     constructor(client: Client, textChannel: TextChannel) {
         this.client = client
@@ -52,34 +52,34 @@ export class AudioPlayerButtonsHandler {
             new ButtonBuilder().setCustomId(ButtonIDs.stopMusic).setStyle(ButtonStyle.Danger).setEmoji('<:stopwhite:1014551716043173989>')
         )
 
-        const filter = (button: { customId: any; }) => button.customId
-
         this.collector = textChannel.createMessageComponentCollector({
-            componentType: ComponentType.Button,
-            filter
+            componentType: ComponentType.Button
         })
 
-        this.collector.on("collect", async (ButtonInteraction) => {
+        this.collector.on("collect", async (ButtonInteraction: ButtonInteraction) => {
             try{
-                const checkObj = await checkMemberInVoiceWithBot(ButtonInteraction.member)
+                const checkObj = await checkMemberInVoiceWithBot(ButtonInteraction.member as GuildMember)
                 if (!checkObj.channelTheSame){
-                    ButtonInteraction.reply({embeds: [generateErrorEmbed(checkObj.errorMessage)], ephemeral: true})
+                    await ButtonInteraction.reply({
+                        embeds: [generateErrorEmbed(checkObj.errorMessage)],
+                        ephemeral: true
+                    })
                     return
                 }
 
                 switch (ButtonInteraction.customId){
                     case ButtonIDs.stopMusic:
-                        await this.client.audioPlayer.stop(ButtonInteraction.guild)
-                        await ButtonInteraction.reply({content: generateMessageAudioPlayerStop(ButtonInteraction.member)})
+                        await this.client.audioPlayer.stop(ButtonInteraction.guild as Guild)
+                        await ButtonInteraction.reply({content: generateMessageAudioPlayerStop(ButtonInteraction.member as GuildMember)})
                         break
 
                     case ButtonIDs.pauseMusic:
-                        await this.client.audioPlayer.pause(ButtonInteraction.guild)
-                        ButtonInteraction.deferUpdate()
+                        await this.client.audioPlayer.pause(ButtonInteraction.guild as Guild)
+                        await ButtonInteraction.deferUpdate()
                         break
 
                     case ButtonIDs.previousSong: {
-                        const song = await this.client.audioPlayer.previous(ButtonInteraction.guild)
+                        const song = await this.client.audioPlayer.previous(ButtonInteraction.guild as Guild)
                         if (song) {
                             await ButtonInteraction.reply({content: generateMessageAudioPlayerPrevious(ButtonInteraction.member as GuildMember, song)})
                         }else{
@@ -89,7 +89,7 @@ export class AudioPlayerButtonsHandler {
                     }
 
                     case ButtonIDs.skipSong: {
-                        const song = await this.client.audioPlayer.skip(ButtonInteraction.guild)
+                        const song = await this.client.audioPlayer.skip(ButtonInteraction.guild as Guild)
 
                         if (song){
                             await ButtonInteraction.reply({content: generateSkipMessage(song, ButtonInteraction.member as GuildMember)})
@@ -100,13 +100,13 @@ export class AudioPlayerButtonsHandler {
                     }
 
                     case ButtonIDs.toggleLoopMode:
-                        await this.client.audioPlayer.changeLoopMode(ButtonInteraction.guild)
-                        ButtonInteraction.deferUpdate()
+                        await this.client.audioPlayer.changeLoopMode(ButtonInteraction.guild as Guild)
+                        await ButtonInteraction.deferUpdate()
                         break
 
                     case ButtonIDs.downloadSong: {
-                        const url = await this.client.audioPlayer.getCurrentSongDownloadLink(ButtonInteraction.guild)
-                        ButtonInteraction.reply({content: url, ephemeral: true})
+                        const url = await this.client.audioPlayer.getCurrentSongDownloadLink(ButtonInteraction.guild as Guild)
+                        await ButtonInteraction.reply({content: url, ephemeral: true})
                         break
                     }
 
@@ -115,7 +115,7 @@ export class AudioPlayerButtonsHandler {
                         break
 
                     case ButtonIDs.shuffle: {
-                        if (await this.client.audioPlayer.shuffle(ButtonInteraction.guild)){
+                        if (await this.client.audioPlayer.shuffle(ButtonInteraction.guild as Guild)){
                             await ButtonInteraction.reply({content: generateMessageAudioPlayerShuffle(ButtonInteraction.member as GuildMember)})
                         }else{
                             await ButtonInteraction.reply(generateMessageAudioPlayerShuffleFailure())

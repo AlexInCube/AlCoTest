@@ -2,14 +2,15 @@ import {EmbedBuilder, User} from "discord.js";
 import {AudioPlayerLoopMode, AudioPlayerState} from "./AudioPlayerTypes.js";
 import {getNoun} from "../../../utilities/getNoun.js";
 import {formatSecondsToTime} from "../../../utilities/formatSecondsToTime.js";
+import i18next from "i18next";
 
 export class AudioPlayerEmbedBuilder extends EmbedBuilder{
     private playerState: AudioPlayerState = "loading"
     private requester: User | undefined = undefined
-    private uploader = "Неизвестно"
+    private uploader = i18next.t("audioplayer:player_embed_unknown")
     private songsCount = 0
     private queueDuration = "00:00"
-    private loop = "Выключено"
+    private loop = i18next.t("audioplayer:player_embed_loop_mode_off")
     private nextSong = ""
     private title: string | null = null
     private titleUrl: string | null = null
@@ -27,23 +28,27 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
         this.setThumbnail(null)
         if (this.playerState !== "waiting" && this.playerState !== "loading"){
             if (this.requester){
-                this.addFields({name: "Запросил", value: this.requester.toString(), inline: true})
+                this.addFields({name: i18next.t("audioplayer:player_embed_requester"), value: this.requester.toString(), inline: true})
             }
             this.setThumbnail(this.thumbnailURL)
             this.setTitle(this.title)
             this.setURL(this.titleUrl)
-            this.addFields({name: "Автор", value: `\`${this.uploader}\``, inline: true})
-            this.addFields({name: "Очередь", value: `
-                \`${this.songsCount} ${getNoun(this.songsCount, "песня", "песни", "песен")}\`
+            this.addFields({name: i18next.t("audioplayer:player_embed_author"), value: `\`${this.uploader}\``, inline: true})
+            this.addFields({name: i18next.t("audioplayer:player_embed_queue"), value: `
+                \`${this.songsCount} ${getNoun(this.songsCount,
+                    i18next.t("audioplayer:player_embed_queue_noun_one"),
+                    i18next.t("audioplayer:player_embed_queue_noun_two"),
+                    i18next.t("audioplayer:player_embed_queue_noun_five")
+                )}\`
                  \`${this.queueDuration}\`
                  `, inline: true})
-            this.addFields({name: "Режим повтора", value: `\`${this.loop}\``, inline: true})
+            this.addFields({name: i18next.t("audioplayer:player_embed_loop_mode"), value: `\`${this.loop}\``, inline: true})
             this.addFields({
-                name: "Длительность песни: ",
+                name: `${i18next.t("audioplayer:player_embed_song_length")}: `,
                 value: `\`${this.formattedDuration}\``,
                 inline: true
             })
-            this.addFields({name: "Следующая песня", value: `\`${this.nextSong}\``, inline: false})
+            this.addFields({name: i18next.t("audioplayer:player_embed_next_song"), value: `\`${this.nextSong}\``, inline: false})
         }
 
         return this
@@ -61,16 +66,16 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
 
         switch (this.playerState){
             case "waiting":
-                this.setAuthor({name: '💿 Жду следующую песню 💿'}).setColor('#43f7f7').setURL(null).setTitle(null).setThumbnail(null)
+                this.setAuthor({name: `💿 ${i18next.t("audioplayer:player_embed_state_waiting")} 💿`}).setColor('#43f7f7').setURL(null).setTitle(null).setThumbnail(null)
                 break
             case "pause":
-                this.setAuthor({name: '⏸️ Пауза ⏸️ '}).setColor('#f74343')
+                this.setAuthor({name: `⏸️ ${i18next.t("audioplayer:player_embed_state_pause")} ⏸️ `}).setColor('#f74343')
                 break
             case "playing":
-                this.setAuthor({name: '▶️ Играет ▶️'}).setColor('#49f743')
+                this.setAuthor({name: `▶️ ${i18next.t("audioplayer:player_embed_state_playing")} ▶️`}).setColor('#49f743')
                 break
             case "loading":
-                this.setAuthor({name: '⌚ Пожалуйста, подождите... ⌚'}).setColor('#f1f743').setURL(null).setTitle(null).setThumbnail(null)
+                this.setAuthor({name: `⌚ ${i18next.t("audioplayer:player_embed_state_loading")} ⌚`}).setColor('#f1f743').setURL(null).setTitle(null).setThumbnail(null)
                 break
         }
     }
@@ -80,7 +85,7 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
     }
 
     setUploader(uploader: string | undefined){
-        this.uploader = uploader ?? "Неизвестно"
+        this.uploader = uploader ?? i18next.t("audioplayer:player_embed_unknown")
     }
 
     setQueueData(songs_count: number, queue_duration: number){
@@ -95,20 +100,20 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
     setLoopMode(mode: AudioPlayerLoopMode){
         switch (mode){
             case "disabled":
-                this.loop = "Выключено"
+                this.loop = i18next.t("audioplayer:player_embed_loop_mode_off")
                 break
             case "song":
-                this.loop = "Песня"
+                this.loop = i18next.t("audioplayer:player_embed_loop_mode_song")
                 break
             case "queue":
-                this.loop = "Очередь"
+                this.loop = i18next.t("audioplayer:player_embed_loop_mode_queue")
                 break
         }
     }
 
     setNextSong(songName: string | undefined){
         if (songName === undefined){
-            this.nextSong = "Пусто"
+            this.nextSong = i18next.t("audioplayer:player_embed_next_song_empty")
             return
         }
         this.nextSong = songName
@@ -116,7 +121,7 @@ export class AudioPlayerEmbedBuilder extends EmbedBuilder{
 
     setSongDuration(formattedDuration: number, isLive = false){
         if (isLive){
-            this.formattedDuration = "Прямая трансляция"
+            this.formattedDuration = i18next.t("audioplayer:player_embed_duration_stream")
         }else{
             this.formattedDuration = formatSecondsToTime(formattedDuration)
         }

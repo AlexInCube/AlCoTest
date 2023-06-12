@@ -1,50 +1,55 @@
 import {CommandArgument, ICommand} from "../../CommandTypes.js";
-import {Guild, PermissionsBitField, SlashCommandBuilder} from "discord.js";
+import {Guild, Message, PermissionsBitField, SlashCommandBuilder} from "discord.js";
 import {setGuildOption} from "../../handlers/MongoSchemas/SchemaGuild.js";
 import {GroupAdmin} from "./AdminTypes.js";
+import i18next from "i18next";
 
-const command : ICommand = {
-    name: "setprefix",
-    description: 'Меняет префикс для ТЕКСТОВЫХ команд (которые пишутся не через / ) и только для текущего сервера',
-    arguments: [new CommandArgument("символ", true)],
-    slash_builder: new SlashCommandBuilder()
-        .setName('setprefix')
-        .setDescription('Меняет префикс для ТЕКСТОВЫХ команд (которые пишутся не через / ) и только для текущего сервера')
-        .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator)
-        .addStringOption(option =>
-            option.setName('newprefix')
-                .setNameLocalizations({
-                    ru: 'символ'
+export default function(): ICommand {
+    return {
+        text_data: {
+            name: "setprefix",
+            description: i18next.t("commands:set_prefix_desc"),
+            arguments: [new CommandArgument("символ", true)],
+            execute: async (message: Message, args: string[]): Promise<void> => {
+                const prefix: string = args[0]
+                if (!prefix) return;
+                if (!message.guild) return;
+                await message.reply({content: await changePrefixTo(message.guild, prefix)})
+            }
+        },
+        slash_data: {
+            slash_builder: new SlashCommandBuilder()
+                .setName('setprefix')
+                .setDescription(i18next.t("commands:set_prefix_desc"))
+                .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator)
+                .addStringOption(option =>
+                    option.setName('newprefix')
+                        .setDescription(i18next.t("commands:set_prefix_arg_newprefix_desc"))
+                        .setRequired(true)
+                ),
+            execute: async (interaction) => {
+                const prefix: string | null = interaction.options.getString('newprefix')
+                if (!prefix) return
+                if (!interaction.guild) return
+                await interaction.reply({
+                    content: await changePrefixTo(interaction.guild, prefix),
+                    allowedMentions: { users : []}
                 })
-                .setDescription('Не забудьте сообщить остальным участникам сервера об изменённом префиксе')
-                .setRequired(true)
-        ),
-    guild_only: true,
-    group: GroupAdmin,
-    user_permissions: [PermissionsBitField.Flags.Administrator],
-    bot_permissions: [PermissionsBitField.Flags.SendMessages],
-    execute: async (interaction) => {
-        const prefix: string | null = interaction.options.getString('newprefix')
-        if (!prefix) return
-        if (!interaction.guild) return
-        await interaction.reply({
-            content: await changePrefixTo(interaction.guild, prefix),
-            allowedMentions: { users : []}
-        })
-    },
-    executeText: async (message, args) => {
-        const prefix = args[0]
-        if (!prefix) return;
-        if (!message.guild) return;
-        await message.reply({content: await changePrefixTo(message.guild, prefix)})
+            },
+        },
+        guild_data: {
+            guild_only: true
+        },
+        group: GroupAdmin,
+        user_permissions: [PermissionsBitField.Flags.Administrator],
+        bot_permissions: [PermissionsBitField.Flags.SendMessages],
     }
 }
 
 async function changePrefixTo(guild: Guild, prefix: string): Promise<string> {
-    if (prefix === "/" || prefix === "@" || prefix === "#") return "Нельзя указывать символы \"/ @ #\" в качестве префикса"
-    if (prefix.length >= 2) return "Префикс не может быть длиннее одного символов"
+    if (prefix === "/" || prefix === "@" || prefix === "#") return i18next.t("commands:set_prefix_restrict_prefixes", {prefixes: "/ @ #"}) as string
+    if (prefix.length > 1) return i18next.t("commands:set_prefix_length_error") as string
     await setGuildOption(guild, "prefix", prefix)
-    return `Префикс на этом сервере успешно изменён на ${prefix}`
+    return i18next.t("commands:set_prefix_success_change", {prefix: prefix}) as string
 }
 
-export default command

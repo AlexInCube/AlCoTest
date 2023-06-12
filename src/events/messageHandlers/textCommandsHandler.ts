@@ -9,50 +9,54 @@ import {checkMemberInVoice} from "../../utilities/checkMemberInVoice.js";
 import {CheckBotPermissions, CheckMemberPermissions} from "../../utilities/checkPermissions.js";
 import {Client, Message, TextChannel} from "discord.js";
 import {loggerSend} from "../../utilities/logger.js";
+import i18next from "i18next";
+import {loggerPrefixCommandHandler} from "../../handlers/Command.handler.js";
 
 export async function textCommandsHandler(client: Client, message: Message){
     try{
         if (!message.author || message.author.bot) return;
 
-        let prefix = process.env.BOT_COMMAND_PREFIX
+        let prefix: string = process.env.BOT_COMMAND_PREFIX
 
-        if (message.guild){
-            if (MongoCheckConnection()) {
-                const guildPrefix = await getGuildOption(message.guild, "prefix")
-                if (guildPrefix) prefix = guildPrefix;
+        if (!message.content.startsWith(process.env.BOT_COMMAND_PREFIX)){
+            if (message.guild){
+                if (MongoCheckConnection()) {
+                    const guildPrefix = await getGuildOption(message.guild, "prefix")
+                    if (guildPrefix) prefix = guildPrefix;
+                }
             }
         }
 
-        if (!message.content.startsWith(prefix) && !message.content.startsWith(process.env.BOT_COMMAND_PREFIX)) return;//Проверка префикса сообщения
+        if (!message.content.startsWith(prefix)) return;
 
         const args = message.content.substring(prefix.length).split(" ")
         const command: ICommand | undefined = message.client.commands.get(args.shift() ?? "")
 
         if (!command) return;
 
-        if (command.arguments){
+        if (command.text_data.arguments){
             let requiredArgsCount = 0
 
-            command.arguments.forEach((arg) => {if (arg.required){requiredArgsCount++}})
+            command.text_data.arguments.forEach((arg) => {if (arg.required){requiredArgsCount++}})
 
             if (requiredArgsCount > args.length){
                 if (message.guild){
-                    await message.reply({embeds: [generateSpecificCommandHelp(command.name, client, {guild: message.guild, member: message.member!})]})
+                    await message.reply({embeds: [generateSpecificCommandHelp(command.text_data.name, client, {guild: message.guild, member: message.member!})]})
                     return
                 }
-                await message.reply({embeds: [generateSpecificCommandHelp(command.name, client)]})
+                await message.reply({embeds: [generateSpecificCommandHelp(command.text_data.name, client)]})
                 return
             }
         }
 
-        if (command.guild_only) {
+        if (command?.guild_data?.guild_only) { // If command allowed only in guild, check voice_required and voice_with_bot_only properties
             if (!message.guild) {
-                await message.reply({embeds: [generateErrorEmbed('Эта команда может выполняться только на серверах')]})
+                await message.reply({embeds: [generateErrorEmbed(i18next.t("commandshandlers:command_only_in_guilds"))]})
                 return
             }
 
-            if (command.voice_required){
-                if (command.voice_with_bot_only){
+            if (command.guild_data.voice_required){
+                if (command.guild_data.voice_with_bot_only){
                     if (checkBotInVoice(message.member!.guild)){
                         const checkObj = await checkMemberInVoiceWithBot(message.member!)
                         if (!checkObj.channelTheSame){
@@ -63,33 +67,35 @@ export async function textCommandsHandler(client: Client, message: Message){
                 }
 
                 if (!checkMemberInVoice(message.member!)){
-                    await message.reply({embeds: [generateErrorEmbed('Вы должны быть в любом голосовом канале для выполнения этой команды')]})
+                    await message.reply({embeds: [generateErrorEmbed(i18next.t("commandshandlers:command_only_in_voice"))]})
                     return
                 }
             }
         }
 
-        if (message.guild){// Если мы пишем в личку боту, то никакого сервера/гильдии быть не может. Соответственно как и привилегий в личных сообщениях
+        if (message.guild){ // If we used command in guild, then check permissions
+            // Check bot permissions for command executing
             if (!CheckBotPermissions(message.channel as TextChannel, command.bot_permissions)) {
                 await message.reply({
-                    embeds: [generateErrorEmbed(':no_entry: У БОТА недостаточно прав на этом канале или сервере :no_entry:.\n' +
-                        'Напишите /help (название команды), чтобы увидеть недостающие права. \n' +
-                        'А также попросите администрацию сервера их выдать боту.')]
+                    embeds: [generateErrorEmbed(`:no_entry: ${i18next.t("commandshandlers:bot_not_enough_permissions_1")} :no_entry:.\n` +
+                        `${i18next.t("commandshandlers:bot_not_enough_permissions_2")} \n` +
+                        `${i18next.t("commandshandlers:bot_not_enough_permissions_3")}`)]
                 })
                 return
             }
 
+            // Check user permissions to allow executing requested command
             const member = message.guild.members.cache.get(message.author.id)
             if (member){
                 if (!CheckMemberPermissions(member, command.user_permissions)){
-                    await message.reply({embeds: [generateErrorEmbed('У вас недостаточно прав на этом канале или сервере')]})
+                    await message.reply({embeds: [generateErrorEmbed(i18next.t("commandshandlers:user_not_enough_permissions"))]})
                     return
                 }
             }
         }
 
-        await command.executeText(message, args)
+        await command.text_data.execute(message, args)
     } catch (e) {
-        loggerSend(e)
+        loggerSend(`${i18next.t("commandshandlers:text_command_error")}: ${e}`, loggerPrefixCommandHandler)
     }
 }

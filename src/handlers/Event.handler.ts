@@ -5,6 +5,7 @@ import getDirName from "../utilities/getDirName.js";
 import fs from "node:fs/promises";
 import path from "path";
 import {pathToFileURL} from "url";
+import i18next from "i18next";
 
 export const loggerPrefixEventHandler = "Events"
 
@@ -31,7 +32,7 @@ const handler = async (client: Client) => {
         //loggerSend(`Event loaded: ${importPath}`, loggerPrefixEventHandler)
     }));
 
-    await loggerSend(`Events Loaded: ${eventsFiles.length} total`, loggerPrefixEventHandler)
+    await loggerSend(i18next.t("events_loaded", {total: eventsFiles.length}), loggerPrefixEventHandler)
 }
 
 async function getAllEventsFilesInDir(eventsDir: string) {

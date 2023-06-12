@@ -1,4 +1,13 @@
-import {Client, Embed, EmbedBuilder, Guild, TextChannel, VoiceBasedChannel} from "discord.js";
+import {
+    Client,
+    CommandInteraction,
+    Embed,
+    EmbedBuilder,
+    Guild,
+    Interaction,
+    TextChannel,
+    VoiceBasedChannel
+} from "discord.js";
 import {DisTube, PlayOptions, Queue, RepeatMode, SearchResult, Song} from 'distube';
 import {PlayersManager} from "./PlayersManager.js";
 import {SpotifyPlugin} from "@distube/spotify";
@@ -10,6 +19,7 @@ import {clamp} from "../../../utilities/clamp.js";
 import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed.js";
 import {getDownloadLink} from "./getDownloadLink.js";
 import {joinVoiceChannel} from "@discordjs/voice";
+import i18next from "i18next";
 
 export class AudioPlayer{
     client: Client
@@ -60,7 +70,7 @@ export class AudioPlayer{
         try{
             await this.distube.play(voiceChannel, song, options)
         } catch (e) {
-            await textChannel.send({embeds: [generateErrorEmbed("Произошла ошибка, попробуйте другую ссылку")]})
+            await textChannel.send({embeds: [generateErrorEmbed(i18next.t("audioplayer:play_error"))]})
         }
     }
 
@@ -172,7 +182,8 @@ export class AudioPlayer{
             return false
         }
     }
-    async showQueue (interaction: any){
+    async showQueue (interaction: Interaction){
+        if (!interaction.guild) return
         const queue = this.distube.getQueue(interaction.guild)
         if (!queue) {
             return
@@ -189,9 +200,9 @@ export class AudioPlayer{
             }
 
             return new EmbedBuilder()
-                .setAuthor({name: 'Сейчас играет: '})
+                .setAuthor({name: `${i18next.t("audioplayer:show_queue_songs_in_queue")}: `})
                 .setTitle(queue.songs[0].name!).setURL(queue.songs[0].url)
-                .setDescription(`**Песни в очереди: **\n${queueList}`.slice(0, 4096))
+                .setDescription(`**${i18next.t("audioplayer:show_queue_title")}: **\n${queueList}`.slice(0, 4096))
         }
 
         const arrayEmbeds: Array<EmbedBuilder> = []
@@ -204,8 +215,8 @@ export class AudioPlayer{
 
         await pagination({
             embeds: arrayEmbeds as unknown as Embed[],
-            author: interaction.member.user,
-            interaction: interaction,
+            author: interaction.user,
+            interaction: interaction as CommandInteraction,
             ephemeral: true,
             fastSkip: true,
             pageTravel: false,
@@ -245,7 +256,7 @@ export class AudioPlayer{
     private setupEvents(){
         this.distube
             .on("empty", async (queue) => {
-                await queue.textChannel?.send('Все ушли от меня, значит я тоже ухожу.')
+                await queue.textChannel?.send(i18next.t("audioplayer:event_empty") as string)
                 await this.playersManager.remove(queue.id)
             })
             .on("initQueue", async (queue) => {
@@ -269,8 +280,8 @@ export class AudioPlayer{
                 const songEmbed = new EmbedBuilder()
                     .setTitle(song.name ?? null)
                     .setURL(song.url)
-                    .setAuthor({ name: `🎵${song.member!.user.username} добавил песню🎵` })
-                    .setDescription(`Длительность - ${song.formattedDuration} | Автор - ${song.uploader.name}`)
+                    .setAuthor({ name: `🎵${song.member!.user.username} ${i18next.t("audioplayer:event_add_song")}🎵` })
+                    .setDescription(`${i18next.t("audioplayer:event_add_song_length")} - ${song.formattedDuration} | ${i18next.t("audioplayer:event_add_song_author")} - ${song.uploader.name}`)
                     .setThumbnail(song.thumbnail ?? null)
 
                 if (queue.textChannel){
@@ -286,8 +297,8 @@ export class AudioPlayer{
                 const songEmbed = new EmbedBuilder()
                     .setTitle(playlist.name ?? null)
                     .setURL(playlist.url ?? null)
-                    .setAuthor({ name: `🎵${playlist.member!.user.username} добавил песню🎵` })
-                    .setDescription(`Количество песен - ${playlist.songs.length} | Длительность - ${playlist.formattedDuration}`)
+                    .setAuthor({ name: `🎵${playlist.member!.user.username} ${i18next.t("audioplayer:event_add_song")}🎵` })
+                    .setDescription(`${i18next.t("event_add_list_songs_count")} - ${playlist.songs.length} | ${i18next.t("audioplayer:event_add_song_length")} - ${playlist.formattedDuration}`)
                     .setThumbnail(playlist.thumbnail ?? null)
 
                 if (queue.textChannel){

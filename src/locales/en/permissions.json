@@ -1,0 +1,11 @@
+{
+  "notFound": "Permission name not found",
+  "Administrator": "Administrator",
+  "SendMessages": "Send Messages",
+  "ManageMessages": "Manage Messages",
+  "Connect": "Connect",
+  "Speak": "Speak",
+  "ViewChannel": "View Channels",
+  "AttachFiles": "Attach Files",
+  "ViewAuditLog": "View Audit Log"
+}

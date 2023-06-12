@@ -1,0 +1,11 @@
+{
+  "text_command_error": "Error when executing text command",
+  "bot_not_enough_permissions_1": "BOT has not enough permissions on this server or channel",
+  "bot_not_enough_permissions_2": "Write /help (command name), to see the missing permissions",
+  "bot_not_enough_permissions_3": "And also ask the server administration to give them to the bot",
+  "user_not_enough_permissions": "You do not have enough permissions on this channel or server",
+  "command_only_in_guilds": "This command working only on servers",
+  "command_only_in_voice": "You need to be in voice channel for executing this command",
+  "voice_join_in_any_channel": "Зайди в любой голосовой канал",
+  "voice_join_in_channel": "Зайди в голосовой канал"
+}

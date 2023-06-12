@@ -5,6 +5,7 @@ import {AudioPlayerButtonsHandler} from "./AudioPlayerButtonsHandler.js";
 import {AudioPlayerState} from "./AudioPlayerTypes.js";
 import {loggerSend} from "../../../utilities/logger.js";
 import {checkBotInVoice} from "../../../utilities/checkBotInVoice.js";
+import i18next from "i18next";
 
 
 export class PlayerGuild{
@@ -37,7 +38,7 @@ export class PlayerGuild{
                     if (queue) return
                     if (await checkBotInVoice(this.textChannel.guild)) {
                         await this.client.audioPlayer.stop(this.textChannel.guild)
-                        await this.textChannel.send("Время прошло, никто не смог дать мне новую песню. Я ухожу от вас.")
+                        await this.textChannel.send(i18next.t("audioplayer:event_finish_time") as string)
                         await this.stopFinishTimer()
                     }
                 }, this.finishTime)
@@ -60,7 +61,7 @@ export class PlayerGuild{
         const currentSong = this.queue.songs[0]
         if (currentSong){
             this.embedBuilder.setSongDuration(currentSong.duration, currentSong.isLive)
-            this.embedBuilder.setSongTitle(currentSong.name ?? "Неизвестно", currentSong.url)
+            this.embedBuilder.setSongTitle(currentSong.name ?? i18next.t("audioplayer:player_embed_unknown"), currentSong.url)
             this.embedBuilder.setThumbnailURL(currentSong.thumbnail ?? null)
             this.embedBuilder.setUploader(currentSong.uploader.name)
 

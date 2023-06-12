@@ -10,7 +10,7 @@ const event: BotEvent = {
         if (!client.user) return
 
         loggerSend(i18next.t("bot_is_running", {botName: client.user.username, version: process.env.npm_package_version}))
-        client.user.setActivity('Send /help')
+        client.user.setActivity('/help')
     }
 }
 

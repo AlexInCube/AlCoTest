@@ -3,91 +3,95 @@ import {
     Client,
     EmbedBuilder,
     Guild,
-    GuildMember,
+    GuildMember, Message,
     PermissionResolvable,
     PermissionsBitField,
     SlashCommandBuilder
 } from "discord.js";
 import "../../Types.js"
-import * as process from "process";
 import {GroupInfo} from "./InfoTypes.js";
-import {getGuildOption} from "../../handlers/MongoSchemas/SchemaGuild.js";
+import i18next from "i18next";
 
-const command : ICommand = {
-    name: "help",
-    description: "Подробное описание команд",
-    arguments: [new CommandArgument("название команды")],
-    group: GroupInfo,
-    bot_permissions: [PermissionsBitField.Flags.SendMessages],
-    slash_builder: new SlashCommandBuilder()
-        .setName("help")
-        .setDescription("Подробное описание команд")
-        .addStringOption(option =>
-            option.setName('command')
-                .setNameLocalizations({
-                    ru: 'команда'
-                })
-                .setDescription('Подробности об указанной команде')
-                .setRequired(false)
-                .setAutocomplete(true)
-        ),
-    autocomplete: async (interaction) => {
-        const commandsList = [...interaction.client.commands].map((commandEntry) => {
-            return {
-                name: commandEntry[0],
-                value: commandEntry[0]
+export default function(): ICommand {
+    return {
+        text_data: {
+            name: "help",
+            description: i18next.t("commands:help_desc"),
+            arguments: [new CommandArgument(i18next.t("commands:help_arg_command"))],
+            execute: async (message: Message, args: string[]) => {
+                const commandName: string = args[0]
+                if (commandName) { // If command not specified, then return the list of commands
+                    if (message.guild && message.member) {
+                        await message.reply({
+                            embeds: [generateSpecificCommandHelp(commandName, message.client, {guild: message.guild, member: message.member})],
+                            allowedMentions: { users : []}
+                        })
+                        return
+                    }
+                    await message.reply({
+                        embeds: [generateSpecificCommandHelp(commandName, message.client)],
+                        allowedMentions: { users : []}
+                    })
+                } else { // Если указана конкретная команда
+                    await message.reply({
+                        embeds: [await generateCommandsEmbedList(message.client)],
+                        allowedMentions: { users : []}
+                    })
+                }
             }
-        })
-
-        await interaction.respond(commandsList)
-    },
-    execute: async (interaction) => {
-        const commandName: string | null = interaction.options.getString('command')
-        if (commandName) { // Если конкретная команда не указана, то выводим список
-            if (interaction.guild && interaction.member) {
-                await interaction.reply({
-                    embeds: [generateSpecificCommandHelp(commandName, interaction.client, {
-                        guild: interaction.guild,
-                        member: interaction.member as GuildMember
-                    })], ephemeral: true
+        },
+        slash_data: {
+            slash_builder: new SlashCommandBuilder()
+                .setName("help")
+                .setDescription(i18next.t("commands:help_desc"))
+                .addStringOption(option =>
+                    option.setName('command')
+                        .setDescription(i18next.t("commands:help_slash_arg_command"))
+                        .setRequired(false)
+                        .setAutocomplete(true)
+                ),
+            execute: async (interaction) => {
+                const commandName: string | null = interaction.options.getString('command')
+                if (commandName) { // If command not specified, then return the list of commands
+                    if (interaction.guild && interaction.member) {
+                        await interaction.reply({
+                            embeds: [generateSpecificCommandHelp(commandName, interaction.client, {
+                                guild: interaction.guild,
+                                member: interaction.member as GuildMember
+                            })], ephemeral: true
+                        })
+                        return
+                    }
+                    await interaction.reply({
+                        embeds: [generateSpecificCommandHelp(commandName, interaction.client)], ephemeral: true
+                    })
+                } else {
+                    await interaction.reply({ embeds: [await generateCommandsEmbedList(interaction.client)], ephemeral: true })
+                }
+            },
+            autocomplete: async (interaction) => {
+                const commandsList: Array<{name: string, value: string}> = []
+                interaction.client.commands.forEach((command: ICommand) => {
+                    if (command.hidden) return
+                    commandsList.push({
+                        name: command.text_data.name,
+                        value: command.text_data.name
+                    })
                 })
-                return
-            }
-            await interaction.reply({
-                embeds: [generateSpecificCommandHelp(commandName, interaction.client)], ephemeral: true
-            })
-        } else {
-            await interaction.reply({ embeds: [await generateCommandsEmbedList(interaction.client, interaction.guild)], ephemeral: true })
-        }
-    },
-    executeText: async (message, args) => {
-        const commandName: string = args[0]
-        if (commandName) { // Если конкретная команда не указана, то выводим список
-            if (message.guild && message.member) {
-                await message.reply({
-                    embeds: [generateSpecificCommandHelp(commandName, message.client, {guild: message.guild, member: message.member})],
-                    allowedMentions: { users : []}
-                })
-                return
-            }
-            await message.reply({
-                embeds: [generateSpecificCommandHelp(commandName, message.client)],
-                allowedMentions: { users : []}
-            })
-        } else { // Если указана конкретная команда
-            await message.reply({
-                embeds: [await generateCommandsEmbedList(message.client, message.guild)],
-                allowedMentions: { users : []}
-            })
-        }
+                await interaction.respond(commandsList)
+            },
+        },
+        group: GroupInfo,
+        bot_permissions: [PermissionsBitField.Flags.SendMessages],
     }
 }
+
 export function generateSpecificCommandHelp (commandName: string, client: Client, guildData?: {guild: Guild, member: GuildMember}) {
     const command = client.commands.get(commandName)
 
     const helpEmbed = new EmbedBuilder()
         .setColor('#436df7')
-        .setTitle(`Команда ${commandName} не найдена`)
+        .setTitle(i18next.t("commands:help_command_not_found", {commandName: commandName}))
 
     if (!command) {
         return helpEmbed
@@ -95,8 +99,8 @@ export function generateSpecificCommandHelp (commandName: string, client: Client
 
     let argument_string = ""
 
-    if (command.arguments){
-        command.arguments.forEach((value: { required: any; name: any; }) => {
+    if (command.text_data.arguments){
+        command.text_data.arguments.forEach((value: { required: boolean; name: string; }) => {
             if (value.required){
                 argument_string += `${value.name} `
             }else{
@@ -106,13 +110,13 @@ export function generateSpecificCommandHelp (commandName: string, client: Client
     }
 
     helpEmbed
-        .setTitle(`/${command.name} ${argument_string}`)
-        .setDescription(command.description)
+        .setTitle(`/${command.text_data.name} ${argument_string}`)
+        .setDescription(command.text_data.description)
 
-    helpEmbed.addFields({ name: '✉️ Разрешено в личных сообщениях', value: command.guild_only ? "❌ Нет" : "✅ Да", inline: false })
+    helpEmbed.addFields({ name: `✉️ ${i18next.t("commands:help_allowed_in_dm")}`, value: command.guild_data?.guild_only ? "❌" : "✅", inline: false })
 
     if (guildData){
-        if (!guildData.guild.members.me) {helpEmbed.setTitle(`Произошла ошибка`); return helpEmbed;}
+        if (!guildData.guild.members.me) {helpEmbed.setTitle(i18next.t("general:error")); return helpEmbed;}
 
         let permissionsBotString = ''
         const bot = guildData.guild.members.me
@@ -126,9 +130,9 @@ export function generateSpecificCommandHelp (commandName: string, client: Client
             permissionsBotString += '  ' + convertPermissionsToLocaleString(value) + '\n'
         })
 
-        helpEmbed.addFields({ name: '🤖 Права требуемые для бота', value: permissionsBotString || 'Права не требуются', inline: true })
+        helpEmbed.addFields({ name: `🤖 ${i18next.t("commands:help_permissions_for_bot")}`, value: permissionsBotString || i18next.t("commands:help_permissions_not_required"), inline: true })
 
-        let permissionsMemberString = 'Права не требуются'
+        let permissionsMemberString = i18next.t("commands:help_permissions_not_required")
 
         if (command.user_permissions){
             permissionsMemberString = ''
@@ -142,40 +146,25 @@ export function generateSpecificCommandHelp (commandName: string, client: Client
             })
         }
 
-        helpEmbed.addFields({ name: '🐸 Права требуемые для пользователя: ', value: permissionsMemberString, inline: true })
+        helpEmbed.addFields({ name: `🐸 ${i18next.t("commands:help_permissions_for_user")}`, value: permissionsMemberString, inline: true })
     }
 
     return helpEmbed
 }
 
-export async function generateCommandsEmbedList(client: Client, guild?: Guild | null): Promise<EmbedBuilder> {
-    let prefixes_string = process.env.BOT_COMMAND_PREFIX
-
-    if (guild){
-        const prefix = await getGuildOption(guild, "prefix")
-        if (prefixes_string !== prefix) {
-            prefixes_string += " или " + prefix
-        }
-    }
-
+export async function generateCommandsEmbedList(client: Client): Promise<EmbedBuilder> {
     const helpEmbed = new EmbedBuilder()
         .setColor('#436df7')
-        .setTitle('Справка о командах')
-        .setDescription(
-            `Вы можете писать команды через ординарный / (тогда в большинстве случаев ваши сообщения никто не увидит) 
-            или используйте префиксы: ${prefixes_string}\n
-            Напишите help <название команды> чтобы увидеть подробности\n
-            <параметр> - Параметр команды в кавычках необязателен 
-            `
-        )
+        .setTitle(i18next.t("commands:help_about_commands"))
 
     client.commandsGroups.forEach((group) => {
         let commandsList = ''
-        group.commands.forEach((value: ICommand) => {
-            commandsList += `\`${value.name}\`, `
+        group.commands.forEach((command: ICommand) => {
+            if (command.hidden) return
+            commandsList += `\`${command.text_data.name}\`, `
         })
         helpEmbed.addFields({
-            name: group.icon_emoji + convertGroupToLocaleString(group),
+            name: group.icon_emoji + " " + convertGroupToLocaleString(group),
             value: commandsList.slice(0, -2),
             inline: false
         })
@@ -185,27 +174,20 @@ export async function generateCommandsEmbedList(client: Client, guild?: Guild | 
 }
 
 function convertGroupToLocaleString (group: ICommandGroup): string {
-    switch (group.name) {
-        case 'audio': return 'Аудио'
-        case 'fun': return 'Развлечения'
-        case 'info': return 'Информация'
-        case 'admin': return 'Только для администрации сервера'
-        default: return group.name
-    }
+    return i18next.t(`commandsGroups:${group.name}`)
 }
 
 function convertPermissionsToLocaleString (permission: PermissionResolvable): string {
     switch (permission) {
-        case PermissionsBitField.Flags.Administrator: return 'Администратор'
-        case PermissionsBitField.Flags.SendMessages: return 'Отправлять сообщения'
-        case PermissionsBitField.Flags.ManageMessages: return 'Управлять сообщениями'
-        case PermissionsBitField.Flags.Connect: return 'Подключаться'
-        case PermissionsBitField.Flags.Speak: return 'Говорить'
-        case PermissionsBitField.Flags.ViewChannel: return 'Просматривать каналы'
-        case PermissionsBitField.Flags.AttachFiles: return 'Прикреплять файлы'
-        case PermissionsBitField.Flags.ViewAuditLog: return 'Просмотр журнала аудита'
-        default: return 'Не найдено название прав: ' + permission
+        case PermissionsBitField.Flags.Administrator: return i18next.t("permissions:Administrator")
+        case PermissionsBitField.Flags.SendMessages: return i18next.t("permissions:SendMessages")
+        case PermissionsBitField.Flags.ManageMessages: return i18next.t("permissions:ManageMessages")
+        case PermissionsBitField.Flags.Connect: return i18next.t("permissions:Connect")
+        case PermissionsBitField.Flags.Speak: return i18next.t("permissions:Speak")
+        case PermissionsBitField.Flags.ViewChannel: return i18next.t("permissions:ViewChannel")
+        case PermissionsBitField.Flags.AttachFiles: return i18next.t("permissions:AttachFiles")
+        case PermissionsBitField.Flags.ViewAuditLog: return i18next.t("permissions:ViewAuditLog")
+        default: return `${i18next.t("permissions:notFound")}: ` + permission
     }
 }
 
-export default command
