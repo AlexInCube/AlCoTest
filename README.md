@@ -8,7 +8,7 @@ Cool audiobot for Discord created by <a href="https://vk.com/alexincube"><b>@Ale
 ## Features
 - Command /alcotest which show your alcohol count in blood
 - Audioplayer based on [Distube](https://github.com/skick1234/DisTube) with buttons ![image](https://i.imgur.com/zqQ6ViY.png)
-- Support YouTube, Spotify, Soundcloud
+- Support YouTube, Spotify, Soundcloud and Discord Attachments (/playfile support MP3/WAV/OGG)
 - Support Slash and Text commands (with customizable prefix per server using /setprefix)
 - Localization (English and Russian are currently supported)
 
@@ -16,7 +16,8 @@ Cool audiobot for Discord created by <a href="https://vk.com/alexincube"><b>@Ale
 - Node.js 16.9.0 or higher
 - MongoDB 6.0 or higher
 
-# How to run bot?
+## How to run bot?
+### Configure .env
 You can use Docker image or install Node.js, MongoDB and source code locally.
 But in both cases you need to configure .env file.
 
@@ -43,6 +44,9 @@ MONGO_DATABASE_NAME=<any name you want> Database name in MongoDB, for example: a
 ```
 
 ### Run locally
+- Follow "Configure .env" section
+- Then run this commands
+
 ```npm
 npm install
 npm run build
@@ -50,5 +54,5 @@ npm run production
 ```
 ### Run in Docker
 - Copy docker-compose.yml, Dockerfile, runInDocker.bat (for Windows) or runInDocker.sh (for Linux) in empty folder
-- Copy .env file in this folder and follow steps above
-- Run .bat or .sh
+- Follow "Configure .env" section, but copy .env.production in folder with Dockerfile etc.
+- Run "runInDocker" file
