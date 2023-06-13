@@ -6,12 +6,11 @@
 Cool audiobot for Discord created by <a href="https://vk.com/alexincube"><b>@AlexInCube</b></a></p>
 
 ## Features
-
-- Based on [Distube](https://github.com/skick1234/DisTube)
-- Rich audioplayer with buttons
+- Command /alcotest which show your alcohol count in blood
+- Audioplayer based on [Distube](https://github.com/skick1234/DisTube) with buttons ![image](https://i.imgur.com/zqQ6ViY.png)
 - Support YouTube, Spotify, Soundcloud
-- Support slash and text commands
-- Localization
+- Support Slash and Text commands (with customizable prefix per server using /setprefix)
+- Localization (English and Russian are currently supported)
 
 ## Requirements
 - Node.js 16.9.0 or higher
@@ -28,12 +27,12 @@ But in both cases you need to configure .env file.
 - To get Spotify Secret and ID, follow this [guide](https://stevesie.com/docs/pages/spotify-client-id-secret-developer-api)
 
 ```
-BOT_COMMAND_PREFIX=<default prefix you want> Used only for text commands
+BOT_COMMAND_PREFIX=<default prefix you want> Used only for text commands, for example: //
 BOT_LANGUAGE=<language> Supported values: en ru
 
 BOT_DISCORD_TOKEN=<discord token>
 BOT_DISCORD_CLIENT_ID=<discord bot id>
-BOT_DISCORD_OVERPOWERED_ID=<your id in discord> You are retrieve reports in direct message
+BOT_DISCORD_OVERPOWERED_ID=<your id in discord> This need to retrieve reports in direct message
 
 BOT_YOUTUBE_COOKIE=<cookie> 
 BOT_SPOTIFY_CLIENT_SECRET=<spotify secret>

@@ -297,8 +297,8 @@ export class AudioPlayer{
                 const songEmbed = new EmbedBuilder()
                     .setTitle(playlist.name ?? null)
                     .setURL(playlist.url ?? null)
-                    .setAuthor({ name: `🎵${playlist.member!.user.username} ${i18next.t("audioplayer:event_add_song")}🎵` })
-                    .setDescription(`${i18next.t("event_add_list_songs_count")} - ${playlist.songs.length} | ${i18next.t("audioplayer:event_add_song_length")} - ${playlist.formattedDuration}`)
+                    .setAuthor({ name: `🎵${playlist.member!.user.username} ${i18next.t("audioplayer:event_add_list")}🎵` })
+                    .setDescription(`${i18next.t("audioplayer:event_add_list_songs_count")} - ${playlist.songs.length} | ${i18next.t("audioplayer:event_add_song_length")} - ${playlist.formattedDuration}`)
                     .setThumbnail(playlist.thumbnail ?? null)
 
                 if (queue.textChannel){

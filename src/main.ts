@@ -42,7 +42,7 @@ export const client = new Client({
 })
 
 client.rest.on("rateLimited", data => {
-    console.log(`Client encountered a rate limit: `, data)
+    loggerSend(`Client encountered a rate limit: ${data}`)
 })
 new AudioPlayer(client);
 await handlersLoad(client)

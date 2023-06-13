@@ -9,6 +9,7 @@
   "event_add_song": "added a song",
   "event_add_song_length": "Duration",
   "event_add_song_author": "Author",
+  "event_add_list": "added a playlist",
   "event_add_list_songs_count": "Songs count",
   "player_embed_unknown": "Unknown",
   "player_embed_requester": "Requester",

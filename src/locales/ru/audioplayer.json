@@ -9,6 +9,7 @@
   "event_add_song": "добавил(-а) песню",
   "event_add_song_length": "Длительность",
   "event_add_song_author": "Автор",
+  "event_add_list": "добавил(-а) плейлист",
   "event_add_list_songs_count": "Количество песен",
   "player_embed_unknown": "Неизвестно",
   "player_embed_requester": "Запросил",
