@@ -1,17 +1,17 @@
 import {Client, Collection, TextChannel} from "discord.js";
 import {Queue} from "distube";
-import {PlayerGuild} from "./PlayerGuild.js";
+import {MessagePlayer} from "./MessagePlayer.js";
 
-export class PlayersManager{
+export class AudioPlayersManager {
     private readonly client: Client;
-    private readonly collection = new Collection<string, PlayerGuild>();
+    private readonly collection = new Collection<string, MessagePlayer>();
     constructor(_client: Client) {
         this.client = _client
     }
-    async add(guildId: string, textChannel: TextChannel, queue: Queue): Promise<PlayerGuild | undefined> {
+    async add(guildId: string, textChannel: TextChannel, queue: Queue): Promise<MessagePlayer | undefined> {
         if (await this.client.guilds.cache.get(guildId)) {
             if (!this.collection.has(guildId)) {
-                this.collection.set(guildId, new PlayerGuild(this.client, textChannel, queue))
+                this.collection.set(guildId, new MessagePlayer(this.client, textChannel, queue))
             }
 
             return this.collection.get(guildId)
@@ -20,7 +20,7 @@ export class PlayersManager{
         return undefined
     }
 
-    get(guildId: string): PlayerGuild | undefined{
+    get(guildId: string): MessagePlayer | undefined{
         return this.collection.get(guildId)
     }
 

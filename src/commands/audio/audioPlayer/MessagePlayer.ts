@@ -1,33 +1,45 @@
 import {Client, Message, TextChannel} from "discord.js";
-import {AudioPlayerEmbedBuilder} from "./AudioPlayerEmbedBuilder.js";
-import {Queue} from "distube";
-import {AudioPlayerButtonsHandler} from "./AudioPlayerButtonsHandler.js";
+import {MessagePlayerEmbedBuilder} from "./MessagePlayerEmbedBuilder.js";
+import {Queue, Song} from "distube";
+import {MessagePlayerButtonsHandler} from "./MessagePlayerButtonsHandler.js";
 import {AudioPlayerState} from "./AudioPlayerTypes.js";
 import {loggerSend} from "../../../utilities/logger.js";
 import {checkBotInVoice} from "../../../utilities/checkBotInVoice.js";
 import i18next from "i18next";
 
 
-export class PlayerGuild{
-    private finishTime = 20000
-    private updateTime = 3500
+export class MessagePlayer {
     private readonly client: Client
+    // TextChannel where player was created
     readonly textChannel: TextChannel
+    // Player state
     private state: AudioPlayerState = "loading"
-    embedBuilder: AudioPlayerEmbedBuilder = new AudioPlayerEmbedBuilder()
-    private buttonsHandler: AudioPlayerButtonsHandler
+    // Player embed interface
+    embedBuilder: MessagePlayerEmbedBuilder = new MessagePlayerEmbedBuilder()
+    // Player buttons for embed
+    private buttonsHandler: MessagePlayerButtonsHandler
+    // Message where player is stored right now
     private messageWithPlayer: Message | undefined
-    lastDeletedMessage: Message | undefined
     private queue: Queue
-    private recreationTimer: NodeJS.Timeout | undefined // Timer for "recreationPlayer"
-    private finishTimer: NodeJS.Timeout | undefined // Timer for waiting
+    // Variable for "recreationPlayer"
+    lastDeletedMessage: Message | undefined
+    // Delay for player recreation
+    private updateTime = 3500
+    // Timer for "recreationPlayer"
+    private recreationTimer: NodeJS.Timeout | undefined
+    // Time for "waiting" state
+    private finishTime = 20000
+    // Timer object for "waiting" state
+    private finishTimer: NodeJS.Timeout | undefined
     constructor(client: Client, txtChannel: TextChannel, queue: Queue) {
         this.client = client
         this.textChannel = txtChannel
         this.queue = queue
-        this.buttonsHandler = new AudioPlayerButtonsHandler(this.client, this.textChannel)
+        this.buttonsHandler = new MessagePlayerButtonsHandler(this.client, this.textChannel)
     }
 
+    // If a player is in "waiting" state, they start finish timer.
+    // It can be canceled by switching state to any other state
     async startFinishTimer() {
         try{
             if (await checkBotInVoice(this.textChannel.guild)) {
@@ -45,20 +57,21 @@ export class PlayerGuild{
             }
         }catch (e) { /* empty */ }
     }
-
-    async stopFinishTimer(){
+    // Cancel finish timer
+    private async stopFinishTimer(){
         if (this.finishTimer){
             clearTimeout(this.finishTimer)
         }
     }
+    // Update embed interface to represent the current state of player, BUT THIS NOT PUSHES UPDATED EMBED TO MESSAGE
     private updateEmbedState(){
-        const queue = this.client.audioPlayer.distube.getQueue(this.textChannel.guild)
+        const queue: Queue | undefined = this.client.audioPlayer.distube.getQueue(this.textChannel.guild)
         if (queue) {
             this.queue = queue
         }
         this.embedBuilder.setPlayerState(this.state)
 
-        const currentSong = this.queue.songs[0]
+        const currentSong: Song = this.queue.songs[0]
         if (currentSong){
             this.embedBuilder.setSongDuration(currentSong.duration, currentSong.isLive)
             this.embedBuilder.setSongTitle(currentSong.name ?? i18next.t("audioplayer:player_embed_unknown"), currentSong.url)
@@ -75,6 +88,7 @@ export class PlayerGuild{
         this.embedBuilder.update()
     }
 
+    // Update a message with player with embed and buttons
     private async updateMessageState() {
         if (!this.messageWithPlayer) return
         try{
@@ -96,6 +110,8 @@ export class PlayerGuild{
             }
         } catch (e) { /* empty */ }
     }
+
+    // Send a first player message
     async init() {
         try{
             this.updateEmbedState()
@@ -109,11 +125,10 @@ export class PlayerGuild{
         } catch (e) { loggerSend(e) }
     }
 
+    // Attempt to recreate player if is deleted, or it is not the last message in the text channel
     async recreatePlayer(){
         if (!this.messageWithPlayer) return
-        if (this.recreationTimer){
-            clearTimeout(this.recreationTimer)
-        }
+        this.stopRecreationTimer() // We stop recreation in recreatePlayer to keep "singleton" for this recreatePlayer
         this.recreationTimer = setTimeout(async () => {
             if (!this.messageWithPlayer) return
             const messages = await this.textChannel.messages.fetch({limit: 1})
@@ -130,7 +145,14 @@ export class PlayerGuild{
             }
         }, this.updateTime)
     }
+    // Cancel recreatePlayer
+    private async stopRecreationTimer(){
+        if (this.recreationTimer){
+            clearTimeout(this.recreationTimer)
+        }
+    }
 
+    // Update embed and player message
     async update() {
         if (!this.messageWithPlayer) return
         if (this.state === "destroying") return
@@ -145,19 +167,30 @@ export class PlayerGuild{
             await this.updateMessageState()
         }catch (e) { /* empty */ }
     }
+
+    // Destroy the player and all related stuff
     async destroy() {
         //loggerSend("Player Destroy")
         await this.setState("destroying")
-        if (this.recreationTimer) clearTimeout(this.recreationTimer)
+        await this.stopRecreationTimer()
         await this.stopFinishTimer()
         if (!this.messageWithPlayer) return
         try{
             this.buttonsHandler.destroy()
             this.lastDeletedMessage = this.messageWithPlayer
-            await this.messageWithPlayer?.delete()
+            if (await this.messageWithPlayer?.delete()){
+                // In very rare cases, a player message after deleting can be sent again.
+                // This timeout is a workaround for this case.
+                setTimeout(async () => {
+                    try{
+                        await this.messageWithPlayer?.delete()
+                    } catch (e) {/* empty */}
+                }, 5000)
+            }
         }catch (e) { /* empty */ }
     }
 
+    // Changed state of the player and update player message
     async setState(state: AudioPlayerState) {
         this.state = state
         // When Distube is waiting the song, they remove their Queue object. So when we try to play a new song, we need to receive new Queue
@@ -181,6 +214,7 @@ export class PlayerGuild{
         return this.state
     }
 
+    // Debug info for text command $audiodebug
     debug(): string{
         return `GuildName: ${this.textChannel.guild.name}, Player State: ${this.state}, GuildID: ${this.textChannel.guildId},  VoiceChannelID: ${this.queue.voice.channel.id}, VoiceChannelName: ${this.queue.voice.channel.name}, TextChannelId: ${this.textChannel.id}, TextChannelName: ${this.textChannel.name} Message ID: ${this.messageWithPlayer?.id}\n`
     }

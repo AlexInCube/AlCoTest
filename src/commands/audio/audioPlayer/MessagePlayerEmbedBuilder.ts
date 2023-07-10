@@ -4,7 +4,7 @@ import {getNoun} from "../../../utilities/getNoun.js";
 import {formatSecondsToTime} from "../../../utilities/formatSecondsToTime.js";
 import i18next from "i18next";
 
-export class AudioPlayerEmbedBuilder extends EmbedBuilder{
+export class MessagePlayerEmbedBuilder extends EmbedBuilder{
     private playerState: AudioPlayerState = "loading"
     private requester: User | undefined = undefined
     private uploader = i18next.t("audioplayer:player_embed_unknown")

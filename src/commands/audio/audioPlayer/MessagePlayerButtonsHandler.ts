@@ -25,7 +25,7 @@ enum ButtonIDs{
     shuffle = "shuffle",
     showQueue = "showQueue",
 }
-export class AudioPlayerButtonsHandler {
+export class MessagePlayerButtonsHandler {
     rowPrimary = new ActionRowBuilder<ButtonBuilder>()
     rowSecondary = new ActionRowBuilder<ButtonBuilder>()
     rowWithOnlyStop = new ActionRowBuilder<ButtonBuilder>()

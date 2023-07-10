@@ -47,7 +47,7 @@ export default function(): ICommand {
                 const songQuery = interaction.options.getString('request')
 
                 await interaction.reply({
-                    content: `Я думаю`,
+                    content: i18next.t("general:thinking") as string,
                 });
                 await interaction.deleteReply();
 

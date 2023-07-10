@@ -1,7 +1,7 @@
 import {Client, GatewayIntentBits, Partials} from "discord.js";
 import {loggerSend} from "./utilities/logger.js";
 import {loginBot} from "./utilities/loginBot.js";
-import {AudioPlayer} from "./commands/audio/audioPlayer/AudioPlayer.js";
+import {AudioPlayerCore} from "./commands/audio/audioPlayer/AudioPlayerCore.js";
 import loadLocale from "./locales/Locale.js"
 
 import * as dotenv from 'dotenv'
@@ -41,10 +41,10 @@ export const client = new Client({
     partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 })
 
-client.rest.on("rateLimited", data => {
-    loggerSend(`Client encountered a rate limit: ${data}`)
+client.rest.on("rateLimited", () => {
+    loggerSend(`Client encountered a rate limit`)
 })
-new AudioPlayer(client);
+new AudioPlayerCore(client);
 await handlersLoad(client)
 
 loginBot()

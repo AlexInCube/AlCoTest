@@ -8,8 +8,8 @@ import {
     TextChannel,
     VoiceBasedChannel
 } from "discord.js";
-import {DisTube, PlayOptions, Queue, RepeatMode, SearchResult, Song} from 'distube';
-import {PlayersManager} from "./PlayersManager.js";
+import {DisTube, Playlist, PlayOptions, Queue, RepeatMode, SearchResult, Song} from 'distube';
+import {AudioPlayersManager} from "./AudioPlayersManager.js";
 import {SpotifyPlugin} from "@distube/spotify";
 import {YtDlpPlugin} from "@distube/yt-dlp";
 import {SoundCloudPlugin} from "@distube/soundcloud";
@@ -21,14 +21,14 @@ import {getDownloadLink} from "./getDownloadLink.js";
 import {joinVoiceChannel} from "@discordjs/voice";
 import i18next from "i18next";
 
-export class AudioPlayer{
+export class AudioPlayerCore {
     client: Client
-    playersManager: PlayersManager
+    playersManager: AudioPlayersManager
     distube: DisTube
     constructor(client: Client) {
         this.client = client
         this.client.audioPlayer = this
-        this.playersManager = new PlayersManager(this.client)
+        this.playersManager = new AudioPlayersManager(this.client)
         this.distube = new DisTube(this.client, {
             leaveOnEmpty: true,
             emptyCooldown: process.env.NODE_ENV === 'production' ? 20 : 5,
@@ -277,15 +277,8 @@ export class AudioPlayer{
                 await this.playersManager.remove(queue.id)
             })
             .on("addSong", async (queue, song) => {
-                const songEmbed = new EmbedBuilder()
-                    .setTitle(song.name ?? null)
-                    .setURL(song.url)
-                    .setAuthor({ name: `🎵${song.member!.user.username} ${i18next.t("audioplayer:event_add_song")}🎵` })
-                    .setDescription(`${i18next.t("audioplayer:event_add_song_length")} - ${song.formattedDuration} | ${i18next.t("audioplayer:event_add_song_author")} - ${song.uploader.name}`)
-                    .setThumbnail(song.thumbnail ?? null)
-
                 if (queue.textChannel){
-                    await queue.textChannel.send({ embeds: [songEmbed] })
+                    await queue.textChannel.send({ embeds: [generateAddedSongMessage(song)] })
                 }
 
                 const player = this.playersManager.get(queue.id)
@@ -294,15 +287,8 @@ export class AudioPlayer{
                 }
             })
             .on("addList", async (queue, playlist) => {
-                const songEmbed = new EmbedBuilder()
-                    .setTitle(playlist.name ?? null)
-                    .setURL(playlist.url ?? null)
-                    .setAuthor({ name: `🎵${playlist.member!.user.username} ${i18next.t("audioplayer:event_add_list")}🎵` })
-                    .setDescription(`${i18next.t("audioplayer:event_add_list_songs_count")} - ${playlist.songs.length} | ${i18next.t("audioplayer:event_add_song_length")} - ${playlist.formattedDuration}`)
-                    .setThumbnail(playlist.thumbnail ?? null)
-
                 if (queue.textChannel){
-                    await queue.textChannel.send({ embeds: [songEmbed] })
+                    await queue.textChannel.send({ embeds: [generateAddedPlaylistMessage(playlist)] })
                 }
 
                 const player = this.playersManager.get(queue.id)
@@ -319,4 +305,30 @@ export class AudioPlayer{
                 channel?.send({embeds: [generateErrorEmbed(`${error.name} + \n\n + ${error.message} \n\n + ${error.stack}`)]})
             })
     }
+}
+
+function generateAddedSongMessage(song: Song){
+    return new EmbedBuilder()
+        .setTitle(song.name ?? null)
+        .setURL(song.url)
+        .setAuthor({ name: `🎵${i18next.t("audioplayer:event_add_song")}🎵` })
+        .setThumbnail(song.thumbnail ?? null)
+        .addFields(
+            {name: `${i18next.t("audioplayer:player_embed_requester")}`, value: `${song.member!.user.toString()}`, inline: true},
+            {name: `${i18next.t("audioplayer:event_add_song_length")}`, value: `\`${song.formattedDuration}\``, inline: true},
+            {name: `${i18next.t("audioplayer:event_add_song_author")}`, value: `\`${song.uploader.name}\``, inline: true}
+        )
+}
+
+function generateAddedPlaylistMessage(playlist: Playlist){
+    return new EmbedBuilder()
+        .setTitle(playlist.name ?? null)
+        .setURL(playlist.url ?? null)
+        .setAuthor({ name: `🎵${i18next.t("audioplayer:event_add_list")}🎵` })
+        .setThumbnail(playlist.thumbnail ?? null)
+        .addFields(
+            {name: `${i18next.t("audioplayer:player_embed_requester")}`, value: `${playlist.member!.user.toString()}`, inline: true},
+            {name: `${i18next.t("audioplayer:event_add_list_songs_count")}`, value: `\`${playlist.songs.length}\``, inline: true},
+            {name: `${i18next.t("audioplayer:event_add_song_length")}`, value: `\`${playlist.formattedDuration}\``, inline: true}
+        )
 }
