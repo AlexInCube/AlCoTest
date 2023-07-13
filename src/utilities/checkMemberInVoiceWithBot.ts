@@ -7,25 +7,30 @@ export async function checkMemberInVoiceWithBot(member: GuildMember): Promise<{ 
         channelTheSame: false,
         errorMessage: "CheckingVoiceError"
     }
-    const connection = checkBotInVoice(member.guild)
-    if (connection) {
-        if (member.voice.channel) {
-            response.channelTheSame = connection.joinConfig.channelId === member.voice?.channel.id
-            if (response.channelTheSame){
+
+    try{
+        const connection = checkBotInVoice(member.guild)
+        if (connection) {
+            if (member.voice.channel) {
+                response.channelTheSame = member.guild.members.me?.voice.channel?.id === member.voice?.channel.id
+                if (response.channelTheSame){
+                    return response
+                }
+            }else{
+                response.errorMessage = i18next.t("commandshandlers:voice_join_in_any_channel")
                 return response
             }
-        }else{
-            response.errorMessage = i18next.t("commandshandlers:voice_join_in_any_channel")
-            return response
-        }
 
-        await member.guild.client.channels.fetch(connection.joinConfig.channelId!).then(channel => {
-            if (channel) {
-                if (channel instanceof VoiceChannel) {
-                    response.errorMessage = `${i18next.t("commandshandlers:voice_join_in_channel")} ${channel.name}`
+            await member.guild.client.channels.fetch(<string>member.guild.members.me?.voice.channel?.id).then(channel => {
+                if (channel) {
+                    if (channel instanceof VoiceChannel) {
+                        response.errorMessage = `${i18next.t("commandshandlers:voice_join_in_channel")} ${channel.name}`
+                    }
                 }
-            }
-        })
+            })
+        }
+    } catch (e) {
+        return response
     }
 
     return response
