@@ -13,6 +13,7 @@ declare global{
             BOT_YOUTUBE_COOKIE: string,
             BOT_SPOTIFY_CLIENT_SECRET: string,
             BOT_SPOTIFY_CLIENT_ID: string,
+            BOT_YANDEXMUSIC_TOKEN: string,
 
             MONGO_URI: string;
             MONGO_DATABASE_NAME: string

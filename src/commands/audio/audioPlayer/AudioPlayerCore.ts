@@ -20,6 +20,7 @@ import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed.js";
 import {getDownloadLink} from "./getDownloadLink.js";
 import {joinVoiceChannel} from "@discordjs/voice";
 import i18next from "i18next";
+import {YandexMusicPlugin} from "./YandexMusicPlugin/YandexMusicPlugin.js";
 
 export class AudioPlayerCore {
     client: Client
@@ -52,7 +53,10 @@ export class AudioPlayerCore {
                             clientSecret: process.env.BOT_SPOTIFY_CLIENT_SECRET
                         }
                     }),
-                new SoundCloudPlugin()
+                new SoundCloudPlugin(),
+                new YandexMusicPlugin({
+                    oauthToken: process.env.BOT_YANDEXMUSIC_TOKEN
+                }),
             ]
         })
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

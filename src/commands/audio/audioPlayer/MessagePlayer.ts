@@ -3,10 +3,8 @@ import {MessagePlayerEmbedBuilder} from "./MessagePlayerEmbedBuilder.js";
 import {Queue, Song} from "distube";
 import {MessagePlayerButtonsHandler} from "./MessagePlayerButtonsHandler.js";
 import {AudioPlayerState} from "./AudioPlayerTypes.js";
-import {loggerSend} from "../../../utilities/logger.js";
 import {checkBotInVoice} from "../../../utilities/checkBotInVoice.js";
 import i18next from "i18next";
-
 
 export class MessagePlayer {
     private readonly client: Client
@@ -122,13 +120,13 @@ export class MessagePlayer {
             } else {
                 await this.recreatePlayer()
             }
-        } catch (e) { loggerSend(e) }
+        } catch (e) { /* empty */ }
     }
 
     // Attempt to recreate player if is deleted, or it is not the last message in the text channel
     async recreatePlayer(){
         if (!this.messageWithPlayer) return
-        this.stopRecreationTimer() // We stop recreation in recreatePlayer to keep "singleton" for this recreatePlayer
+        await this.stopRecreationTimer() // We stop recreation in recreatePlayer to keep "singleton" for this recreatePlayer
         this.recreationTimer = setTimeout(async () => {
             if (!this.messageWithPlayer) return
             const messages = await this.textChannel.messages.fetch({limit: 1})
@@ -193,7 +191,7 @@ export class MessagePlayer {
     // Changed state of the player and update player message
     async setState(state: AudioPlayerState) {
         this.state = state
-        // When Distube is waiting the song, they remove their Queue object. So when we try to play a new song, we need to receive new Queue
+        // When Distube is waiting the song, they remove their Queue object. So when we try to play a new song, we need to receive a new Queue
         const queue = this.client.audioPlayer.distube.getQueue(this.textChannel.guild)
         if (queue) {
             this.queue = queue

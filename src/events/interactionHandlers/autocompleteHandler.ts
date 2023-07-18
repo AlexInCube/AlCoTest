@@ -1,4 +1,3 @@
-import {loggerSend} from "../../utilities/logger.js";
 import {Interaction} from "discord.js";
 
 export async function autocompleteHandler(interaction: Interaction) {
@@ -13,6 +12,6 @@ export async function autocompleteHandler(interaction: Interaction) {
             await command.slash_data.autocomplete(interaction)
         }
     } catch (e) {
-        loggerSend(e)
+        //loggerSend(e)
     }
 }
