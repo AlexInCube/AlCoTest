@@ -11,6 +11,11 @@ export function getCurrentTimestamp(): string {
 }
 
 export function loggerSend(message: unknown, prefix?: string): void {
+    if (message instanceof Error){
+        console.error(`[ ${getCurrentTimestamp()} ] [ ERROR ${prefix ? prefix : ""} ] `, message)
+        return
+    }
+
     let finalOutput = ""
 
     switch (typeof message) {
