@@ -156,6 +156,7 @@ export async function generateCommandsEmbedList(client: Client): Promise<EmbedBu
     const helpEmbed = new EmbedBuilder()
         .setColor('#436df7')
         .setTitle(i18next.t("commands:help_about_commands"))
+        .setDescription(`Bot github: https://github.com/AlexInCube/AlCoTest`)
 
     client.commandsGroups.forEach((group) => {
         let commandsList = ''

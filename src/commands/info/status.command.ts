@@ -50,16 +50,17 @@ export async function generateStatusEmbed(client: Client): Promise<EmbedBuilder>
     const memoryInfo = await mem.info();
 
     function addState(name: string, value: string) {
-        stateString += `${name}: \`${value}\`\n`
+        stateString += `${name}: ${value}\n`
     }
 
-    addState(i18next.t("commands:status_embed_bot_version"), `${process.env.npm_package_version}`)
-    addState("Websocket Heartbeat", `${client.ws.ping}`)
-    addState(i18next.t("commands:status_embed_os"), `${os.platform()}`)
-    addState(i18next.t("commands:status_embed_cpu"), cpu.model())
-    addState(i18next.t("commands:status_embed_cpu_usage"), `${await cpu.usage()} %`)
-    addState(i18next.t("commands:status_embed_ram_usage"), `${memoryInfo.usedMemMb} mb / ${memoryInfo.totalMemMb} mb`)
-    addState(i18next.t("commands:status_embed_guilds_count"), `${client.guilds.cache.size}`)
+    addState("Github", "https://github.com/AlexInCube/AlCoTest")
+    addState(i18next.t("commands:status_embed_bot_version"), `\`${process.env.npm_package_version}\``)
+   // addState("Websocket Heartbeat", `\`${client.ws.ping}\``)
+    addState(i18next.t("commands:status_embed_os"), `\`${os.platform()}\``)
+    addState(i18next.t("commands:status_embed_cpu"), `\`${cpu.model()}\``)
+    addState(i18next.t("commands:status_embed_cpu_usage"), `\`${await cpu.usage()} %\``)
+    addState(i18next.t("commands:status_embed_ram_usage"), `\`${memoryInfo.usedMemMb} mb / ${memoryInfo.totalMemMb} mb\``)
+    addState(i18next.t("commands:status_embed_guilds_count"), `\`${client.guilds.cache.size}\``)
 
     return new EmbedBuilder()
         .addFields({name: `${i18next.t("commands:status_embed_title")}: `, value: stateString})

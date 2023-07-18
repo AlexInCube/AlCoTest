@@ -35,7 +35,7 @@ export class YandexMusicPlugin extends CustomPlugin {
     }
 
     override async validate(url: string): Promise<boolean> {
-        return /^https?:\/\/(?:(?:www|music)\.)?yandex\.com\/(.*)$/.test(url)
+        return /^https?:\/\/(?:(?:www|music)\.)?yandex\.[a-z0-9]{0,10}\/(.*)$/.test(url)
     }
 
     async play(voiceChannel: VoiceBasedChannel, songLink: string, options: PlayOptions){
@@ -83,8 +83,14 @@ export class YandexMusicPlugin extends CustomPlugin {
 
 function parseYandexMusicURL(url: string): {type: SearchType, id: string, url: string} | undefined {
     // for example https://music.yandex.com/album/10030/track/38634572
+
+
     try{
-        const parsedData = new URL(url).pathname.split("/").splice(1)
+        let parsedData = new URL(url).pathname.split("/").splice(1)
+        parsedData = parsedData.filter((element) => {
+            return (element === SearchType.Track || element === SearchType.Playlist || typeof parseInt(element) === "number") && element !== ""
+        })
+
         const type = parsedData[parsedData.length - 2]
 
         switch (parsedData.length) {
