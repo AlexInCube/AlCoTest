@@ -7,7 +7,6 @@ import {loggerSend} from "../../../utilities/logger.js";
 import {checkBotInVoice} from "../../../utilities/checkBotInVoice.js";
 import i18next from "i18next";
 
-
 export class MessagePlayer {
     private readonly client: Client
     // TextChannel where player was created
