@@ -13,7 +13,7 @@ Cool audiobot for Discord created by <a href="https://vk.com/alexincube"><b>@Ale
 - Localization (English and Russian are currently supported)
 
 ## Requirements
-- Node.js 16.9.0 or higher
+- Node.js 18 or higher
 - MongoDB 6.0 or higher
 
 ## How to run bot?
