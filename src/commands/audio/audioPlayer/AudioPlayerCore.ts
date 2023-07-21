@@ -13,7 +13,6 @@ import {AudioPlayersManager} from "./AudioPlayersManager.js";
 import {SpotifyPlugin} from "@distube/spotify";
 import {YtDlpPlugin} from "@distube/yt-dlp";
 import {SoundCloudPlugin} from "@distube/soundcloud";
-import {YandexMusicPlugin} from "distube-yandex-music";
 import {pagination} from "../../../utilities/pagination/pagination.js";
 import {ButtonStyles, ButtonTypes} from "../../../utilities/pagination/paginationTypes.js";
 import {clamp} from "../../../utilities/clamp.js";
@@ -21,6 +20,7 @@ import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed.js";
 import {getDownloadLink} from "./getDownloadLink.js";
 import {joinVoiceChannel} from "@discordjs/voice";
 import i18next from "i18next";
+import {YandexMusicPlugin} from "distube-yandex-music-plugin";
 
 
 export class AudioPlayerCore {
