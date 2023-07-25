@@ -20,6 +20,7 @@ import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed.js";
 import {getDownloadLink} from "./getDownloadLink.js";
 import {joinVoiceChannel} from "@discordjs/voice";
 import i18next from "i18next";
+
 import {YandexMusicPlugin} from "distube-yandex-music-plugin";
 
 
@@ -42,9 +43,6 @@ export class AudioPlayerCore {
             emitAddSongWhenCreatingQueue: true,
             savePreviousSongs: true,
             plugins: [
-                new YtDlpPlugin({
-                    update: true
-                }),
                 new SpotifyPlugin(
                     {
                         parallel: true,
@@ -57,6 +55,9 @@ export class AudioPlayerCore {
                 new SoundCloudPlugin(),
                 new YandexMusicPlugin({
                     oauthToken: process.env.BOT_YANDEXMUSIC_TOKEN
+                }),
+                new YtDlpPlugin({
+                    update: true
                 }),
             ]
         })

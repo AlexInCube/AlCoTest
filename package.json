@@ -1,6 +1,6 @@
 {
   "name": "aicbot",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "",
   "main": "build/main.js",
   "scripts": {
@@ -23,7 +23,7 @@
     "cross-env": "7.0.3",
     "discord.js": "^14.11.0",
     "distube": "^4.0.5",
-    "distube-yandex-music-plugin": "^0.1.0",
+    "distube-yandex-music-plugin": "^0.2.0",
     "dotenv": "16.0.3",
     "i18next": "^22.5.1",
     "i18next-fs-backend": "^2.1.5",
@@ -32,7 +32,6 @@
     "sodium-native": "4.0.1"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.3",
     "@types/node": "^20.4.2",
     "@types/node-os-utils": "^1.3.1",
     "@typescript-eslint/eslint-plugin": "^5.62.0",

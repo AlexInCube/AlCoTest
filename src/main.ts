@@ -41,8 +41,9 @@ export const client = new Client({
     partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 })
 
-client.rest.on("rateLimited", () => {
+client.rest.on("rateLimited", (args) => {
     loggerSend(`Client encountered a rate limit`)
+    loggerSend(args)
 })
 new AudioPlayerCore(client);
 await handlersLoad(client)
