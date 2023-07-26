@@ -1,5 +1,5 @@
 import {Client, GatewayIntentBits, Partials} from "discord.js";
-import {loggerSend} from "./utilities/logger.js";
+import {loggerError, loggerSend} from "./utilities/logger.js";
 import {loginBot} from "./utilities/loginBot.js";
 import {AudioPlayerCore} from "./commands/audio/audioPlayer/AudioPlayerCore.js";
 import loadLocale from "./locales/Locale.js"
@@ -42,8 +42,7 @@ export const client = new Client({
 })
 
 client.rest.on("rateLimited", (args) => {
-    loggerSend(`Client encountered a rate limit`)
-    loggerSend(args)
+    loggerError(`Client encountered a rate limit: ${JSON.stringify(args)}`)
 })
 new AudioPlayerCore(client);
 await handlersLoad(client)
@@ -51,5 +50,5 @@ await handlersLoad(client)
 loginBot()
 
 process.on('uncaughtException', (err) => {
-    loggerSend(err);
+    loggerError(err);
 });

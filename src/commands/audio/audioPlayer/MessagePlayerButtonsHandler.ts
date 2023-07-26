@@ -9,7 +9,7 @@ import {
 } from "discord.js";
 import {checkMemberInVoiceWithBot} from "../../../utilities/checkMemberInVoiceWithBot.js";
 import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed.js";
-import {loggerSend} from "../../../utilities/logger.js";
+import {loggerError} from "../../../utilities/logger.js";
 import {generateSkipMessage, generateSkipMessageFailure} from "../skip.command.js";
 import {generateMessageAudioPlayerStop} from "../stop.command.js";
 import {generateMessageAudioPlayerPrevious, generateMessageAudioPlayerPreviousFailure} from "../previous.command.js";
@@ -123,7 +123,9 @@ export class MessagePlayerButtonsHandler {
                         break
                     }
                 }
-            } catch (e) { loggerSend(e) }
+            } catch (e) {
+                loggerError(e)
+            }
         })
     }
 

@@ -1,5 +1,5 @@
 import {Client, Collection, REST, Routes} from "discord.js";
-import {loggerSend} from "../utilities/logger.js";
+import {loggerError, loggerSend} from "../utilities/logger.js";
 import {ICommand, ICommandGroup, SlashBuilder} from "../CommandTypes.js";
 import * as fs from "fs";
 import * as path from "path";
@@ -56,7 +56,7 @@ const handler = async (client: Client) => {
     ).then(() => {
         loggerSend(i18next.t("commands_loaded", {total: scanResult.length}), loggerPrefixCommandHandler)
     }).catch((error) => {
-        loggerSend(`${error}`, loggerPrefixCommandHandler)
+        loggerError(`${error}`, loggerPrefixCommandHandler)
     })
 }
 

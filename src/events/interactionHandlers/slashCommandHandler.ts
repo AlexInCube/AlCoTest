@@ -4,7 +4,7 @@ import {checkBotInVoice} from "../../utilities/checkBotInVoice.js";
 import {checkMemberInVoiceWithBot} from "../../utilities/checkMemberInVoiceWithBot.js";
 import {checkMemberInVoice} from "../../utilities/checkMemberInVoice.js";
 import {CheckBotPermissions} from "../../utilities/checkPermissions.js";
-import {loggerSend} from "../../utilities/logger.js";
+import {loggerError} from "../../utilities/logger.js";
 import {loggerPrefixCommandHandler} from "../../handlers/Command.handler.js";
 import i18next from "i18next";
 import {ICommand} from "../../CommandTypes.js";
@@ -64,6 +64,6 @@ export async function slashCommandHandler(interaction: Interaction) {
 
         await command.slash_data.execute(interaction)
     } catch (e) {
-        loggerSend(`${i18next.t("commandshandlers:text_command_error")}: ${e}`, loggerPrefixCommandHandler)
+        loggerError(`${i18next.t("commandshandlers:text_command_error")}: ${e}`, loggerPrefixCommandHandler)
     }
 }

@@ -10,9 +10,9 @@ export function getCurrentTimestamp(): string {
     return `${dd + '/' + mm + '/' + yyyy + ' | ' + hour + ':' + minute + ':' + seconds}`
 }
 
-export function loggerSend(message: unknown, prefix?: string): void {
-    if (message instanceof Error){
-        console.error(`[ ${getCurrentTimestamp()} ] [ ERROR ${prefix ? prefix : ""} ] `, message)
+export function loggerSend(message: unknown, prefix?: string, isError?: boolean): void {
+    if (message instanceof Error || isError){
+        console.error(`[ ${getCurrentTimestamp()} ] [ ${prefix ? `${prefix} | ERROR` : "ERROR"} ] `, message)
         return
     }
 
@@ -31,4 +31,8 @@ export function loggerSend(message: unknown, prefix?: string): void {
     }else{
         console.log(`[ ${getCurrentTimestamp()} ] [ UNKNOWN ] ${finalOutput}`)
     }
+}
+
+export function loggerError(message: unknown, prefix?: string){
+    loggerSend(message, prefix, true)
 }
