@@ -8,7 +8,7 @@ await loadLocale()
 
 import {handlersLoad} from "./handlers/handlersLoad.js";
 
-export const client = new Client({
+const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildPresences,
@@ -29,7 +29,7 @@ client.rest.on("rateLimited", (args) => {
 new AudioPlayerCore(client);
 await handlersLoad(client)
 
-loginBot()
+loginBot(client)
 
 process.on('uncaughtException', (err) => {
     loggerError(err);

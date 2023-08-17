@@ -1,5 +1,7 @@
 import {BotEvent} from "../Types.js";
 import {Client, Events, Message, TextChannel} from "discord.js";
+import {ENV} from "../EnvironmentTypes.js";
+import {loggerError} from "../utilities/logger.js";
 
 const event: BotEvent = {
     name: Events.MessageDelete,
@@ -13,7 +15,9 @@ const event: BotEvent = {
             if (player.lastDeletedMessage?.id === message.id) return // If player deleted message them self, then don`t "trigger" event
             try{
                 await player.recreatePlayer()
-            }catch (e) { /* empty */ }
+            }catch (e) {
+                if (ENV.BOT_VERBOSE_LOGGING) loggerError(e)
+            }
         }
     }
 }

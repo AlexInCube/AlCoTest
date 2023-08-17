@@ -2,6 +2,8 @@
   "audio_commands_wrapper_song_processing": "Song is processing, please wait",
   "audio_commands_wrapper_player_not_exist": "Player is not exists",
   "play_error": "With this link is something wrong",
+  "download_song_press_link": "Press here to start downloading audio",
+  "download_song_error": "Something went wrong, when retrieving link to audio",
   "show_queue_title": "Now playing",
   "show_queue_songs_in_queue": "Songs in queue",
   "event_empty": "Everyone has left me, so I'm leaving too.",

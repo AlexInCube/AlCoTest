@@ -1,4 +1,6 @@
 import {Interaction} from "discord.js";
+import {ENV} from "../../EnvironmentTypes.js";
+import {loggerError} from "../../utilities/logger.js";
 
 export async function autocompleteHandler(interaction: Interaction) {
     if (!interaction.isAutocomplete()) return;
@@ -12,6 +14,6 @@ export async function autocompleteHandler(interaction: Interaction) {
             await command.slash_data.autocomplete(interaction)
         }
     } catch (e) {
-        //loggerSend(e)
+        if (ENV.BOT_VERBOSE_LOGGING) loggerError(e)
     }
 }

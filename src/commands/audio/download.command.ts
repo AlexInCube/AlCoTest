@@ -1,12 +1,14 @@
 import {CommandArgument, ICommand} from "../../CommandTypes.js";
 import {
+    EmbedBuilder,
     PermissionsBitField,
     SlashCommandBuilder,
 } from "discord.js";
 import {GroupAudio} from "./AudioTypes.js";
-import {services, songSearchAutocomplete} from "./play.command.js";
+import {services} from "./play.command.js";
 import {getDownloadLink} from "./audioPlayer/getDownloadLink.js";
 import i18next from "i18next";
+import {generateErrorEmbed} from "../../utilities/generateErrorEmbed.js";
 
 export default function(): ICommand {
     return {
@@ -17,7 +19,13 @@ export default function(): ICommand {
             execute: async (message, args) => {
                 const songQuery = args.join(" ")
 
-                await message.reply({content: await getDownloadLink(message.client, songQuery)})
+                const downloadLink = await getDownloadLink(message.client, songQuery)
+
+                if (downloadLink){
+                    await message.reply({embeds: [generateDownloadSongEmbed(downloadLink)]})
+                }else{
+                    await message.reply({embeds: [generateErrorEmbed(i18next.t("audioplayer:download_song_error"))]})
+                }
             }
         },
         slash_data: {
@@ -31,13 +39,17 @@ export default function(): ICommand {
                             ru: 'запрос'
                         })
                         .setDescription(i18next.t('commands:play_arg_link', {services: services}))
-                        .setAutocomplete(true)
                         .setRequired(true)),
-            autocomplete: songSearchAutocomplete,
             execute: async (interaction) => {
                 const songQuery = interaction.options.getString('request')!
 
-                await interaction.reply({content: await getDownloadLink(interaction.client, songQuery)})
+                const downloadLink = await getDownloadLink(interaction.client, songQuery)
+
+                if (downloadLink){
+                    await interaction.reply({embeds: [generateDownloadSongEmbed(downloadLink)]})
+                }else{
+                    await interaction.reply({embeds: [generateErrorEmbed(i18next.t("audioplayer:download_song_error"))]})
+                }
             },
         },
         group: GroupAudio,
@@ -45,4 +57,10 @@ export default function(): ICommand {
             PermissionsBitField.Flags.SendMessages,
         ],
     }
+}
+
+export function generateDownloadSongEmbed(songStreamUrl: string){
+    return new EmbedBuilder()
+        .setTitle(i18next.t("audioplayer:download_song_press_link"))
+        .setURL(songStreamUrl)
 }

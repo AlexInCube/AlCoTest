@@ -1,4 +1,6 @@
 import {TextChannel} from "discord.js";
+import {ENV} from "../../EnvironmentTypes.js";
+import {loggerError} from "../../utilities/logger.js";
 
 export async function playerMessageHandler(textChannel: TextChannel){
     try{
@@ -7,5 +9,7 @@ export async function playerMessageHandler(textChannel: TextChannel){
             if (player.textChannel.id !== textChannel.id) return
             await player.recreatePlayer()
         }
-    }catch (e) { /* empty */ }
+    }catch (e) {
+        if (ENV.BOT_VERBOSE_LOGGING) loggerError(e)
+    }
 }

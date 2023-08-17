@@ -1,21 +1,17 @@
-import {SearchResultType} from "distube";
 import {Client} from "discord.js";
 
-export async function getDownloadLink(client: Client, request: string) {
-    let songUrl = "undefined"
-
-    if (!request.startsWith("https://www.youtube.com") && !request.startsWith("www.youtube.com")) {
-        await client.audioPlayer.distube.search(request, {
-            limit: 1,
-            type: SearchResultType.VIDEO
-        }).then(function (result: { url: string; }[]) {
-            songUrl = result[0].url
-        })
-    } else {
-        songUrl = request
+export async function getDownloadLink(client: Client, request: string): Promise<string | undefined> {
+    for (const plugin of client.audioPlayer.distube.customPlugins) {
+        if (await plugin.validate(request)) {
+            return plugin.getStreamURL(request);
+        }
     }
 
-    songUrl = songUrl.replace("youtube.com/", "youtube5s.com/")
+    for (const plugin of client.audioPlayer.distube.extractorPlugins) {
+        if (await plugin.validate(request)) {
+            return plugin.getStreamURL(request);
+        }
+    }
 
-    return songUrl
+    return undefined
 }

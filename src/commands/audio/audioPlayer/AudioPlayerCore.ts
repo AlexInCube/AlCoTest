@@ -32,7 +32,7 @@ import {joinVoiceChannel} from "@discordjs/voice";
 import i18next from "i18next";
 
 import {YandexMusicPlugin} from "distube-yandex-music-plugin";
-import {loggerWarn} from "../../../utilities/logger.js";
+import {loggerError, loggerWarn} from "../../../utilities/logger.js";
 import {ENV} from "../../../EnvironmentTypes.js";
 
 const loggerPrefixAudioplayer = `Audioplayer`
@@ -177,7 +177,9 @@ export class AudioPlayerCore {
                 await this.distube.skip(guild)
                 return queue.songs[0]
             }
-        } catch (e) { /* empty */ }
+        } catch (e) {
+            if (ENV.BOT_VERBOSE_LOGGING) loggerError(e)
+        }
         return undefined
     }
 
@@ -191,7 +193,9 @@ export class AudioPlayerCore {
                 await player.update()
                 return queue
             }
-        } catch (e) { /* empty */ }
+        } catch (e) {
+            if (ENV.BOT_VERBOSE_LOGGING) loggerError(e)
+        }
         return undefined
     }
 
@@ -201,7 +205,9 @@ export class AudioPlayerCore {
             if (queue){
                 return this.distube.jump(guild, clamp(position, 1, queue.songs.length))
             }
-        }catch (e) { /* empty */ }
+        }catch (e) {
+            if (ENV.BOT_VERBOSE_LOGGING) loggerError(e)
+        }
         return undefined
     }
 
@@ -211,7 +217,9 @@ export class AudioPlayerCore {
             if (queue){
                 return await this.distube.previous(guild)
             }
-        }catch (e) { /* empty */ }
+        }catch (e) {
+            if (ENV.BOT_VERBOSE_LOGGING) loggerError(e)
+        }
         return undefined
     }
 
@@ -356,20 +364,20 @@ export class AudioPlayerCore {
 
 function generateAddedSongMessage(song: Song){
     return new EmbedBuilder()
-        .setTitle(song.name ?? null)
-        .setURL(song.url)
+        .setTitle(song.name ?? i18next.t("audioplayer:player_embed_unknown"))
+        .setURL(song.url ?? null)
         .setAuthor({ name: `🎵${i18next.t("audioplayer:event_add_song")}🎵` })
         .setThumbnail(song.thumbnail ?? null)
         .addFields(
             {name: `${i18next.t("audioplayer:player_embed_requester")}`, value: `${song.member!.user.toString()}`, inline: true},
             {name: `${i18next.t("audioplayer:event_add_song_length")}`, value: `\`${song.formattedDuration}\``, inline: true},
-            {name: `${i18next.t("audioplayer:event_add_song_author")}`, value: `\`${song.uploader.name}\``, inline: true}
+            {name: `${i18next.t("audioplayer:event_add_song_author")}`, value: `\`${song.uploader.name ?? i18next.t("audioplayer:player_embed_unknown")}\``, inline: true}
         )
 }
 
 function generateAddedPlaylistMessage(playlist: Playlist){
     return new EmbedBuilder()
-        .setTitle(playlist.name ?? null)
+        .setTitle(playlist.name ?? i18next.t("audioplayer:player_embed_unknown"))
         .setURL(playlist.url ?? null)
         .setAuthor({ name: `🎵${i18next.t("audioplayer:event_add_list")}🎵` })
         .setThumbnail(playlist.thumbnail ?? null)
