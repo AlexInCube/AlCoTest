@@ -11,14 +11,15 @@ import {Client, Message, TextChannel} from "discord.js";
 import {loggerSend} from "../../utilities/logger.js";
 import i18next from "i18next";
 import {loggerPrefixCommandHandler} from "../../handlers/Command.handler.js";
+import {ENV} from "../../EnvironmentTypes.js";
 
 export async function textCommandsHandler(client: Client, message: Message){
     try{
         if (!message.author || message.author.bot) return;
 
-        let prefix: string = process.env.BOT_COMMAND_PREFIX
+        let prefix: string = ENV.BOT_COMMAND_PREFIX
 
-        if (!message.content.startsWith(process.env.BOT_COMMAND_PREFIX)){
+        if (!message.content.startsWith(ENV.BOT_COMMAND_PREFIX)){
             if (message.guild){
                 if (MongoCheckConnection()) {
                     const guildPrefix = await getGuildOption(message.guild, "prefix")

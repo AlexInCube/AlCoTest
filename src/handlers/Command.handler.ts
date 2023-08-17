@@ -4,9 +4,8 @@ import {ICommand, ICommandGroup, SlashBuilder} from "../CommandTypes.js";
 import * as fs from "fs";
 import * as path from "path";
 import "../Types.js"
-import * as process from "process";
 import getDirName from "../utilities/getDirName.js";
-import i18next from "i18next";
+import {ENV} from "../EnvironmentTypes.js";
 
 export const loggerPrefixCommandHandler = "Commands"
 
@@ -49,12 +48,12 @@ const handler = async (client: Client) => {
         //loggerSend(`Command Loaded ${importPath}`, loggerPrefixCommandHandler)
     }))
 
-    const rest = new REST({ version: '10' }).setToken(process.env.BOT_DISCORD_TOKEN)
+    const rest = new REST({ version: '10' }).setToken(ENV.BOT_DISCORD_TOKEN)
 
-    await rest.put(Routes.applicationCommands(process.env.BOT_DISCORD_CLIENT_ID),
+    await rest.put(Routes.applicationCommands(ENV.BOT_DISCORD_CLIENT_ID),
         { body: buildersArray }
     ).then(() => {
-        loggerSend(i18next.t("commands_loaded", {total: scanResult.length}), loggerPrefixCommandHandler)
+        loggerSend(`Loaded commands: ${scanResult.length} total`, loggerPrefixCommandHandler)
     }).catch((error) => {
         loggerError(`${error}`, loggerPrefixCommandHandler)
     })

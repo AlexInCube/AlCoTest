@@ -2,6 +2,7 @@ import {ICommand} from "../../CommandTypes.js";
 import {Message, PermissionsBitField, SlashCommandBuilder} from "discord.js";
 import {GroupInfo} from "./InfoTypes.js";
 import i18next from "i18next";
+import {ENV} from "../../EnvironmentTypes.js";
 
 export default function(): ICommand {
     return {
@@ -32,5 +33,5 @@ export default function(): ICommand {
 }
 
 export function generateLinkMessage(): string{
-    return `https://discord.com/api/oauth2/authorize?client_id=${process.env.BOT_DISCORD_CLIENT_ID}&permissions=8&scope=bot%20applications.commands`
+    return `https://discord.com/api/oauth2/authorize?client_id=${ENV.BOT_DISCORD_CLIENT_ID}&permissions=8&scope=bot%20applications.commands`
 }

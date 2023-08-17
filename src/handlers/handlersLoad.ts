@@ -2,7 +2,7 @@ import {Client} from "discord.js";
 import getDirName from "../utilities/getDirName.js";
 import fs from "node:fs/promises";
 import {loggerSend} from "../utilities/logger.js";
-import i18next from "i18next";
+
 export const loggerPrefixHandlersManager = "Handlers"
 export async function handlersLoad(client: Client): Promise<void> {
     const handlersDir = getDirName(import.meta.url)
@@ -13,7 +13,7 @@ export async function handlersLoad(client: Client): Promise<void> {
         return handler.default(client);
     }));
 
-    loggerSend(i18next.t("handlers_loaded", {total: handlersFiles.length}), loggerPrefixHandlersManager)
+    loggerSend(`Loaded handlers: ${handlersFiles.length} total`, loggerPrefixHandlersManager)
 }
 
 async function getAllHandlersFilesInDir(handlersDir: string): Promise<string[]> {

@@ -1,6 +1,7 @@
 import {Document, model, Schema} from "mongoose";
 import {Guild} from "discord.js";
 import {MongoCheckConnection} from "../Mongo.handler.js";
+import {ENV} from "../../EnvironmentTypes.js";
 
 interface GuildOptions {
     prefix: string,
@@ -16,7 +17,7 @@ type GuildOption = keyof GuildOptions
 const GuildSchema = new Schema<IGuild>({
     guildID: {required:true, type: String},
     options: {
-        prefix: {type: String, default: process.env.BOT_COMMAND_PREFIX}
+        prefix: {type: String, default: ENV.BOT_COMMAND_PREFIX}
     }
 })
 

@@ -1,5 +1,6 @@
 import {client} from "../main.js";
+import {ENV} from "../EnvironmentTypes.js";
 
 export function loginBot(){
-    void client.login(process.env.BOT_DISCORD_TOKEN)
+    void client.login(ENV.BOT_DISCORD_TOKEN)
 }

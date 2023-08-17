@@ -1,30 +1,12 @@
 import {Client, GatewayIntentBits, Partials} from "discord.js";
-import {loggerError, loggerSend} from "./utilities/logger.js";
+import {loggerError} from "./utilities/logger.js";
 import {loginBot} from "./utilities/loginBot.js";
 import {AudioPlayerCore} from "./commands/audio/audioPlayer/AudioPlayerCore.js";
 import loadLocale from "./locales/Locale.js"
 
-import * as dotenv from 'dotenv'
-dotenv.config({ path: `.env.${process.env.NODE_ENV}` })
-
-import i18next from "i18next";
-
 await loadLocale()
 
 import {handlersLoad} from "./handlers/handlersLoad.js";
-
-switch (process.env.NODE_ENV){
-    case "development": {
-        loggerSend(i18next.t("mode_is_developer"))
-        break
-    }
-    case "production": {
-        loggerSend(i18next.t("mode_is_production"))
-        break
-    }
-    default:
-        loggerSend(`${i18next.t("mode_is_unknown")} ${process.env.NODE_ENV}`)
-}
 
 export const client = new Client({
     intents: [

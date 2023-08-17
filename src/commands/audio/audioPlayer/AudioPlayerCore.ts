@@ -8,7 +8,17 @@ import {
     TextChannel,
     VoiceBasedChannel
 } from "discord.js";
-import {DisTube, Playlist, PlayOptions, Queue, RepeatMode, SearchResult, Song} from 'distube';
+import {
+    CustomPlugin,
+    DisTube,
+    ExtractorPlugin,
+    Playlist,
+    PlayOptions,
+    Queue,
+    RepeatMode,
+    SearchResult,
+    Song
+} from 'distube';
 import {AudioPlayersManager} from "./AudioPlayersManager.js";
 import {SpotifyPlugin} from "@distube/spotify";
 import {YtDlpPlugin} from "@distube/yt-dlp";
@@ -22,7 +32,55 @@ import {joinVoiceChannel} from "@discordjs/voice";
 import i18next from "i18next";
 
 import {YandexMusicPlugin} from "distube-yandex-music-plugin";
+import {loggerWarn} from "../../../utilities/logger.js";
+import {ENV} from "../../../EnvironmentTypes.js";
 
+const loggerPrefixAudioplayer = `Audioplayer`
+
+function LoadPlugins(): Array<CustomPlugin | ExtractorPlugin>{
+    const plugins: Array<CustomPlugin | ExtractorPlugin> = []
+
+    if (!ENV.BOT_YOUTUBE_COOKIE){
+        loggerWarn("BOT_YOUTUBE_COOKIE is not provided, 18+ videos from Youtube is not available", loggerPrefixAudioplayer)
+    }
+
+    if (ENV.BOT_SPOTIFY_CLIENT_ID && ENV.BOT_SPOTIFY_CLIENT_SECRET){
+        plugins.push(
+            new SpotifyPlugin(
+                {
+                    parallel: true,
+                    emitEventsAfterFetching: true,
+                    api: {
+                        clientId: ENV.BOT_SPOTIFY_CLIENT_ID,
+                        clientSecret: ENV.BOT_SPOTIFY_CLIENT_SECRET
+                    }
+                })
+        )
+    }else{
+        loggerWarn("Spotify plugin is disabled, because BOT_SPOTIFY_CLIENT_ID and BOT_SPOTIFY_CLIENT_SECRET are wrong or not provided", loggerPrefixAudioplayer)
+    }
+
+    if (ENV.BOT_YANDEXMUSIC_TOKEN){
+        plugins.push(
+            new YandexMusicPlugin({
+                oauthToken: ENV.BOT_YANDEXMUSIC_TOKEN
+            }),
+        )
+    }else{
+        loggerWarn("Yandex Music plugin is disabled, because BOT_YANDEXMUSIC_TOKEN are wrong or not provided", loggerPrefixAudioplayer)
+    }
+
+    plugins.push(new SoundCloudPlugin())
+    if (!ENV.BOT_SOUNDCLOUD_CLIENT_ID || !ENV.BOT_SOUNDCLOUD_TOKEN){
+        loggerWarn("Some Soundcloud features is disabled, because BOT_SOUNDCLOUD_CLIENT_ID or BOT_SOUNDCLOUD_TOKEN are wrong or not provided", loggerPrefixAudioplayer)
+    }
+
+    plugins.push(new YtDlpPlugin({
+        update: true
+    }))
+
+    return plugins
+}
 
 export class AudioPlayerCore {
     client: Client
@@ -34,32 +92,15 @@ export class AudioPlayerCore {
         this.playersManager = new AudioPlayersManager(this.client)
         this.distube = new DisTube(this.client, {
             leaveOnEmpty: true,
-            emptyCooldown: process.env.NODE_ENV === 'production' ? 20 : 5,
+            emptyCooldown: ENV.NODE_ENV === 'production' ? 20 : 5,
             leaveOnFinish: false,
             leaveOnStop: true,
-            youtubeCookie: process.env.BOT_YOUTUBE_COOKIE,
+            youtubeCookie: ENV.BOT_YOUTUBE_COOKIE ?? undefined,
             nsfw: true,
             emitAddListWhenCreatingQueue: true,
             emitAddSongWhenCreatingQueue: true,
             savePreviousSongs: true,
-            plugins: [
-                new SpotifyPlugin(
-                    {
-                        parallel: true,
-                        emitEventsAfterFetching: true,
-                        api: {
-                            clientId: process.env.BOT_SPOTIFY_CLIENT_ID,
-                            clientSecret: process.env.BOT_SPOTIFY_CLIENT_SECRET
-                        }
-                    }),
-                new SoundCloudPlugin(),
-                new YandexMusicPlugin({
-                    oauthToken: process.env.BOT_YANDEXMUSIC_TOKEN
-                }),
-                new YtDlpPlugin({
-                    update: true
-                }),
-            ]
+            plugins: LoadPlugins()
         })
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
