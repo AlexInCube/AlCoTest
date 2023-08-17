@@ -21,10 +21,10 @@ const handler = async (client: Client) => {
     const scanResult: string[] = getAllCommandFilesInDir(commandsDir) // Recursion for scan "commands" folder for files end with ".command.js"
     const buildersArray: SlashBuilder[] = [] // Prepare builders array for send into Discord REST API
 
-    await Promise.all(scanResult.map(async (filePath) => {
+    for (const filePath of scanResult) {
         const importPath = `file:///${filePath}`
 
-        //loggerSend(`Try Load Command ${importPath}`, loggerPrefixCommandHandler)
+        if (ENV.BOT_VERBOSE_LOGGING) loggerSend(`Try to load command from: ${importPath}`, loggerPrefixCommandHandler)
 
         const commandModule = await import(importPath)
 
@@ -45,8 +45,8 @@ const handler = async (client: Client) => {
             buildersArray.push(command.slash_data.slash_builder)
         }
 
-        //loggerSend(`Command Loaded ${importPath}`, loggerPrefixCommandHandler)
-    }))
+        if (ENV.BOT_VERBOSE_LOGGING) loggerSend(`Command ${command.text_data.name} is loaded from: ${importPath}`, loggerPrefixCommandHandler)
+    }
 
     const rest = new REST({ version: '10' }).setToken(ENV.BOT_DISCORD_TOKEN)
 

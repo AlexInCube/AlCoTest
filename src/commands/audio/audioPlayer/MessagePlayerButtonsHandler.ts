@@ -14,6 +14,8 @@ import {generateSkipMessage, generateSkipMessageFailure} from "../skip.command.j
 import {generateMessageAudioPlayerStop} from "../stop.command.js";
 import {generateMessageAudioPlayerPrevious, generateMessageAudioPlayerPreviousFailure} from "../previous.command.js";
 import {generateMessageAudioPlayerShuffle, generateMessageAudioPlayerShuffleFailure} from "../shuffle.command.js";
+import {generateDownloadSongEmbed} from "../download.command.js";
+import i18next from "i18next";
 
 enum ButtonIDs{
     stopMusic = "stopMusic",
@@ -105,8 +107,13 @@ export class MessagePlayerButtonsHandler {
                         break
 
                     case ButtonIDs.downloadSong: {
-                        const url = await this.client.audioPlayer.getCurrentSongDownloadLink(ButtonInteraction.guild as Guild)
-                        await ButtonInteraction.reply({content: url, ephemeral: true})
+                        const song = this.client.audioPlayer.distube.getQueue(ButtonInteraction.guild as Guild)?.songs[0]
+
+                        if (!song) {
+                            await ButtonInteraction.reply({embeds: [generateErrorEmbed(i18next.t("audioplayer:download_song_error"))]})
+                            break
+                        }
+                        await ButtonInteraction.reply({ephemeral: true, embeds: [generateDownloadSongEmbed(song.streamURL ?? song.url)]})
                         break
                     }
 

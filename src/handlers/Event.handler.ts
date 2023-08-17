@@ -5,6 +5,7 @@ import getDirName from "../utilities/getDirName.js";
 import fs from "node:fs/promises";
 import path from "path";
 import {pathToFileURL} from "url";
+import {ENV} from "../EnvironmentTypes.js";
 
 export const loggerPrefixEventHandler = "Events"
 
@@ -13,11 +14,11 @@ const handler = async (client: Client) => {
 
     const eventsFiles: string[] = await getAllEventsFilesInDir(eventsDir);
 
-    await Promise.all(eventsFiles.map(async (file) => {
+    for (const file of eventsFiles) {
         if (!file.endsWith(".event.js")) return;
 
         const importPath = pathToFileURL(path.resolve(eventsDir, file)).toString()
-        //loggerSend(`Try Load Event: ${importPath}`, loggerPrefixEventHandler)
+        if (ENV.BOT_VERBOSE_LOGGING) loggerSend(`Try to load event from: ${importPath}`, loggerPrefixEventHandler)
 
         const eventModule = await import(importPath)
         const event: BotEvent = eventModule.default
@@ -28,8 +29,8 @@ const handler = async (client: Client) => {
             client.on(event.name, (...args) => event.execute(client, ...args))
         }
 
-        //loggerSend(`Event loaded: ${importPath}`, loggerPrefixEventHandler)
-    }));
+        if (ENV.BOT_VERBOSE_LOGGING) loggerSend(`Event ${event.name} is loaded from: ${importPath}`, loggerPrefixEventHandler)
+    }
 
     loggerSend(`Loaded events: ${eventsFiles.length} total`, loggerPrefixEventHandler)
 }

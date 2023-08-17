@@ -8,7 +8,7 @@ import {checkMemberInVoiceWithBot} from "../../utilities/checkMemberInVoiceWithB
 import {checkMemberInVoice} from "../../utilities/checkMemberInVoice.js";
 import {CheckBotPermissions, CheckMemberPermissions} from "../../utilities/checkPermissions.js";
 import {Client, Message, TextChannel} from "discord.js";
-import {loggerSend} from "../../utilities/logger.js";
+import {loggerError} from "../../utilities/logger.js";
 import i18next from "i18next";
 import {loggerPrefixCommandHandler} from "../../handlers/Command.handler.js";
 import {ENV} from "../../EnvironmentTypes.js";
@@ -97,6 +97,6 @@ export async function textCommandsHandler(client: Client, message: Message){
 
         await command.text_data.execute(message, args)
     } catch (e) {
-        loggerSend(`${i18next.t("commandshandlers:text_command_error")}: ${e}`, loggerPrefixCommandHandler)
+        loggerError(`${i18next.t("commandshandlers:text_command_error")}: ${e}`, loggerPrefixCommandHandler)
     }
 }

@@ -8,7 +8,7 @@ Cool audiobot for Discord created by <a href="https://vk.com/alexincube"><b>@Ale
 ## 🌟 Features
 - Command /alcotest which show your alcohol count in blood
 - Audioplayer based on [Distube](https://github.com/skick1234/DisTube) with buttons ![image](https://i.imgur.com/zqQ6ViY.png)
-- Support YouTube, Spotify, Soundcloud and Discord Attachments (/playfile support MP3/WAV/OGG)
+- Support YouTube, Spotify, Soundcloud, any HTTP-stream and Discord Attachments (/playfile support MP3/WAV/OGG)
 - Support Slash and Text commands (with customizable prefix per server using /setprefix)
 - Localization (English and Russian are currently supported)
 
@@ -23,21 +23,23 @@ You can use Docker image or install things from "Requirements" and source code l
 But in both cases, you need to configure .env file.
 
 - Create .env.production
-- Fill all fields in .env.production
+- Fill all fields in .env.production. If field marked as (Optional), you can skip it.
 - (Required) To get Discord Token, follow this [guide](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot)
 - (Optional) To get YouTube Cookie, follow this [guide](https://www.youtube.com/watch?v=iQnpef9LgVM)
 - (Optional) To get Spotify Secret and ID, follow this [guide](https://stevesie.com/docs/pages/spotify-client-id-secret-developer-api)
 - (Optional) To get Yandex Music token, follow this [guide](https://github.com/MarshalX/yandex-music-api/discussions/513)
 ```
-BOT_COMMAND_PREFIX=<default prefix you want> Used only for text commands, for example: //
-BOT_LANGUAGE=<language> Supported values: en ru
+BOT_VERBOSE_LOGGING=<boolean> (Optional) The bot will give more information about what it is doing to the console, useful for debugging. By default is: false
 
-MONGO_URI=<ip to mongodb> If you run bot locally, use mongodb://localhost:27017. If you run in Docker, use mongodb://mongo:27017
-MONGO_DATABASE_NAME=<any name you want> Database name in MongoDB, for example: aicbot
+BOT_COMMAND_PREFIX=<default prefix you want> (Required) Used only for text commands, for example: //
+BOT_LANGUAGE=<language> (Optional) Supported values: en ru. By default is: en
 
-BOT_DISCORD_TOKEN=<discord token>
-BOT_DISCORD_CLIENT_ID=<discord bot id>
-BOT_DISCORD_OVERPOWERED_ID=<your id in discord> This need to retrieve reports in direct message
+MONGO_URI=<ip to mongodb> (Required) If you run bot locally, use mongodb://localhost:27017. If you run in Docker, use mongodb://mongo:27017
+MONGO_DATABASE_NAME=<any name you want> (Required) Database name in MongoDB, for example: aicbot
+
+BOT_DISCORD_TOKEN=<discord token> (Required) 
+BOT_DISCORD_CLIENT_ID=<discord bot id> (Required) 
+BOT_DISCORD_OVERPOWERED_ID=<your id in discord> (Required) This need to retrieve reports in direct message
 
 BOT_YOUTUBE_COOKIE=<cookie> (Optional)
 

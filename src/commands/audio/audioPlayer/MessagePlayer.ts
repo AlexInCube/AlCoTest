@@ -5,6 +5,8 @@ import {MessagePlayerButtonsHandler} from "./MessagePlayerButtonsHandler.js";
 import {AudioPlayerState} from "./AudioPlayerTypes.js";
 import {checkBotInVoice} from "../../../utilities/checkBotInVoice.js";
 import i18next from "i18next";
+import {ENV} from "../../../EnvironmentTypes.js";
+import {loggerError} from "../../../utilities/logger.js";
 
 export class MessagePlayer {
     private readonly client: Client
@@ -53,7 +55,9 @@ export class MessagePlayer {
                     }
                 }, this.finishTime)
             }
-        }catch (e) { /* empty */ }
+        }catch (e) {
+            if (ENV.BOT_VERBOSE_LOGGING) loggerError(e)
+        }
     }
     // Cancel finish timer
     private async stopFinishTimer(){
@@ -106,7 +110,9 @@ export class MessagePlayer {
                     })
                     break
             }
-        } catch (e) { /* empty */ }
+        } catch (e) {
+            if (ENV.BOT_VERBOSE_LOGGING) loggerError(e)
+        }
     }
 
     // Send a first player message
@@ -120,7 +126,9 @@ export class MessagePlayer {
             } else {
                 await this.recreatePlayer()
             }
-        } catch (e) { /* empty */ }
+        } catch (e) {
+            if (ENV.BOT_VERBOSE_LOGGING) loggerError(e)
+        }
     }
 
     // Attempt to recreate player if is deleted, or it is not the last message in the text channel
@@ -163,7 +171,9 @@ export class MessagePlayer {
         try{
             this.updateEmbedState()
             await this.updateMessageState()
-        }catch (e) { /* empty */ }
+        }catch (e) {
+            if (ENV.BOT_VERBOSE_LOGGING) loggerError(e)
+        }
     }
 
     // Destroy the player and all related stuff
@@ -182,10 +192,14 @@ export class MessagePlayer {
                 setTimeout(async () => {
                     try{
                         await this.messageWithPlayer?.delete()
-                    } catch (e) {/* empty */}
+                    } catch (e) {
+                        if (ENV.BOT_VERBOSE_LOGGING) loggerError(e)
+                    }
                 }, 5000)
             }
-        }catch (e) { /* empty */ }
+        }catch (e) {
+            if (ENV.BOT_VERBOSE_LOGGING) loggerError(e)
+        }
     }
 
     // Changed state of the player and update player message

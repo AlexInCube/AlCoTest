@@ -13,7 +13,7 @@ import {SearchResultType, SearchResultVideo} from "distube";
 import {truncateString} from "../../utilities/truncateString.js";
 import i18next from "i18next";
 
-export const services = "Youtube, Spotify, Soundcloud, Yandex Music"
+export const services = "Youtube, Spotify, Soundcloud, Yandex Music, HTTP-stream"
 export default function(): ICommand {
     return {
         text_data: {

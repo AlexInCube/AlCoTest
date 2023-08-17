@@ -7,7 +7,13 @@ loggerSend(`Loaded .env.${process.env.NODE_ENV}`)
 
 const envVariables = z.object({
     NODE_ENV: z.enum(['development', 'production']),
-    BOT_LANGUAGE: z.enum(['en', 'ru']),
+
+    BOT_VERBOSE_LOGGING:
+        z.preprocess((v) => z.enum(['true', 'false'])
+        .transform((v) =>
+            JSON.parse(v)).catch(v).parse(v),z.boolean()).optional().default(false),
+
+    BOT_LANGUAGE: z.enum(['en', 'ru']).optional().default('en'),
     BOT_COMMAND_PREFIX: z.string().min(1),
 
     MONGO_URI: z.string(),
