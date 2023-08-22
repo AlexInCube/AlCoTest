@@ -1,5 +1,5 @@
 import {TextChannel} from "discord.js";
-import {ENV} from "../../EnvironmentTypes.js";
+import {ENV} from "../../EnvironmentVariables.js";
 import {loggerError} from "../../utilities/logger.js";
 
 export async function playerMessageHandler(textChannel: TextChannel){

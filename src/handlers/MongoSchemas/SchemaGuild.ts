@@ -1,7 +1,7 @@
 import {Document, model, Schema} from "mongoose";
 import {Guild} from "discord.js";
 import {MongoCheckConnection} from "../Mongo.handler.js";
-import {ENV} from "../../EnvironmentTypes.js";
+import {ENV} from "../../EnvironmentVariables.js";
 
 interface GuildOptions {
     prefix: string,

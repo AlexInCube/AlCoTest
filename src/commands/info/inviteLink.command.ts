@@ -2,7 +2,7 @@ import {ICommand} from "../../CommandTypes.js";
 import {Message, PermissionsBitField, SlashCommandBuilder} from "discord.js";
 import {GroupInfo} from "./InfoTypes.js";
 import i18next from "i18next";
-import {ENV} from "../../EnvironmentTypes.js";
+import {ENV} from "../../EnvironmentVariables.js";
 
 export default function(): ICommand {
     return {

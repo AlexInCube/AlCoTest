@@ -5,7 +5,7 @@ import * as fs from "fs";
 import * as path from "path";
 import "../Types.js"
 import getDirName from "../utilities/getDirName.js";
-import {ENV} from "../EnvironmentTypes.js";
+import {ENV} from "../EnvironmentVariables.js";
 
 export const loggerPrefixCommandHandler = "Commands"
 

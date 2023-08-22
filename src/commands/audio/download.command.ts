@@ -1,14 +1,18 @@
 import {CommandArgument, ICommand} from "../../CommandTypes.js";
 import {
-    EmbedBuilder,
     PermissionsBitField,
     SlashCommandBuilder,
 } from "discord.js";
 import {GroupAudio} from "./AudioTypes.js";
 import {services} from "./play.command.js";
-import {getDownloadLink} from "./audioPlayer/getDownloadLink.js";
+import {
+    deleteMP3file,
+    DownloadSongErrorGetLocale,
+    getSongFileAttachment
+} from "./util/downloadSong.js";
 import i18next from "i18next";
 import {generateErrorEmbed} from "../../utilities/generateErrorEmbed.js";
+import {ReadStream} from "fs";
 
 export default function(): ICommand {
     return {
@@ -19,12 +23,16 @@ export default function(): ICommand {
             execute: async (message, args) => {
                 const songQuery = args.join(" ")
 
-                const downloadLink = await getDownloadLink(message.client, songQuery)
+                const reply =  await message.channel.send({content: i18next.t("commands:download_please_wait") as string})
 
-                if (downloadLink){
-                    await message.reply({embeds: [generateDownloadSongEmbed(downloadLink)]})
-                }else{
-                    await message.reply({embeds: [generateErrorEmbed(i18next.t("audioplayer:download_song_error"))]})
+                try{
+                    const file = await getSongFileAttachment(message.client, songQuery)
+                    if (file) {
+                        await reply.edit({files: [file]})
+                        await deleteMP3file((<ReadStream>file.attachment).path as string)
+                    }
+                }catch (e) {
+                    await reply.edit({content: undefined, embeds: [generateErrorEmbed(DownloadSongErrorGetLocale(e.message))]})
                 }
             }
         },
@@ -35,20 +43,22 @@ export default function(): ICommand {
                 .addStringOption(option =>
                     option
                         .setName('request')
-                        .setNameLocalizations({
-                            ru: 'запрос'
-                        })
                         .setDescription(i18next.t('commands:play_arg_link', {services: services}))
                         .setRequired(true)),
             execute: async (interaction) => {
                 const songQuery = interaction.options.getString('request')!
 
-                const downloadLink = await getDownloadLink(interaction.client, songQuery)
+                await interaction.deferReply()
 
-                if (downloadLink){
-                    await interaction.reply({embeds: [generateDownloadSongEmbed(downloadLink)]})
-                }else{
-                    await interaction.reply({embeds: [generateErrorEmbed(i18next.t("audioplayer:download_song_error"))]})
+                try{
+                    const file = await getSongFileAttachment(interaction.client, songQuery)
+
+                    if (file) {
+                        await interaction.editReply({files: [file]})
+                        await deleteMP3file((<ReadStream>file.attachment).path as string)
+                    }
+                }catch (e) {
+                    await interaction.editReply({embeds: [generateErrorEmbed(DownloadSongErrorGetLocale(e.message))]})
                 }
             },
         },
@@ -59,8 +69,3 @@ export default function(): ICommand {
     }
 }
 
-export function generateDownloadSongEmbed(songStreamUrl: string){
-    return new EmbedBuilder()
-        .setTitle(i18next.t("audioplayer:download_song_press_link"))
-        .setURL(songStreamUrl)
-}

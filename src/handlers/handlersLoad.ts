@@ -2,7 +2,7 @@ import {Client} from "discord.js";
 import getDirName from "../utilities/getDirName.js";
 import fs from "node:fs/promises";
 import {loggerSend} from "../utilities/logger.js";
-import {ENV} from "../EnvironmentTypes.js";
+import {ENV} from "../EnvironmentVariables.js";
 
 const loggerPrefixHandlersManager = "Handlers"
 export async function handlersLoad(client: Client): Promise<void> {

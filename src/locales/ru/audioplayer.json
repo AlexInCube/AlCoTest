@@ -2,8 +2,6 @@
   "audio_commands_wrapper_song_processing": "Песни всё ещё обрабатываются, подожди",
   "audio_commands_wrapper_player_not_exist": "Плеера не существует",
   "play_error": "Попробуйте другую ссылку",
-  "download_song_press_link": "Нажмите сюда чтобы скачать аудио",
-  "download_song_error": "Что-то пошло не так при получении ссылки на скачивание",
   "show_queue_title": "Сейчас играет",
   "show_queue_songs_in_queue": "Песни в очереди",
   "event_empty": "Все ушли от меня, значит я тоже ухожу",

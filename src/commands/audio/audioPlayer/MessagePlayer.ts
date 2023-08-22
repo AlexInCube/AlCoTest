@@ -5,7 +5,7 @@ import {MessagePlayerButtonsHandler} from "./MessagePlayerButtonsHandler.js";
 import {AudioPlayerState} from "./AudioPlayerTypes.js";
 import {checkBotInVoice} from "../../../utilities/checkBotInVoice.js";
 import i18next from "i18next";
-import {ENV} from "../../../EnvironmentTypes.js";
+import {ENV} from "../../../EnvironmentVariables.js";
 import {loggerError} from "../../../utilities/logger.js";
 
 export class MessagePlayer {

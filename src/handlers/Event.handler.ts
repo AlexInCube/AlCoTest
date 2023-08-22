@@ -5,7 +5,7 @@ import getDirName from "../utilities/getDirName.js";
 import fs from "node:fs/promises";
 import path from "path";
 import {pathToFileURL} from "url";
-import {ENV} from "../EnvironmentTypes.js";
+import {ENV} from "../EnvironmentVariables.js";
 
 export const loggerPrefixEventHandler = "Events"
 

@@ -4,3 +4,4 @@
 .env.developmentDocker
 build
 data
+/downloads/

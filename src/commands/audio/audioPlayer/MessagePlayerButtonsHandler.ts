@@ -14,8 +14,6 @@ import {generateSkipMessage, generateSkipMessageFailure} from "../skip.command.j
 import {generateMessageAudioPlayerStop} from "../stop.command.js";
 import {generateMessageAudioPlayerPrevious, generateMessageAudioPlayerPreviousFailure} from "../previous.command.js";
 import {generateMessageAudioPlayerShuffle, generateMessageAudioPlayerShuffleFailure} from "../shuffle.command.js";
-import {generateDownloadSongEmbed} from "../download.command.js";
-import i18next from "i18next";
 
 enum ButtonIDs{
     stopMusic = "stopMusic",
@@ -45,7 +43,7 @@ export class MessagePlayerButtonsHandler {
         )
 
         this.rowSecondary.addComponents(
-            new ButtonBuilder().setCustomId(ButtonIDs.downloadSong).setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>'),
+            //new ButtonBuilder().setCustomId(ButtonIDs.downloadSong).setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>'),
             new ButtonBuilder().setCustomId(ButtonIDs.shuffle).setStyle(ButtonStyle.Primary).setEmoji('<:shufflebutton:1092107651384614912>'),
             new ButtonBuilder().setCustomId(ButtonIDs.showQueue).setStyle(ButtonStyle.Secondary).setEmoji('<:songlistwhite:1014551771705782405>'),
         )
@@ -106,16 +104,16 @@ export class MessagePlayerButtonsHandler {
                         await ButtonInteraction.deferUpdate()
                         break
 
-                    case ButtonIDs.downloadSong: {
-                        const song = this.client.audioPlayer.distube.getQueue(ButtonInteraction.guild as Guild)?.songs[0]
-
-                        if (!song) {
-                            await ButtonInteraction.reply({embeds: [generateErrorEmbed(i18next.t("audioplayer:download_song_error"))]})
-                            break
-                        }
-                        await ButtonInteraction.reply({ephemeral: true, embeds: [generateDownloadSongEmbed(song.streamURL ?? song.url)]})
-                        break
-                    }
+                    // case ButtonIDs.downloadSong: {
+                    //     const song = this.client.audioPlayer.distube.getQueue(ButtonInteraction.guild as Guild)?.songs[0]
+                    //
+                    //     if (!song) {
+                    //         await ButtonInteraction.reply({embeds: [generateErrorEmbed(i18next.t("audioplayer:download_song_error"))]})
+                    //         break
+                    //     }
+                    //     await ButtonInteraction.reply({ephemeral: true, embeds: [generateDownloadSongEmbed(song.streamURL ?? song.url)]})
+                    //     break
+                    // }
 
                     case ButtonIDs.showQueue:
                         await this.client.audioPlayer.showQueue(ButtonInteraction)

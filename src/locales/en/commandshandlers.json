@@ -1,5 +1,6 @@
 {
   "text_command_error": "Error when executing text command",
+  "slash_command_error": "Error when executing slash command",
   "bot_not_enough_permissions_1": "BOT has not enough permissions on this server or channel",
   "bot_not_enough_permissions_2": "Write /help (command name), to see the missing permissions",
   "bot_not_enough_permissions_3": "And also ask the server administration to give them to the bot",

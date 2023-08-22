@@ -8,6 +8,7 @@ import {loggerError} from "../../utilities/logger.js";
 import {loggerPrefixCommandHandler} from "../../handlers/Command.handler.js";
 import i18next from "i18next";
 import {ICommand} from "../../CommandTypes.js";
+import {ENV} from "../../EnvironmentVariables.js";
 
 export async function slashCommandHandler(interaction: Interaction) {
     if (!interaction.isChatInputCommand()) return
@@ -64,6 +65,6 @@ export async function slashCommandHandler(interaction: Interaction) {
 
         await command.slash_data.execute(interaction)
     } catch (e) {
-        loggerError(`${i18next.t("commandshandlers:text_command_error")}: ${e}`, loggerPrefixCommandHandler)
+        if (ENV.BOT_VERBOSE_LOGGING) loggerError(`${i18next.t("commandshandlers:slash_command_error")}: ${e}`, loggerPrefixCommandHandler)
     }
 }

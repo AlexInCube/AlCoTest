@@ -1,4 +1,4 @@
-import {ENV} from "../EnvironmentTypes.js";
+import {ENV} from "../EnvironmentVariables.js";
 import {Client} from "discord.js";
 
 export function loginBot(client: Client){

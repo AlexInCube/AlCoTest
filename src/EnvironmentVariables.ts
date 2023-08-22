@@ -2,8 +2,10 @@ import {z} from "zod"
 import * as dotenv from "dotenv";
 import {loggerSend} from "./utilities/logger.js";
 
+const loggerPrefixEnv = "ENV"
+
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` })
-loggerSend(`Loaded .env.${process.env.NODE_ENV}`)
+loggerSend(`Loaded .env.${process.env.NODE_ENV}`, loggerPrefixEnv)
 
 const envVariables = z.object({
     NODE_ENV: z.enum(['development', 'production']),

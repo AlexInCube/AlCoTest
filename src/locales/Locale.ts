@@ -3,7 +3,7 @@ import FsBackend, { FsBackendOptions }from 'i18next-fs-backend';
 import {join} from "path";
 import {loggerSend} from "../utilities/logger.js";
 import getDirName from "../utilities/getDirName.js";
-import {ENV} from "../EnvironmentTypes.js";
+import {ENV} from "../EnvironmentVariables.js";
 
 export const loggerLocalization = "Localization"
 export default async function loadLocale() {

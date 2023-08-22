@@ -1,7 +1,7 @@
 import {submitReport} from "../../handlers/MongoSchemas/SchemaReport.js";
 import {Interaction} from "discord.js";
 import i18next from "i18next";
-import {ENV} from "../../EnvironmentTypes.js";
+import {ENV} from "../../EnvironmentVariables.js";
 
 export async function modalsHandler(interaction: Interaction) {
     if (!interaction.isModalSubmit()) return;

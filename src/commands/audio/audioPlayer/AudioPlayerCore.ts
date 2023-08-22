@@ -27,13 +27,12 @@ import {pagination} from "../../../utilities/pagination/pagination.js";
 import {ButtonStyles, ButtonTypes} from "../../../utilities/pagination/paginationTypes.js";
 import {clamp} from "../../../utilities/clamp.js";
 import {generateErrorEmbed} from "../../../utilities/generateErrorEmbed.js";
-import {getDownloadLink} from "./getDownloadLink.js";
 import {joinVoiceChannel} from "@discordjs/voice";
 import i18next from "i18next";
 
 import {YandexMusicPlugin} from "distube-yandex-music-plugin";
 import {loggerError, loggerWarn} from "../../../utilities/logger.js";
-import {ENV} from "../../../EnvironmentTypes.js";
+import {ENV} from "../../../EnvironmentVariables.js";
 
 const loggerPrefixAudioplayer = `Audioplayer`
 
@@ -92,7 +91,7 @@ export class AudioPlayerCore {
         this.playersManager = new AudioPlayersManager(this.client)
         this.distube = new DisTube(this.client, {
             leaveOnEmpty: true,
-            emptyCooldown: ENV.NODE_ENV === 'production' ? 20 : 5,
+            emptyCooldown: ENV.NODE_ENV === 'production' ? 120 : 5,
             leaveOnFinish: false,
             leaveOnStop: true,
             youtubeCookie: ENV.BOT_YOUTUBE_COOKIE ?? undefined,
@@ -300,14 +299,6 @@ export class AudioPlayerCore {
         });
     }
 
-    async getCurrentSongDownloadLink(guild: Guild): Promise<string | undefined> {
-        const queue = this.distube.getQueue(guild)
-        if (!queue) {
-            return undefined
-        }
-
-        return await getDownloadLink(guild.client, queue.songs[0].url)
-    }
     private setupEvents(){
         this.distube
             .on("empty", async (queue) => {

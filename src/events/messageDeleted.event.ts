@@ -1,6 +1,6 @@
 import {BotEvent} from "../Types.js";
 import {Client, Events, Message, TextChannel} from "discord.js";
-import {ENV} from "../EnvironmentTypes.js";
+import {ENV} from "../EnvironmentVariables.js";
 import {loggerError} from "../utilities/logger.js";
 
 const event: BotEvent = {
