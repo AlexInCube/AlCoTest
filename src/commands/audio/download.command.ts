@@ -43,7 +43,7 @@ export default function(): ICommand {
                 .addStringOption(option =>
                     option
                         .setName('request')
-                        .setDescription(i18next.t('commands:play_arg_link', {services: services}))
+                        .setDescription(i18next.t('commands:download_arg_request', {services: services}))
                         .setRequired(true)),
             execute: async (interaction) => {
                 const songQuery = interaction.options.getString('request')!

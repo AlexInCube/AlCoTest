@@ -19,7 +19,7 @@ class DownloadSongError extends Error {
 }
 
 type DownloadSongMessage = "is_not_url" | "not_found" | "song_is_too_large" | "failed_loading"
-const maxDownloadSize = 5000000 //bytes
+const maxDownloadSize = 10000000 //bytes
 
 export async function downloadSong(client: Client, request: string): Promise<ReadStream | undefined>{
     let streamUrl = "";
@@ -31,12 +31,14 @@ export async function downloadSong(client: Client, request: string): Promise<Rea
     for (const plugin of client.audioPlayer.distube.customPlugins) {
         if (await plugin.validate(request)) {
             streamUrl = await plugin.getStreamURL(request);
+            break
         }
     }
 
     for (const plugin of client.audioPlayer.distube.extractorPlugins) {
         if (await plugin.validate(request)) {
             streamUrl = await plugin.getStreamURL(request);
+            break
         }
     }
 
