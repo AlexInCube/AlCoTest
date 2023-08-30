@@ -1,6 +1,7 @@
 import {z} from "zod"
 import * as dotenv from "dotenv";
-import {loggerSend} from "./utilities/logger.js";
+import {loggerError, loggerSend} from "./utilities/logger.js";
+import fs from "fs";
 
 const loggerPrefixEnv = "ENV"
 
@@ -25,8 +26,6 @@ const envVariables = z.object({
     BOT_DISCORD_CLIENT_ID: z.string(),
     BOT_DISCORD_OVERPOWERED_ID: z.string(),
 
-    BOT_YOUTUBE_COOKIE: z.string().optional(),
-
     BOT_SOUNDCLOUD_CLIENT_ID: z.string().optional(),
     BOT_SOUNDCLOUD_TOKEN: z.string().optional(),
 
@@ -37,3 +36,14 @@ const envVariables = z.object({
 })
 
 export const ENV = envVariables.parse(process.env)
+
+export let BOT_YOUTUBE_COOKIE = undefined
+
+try{
+    BOT_YOUTUBE_COOKIE = JSON.parse(fs.readFileSync("yt-cookies.json", { encoding: 'utf8', flag: 'r' }))
+    loggerSend("Cookie file is loaded", loggerPrefixEnv)
+}catch (e) {
+    loggerError("Cookie file is not provided or cookie is wrong. Please, follow this instructions https://distube.js.org/#/docs/DisTube/main/general/cookie", loggerPrefixEnv)
+}
+
+

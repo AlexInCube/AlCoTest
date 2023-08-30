@@ -32,14 +32,14 @@ import i18next from "i18next";
 
 import {YandexMusicPlugin} from "distube-yandex-music-plugin";
 import {loggerError, loggerWarn} from "../../../utilities/logger.js";
-import {ENV} from "../../../EnvironmentVariables.js";
+import {BOT_YOUTUBE_COOKIE, ENV} from "../../../EnvironmentVariables.js";
 
 const loggerPrefixAudioplayer = `Audioplayer`
 
 function LoadPlugins(): Array<CustomPlugin | ExtractorPlugin>{
     const plugins: Array<CustomPlugin | ExtractorPlugin> = []
 
-    if (!ENV.BOT_YOUTUBE_COOKIE){
+    if (!BOT_YOUTUBE_COOKIE){
         loggerWarn("BOT_YOUTUBE_COOKIE is not provided, 18+ videos from Youtube is not available", loggerPrefixAudioplayer)
     }
 
@@ -94,7 +94,7 @@ export class AudioPlayerCore {
             emptyCooldown: ENV.NODE_ENV === 'production' ? 120 : 5,
             leaveOnFinish: false,
             leaveOnStop: true,
-            youtubeCookie: ENV.BOT_YOUTUBE_COOKIE ?? undefined,
+            youtubeCookie: BOT_YOUTUBE_COOKIE ?? undefined,
             nsfw: true,
             emitAddListWhenCreatingQueue: true,
             emitAddSongWhenCreatingQueue: true,
@@ -116,6 +116,7 @@ export class AudioPlayerCore {
         try{
             await this.distube.play(voiceChannel, song, options)
         } catch (e) {
+            if (ENV.BOT_VERBOSE_LOGGING) loggerError(e)
             await textChannel.send({embeds: [generateErrorEmbed(i18next.t("audioplayer:play_error"))]})
         }
     }

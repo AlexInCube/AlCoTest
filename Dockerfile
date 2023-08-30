@@ -10,4 +10,5 @@ RUN git clone https://github.com/AlexInCube/AlCoTest .
 RUN pnpm install
 RUN pnpm run build
 COPY .env.production /bot
+COPY yt-cookies.json /bot
 CMD ["pnpm", "run", "production"]

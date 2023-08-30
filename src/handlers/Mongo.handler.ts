@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import {loggerError, loggerSend} from "../utilities/logger.js";
-import i18next from "i18next";
 import {ENV} from "../EnvironmentVariables.js";
 
 export const loggerPrefixMongo = "MongoDB"
@@ -10,15 +9,15 @@ const handler = () => {
     mongoose.set("strictQuery", true);
     mongoose.pluralize(null)
     mongoose.connect(`${MONGO_URI}/${ENV.MONGO_DATABASE_NAME}`)
-        .then(() => loggerSend(i18next.t("mongodb:is_connected"), loggerPrefixMongo))
-        .catch((reason) => loggerError(`${i18next.t('mongodb:is_connection_error')}: \n` + reason, loggerPrefixMongo))
+        .then(() => loggerSend("Connection was successful", loggerPrefixMongo))
+        .catch((reason) => loggerError(`Connection error while connecting: \n` + reason, loggerPrefixMongo))
 }
 
 export default handler
 
 export function MongoCheckConnection(){
     if (mongoose.connection.readyState === 0) {
-        loggerSend(i18next.t("mongodb:no_connection"), loggerPrefixMongo)
+        loggerSend("Connection is not established", loggerPrefixMongo)
         return false
     }
     return true

@@ -6,7 +6,7 @@
 Cool audiobot for Discord created by <a href="https://vk.com/alexincube"><b>@AlexInCube</b></a></p>
 
 ## 🌟 Features
-- Command /alcotest which show your alcohol count in blood
+- Command /alcotest which shows your alcohol count in blood
 - Audioplayer based on [Distube](https://github.com/skick1234/DisTube) with buttons ![image](https://i.imgur.com/zqQ6ViY.png)
 - Support YouTube, Spotify, Soundcloud, any HTTP-stream and Discord Attachments (/playfile support MP3/WAV/OGG)
 - Support Slash and Text commands (with customizable prefix per server using /setprefix)
@@ -23,9 +23,8 @@ You can use Docker image or install things from "Requirements" and source code l
 But in both cases, you need to configure .env file.
 
 - Create .env.production
-- Fill all fields in .env.production. If field marked as (Optional), you can skip it.
+- Fill all fields in .env.production. If the field is marked as (Optional), you can skip it.
 - (Required) To get Discord Token, follow this [guide](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot)
-- (Optional) To get YouTube Cookie, follow this [guide](https://www.youtube.com/watch?v=iQnpef9LgVM)
 - (Optional) To get Spotify Secret and ID, follow this [guide](https://stevesie.com/docs/pages/spotify-client-id-secret-developer-api)
 - (Optional) To get Yandex Music token, follow this [guide](https://github.com/MarshalX/yandex-music-api/discussions/513)
 ```
@@ -41,17 +40,29 @@ BOT_DISCORD_TOKEN=<discord token> (Required)
 BOT_DISCORD_CLIENT_ID=<discord bot id> (Required) 
 BOT_DISCORD_OVERPOWERED_ID=<your id in discord> (Required) This need to retrieve reports in direct message
 
-BOT_YOUTUBE_COOKIE=<cookie> (Optional)
-
 BOT_SPOTIFY_CLIENT_SECRET=<spotify secret> (Optional)
 BOT_SPOTIFY_CLIENT_ID=<spotify id> (Optional)
 
 BOT_YANDEXMUSIC_TOKEN=<yandexmusic token> (Optional)
 ```
 
+### 🍪 Youtube Cookie
+Also, it is preferable to provide cookies for YouTube.
+This will allow you to play 18+ videos and bypass YouTube rate limiting error (429 Error).
+I highly recommend that you create a new Google account from which you get the cookie.
+You cannot watch videos in your browser from this account,
+otherwise your cookie will be reset, and you will need to retrieve it again.
+
+- Install an extension for extracting cookie, [EditThisCookie](https://www.editthiscookie.com/blog/2014/03/install-editthiscookie/)
+- Go to [YouTube](https://www.youtube.com/)
+- Log in to your account. (You should use a new account for this purpose)
+- Click on the extension icon and click "Export" button.
+- Create file yt-cookies.json and paste cookie in this file
+
 ### 🖥️ Run locally
 - Install things from "Requirements" section
-- Follow "Configure .env" section and put .env.production in folder with repository.
+- Follow the "Configure .env" section and put .env.production in folder with repository.
+- Follow the "YouTube Cookie" section and put yt-cookies.json in the folder with repository.
 - Run commands below
 
 ```npm
@@ -62,5 +73,6 @@ npm run production
 
 ### 🐋 Run in Docker
 - Copy docker-compose.yml, Dockerfile, runInDocker.bat (for Windows) or runInDocker.sh (for Linux) in empty folder
-- Follow "Configure .env" section and put .env.production in folder with Dockerfile etc.
+- Follow the "Configure .env" section and put .env.production in folder with Dockerfile etc.
+- Follow the "YouTube Cookie" section and put yt-cookies.json in the folder with Dockerfile etc.
 - Run "runInDocker" file

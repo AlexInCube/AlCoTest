@@ -12,12 +12,12 @@ export function getCurrentTimestamp(): string {
 
 export function loggerSend(message: unknown, prefix?: string, isError?: boolean, isWarn?: boolean): void {
     if (message instanceof Error || isError){
-        console.error(`[ ${getCurrentTimestamp()} ] [ ${prefix ? `${prefix} | ERROR` : "ERROR"} ] `, message)
+        console.error(`[ ${getCurrentTimestamp()} ] [ ${prefix ? `${prefix} | ERROR` : "ERROR"} ]`, message)
         return
     }
 
     if (isWarn){
-        console.warn(`[ ${getCurrentTimestamp()} ] [ ${prefix ? `${prefix} | WARN` : "WARN"} ] `, message)
+        console.warn(`[ ${getCurrentTimestamp()} ] [ ${prefix ? `${prefix} | WARN` : "WARN"} ]`, message)
         return
     }
 
