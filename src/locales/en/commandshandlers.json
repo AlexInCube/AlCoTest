@@ -7,6 +7,6 @@
   "user_not_enough_permissions": "You do not have enough permissions on this channel or server",
   "command_only_in_guilds": "This command working only on servers",
   "command_only_in_voice": "You need to be in voice channel for executing this command",
-  "voice_join_in_any_channel": "Зайди в любой голосовой канал",
-  "voice_join_in_channel": "Зайди в голосовой канал"
+  "voice_join_in_any_channel": "Please, join in any voice channel",
+  "voice_join_in_channel": "Please, join in voice channel"
 }

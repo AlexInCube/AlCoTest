@@ -24,7 +24,7 @@ But in both cases, you need to configure .env file.
 
 - Create .env.production
 - Fill all fields in .env.production. If the field is marked as (Optional), you can skip it.
-- (Required) To get Discord Token, follow this [guide](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot)
+- (Required) To get Discord Token, follow this [guide](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot). After following the guide, you need to enable privileged intents in [Discord Developer Portal.](https://github.com/AlexInCube/AlCoTest/assets/25522245/fdbcdcf1-9501-47f0-93bf-7e76806f623f)
 - (Optional) To get Spotify Secret and ID, follow this [guide](https://stevesie.com/docs/pages/spotify-client-id-secret-developer-api)
 - (Optional) To get Yandex Music token, follow this [guide](https://github.com/MarshalX/yandex-music-api/discussions/513)
 ```

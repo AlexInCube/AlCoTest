@@ -14,6 +14,7 @@ import {
     ModalSubmitInteraction
 } from "discord.js";
 import {ButtonTypes, ButtonStyles, ButtonsTypes, PaginationOptions} from "./paginationTypes.js";
+import i18next from "i18next";
 
 const defaultEmojis = {
     first: "⬅️",
@@ -98,12 +99,12 @@ export const pagination = async (options: PaginationOptions) => {
         const newEmbed = new EmbedBuilder(embedJSON);
         if (Object.prototype.hasOwnProperty.call(embedJSON, 'footer')) {
             return newEmbed.setFooter({
-                text: `Страница ${currentPage} / ${embeds.length} - ${embedJSON.footer.text}`,
+                text: `${i18next.t("general:page")} ${currentPage} / ${embeds.length} - ${embedJSON.footer.text}`,
                 iconURL: embedJSON.footer.icon_url
             });
         }
         return newEmbed.setFooter({
-            text: `Страница ${currentPage} / ${embeds.length}`
+            text: `${i18next.t("general:page")} ${currentPage} / ${embeds.length}`
         });
     }
 
