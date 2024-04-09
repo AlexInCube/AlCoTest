@@ -13,7 +13,7 @@ Cool audiobot for Discord created by <a href="https://vk.com/alexincube"><b>@Ale
 - Localization (English and Russian are currently supported)
 
 ## 🎛️ Requirements
-- Node.js 18 or higher
+- Node.js 20 or higher
 - MongoDB 6.0 or higher
 - ffmpeg latest
 
@@ -72,7 +72,7 @@ npm run production
 ```
 
 ### 🐋 Run in Docker
-- Copy docker-compose.yml, Dockerfile, runInDocker.bat (for Windows) or runInDocker.sh (for Linux) in empty folder
+- Copy docker-compose.yml, Dockerfile in empty folder
 - Follow the "Configure .env" section and put .env.production in folder with Dockerfile etc.
 - Follow the "YouTube Cookie" section and put yt-cookies.json in the folder with Dockerfile etc.
-- Run "runInDocker" file
+- Run command ```docker-compose up --detach --force-recreate``` in folder with files

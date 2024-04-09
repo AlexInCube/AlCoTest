@@ -1,4 +1,2 @@
-#!/bin/bash
-echo "Build And Run AICBot"
-docker-compose build --no-cache
+#!/bin/sh
 docker-compose up --detach --force-recreate
