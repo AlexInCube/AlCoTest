@@ -1,2 +1,7 @@
 node_modules
-package-lock.json
+.git
+*Dockerfile*
+*docker-compose*
+.env*
+runInDocker.*
+yt-cookies.json

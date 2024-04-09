@@ -4,16 +4,39 @@ services:
     container_name: mongo
     image: bitnami/mongodb:latest
     restart: always
+    env_file:
+      - ./.env.production
+      - ./.env.development
     volumes:
       - ./data:/data/db
     ports:
       - '27018:27017'
   bot:
     container_name: bot
-    image: bot
-    restart: always
+    image: alexincube/aicotest:latest
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 15s
+        max_attempts: 3
+        window: 120s
+    #command: sleep infinity
     build: .
+    env_file:
+      - ./.env.production
+      - ./.env.development
+    volumes:
+      - type: bind
+        source: ./yt-cookies.json
+        target: /bot/yt-cookies.json
+        read_only: true
     links:
       - mongo
     depends_on:
       - mongo
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 3600 bot

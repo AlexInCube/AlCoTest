@@ -101,8 +101,7 @@ export class AudioPlayerCore {
             savePreviousSongs: true,
             plugins: LoadPlugins()
         })
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
+
         this.client.distube = this.distube
 
         this.setupEvents()

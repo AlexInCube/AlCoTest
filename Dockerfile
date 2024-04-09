@@ -1,14 +1,19 @@
 # syntax=docker/dockerfile:1
-FROM bitnami/node:18.16.0
-RUN apt update
-RUN apt install git
-RUN apt install -y ffmpeg
+FROM node:20-alpine as base
+RUN apk update && apk upgrade && apk add ffmpeg
+
+FROM base as build
+RUN apk add python3 && apk add build-base && apk add make
 RUN npm i -g pnpm@latest
-RUN mkdir -p /bot
-WORKDIR /bot
-RUN git clone https://github.com/AlexInCube/AlCoTest .
-RUN pnpm install
+WORKDIR /botbuild
+COPY . .
+RUN pnpm install --frozen-lockfile
 RUN pnpm run build
-COPY .env.production /bot
-COPY yt-cookies.json /bot
-CMD ["pnpm", "run", "production"]
+RUN pnpm prune --prod
+
+FROM base as prod
+WORKDIR /bot
+COPY --from=build /botbuild/build ./build
+COPY --from=build /botbuild/node_modules ./node_modules
+COPY --from=build /botbuild/package.json .
+CMD ["npm", "run", "production"]
