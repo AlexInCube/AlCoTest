@@ -1,12 +1,14 @@
-version: "3"
+version: '3.2'
 services:
   mongo:
     container_name: mongo
     image: bitnami/mongodb:latest
     restart: always
     env_file:
-      - ./.env.production
-      - ./.env.development
+      - path: ./.env.production
+        required: false
+      - path: ./.env.development
+        required: false
     volumes:
       - ./data:/data/db
     ports:
@@ -23,8 +25,10 @@ services:
     #command: sleep infinity
     build: .
     env_file:
-      - ./.env.production
-      - ./.env.development
+      - path: ./.env.production
+        required: false
+      - path: ./.env.development
+        required: false
     volumes:
       - type: bind
         source: ./yt-cookies.json
