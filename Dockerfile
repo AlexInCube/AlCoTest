@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1
 FROM node:20-alpine as base
-RUN apk update && apk upgrade && apk add ffmpeg
+RUN apk update && apk upgrade && apk add ffmpeg && apk add python3
 
 FROM base as build
-RUN apk add python3 && apk add build-base && apk add make
+RUN apk add build-base && apk add make
 RUN npm i -g pnpm@latest
 WORKDIR /botbuild
 COPY . .
