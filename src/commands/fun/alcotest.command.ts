@@ -32,6 +32,6 @@ export default function(): ICommand {
 }
 
 function generateAlcoTestMessage(): string{
-    return `🍻 ${i18next.t("commands:alcotest_success")} ${Math.round(Math.random() * 100)}% 🍻 `
+    return `🍻 ${i18next.t("commands:alcotest_success")} ${Math.floor(Math.random() * 101)}% 🍻 `
 }
 
