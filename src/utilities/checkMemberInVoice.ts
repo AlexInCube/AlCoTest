@@ -1,6 +1,6 @@
-import {GuildMember} from "discord.js";
+import { GuildMember } from 'discord.js';
 
-export function checkMemberInVoice(member: GuildMember){
-    const voice = member.voice.channel
-    return voice !== null
+export function checkMemberInVoice(member: GuildMember) {
+  const voice = member.voice.channel;
+  return voice !== null;
 }

@@ -1,97 +1,91 @@
-import {
-    Embed,
-    Message,
-    User,
-    MessageComponentInteraction,
-    CommandInteraction,
-} from "discord.js"
+import { Embed, Message, User, MessageComponentInteraction, CommandInteraction } from 'discord.js';
 
 export interface PaginationOptions {
-    /**
-     * Interaction to reply with the pagination system
-     */
-    interaction?: MessageComponentInteraction | CommandInteraction
+  /**
+   * Interaction to reply with the pagination system
+   */
+  interaction?: MessageComponentInteraction | CommandInteraction;
 
-    /**
-     * Message to send the pagination system
-     */
-    message?: Message
+  /**
+   * Message to send the pagination system
+   */
+  message?: Message;
 
-    /**
-     * Whether the reply should be ephemeral or not
-     */
-    ephemeral?: boolean
+  /**
+   * Whether the reply should be ephemeral or not
+   */
+  ephemeral?: boolean;
 
-    /**
-     * Author's user class
-     */
-    author: User
+  /**
+   * Author's user class
+   */
+  author: User;
 
-    /**
-     * array of embed messages to paginate
-     */
-    embeds: Embed[]
+  /**
+   * array of embed messages to paginate
+   */
+  embeds: Embed[];
 
-    /**
-     * customize your buttons!
-     */
-    buttons?: Buttons[]
+  /**
+   * customize your buttons!
+   */
+  buttons?: Buttons[];
 
-    /**
-     * Disable or remove buttons after timeout
-     */
-    disableButtons?: boolean
+  /**
+   * Disable or remove buttons after timeout
+   */
+  disableButtons?: boolean;
 
-    /**
-     * travel pages by sending page numbers?
-     */
-    pageTravel?: boolean
+  /**
+   * travel pages by sending page numbers?
+   */
+  pageTravel?: boolean;
 
-    /**
-     * two additional buttons, a button to skip to the end and a button to skip to the first page
-     */
-    fastSkip?: boolean
+  /**
+   * two additional buttons, a button to skip to the end and a button to skip to the first page
+   */
+  fastSkip?: boolean;
 
-    /**
-     * how long before pagination get disabled
-     */
-    time?: number
+  /**
+   * how long before pagination get disabled
+   */
+  time?: number;
 
-    /**
-     * maximum interactions before disabling the pagination
-     */
-    max?: number
+  /**
+   * maximum interactions before disabling the pagination
+   */
+  max?: number;
 
-    /**
-     * custom filter for message component collector
-     */
-    customFilter?(interaction: MessageComponentInteraction | CommandInteraction): boolean
+  /**
+   * custom filter for message component collector
+   */
+  customFilter?(interaction: MessageComponentInteraction | CommandInteraction): boolean;
 }
 
 export const ButtonTypes = {
-    first: 1,
-    previous: 2,
-    next: 3,
-    last: 4,
-    number: 5
+  first: 1,
+  previous: 2,
+  next: 3,
+  last: 4,
+  number: 5
 } as const;
 
 export const ButtonStyles = {
-    Primary: 1,
-    Secondary: 2,
-    Success: 3,
-    Danger: 4,
-    Link: 5
+  Primary: 1,
+  Secondary: 2,
+  Success: 3,
+  Danger: 4,
+  Link: 5
 } as const;
 
 type KeysTypes = keyof typeof ButtonTypes;
 type KeysStyles = keyof typeof ButtonStyles;
-export type ButtonsTypes = typeof ButtonTypes[KeysTypes];
-export type ButtonsStyles = typeof ButtonStyles[KeysStyles];
+export type ButtonsTypes = (typeof ButtonTypes)[KeysTypes];
+export type ButtonsStyles = (typeof ButtonStyles)[KeysStyles];
 
 export interface Buttons {
-    type: ButtonsTypes
-    style: ButtonsStyles
-    label?: string | null
-    emoji?: string | null
+  type: ButtonsTypes;
+  style: ButtonsStyles;
+  label?: string | null;
+  emoji?: string | null;
 }

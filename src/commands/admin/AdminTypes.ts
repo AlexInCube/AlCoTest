@@ -1,7 +1,7 @@
-import {ICommandGroup} from "../../CommandTypes.js";
+import { ICommandGroup } from '../../CommandTypes.js';
 
-export const GroupAdmin : ICommandGroup = {
-    name: "admin",
-    icon_emoji: "🔧",
-    commands: []
-}
+export const GroupAdmin: ICommandGroup = {
+  name: 'admin',
+  icon_emoji: '🔧',
+  commands: []
+};

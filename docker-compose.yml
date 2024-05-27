@@ -1,6 +1,6 @@
 services:
-  mongo:
-    container_name: mongo
+  aicbot-mongo:
+    container_name: aicbot-mongo
     image: bitnami/mongodb:latest
     restart: always
     env_file:
@@ -12,8 +12,8 @@ services:
       - ./data:/data/db
     ports:
       - '27018:27017'
-  bot:
-    container_name: bot
+  aicbot:
+    container_name: aicbot
     image: alexincube/aicotest:latest
     deploy:
       restart_policy:
@@ -34,12 +34,12 @@ services:
         target: /bot/yt-cookies.json
         read_only: true
     links:
-      - mongo
+      - aicbot-mongo
     depends_on:
-      - mongo
-  watchtower:
+      - aicbot-mongo
+  aicbot-watchtower:
     image: containrrr/watchtower
-    container_name: watchtower
+    container_name: aicbot-watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 3600 bot
+    command: --interval 3600 aicbot-bot

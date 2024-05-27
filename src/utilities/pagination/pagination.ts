@@ -1,224 +1,232 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import {
-    ButtonInteraction,
-    ActionRowBuilder,
-    ButtonBuilder,
-    ComponentType,
-    EmbedBuilder,
-    BaseGuildTextChannel,
-    ModalBuilder,
-    TextInputBuilder,
-    TextInputStyle,
-    ModalActionRowComponentBuilder,
-    ModalSubmitInteraction
-} from "discord.js";
-import {ButtonTypes, ButtonStyles, ButtonsTypes, PaginationOptions} from "./paginationTypes.js";
-import i18next from "i18next";
+  ButtonInteraction,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ComponentType,
+  EmbedBuilder,
+  BaseGuildTextChannel,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  ModalActionRowComponentBuilder,
+  ModalSubmitInteraction
+} from 'discord.js';
+import { ButtonTypes, ButtonStyles, ButtonsTypes, PaginationOptions } from './paginationTypes.js';
+import i18next from 'i18next';
 
 const defaultEmojis = {
-    first: "⬅️",
-    previous: "◀️",
-    next: "▶️",
-    last: "➡️",
-    number: "#️⃣"
-}
+  first: '⬅️',
+  previous: '◀️',
+  next: '▶️',
+  last: '➡️',
+  number: '#️⃣'
+};
 
 const defaultStyles = {
-    first: ButtonStyles.Secondary,
-    previous: ButtonStyles.Danger,
-    next: ButtonStyles.Success,
-    last: ButtonStyles.Secondary,
-    number: ButtonStyles.Success
-}
+  first: ButtonStyles.Secondary,
+  previous: ButtonStyles.Danger,
+  next: ButtonStyles.Success,
+  last: ButtonStyles.Secondary,
+  number: ButtonStyles.Success
+};
 export const pagination = async (options: PaginationOptions) => {
-    const {
-        interaction,
-        message,
-        ephemeral,
-        author,
-        disableButtons,
-        embeds,
-        buttons,
-        time,
-        max,
-        customFilter,
-        fastSkip,
-        pageTravel
-    } = options
-    let currentPage = 1;
-    const disableB = disableButtons || false;
-    const ephemeralMessage = ephemeral !== null ? ephemeral : false;
+  const {
+    interaction,
+    message,
+    ephemeral,
+    author,
+    disableButtons,
+    embeds,
+    buttons,
+    time,
+    max,
+    customFilter,
+    fastSkip,
+    pageTravel
+  } = options;
+  let currentPage = 1;
+  const disableB = disableButtons || false;
+  const ephemeralMessage = ephemeral !== null ? ephemeral : false;
 
-    if (!interaction && !message) throw new Error("Pagination requires either an interaction or a message object");
-    const type = interaction ? 'interaction' : 'message';
+  if (!interaction && !message)
+    throw new Error('Pagination requires either an interaction or a message object');
+  const type = interaction ? 'interaction' : 'message';
 
-    const getButtonData = (type: ButtonsTypes) => {
-        return buttons?.find((btn) => btn.type === type);
+  const getButtonData = (type: ButtonsTypes) => {
+    return buttons?.find((btn) => btn.type === type);
+  };
+
+  const resolveButtonName = (type: ButtonsTypes) => {
+    return (Object.keys(ButtonTypes) as (keyof typeof ButtonTypes)[]).find((key) => {
+      return ButtonTypes[key] === type;
+    });
+  };
+
+  const generateButtons = (state?: boolean) => {
+    const checkState = (type: ButtonsTypes) => {
+      if ([1, 2].includes(type) && currentPage === 1) return true;
+      if ([5].includes(type) && currentPage === 1 && embeds.length === 1) return true;
+      return [3, 4].includes(type) && currentPage === embeds.length;
+    };
+
+    let names: ButtonsTypes[] = [2, 3];
+    if (fastSkip) names = [1, ...names, 4];
+    if (pageTravel) names.push(5);
+
+    return names.reduce((accumulator: ButtonBuilder[], type: ButtonsTypes) => {
+      const embed = new ButtonBuilder()
+        .setCustomId(type.toString())
+        .setDisabled(state || checkState(type))
+        .setStyle(getButtonData(type)?.style || defaultStyles[resolveButtonName(type)]);
+      if (getButtonData(type)?.emoji !== null)
+        embed.setEmoji(getButtonData(type)?.emoji || defaultEmojis[resolveButtonName(type)]);
+      if (getButtonData(type)?.label) embed.setLabel(getButtonData(type)?.label);
+      accumulator.push(embed);
+      return accumulator;
+    }, []);
+  };
+
+  const components = (state?: boolean) => [
+    new ActionRowBuilder<ButtonBuilder>().addComponents(generateButtons(state))
+  ];
+
+  const changeFooter = () => {
+    const embed = embeds[currentPage - 1];
+    const embedJSON = embed.toJSON();
+    const newEmbed = new EmbedBuilder(embedJSON);
+    if (Object.prototype.hasOwnProperty.call(embedJSON, 'footer')) {
+      return newEmbed.setFooter({
+        text: `${i18next.t('general:page')} ${currentPage} / ${embeds.length} - ${embedJSON.footer.text}`,
+        iconURL: embedJSON.footer.icon_url
+      });
     }
+    return newEmbed.setFooter({
+      text: `${i18next.t('general:page')} ${currentPage} / ${embeds.length}`
+    });
+  };
 
-    const resolveButtonName = (type: ButtonsTypes) => {
-        return (Object.keys(ButtonTypes) as (keyof typeof ButtonTypes)[]).find((key) => {
-            return ButtonTypes[key] === type;
-        });
-    }
+  let initialMessage;
+  const channel: BaseGuildTextChannel =
+    (message?.channel as BaseGuildTextChannel) || (interaction?.channel as BaseGuildTextChannel);
 
-    const generateButtons = (state?: boolean) => {
-        const checkState = (type: ButtonsTypes) => {
-            if (([1, 2]).includes(type) && currentPage === 1) return true;
-            if (([5]).includes(type) && currentPage === 1 && embeds.length === 1) return true;
-            return ([3, 4]).includes(type) && currentPage === embeds.length;
-        }
+  if (type === 'interaction' && channel) {
+    await interaction.deferReply({ ephemeral: ephemeralMessage }).catch(() => ({}));
+    initialMessage = await interaction.editReply({
+      embeds: [changeFooter()],
+      components: components()
+    });
+  } else {
+    initialMessage = await channel.send({
+      embeds: [changeFooter()],
+      components: components()
+    });
+  }
 
-        let names: ButtonsTypes[] = [2, 3];
-        if (fastSkip) names = [1, ...names, 4];
-        if (pageTravel) names.push(5);
+  const defaultFilter = (interaction: ButtonInteraction) => {
+    return interaction.user.id === author.id && parseInt(interaction.customId) <= 4;
+  };
 
-        return names.reduce(
-            (accumulator: ButtonBuilder[], type: ButtonsTypes) => {
-                const embed = new ButtonBuilder()
-                    .setCustomId(type.toString())
-                    .setDisabled(state || checkState(type))
-                    .setStyle(getButtonData(type)?.style || defaultStyles[resolveButtonName(type)]);
-                if (getButtonData(type)?.emoji !== null) embed.setEmoji(getButtonData(type)?.emoji || defaultEmojis[resolveButtonName(type)])
-                if (getButtonData(type)?.label) embed.setLabel(getButtonData(type)?.label);
-                accumulator.push(embed);
-                return accumulator;
-            },
-            []
-        );
-    }
+  const collectorOptions = (filter?): any => {
+    const opt = {
+      filter: filter || customFilter || defaultFilter,
+      componentType: ComponentType.Button
+    };
+    if (max) opt['max'] = max;
+    if (time) opt['time'] = time;
+    return opt;
+  };
 
-    const components = (state?: boolean) => [
-        new ActionRowBuilder<ButtonBuilder>().addComponents(generateButtons(state))
-    ]
+  const collector = initialMessage.createMessageComponentCollector(collectorOptions());
+  let collectorModal;
 
-    const changeFooter = () => {
-        const embed = embeds[currentPage - 1];
-        const embedJSON = embed.toJSON();
-        const newEmbed = new EmbedBuilder(embedJSON);
-        if (Object.prototype.hasOwnProperty.call(embedJSON, 'footer')) {
-            return newEmbed.setFooter({
-                text: `${i18next.t("general:page")} ${currentPage} / ${embeds.length} - ${embedJSON.footer.text}`,
-                iconURL: embedJSON.footer.icon_url
+  if (pageTravel) {
+    collectorModal = initialMessage.createMessageComponentCollector(
+      collectorOptions(
+        (_i: ModalSubmitInteraction) => _i.user.id === author.id && parseInt(_i.customId) === 5
+      )
+    );
+    collectorModal.on('collect', async (btnInteraction) => {
+      // Show modal
+      const modal = new ModalBuilder().setCustomId('choose_page_modal').setTitle('Choose Page');
+
+      const inputPageNumber = new TextInputBuilder()
+        .setCustomId('page_number')
+        .setLabel('Enter Page Number')
+        .setStyle(TextInputStyle.Short);
+
+      const buildModal = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+        inputPageNumber
+      );
+      modal.addComponents(buildModal);
+      await btnInteraction.showModal(modal);
+
+      await btnInteraction
+        .awaitModalSubmit({
+          filter: (_i: ButtonInteraction) =>
+            _i.user.id === author.id && _i.customId === 'choose_page_modal',
+          time: 30000
+        })
+        .then(async (i) => {
+          const page_number = i.fields.getTextInputValue('page_number');
+          const int = parseInt(page_number);
+          if (isNaN(int))
+            return i.followUp({
+              content: `${i.member.user}, Please enter a valid page number!\n\`${page_number}\` is not a valid page number!`,
+              ephemeral: true
             });
-        }
-        return newEmbed.setFooter({
-            text: `${i18next.t("general:page")} ${currentPage} / ${embeds.length}`
+          if (int > embeds.length) {
+            currentPage = embeds.length;
+          } else {
+            if (int <= 0) {
+              currentPage = 1;
+            } else {
+              currentPage = int;
+            }
+          }
+          await i.update({
+            embeds: [changeFooter()],
+            components: components(),
+            ephemeral: ephemeralMessage
+          });
         });
+    });
+  }
+
+  collector.on('collect', async (btnInteraction: ButtonInteraction) => {
+    const btnType = parseInt(btnInteraction.customId) as ButtonsTypes;
+
+    switch (btnType) {
+      case 1:
+        currentPage = 1;
+        break;
+      case 2:
+        currentPage--;
+        break;
+      case 3:
+        currentPage++;
+        break;
+      case 4:
+        currentPage = embeds.length;
+        break;
     }
 
-    let initialMessage;
-    const channel: BaseGuildTextChannel = message?.channel as BaseGuildTextChannel || interaction?.channel as BaseGuildTextChannel;
+    await btnInteraction.update({
+      embeds: [changeFooter()],
+      components: components()
+    });
+  });
 
-    if (type === 'interaction' && channel) {
-        await interaction.deferReply({ephemeral: ephemeralMessage}).catch(() => ({}));
-        initialMessage = await interaction.editReply({
-            embeds: [changeFooter()],
-            components: components()
-        });
+  collector.on('end', () => {
+    if (type === 'message') {
+      initialMessage.edit({
+        components: disableB ? components(true) : []
+      });
     } else {
-        initialMessage = await channel.send({
-            embeds: [changeFooter()],
-            components: components()
-        });
+      interaction.editReply({
+        components: disableB ? components(true) : []
+      });
     }
-
-    const defaultFilter = (interaction: ButtonInteraction) => {
-        return interaction.user.id === author.id && parseInt(interaction.customId) <= 4;
-    }
-
-    const collectorOptions = (filter?): any => {
-        const opt = {
-            filter: filter || customFilter || defaultFilter,
-            componentType: ComponentType.Button
-        }
-        if (max) opt["max"] = max;
-        if (time) opt["time"] = time;
-        return opt;
-    }
-
-    const collector = initialMessage.createMessageComponentCollector(collectorOptions());
-    let collectorModal;
-
-    if (pageTravel) {
-        collectorModal = initialMessage.createMessageComponentCollector(collectorOptions((_i: ModalSubmitInteraction) => _i.user.id === author.id && parseInt(_i.customId) === 5));
-        collectorModal.on("collect", async (btnInteraction) => {
-            // Show modal
-            const modal = new ModalBuilder()
-                .setCustomId('choose_page_modal')
-                .setTitle('Choose Page');
-
-            const inputPageNumber = new TextInputBuilder()
-                .setCustomId('page_number')
-                .setLabel('Enter Page Number')
-                .setStyle(TextInputStyle.Short)
-
-            const buildModal = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(inputPageNumber);
-            modal.addComponents(buildModal);
-            await btnInteraction.showModal(modal);
-
-            await btnInteraction.awaitModalSubmit({
-                filter: (_i: ButtonInteraction) => _i.user.id === author.id && _i.customId === 'choose_page_modal',
-                time: 30000,
-            }).then(async (i) => {
-                const page_number = i.fields.getTextInputValue('page_number');
-                const int = parseInt(page_number);
-                if (isNaN(int)) return i.followUp({
-                    content: `${i.member.user}, Please enter a valid page number!\n\`${page_number}\` is not a valid page number!`,
-                    ephemeral: true
-                });
-                if (int > embeds.length) {
-                    currentPage = embeds.length;
-                } else {
-                    if (int <= 0) {
-                        currentPage = 1;
-                    } else {
-                        currentPage = int;
-                    }
-                }
-                await i.update({
-                    embeds: [changeFooter()],
-                    components: components(),
-                    ephemeral: ephemeralMessage
-                });
-            });
-        });
-    }
-
-    collector.on("collect", async (btnInteraction: ButtonInteraction) => {
-        const btnType = parseInt(btnInteraction.customId) as ButtonsTypes;
-
-        switch (btnType) {
-            case 1:
-                currentPage = 1;
-                break;
-            case 2:
-                currentPage--;
-                break;
-            case 3:
-                currentPage++;
-                break;
-            case 4:
-                currentPage = embeds.length;
-                break;
-        }
-
-        await btnInteraction.update({
-            embeds: [changeFooter()],
-            components: components()
-        });
-    });
-
-    collector.on("end", () => {
-        if (type === 'message') {
-            initialMessage.edit({
-                components: disableB ? components(true) : []
-            });
-        } else {
-            interaction.editReply({
-                components: disableB ? components(true) : []
-            });
-        }
-    });
-}
+  });
+};
