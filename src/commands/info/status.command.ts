@@ -8,8 +8,6 @@ import {
   SlashCommandBuilder
 } from 'discord.js';
 import { GroupInfo } from './InfoTypes.js';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import node_os_pkg from 'node-os-utils';
 import i18next from 'i18next';
 

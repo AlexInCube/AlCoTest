@@ -4,7 +4,7 @@ import { GroupAudio } from './AudioTypes.js';
 import {
   AudioCommandWrapperInteraction,
   AudioCommandWrapperText
-} from './util/AudioCommandWrappers.js';
+} from '../audioPlayer/util/AudioCommandWrappers.js';
 import { splitBar } from '../../utilities/splitBar.js';
 import { Queue } from 'distube';
 import i18next from 'i18next';
@@ -50,7 +50,7 @@ export function generatePlayingMessage(guild: Guild): EmbedBuilder {
   if (queue) {
     const song = queue.songs[0];
     embed.setTitle(song.name!);
-    embed.setURL(song.url);
+    embed.setURL(song.url!);
     embed.setAuthor({ name: `${i18next.t('commands:playing_now_playing')}:` });
     embed.addFields({
       name: i18next.t('commands:playing_song_length'),

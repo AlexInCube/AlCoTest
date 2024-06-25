@@ -1,17 +1,17 @@
-import { Client, Message, TextChannel } from 'discord.js';
+import { Client, GuildTextBasedChannel, Message, TextChannel } from 'discord.js';
 import { MessagePlayerEmbedBuilder } from './MessagePlayerEmbedBuilder.js';
 import { Queue, Song } from 'distube';
 import { MessagePlayerButtonsHandler } from './MessagePlayerButtonsHandler.js';
 import { AudioPlayerState } from './AudioPlayerTypes.js';
-import { checkBotInVoice } from '../../../utilities/checkBotInVoice.js';
+import { checkBotInVoice } from '../../utilities/checkBotInVoice.js';
 import i18next from 'i18next';
-import { ENV } from '../../../EnvironmentVariables.js';
-import { loggerError } from '../../../utilities/logger.js';
+import { ENV } from '../../EnvironmentVariables.js';
+import { loggerError } from '../../utilities/logger.js';
 
 export class MessagePlayer {
   private readonly client: Client;
   // TextChannel where player was created
-  readonly textChannel: TextChannel;
+  readonly textChannel: GuildTextBasedChannel;
   // Player state
   private state: AudioPlayerState = 'loading';
   // Player embed interface
@@ -31,7 +31,7 @@ export class MessagePlayer {
   private finishTime = 20000;
   // Timer object for "waiting" state
   private finishTimer: NodeJS.Timeout | undefined;
-  constructor(client: Client, txtChannel: TextChannel, queue: Queue) {
+  constructor(client: Client, txtChannel: GuildTextBasedChannel, queue: Queue) {
     this.client = client;
     this.textChannel = txtChannel;
     this.queue = queue;
@@ -42,13 +42,13 @@ export class MessagePlayer {
   // It can be canceled by switching state to any other state
   async startFinishTimer() {
     try {
-      if (await checkBotInVoice(this.textChannel.guild)) {
+      if (checkBotInVoice(this.textChannel.guild)) {
         await this.stopFinishTimer();
         this.finishTimer = setTimeout(async () => {
-          const queue = this.client.audioPlayer.distube.getQueue(this.textChannel.guild);
+          const queue = this.client.audioPlayer.distube.getQueue(this.textChannel.guild.id);
           // loggerSend('try to stop player on cooldown')
           if (queue) return;
-          if (await checkBotInVoice(this.textChannel.guild)) {
+          if (checkBotInVoice(this.textChannel.guild)) {
             await this.client.audioPlayer.stop(this.textChannel.guild);
             await this.textChannel.send(i18next.t('audioplayer:event_finish_time') as string);
             await this.stopFinishTimer();
@@ -68,7 +68,7 @@ export class MessagePlayer {
   // Update embed interface to represent the current state of player, BUT THIS NOT PUSHES UPDATED EMBED TO MESSAGE
   private updateEmbedState() {
     const queue: Queue | undefined = this.client.audioPlayer.distube.getQueue(
-      this.textChannel.guild
+      this.textChannel.guild.id
     );
     if (queue) {
       this.queue = queue;
@@ -80,13 +80,13 @@ export class MessagePlayer {
       this.embedBuilder.setSongDuration(currentSong.duration, currentSong.isLive);
       this.embedBuilder.setSongTitle(
         currentSong.name ?? i18next.t('audioplayer:player_embed_unknown'),
-        currentSong.url
+        currentSong.url!
       );
       this.embedBuilder.setThumbnailURL(currentSong.thumbnail ?? null);
       this.embedBuilder.setUploader(currentSong.uploader.name);
 
       if (currentSong.user) {
-        this.embedBuilder.setRequester(currentSong.user);
+        this.embedBuilder.setRequester(currentSong.user!);
       }
     }
     this.embedBuilder.setNextSong(this.queue.songs[1]?.name);
@@ -212,7 +212,7 @@ export class MessagePlayer {
     this.state = state;
     // When Distube is waiting the song, they remove their Queue object.
     // So when we try to play a new song, we need to receive a new Queue
-    const queue = this.client.audioPlayer.distube.getQueue(this.textChannel.guild);
+    const queue = this.client.audioPlayer.distube.getQueue(this.textChannel.guild.id);
     if (queue) {
       this.queue = queue;
     }

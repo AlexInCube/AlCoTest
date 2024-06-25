@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "module": "NodeNext",
-    "target": "es2021",
+    "baseUrl": ".",
+    "module": "preserve",
+    "target": "es2022",
     "sourceMap": true,
     "rootDir": "./src",
     "outDir": "./build",
@@ -12,7 +13,7 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": false,
     "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
   },
   "compileOnSave": true,
   "include": [
@@ -22,5 +23,5 @@
   "exclude": [
     "node_modules",
     "build"
-  ],
+  ]
 }

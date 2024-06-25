@@ -27,24 +27,23 @@ But in both cases, you need to configure .env file.
 - (Required) To get Discord Token, follow this [guide](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot). After following the guide, you need to enable privileged intents in [Discord Developer Portal.](https://github.com/AlexInCube/AlCoTest/assets/25522245/fdbcdcf1-9501-47f0-93bf-7e76806f623f)
 - (Optional) To get Spotify Secret and ID, follow this [guide](https://stevesie.com/docs/pages/spotify-client-id-secret-developer-api)
 - (Optional) To get Yandex Music token, follow this [guide](https://github.com/MarshalX/yandex-music-api/discussions/513)
-```
-BOT_VERBOSE_LOGGING=<boolean> (Optional) The bot will give more information about what it is doing to the console, useful for debugging. By default is: false
 
-BOT_COMMAND_PREFIX=<default prefix you want> (Required) Used only for text commands, for example: //
-BOT_LANGUAGE=<language> (Optional) Supported values: en ru. By default is: en
+| Name                         | Example               | Description                                                             | Required? |
+|------------------------------|-----------------------|-------------------------------------------------------------------------|-----------|
+| `BOT_VERBOSE_LOGGING`        | false                 | The bot will give more information to the console, useful for debugging | ❌         |
+| `BOT_COMMAND_PREFIX`         | //                    | Used only for text commands                                             | ✔️        |
+| `BOT_LANGUAGE`               | en                    | Supported values: en ru                                                 | ❌         |
+| `MONGO_URI`                  | mongodb://mongo:27017 | The public key for sending notifications                                | ✔️        |
+| `MONGO_DATABASE_NAME`        | aicbot                | Database name in MongoDB                                                | ✔️        |
+| `BOT_DISCORD_TOKEN`          | ODEzNzUwMTY1N...      | Token from Discord Developer Portal                                     | ✔️        |
+| `BOT_DISCORD_CLIENT_ID`      | 813750165783...       | Client ID from Discord Developer Portal                                 | ✔️        |
+| `BOT_DISCORD_OVERPOWERED_ID` | 29016845994426....    | This need to retrieve reports in direct message                         | ✔️        |
+| `BOT_SPOTIFY_CLIENT_SECRET`  |                       | Used when the Spotify module cannot get the credentials automatically   | ❌         |
+| `BOT_SPOTIFY_CLIENT_ID`      |                       | Used when the Spotify module get the credentials automatically          | ❌         |
+| `BOT_YANDEXMUSIC_TOKEN`      |                       | Provide to enable Yandex Music module                                   | ❌         |
+| `BOT_SOUNDCLOUD_CLIENT_ID`   |                       | Provide to fetch more data with SoundCloud Go+ account                  | ❌         |
+| `BOT_SOUNDCLOUD_TOKEN`       |                       | Provide to fetch more data with SoundCloud Go+ account                  | ❌         |
 
-MONGO_URI=<ip to mongodb> (Required) If you run bot locally, use mongodb://localhost:27017. If you run in Docker, use mongodb://mongo:27017
-MONGO_DATABASE_NAME=<any name you want> (Required) Database name in MongoDB, for example: aicbot
-
-BOT_DISCORD_TOKEN=<discord token> (Required) 
-BOT_DISCORD_CLIENT_ID=<discord bot id> (Required) 
-BOT_DISCORD_OVERPOWERED_ID=<your id in discord> (Required) This need to retrieve reports in direct message
-
-BOT_SPOTIFY_CLIENT_SECRET=<spotify secret> (Optional)
-BOT_SPOTIFY_CLIENT_ID=<spotify id> (Optional)
-
-BOT_YANDEXMUSIC_TOKEN=<yandexmusic token> (Optional)
-```
 
 ### 🍪 Youtube Cookie
 Also, it is preferable to provide cookies for YouTube.

@@ -40,7 +40,8 @@ const envVariables = z.object({
   BOT_SPOTIFY_CLIENT_SECRET: z.string().optional(),
   BOT_SPOTIFY_CLIENT_ID: z.string().optional(),
 
-  BOT_YANDEXMUSIC_TOKEN: z.string().optional()
+  BOT_YANDEXMUSIC_TOKEN: z.string().optional(),
+  BOT_YANDEXMUSIC_UID: z.coerce.number().optional()
 });
 
 export const ENV = envVariables.parse(process.env);
@@ -54,7 +55,7 @@ try {
   loggerSend('Cookie file is loaded', loggerPrefixEnv);
 } catch (e) {
   loggerError(
-    'Cookie file is not provided or cookie is wrong. Please, follow this instructions https://distube.js.org/#/docs/DisTube/main/general/cookie',
+    'Cookie file is not provided or cookie is wrong. Please, follow instructions in README.md',
     loggerPrefixEnv
   );
 }

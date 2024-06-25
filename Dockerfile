@@ -12,8 +12,17 @@ RUN pnpm run build
 RUN pnpm prune --prod
 
 FROM base as prod
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 aicbot
+
 WORKDIR /bot
 COPY --from=build /botbuild/build ./build
 COPY --from=build /botbuild/node_modules ./node_modules
 COPY --from=build /botbuild/package.json .
+
+RUN chown -R aicbot:nodejs /bot
+
+USER aicbot
+
 CMD ["npm", "run", "production"]

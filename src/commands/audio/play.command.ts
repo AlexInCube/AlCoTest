@@ -1,18 +1,20 @@
 import { CommandArgument, ICommand } from '../../CommandTypes.js';
 import {
-  AutocompleteInteraction,
+  ApplicationCommandOptionChoiceData,
+  AutocompleteInteraction, GuildChannel,
   GuildMember,
   Message,
   PermissionsBitField,
   SlashCommandBuilder,
-  TextChannel,
+  TextChannel, VoiceBasedChannel,
   VoiceChannel
 } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
 import { isValidURL } from '../../utilities/isValidURL.js';
-import { SearchResultType, SearchResultVideo } from 'distube';
 import { truncateString } from '../../utilities/truncateString.js';
 import i18next from 'i18next';
+import { SearchResultType, YouTubePlugin, YouTubeSearchResultSong } from '@distube/youtube';
+import { ExtractorPlugin } from 'distube';
 
 export const services = 'Youtube, Spotify, Soundcloud, Yandex Music, HTTP-stream';
 export default function (): ICommand {
@@ -27,13 +29,15 @@ export default function (): ICommand {
         const songQuery = args.join(' ');
 
         const member = message.member as GuildMember;
+        const channel = message.channel as TextChannel;
+
         await message.client.audioPlayer.play(
-          member.voice.channel as VoiceChannel,
-          message.channel as TextChannel,
+          member.voice.channel as VoiceBasedChannel,
+          channel,
           songQuery,
           {
-            member: message.member as GuildMember,
-            textChannel: message.channel as TextChannel
+            member: member,
+            textChannel: channel
           }
         );
 
@@ -62,15 +66,10 @@ export default function (): ICommand {
 
         const member = interaction.member as GuildMember;
         if (songQuery) {
-          await interaction.client.audioPlayer.play(
-            member.voice.channel as VoiceChannel,
-            interaction.channel as TextChannel,
-            songQuery,
-            {
-              member: interaction.member as GuildMember,
-              textChannel: interaction.channel as TextChannel
-            }
-          );
+          await interaction.client.audioPlayer.play(member.voice.channel as VoiceChannel, interaction.channel as TextChannel, songQuery, {
+            member: interaction.member as GuildMember,
+            textChannel: interaction.channel as TextChannel
+          });
         }
       }
     },
@@ -94,23 +93,25 @@ export async function songSearchAutocomplete(interaction: AutocompleteInteractio
   const focusedValue = interaction.options.getFocused(false);
 
   if (focusedValue && !isValidURL(focusedValue)) {
-    const choices = await interaction.client.audioPlayer.distube.search(focusedValue, {
+    const ytPlugin = interaction.client.audioPlayer.distube.plugins[0] as YouTubePlugin;
+
+    const choices = await ytPlugin.search(focusedValue, {
       limit: 10,
       type: SearchResultType.VIDEO,
       safeSearch: false
     });
 
-    const finalResult = choices.map((choice: SearchResultVideo) => {
+    const finalResult = choices.map((choice: YouTubeSearchResultSong) => {
       const duration = choice.isLive ? i18next.t('commands:play_stream') : choice.formattedDuration;
       let choiceString = `${duration} | ${truncateString(choice.uploader.name ?? '', 20)} | `;
-      choiceString += truncateString(choice.name, 100 - choiceString.length);
+      choiceString += truncateString(choice.name!, 100 - choiceString.length);
       return {
         name: choiceString,
         value: choice.url
       };
     });
 
-    await interaction.respond(finalResult);
+    await interaction.respond(finalResult as Array<ApplicationCommandOptionChoiceData>);
     return;
   }
 

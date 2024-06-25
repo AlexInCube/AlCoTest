@@ -8,21 +8,21 @@ import {
   Client,
   GuildMember,
   ButtonInteraction,
-  Guild
+  Guild, GuildTextBasedChannel
 } from 'discord.js';
-import { checkMemberInVoiceWithBot } from '../../../utilities/checkMemberInVoiceWithBot.js';
-import { generateErrorEmbed } from '../../../utilities/generateErrorEmbed.js';
-import { loggerError } from '../../../utilities/logger.js';
-import { generateSkipMessage, generateSkipMessageFailure } from '../skip.command.js';
-import { generateMessageAudioPlayerStop } from '../stop.command.js';
+import { checkMemberInVoiceWithBot } from '../../utilities/checkMemberInVoiceWithBot.js';
+import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
+import { loggerError } from '../../utilities/logger.js';
+import { generateSkipMessage, generateSkipMessageFailure } from '../audio/skip.command.js';
+import { generateMessageAudioPlayerStop } from '../audio/stop.command.js';
 import {
   generateMessageAudioPlayerPrevious,
   generateMessageAudioPlayerPreviousFailure
-} from '../previous.command.js';
+} from '../audio/previous.command.js';
 import {
   generateMessageAudioPlayerShuffle,
   generateMessageAudioPlayerShuffleFailure
-} from '../shuffle.command.js';
+} from '../audio/shuffle.command.js';
 
 enum ButtonIDs {
   stopMusic = 'stopMusic',
@@ -30,7 +30,7 @@ enum ButtonIDs {
   toggleLoopMode = 'toggleLoopMode',
   previousSong = 'previousSong',
   skipSong = 'skipSong',
-  downloadSong = 'downloadSong',
+  //downloadSong = 'downloadSong',
   shuffle = 'shuffle',
   showQueue = 'showQueue'
 }
@@ -40,7 +40,7 @@ export class MessagePlayerButtonsHandler {
   rowWithOnlyStop = new ActionRowBuilder<ButtonBuilder>();
   collector: InteractionCollector<ButtonInteraction>;
   client: Client;
-  constructor(client: Client, textChannel: TextChannel) {
+  constructor(client: Client, textChannel: GuildTextBasedChannel) {
     this.client = client;
 
     this.rowPrimary.addComponents(

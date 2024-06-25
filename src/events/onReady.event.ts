@@ -8,9 +8,7 @@ const event: BotEvent = {
   execute: (client) => {
     if (!client.user) return;
 
-    loggerSend(
-      `Bot ${client.user.username} is running, on version ${process.env.npm_package_version}`
-    );
+    loggerSend(`Bot ${client.user.username} is successfully started!`);
     client.user.setActivity('/help');
   }
 };
