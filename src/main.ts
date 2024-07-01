@@ -3,7 +3,7 @@ loggerSend(`Starting bot on version ${process.env.npm_package_version}`);
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 import { loggerError, loggerSend } from './utilities/logger.js';
 import { loginBot } from './utilities/loginBot.js';
-import { AudioPlayerCore } from './commands/audioPlayer/AudioPlayerCore.js';
+import { AudioPlayerCore } from './audioplayer/AudioPlayerCore.js';
 import loadLocale from './locales/Locale.js';
 
 await loadLocale();

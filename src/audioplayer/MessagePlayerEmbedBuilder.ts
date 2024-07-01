@@ -1,7 +1,7 @@
 import { EmbedBuilder, User } from 'discord.js';
 import { AudioPlayerLoopMode, AudioPlayerState } from './AudioPlayerTypes.js';
-import { getNoun } from '../../utilities/getNoun.js';
-import { formatSecondsToTime } from '../../utilities/formatSecondsToTime.js';
+import { getNoun } from '../utilities/getNoun.js';
+import { formatSecondsToTime } from '../utilities/formatSecondsToTime.js';
 import i18next from 'i18next';
 
 export class MessagePlayerEmbedBuilder extends EmbedBuilder {

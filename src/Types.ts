@@ -1,6 +1,6 @@
 import { Client, ClientEvents, Collection } from 'discord.js';
 import { ICommand, ICommandGroup } from './CommandTypes.js';
-import { AudioPlayerCore } from './commands/audioPlayer/AudioPlayerCore.js';
+import { AudioPlayerCore } from './audioplayer/AudioPlayerCore.js';
 import { DisTube } from 'distube';
 
 declare module 'discord.js' {

@@ -15,6 +15,7 @@ import { truncateString } from '../../utilities/truncateString.js';
 import i18next from 'i18next';
 import { SearchResultType, YouTubePlugin, YouTubeSearchResultSong } from '@distube/youtube';
 import { ExtractorPlugin } from 'distube';
+import ytsr from '@distube/ytsr';
 
 export const services = 'Youtube, Spotify, Soundcloud, Yandex Music, HTTP-stream';
 export default function (): ICommand {
@@ -89,25 +90,22 @@ export default function (): ICommand {
   };
 }
 
+const liveText = i18next.t('commands:play_stream')
+
 export async function songSearchAutocomplete(interaction: AutocompleteInteraction) {
   const focusedValue = interaction.options.getFocused(false);
 
-  if (focusedValue && !isValidURL(focusedValue)) {
-    const ytPlugin = interaction.client.audioPlayer.distube.plugins[0] as YouTubePlugin;
+  if (focusedValue) {
 
-    const choices = await ytPlugin.search(focusedValue, {
-      limit: 10,
-      type: SearchResultType.VIDEO,
-      safeSearch: false
-    });
+    const choices = await ytsr(focusedValue, { safeSearch: true, limit: 10, type: SearchResultType.VIDEO })
 
-    const finalResult = choices.map((choice: YouTubeSearchResultSong) => {
-      const duration = choice.isLive ? i18next.t('commands:play_stream') : choice.formattedDuration;
-      let choiceString = `${duration} | ${truncateString(choice.uploader.name ?? '', 20)} | `;
-      choiceString += truncateString(choice.name!, 100 - choiceString.length);
+    const finalResult = choices.items.map((video: ytsr.Video) => {
+      const duration = video.isLive ? liveText : video.duration;
+      let choiceString = `${duration} | ${truncateString(video.author?.name ?? ' ', 20)} | `;
+      choiceString += truncateString(video.name, 100 - choiceString.length);
       return {
         name: choiceString,
-        value: choice.url
+        value: video.url
       };
     });
 

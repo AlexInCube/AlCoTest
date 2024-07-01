@@ -4,7 +4,7 @@ import { GroupAudio } from './AudioTypes.js';
 import {
   AudioCommandWrapperInteraction,
   AudioCommandWrapperText
-} from '../audioPlayer/util/AudioCommandWrappers.js';
+} from '../../audioplayer/util/AudioCommandWrappers.js';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
 import { Song } from 'distube';
 import i18next from 'i18next';

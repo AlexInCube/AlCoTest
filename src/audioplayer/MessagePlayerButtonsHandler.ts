@@ -8,21 +8,22 @@ import {
   Client,
   GuildMember,
   ButtonInteraction,
-  Guild, GuildTextBasedChannel
+  Guild,
+  GuildTextBasedChannel
 } from 'discord.js';
-import { checkMemberInVoiceWithBot } from '../../utilities/checkMemberInVoiceWithBot.js';
-import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
-import { loggerError } from '../../utilities/logger.js';
-import { generateSkipMessage, generateSkipMessageFailure } from '../audio/skip.command.js';
-import { generateMessageAudioPlayerStop } from '../audio/stop.command.js';
+import { checkMemberInVoiceWithBot } from '../utilities/checkMemberInVoiceWithBot.js';
+import { generateErrorEmbed } from '../utilities/generateErrorEmbed.js';
+import { loggerError } from '../utilities/logger.js';
+import { generateSkipMessage, generateSkipMessageFailure } from '../commands/audio/skip.command.js';
+import { generateMessageAudioPlayerStop } from '../commands/audio/stop.command.js';
 import {
   generateMessageAudioPlayerPrevious,
   generateMessageAudioPlayerPreviousFailure
-} from '../audio/previous.command.js';
+} from '../commands/audio/previous.command.js';
 import {
   generateMessageAudioPlayerShuffle,
   generateMessageAudioPlayerShuffleFailure
-} from '../audio/shuffle.command.js';
+} from '../commands/audio/shuffle.command.js';
 
 enum ButtonIDs {
   stopMusic = 'stopMusic',
@@ -102,14 +103,23 @@ export class MessagePlayerButtonsHandler {
 
         switch (ButtonInteraction.customId) {
           case ButtonIDs.stopMusic:
-            await this.client.audioPlayer.stop(ButtonInteraction.guild as Guild);
-            await ButtonInteraction.reply({
-              content: generateMessageAudioPlayerStop(ButtonInteraction.member as GuildMember)
-            });
+            const guild = ButtonInteraction.guild as Guild;
+
+            const player = this.client.audioPlayer.playersManager.get(guild.id);
+
+            if (player) {
+              await player.textChannel.send({
+                content: generateMessageAudioPlayerStop(ButtonInteraction.member as GuildMember)
+              });
+            }
+
+            await this.client.audioPlayer.stop(guild);
+
+            await ButtonInteraction.deferUpdate();
             break;
 
           case ButtonIDs.pauseMusic:
-            await this.client.audioPlayer.pause(ButtonInteraction.guild as Guild);
+            await this.client.audioPlayer.pauseResume(ButtonInteraction.guild as Guild);
             await ButtonInteraction.deferUpdate();
             break;
 
@@ -153,7 +163,7 @@ export class MessagePlayerButtonsHandler {
             break;
 
           // case ButtonIDs.downloadSong: {
-          //     const song = this.client.audioPlayer.distube.getQueue(ButtonInteraction.guild as Guild)?.songs[0]
+          //     const song = this.client.audioplayer.distube.getQueue(ButtonInteraction.guild as Guild)?.songs[0]
           //
           //     if (!song) {
           //         await ButtonInteraction.reply({embeds: [generateErrorEmbed(i18next.t("audioplayer:download_song_error"))]})

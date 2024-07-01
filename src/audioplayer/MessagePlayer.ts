@@ -3,10 +3,10 @@ import { MessagePlayerEmbedBuilder } from './MessagePlayerEmbedBuilder.js';
 import { Queue, Song } from 'distube';
 import { MessagePlayerButtonsHandler } from './MessagePlayerButtonsHandler.js';
 import { AudioPlayerState } from './AudioPlayerTypes.js';
-import { checkBotInVoice } from '../../utilities/checkBotInVoice.js';
+import { checkBotInVoice } from '../utilities/checkBotInVoice.js';
 import i18next from 'i18next';
-import { ENV } from '../../EnvironmentVariables.js';
-import { loggerError } from '../../utilities/logger.js';
+import { ENV } from '../EnvironmentVariables.js';
+import { loggerError } from '../utilities/logger.js';
 
 export class MessagePlayer {
   private readonly client: Client;
@@ -198,12 +198,12 @@ export class MessagePlayer {
           try {
             await this.messageWithPlayer?.delete();
           } catch (e) {
-            if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
+            //if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
           }
         }, 5000);
       }
     } catch (e) {
-      if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
+      //if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
     }
   }
 

@@ -1,6 +1,6 @@
 import { ExtractorPlugin, InfoExtractorPlugin, PlayableExtractorPlugin } from 'distube';
-import { BOT_YOUTUBE_COOKIE, ENV } from '../../EnvironmentVariables.js';
-import { loggerSend, loggerWarn } from '../../utilities/logger.js';
+import { BOT_YOUTUBE_COOKIE, ENV } from '../EnvironmentVariables.js';
+import { loggerSend, loggerWarn } from '../utilities/logger.js';
 import { SpotifyPlugin } from '@distube/spotify';
 import { SoundCloudPlugin } from '@distube/soundcloud';
 import { YtDlpPlugin } from '@distube/yt-dlp';

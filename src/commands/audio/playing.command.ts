@@ -4,7 +4,7 @@ import { GroupAudio } from './AudioTypes.js';
 import {
   AudioCommandWrapperInteraction,
   AudioCommandWrapperText
-} from '../audioPlayer/util/AudioCommandWrappers.js';
+} from '../../audioplayer/util/AudioCommandWrappers.js';
 import { splitBar } from '../../utilities/splitBar.js';
 import { Queue } from 'distube';
 import i18next from 'i18next';

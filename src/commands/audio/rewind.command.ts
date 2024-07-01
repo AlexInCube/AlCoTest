@@ -4,7 +4,7 @@ import { GroupAudio } from './AudioTypes.js';
 import {
   AudioCommandWrapperInteraction,
   AudioCommandWrapperText
-} from '../audioPlayer/util/AudioCommandWrappers.js';
+} from '../../audioplayer/util/AudioCommandWrappers.js';
 import { formatSecondsToTime } from '../../utilities/formatSecondsToTime.js';
 import i18next from 'i18next';
 

@@ -1,12 +1,12 @@
 import { DisTube, PlayOptions, Queue, RepeatMode, Song, Events as DistubeEvents } from 'distube';
 import { AudioPlayersManager } from './AudioPlayersManager.js';
-import { pagination } from '../../utilities/pagination/pagination.js';
-import { ButtonStyles, ButtonTypes } from '../../utilities/pagination/paginationTypes.js';
-import { clamp } from '../../utilities/clamp.js';
-import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
+import { pagination } from '../utilities/pagination/pagination.js';
+import { ButtonStyles, ButtonTypes } from '../utilities/pagination/paginationTypes.js';
+import { clamp } from '../utilities/clamp.js';
+import { generateErrorEmbed } from '../utilities/generateErrorEmbed.js';
 import i18next from 'i18next';
-import { loggerError, loggerSend } from '../../utilities/logger.js';
-import { ENV } from '../../EnvironmentVariables.js';
+import { loggerError, loggerSend } from '../utilities/logger.js';
+import { ENV } from '../EnvironmentVariables.js';
 import { LoadPlugins } from './LoadPlugins.js';
 import { generateAddedPlaylistMessage } from './util/generateAddedPlaylistMessage.js';
 import { generateAddedSongMessage } from './util/generateAddedSongMessage.js';
@@ -37,6 +37,7 @@ export class AudioPlayerCore {
       emitAddListWhenCreatingQueue: true,
       emitAddSongWhenCreatingQueue: true,
       savePreviousSongs: true,
+      joinNewVoiceChannel: true,
       plugins: LoadPlugins()
     });
 
@@ -54,7 +55,7 @@ export class AudioPlayerCore {
     try {
       // I am need manual connect user to a voice channel, because when I am using only Distube "play"
       // method, getVoiceConnection in @discordjs/voice is not working
-      await this.distube.voices.join(voiceChannel);
+      //await this.distube.voices.join(voiceChannel);
 
       joinVoiceChannel({
         channelId: voiceChannel.id,
@@ -70,15 +71,45 @@ export class AudioPlayerCore {
   }
 
   async stop(guild: Guild) {
-    if (this.distube.getQueue(guild)) {
-      await this.distube.stop(guild);
+    const queue = this.distube.getQueue(guild)
+
+    if (queue) {
+      await queue.stop();
+      queue.voice.leave();
     } else {
       this.distube.voices.leave(guild);
     }
+
     await this.playersManager.remove(guild.id);
   }
 
   async pause(guild: Guild) {
+    const queue = this.distube.getQueue(guild);
+    if (!queue) return;
+    const player = this.playersManager.get(queue.id);
+    if (!player) return;
+    if (!queue.paused) {
+      this.distube.pause(guild);
+      await player.setState('pause');
+    }
+
+    await player.update();
+  }
+
+  async resume(guild: Guild){
+    const queue = this.distube.getQueue(guild);
+    if (!queue) return;
+    const player = this.playersManager.get(queue.id);
+    if (!player) return;
+    if (queue.paused) {
+      this.distube.resume(guild);
+      await player.setState('playing');
+    }
+
+    await player.update();
+  }
+
+  async pauseResume(guild: Guild){
     const queue = this.distube.getQueue(guild);
     if (!queue) return;
     const player = this.playersManager.get(queue.id);
@@ -320,9 +351,6 @@ export class AudioPlayerCore {
         if (!this.playersManager.has(queue.id)) return;
         if (queue._next || queue._prev || queue.stopped || queue.songs.length > 1) return;
         this.playersManager.get(queue.id)?.setState('waiting');
-      })
-      .on(DistubeEvents.FINISH, async (queue) => {
-        queue.voice.leave();
       })
       .on(DistubeEvents.ERROR, async (error, queue) => {
         queue.textChannel?.send({
