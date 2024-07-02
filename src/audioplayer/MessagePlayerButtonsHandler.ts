@@ -23,7 +23,7 @@ import {
   generateMessageAudioPlayerShuffle,
   generateMessageAudioPlayerShuffleFailure
 } from '../commands/audio/shuffle.command.js';
-import { AudioPlayerIcons } from './AudioPlayerTypes.js';
+import { AudioPlayerIcons, AudioPlayerState } from './AudioPlayerTypes.js';
 
 enum ButtonIDs {
   stopMusic = 'stopMusic',
@@ -36,56 +36,79 @@ enum ButtonIDs {
   showQueue = 'showQueue'
 }
 
+const rowPrimary = new ActionRowBuilder<ButtonBuilder>().addComponents(
+  new ButtonBuilder()
+    .setCustomId(ButtonIDs.stopMusic)
+    .setStyle(ButtonStyle.Danger)
+    .setEmoji(AudioPlayerIcons.stop),
+  new ButtonBuilder()
+    .setCustomId(ButtonIDs.pauseMusic)
+    .setStyle(ButtonStyle.Primary)
+    .setEmoji(AudioPlayerIcons.pause),
+  new ButtonBuilder()
+    .setCustomId(ButtonIDs.toggleLoopMode)
+    .setStyle(ButtonStyle.Primary)
+    .setEmoji(AudioPlayerIcons.toogleLoopMode),
+  new ButtonBuilder()
+    .setCustomId(ButtonIDs.previousSong)
+    .setStyle(ButtonStyle.Primary)
+    .setEmoji(AudioPlayerIcons.previous),
+  new ButtonBuilder()
+    .setCustomId(ButtonIDs.skipSong)
+    .setStyle(ButtonStyle.Primary)
+    .setEmoji(AudioPlayerIcons.skip)
+);
+
+const rowPrimaryPaused = new ActionRowBuilder<ButtonBuilder>().addComponents(
+  new ButtonBuilder()
+    .setCustomId(ButtonIDs.stopMusic)
+    .setStyle(ButtonStyle.Danger)
+    .setEmoji(AudioPlayerIcons.stop),
+  new ButtonBuilder()
+    .setCustomId(ButtonIDs.pauseMusic)
+    .setStyle(ButtonStyle.Success)
+    .setEmoji(AudioPlayerIcons.play),
+  new ButtonBuilder()
+    .setCustomId(ButtonIDs.toggleLoopMode)
+    .setStyle(ButtonStyle.Primary)
+    .setEmoji(AudioPlayerIcons.toogleLoopMode),
+  new ButtonBuilder()
+    .setCustomId(ButtonIDs.previousSong)
+    .setStyle(ButtonStyle.Primary)
+    .setEmoji(AudioPlayerIcons.previous),
+  new ButtonBuilder()
+    .setCustomId(ButtonIDs.skipSong)
+    .setStyle(ButtonStyle.Primary)
+    .setEmoji(AudioPlayerIcons.skip)
+);
+
+const rowSecondary = new ActionRowBuilder<ButtonBuilder>().addComponents(
+  //new ButtonBuilder().setCustomId(ButtonIDs.downloadSong).setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>'),
+  new ButtonBuilder()
+    .setCustomId(ButtonIDs.shuffle)
+    .setStyle(ButtonStyle.Primary)
+    .setEmoji(AudioPlayerIcons.shuffle),
+  new ButtonBuilder()
+    .setCustomId(ButtonIDs.showQueue)
+    .setStyle(ButtonStyle.Secondary)
+    .setEmoji(AudioPlayerIcons.list)
+);
+
+const rowWithOnlyStop = new ActionRowBuilder<ButtonBuilder>().addComponents(
+  new ButtonBuilder()
+    .setCustomId(ButtonIDs.stopMusic)
+    .setStyle(ButtonStyle.Danger)
+    .setEmoji(AudioPlayerIcons.stop)
+);
+
 export class MessagePlayerButtonsHandler {
-  rowPrimary = new ActionRowBuilder<ButtonBuilder>();
-  rowSecondary = new ActionRowBuilder<ButtonBuilder>();
-  rowWithOnlyStop = new ActionRowBuilder<ButtonBuilder>();
-  collector: InteractionCollector<ButtonInteraction>;
-  client: Client;
+  private collector: InteractionCollector<ButtonInteraction>;
+  private client: Client;
+  private components: Array<ActionRowBuilder<ButtonBuilder>>;
+
   constructor(client: Client, textChannel: GuildTextBasedChannel) {
+    this.components = [rowPrimary, rowSecondary];
     this.client = client;
-
-    this.rowPrimary.addComponents(
-      new ButtonBuilder()
-        .setCustomId(ButtonIDs.stopMusic)
-        .setStyle(ButtonStyle.Danger)
-        .setEmoji(AudioPlayerIcons.stop),
-      new ButtonBuilder()
-        .setCustomId(ButtonIDs.pauseMusic)
-        .setStyle(ButtonStyle.Primary)
-        .setEmoji(AudioPlayerIcons.pause),
-      new ButtonBuilder()
-        .setCustomId(ButtonIDs.toggleLoopMode)
-        .setStyle(ButtonStyle.Primary)
-        .setEmoji(AudioPlayerIcons.toogleLoopMode),
-      new ButtonBuilder()
-        .setCustomId(ButtonIDs.previousSong)
-        .setStyle(ButtonStyle.Primary)
-        .setEmoji(AudioPlayerIcons.previous),
-      new ButtonBuilder()
-        .setCustomId(ButtonIDs.skipSong)
-        .setStyle(ButtonStyle.Primary)
-        .setEmoji(AudioPlayerIcons.skip)
-    );
-
-    this.rowSecondary.addComponents(
-      //new ButtonBuilder().setCustomId(ButtonIDs.downloadSong).setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>'),
-      new ButtonBuilder()
-        .setCustomId(ButtonIDs.shuffle)
-        .setStyle(ButtonStyle.Primary)
-        .setEmoji(AudioPlayerIcons.shuffle),
-      new ButtonBuilder()
-        .setCustomId(ButtonIDs.showQueue)
-        .setStyle(ButtonStyle.Secondary)
-        .setEmoji(AudioPlayerIcons.list)
-    );
-
-    this.rowWithOnlyStop.addComponents(
-      new ButtonBuilder()
-        .setCustomId(ButtonIDs.stopMusic)
-        .setStyle(ButtonStyle.Danger)
-        .setEmoji(AudioPlayerIcons.stop)
-    );
 
     this.collector = textChannel.createMessageComponentCollector({
       componentType: ComponentType.Button
@@ -195,12 +218,24 @@ export class MessagePlayerButtonsHandler {
     });
   }
 
-  getComponents(): Array<ActionRowBuilder<ButtonBuilder>> {
-    return [this.rowPrimary, this.rowSecondary];
+  setComponentsState(state: AudioPlayerState) {
+    switch (state) {
+      case 'playing':
+        this.components = [rowPrimary, rowSecondary];
+        break;
+      case 'pause':
+        this.components = [rowPrimaryPaused, rowSecondary];
+        break;
+      case 'loading':
+      case 'waiting':
+      case 'destroying':
+      default:
+        this.components = [rowWithOnlyStop];
+    }
   }
 
-  getComponentsOnlyStop(): Array<ActionRowBuilder<ButtonBuilder>> {
-    return [this.rowWithOnlyStop];
+  getComponents(): Array<ActionRowBuilder<ButtonBuilder>> {
+    return this.components;
   }
 
   destroy() {

@@ -45,7 +45,7 @@ export function loggerSend(
   if (prefix) {
     console.log(`[ ${getCurrentTimestamp()} ] [ ${prefix} ] ${finalOutput}`);
   } else {
-    console.log(`[ ${getCurrentTimestamp()} ] [ UNKNOWN ] ${finalOutput}`);
+    console.log(`[ ${getCurrentTimestamp()} ] ${finalOutput}`);
   }
 }
 

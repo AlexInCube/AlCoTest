@@ -125,22 +125,11 @@ export class MessagePlayer {
   private async updateMessageState() {
     if (!this.messageWithPlayer) return;
     try {
-      switch (this.state) {
-        case 'playing':
-        case 'pause':
-          await this.messageWithPlayer.edit({
-            embeds: [this.embedBuilder],
-            components: this.buttonsHandler.getComponents()
-          });
-          break;
-        case 'waiting':
-        case 'loading':
-          await this.messageWithPlayer.edit({
-            embeds: [this.embedBuilder],
-            components: this.buttonsHandler.getComponentsOnlyStop()
-          });
-          break;
-      }
+      this.buttonsHandler.setComponentsState(this.state);
+      await this.messageWithPlayer.edit({
+        embeds: [this.embedBuilder],
+        components: this.buttonsHandler.getComponents()
+      });
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
     }

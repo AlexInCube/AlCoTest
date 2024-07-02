@@ -109,7 +109,7 @@ export class AudioPlayerCore {
     await player.update();
   }
 
-  async pauseResume(guild: Guild){
+  async pauseResume(guild: Guild) {
     const queue = this.distube.getQueue(guild);
     if (!queue) return;
     const player = this.playersManager.get(queue.id);
@@ -305,11 +305,6 @@ export class AudioPlayerCore {
     }
 
     this.distube
-      // TODO: Write custom code for handling user disconnects
-      // .on(DistubeEvents.EMPTY, async (queue) => {
-      //   await queue.textChannel?.send(i18next.t('audioplayer:event_empty') as string);
-      //   await this.playersManager.remove(queue.id);
-      // })
       .on(DistubeEvents.INIT_QUEUE, async (queue) => {
         await this.playersManager.add(queue.id, queue.textChannel as TextChannel, queue);
 
@@ -350,7 +345,7 @@ export class AudioPlayerCore {
       .on(DistubeEvents.FINISH_SONG, async (queue) => {
         if (!this.playersManager.has(queue.id)) return;
         if (queue._next || queue._prev || queue.stopped || queue.songs.length > 1) return;
-        this.playersManager.get(queue.id)?.setState('waiting');
+        await this.playersManager.get(queue.id)?.setState('waiting');
       })
       .on(DistubeEvents.ERROR, async (error, queue) => {
         queue.textChannel?.send({

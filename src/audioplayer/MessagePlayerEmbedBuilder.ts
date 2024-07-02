@@ -39,7 +39,7 @@ export class MessagePlayerEmbedBuilder extends EmbedBuilder {
         });
       }
       this.setThumbnail(this.thumbnailURL);
-      this.setTitle(this.sourceIcon + this.title);
+      this.setTitle(this.sourceIcon + " " + this.title);
       this.setURL(this.titleUrl);
       this.addFields({
         name: i18next.t('audioplayer:player_embed_author'),
