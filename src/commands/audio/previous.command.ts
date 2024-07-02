@@ -57,9 +57,9 @@ export default function (): ICommand {
 }
 
 export function generateMessageAudioPlayerPrevious(member: GuildMember, song: Song) {
-  return `:rewind: ${member} ${i18next.t('previous_success')} ${song.name} :rewind:`;
+  return `:rewind: ${member} ${i18next.t('audioplayer:previous_success')} ${song.name} :rewind:`;
 }
 
 export function generateMessageAudioPlayerPreviousFailure() {
-  return i18next.t('previous_error_song_not_exists');
+  return i18next.t('audioplayer:previous_error_song_not_exists');
 }

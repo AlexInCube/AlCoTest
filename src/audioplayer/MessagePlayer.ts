@@ -1,4 +1,4 @@
-import { Client, GuildTextBasedChannel, Message, TextChannel } from 'discord.js';
+import { Client, GuildTextBasedChannel, Message } from 'discord.js';
 import { MessagePlayerEmbedBuilder } from './MessagePlayerEmbedBuilder.js';
 import { Queue, Song } from 'distube';
 import { MessagePlayerButtonsHandler } from './MessagePlayerButtonsHandler.js';
@@ -24,18 +24,42 @@ export class MessagePlayer {
   // Variable for "recreationPlayer"
   lastDeletedMessage: Message | undefined;
   // Delay for player recreation
-  private updateTime = 3500;
+  private updateTime = 3500; // in ms
   // Timer for "recreationPlayer"
   private recreationTimer: NodeJS.Timeout | undefined;
   // Time for "waiting" state
-  private finishTime = 20000;
+  private finishTime = 20000; // in ms
   // Timer object for "waiting" state
   private finishTimer: NodeJS.Timeout | undefined;
+
+  // If no one in voice channel, start afk timer
+  private afkTime = 20000; // in ms
+  private afkTimer: NodeJS.Timeout | undefined;
+
   constructor(client: Client, txtChannel: GuildTextBasedChannel, queue: Queue) {
     this.client = client;
     this.textChannel = txtChannel;
     this.queue = queue;
     this.buttonsHandler = new MessagePlayerButtonsHandler(this.client, this.textChannel);
+  }
+
+  async startAfkTimer() {
+    try {
+      this.afkTimer = setTimeout(async () => {
+        await this.client.audioPlayer.stop(this.textChannel.guild);
+        await this.textChannel.send(i18next.t('audioplayer:event_empty') as string);
+        await this.stopAfkTimer();
+        await this.stopFinishTimer();
+      }, this.afkTime);
+    } catch (e) {
+      if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
+    }
+  }
+
+  async stopAfkTimer() {
+    if (this.afkTimer) {
+      clearTimeout(this.afkTimer);
+    }
   }
 
   // If a player is in "waiting" state, they start finish timer.
@@ -52,6 +76,7 @@ export class MessagePlayer {
             await this.client.audioPlayer.stop(this.textChannel.guild);
             await this.textChannel.send(i18next.t('audioplayer:event_finish_time') as string);
             await this.stopFinishTimer();
+            await this.stopAfkTimer();
           }
         }, this.finishTime);
       }
@@ -78,6 +103,7 @@ export class MessagePlayer {
     const currentSong: Song = this.queue.songs[0];
     if (currentSong) {
       this.embedBuilder.setSongDuration(currentSong.duration, currentSong.isLive);
+      this.embedBuilder.setSongSource(currentSong);
       this.embedBuilder.setSongTitle(
         currentSong.name ?? i18next.t('audioplayer:player_embed_unknown'),
         currentSong.url!
@@ -219,10 +245,8 @@ export class MessagePlayer {
 
     if (state === 'waiting') {
       await this.startFinishTimer();
-    } else {
-      if (this.finishTimer && queue) {
-        clearTimeout(this.finishTimer);
-      }
+    } else if (queue) {
+      await this.stopFinishTimer();
     }
 
     await this.update();

@@ -3,7 +3,6 @@ import {
   ButtonBuilder,
   ButtonStyle,
   InteractionCollector,
-  TextChannel,
   ComponentType,
   Client,
   GuildMember,
@@ -24,6 +23,7 @@ import {
   generateMessageAudioPlayerShuffle,
   generateMessageAudioPlayerShuffleFailure
 } from '../commands/audio/shuffle.command.js';
+import { AudioPlayerIcons } from './AudioPlayerTypes.js';
 
 enum ButtonIDs {
   stopMusic = 'stopMusic',
@@ -35,6 +35,7 @@ enum ButtonIDs {
   shuffle = 'shuffle',
   showQueue = 'showQueue'
 }
+
 export class MessagePlayerButtonsHandler {
   rowPrimary = new ActionRowBuilder<ButtonBuilder>();
   rowSecondary = new ActionRowBuilder<ButtonBuilder>();
@@ -48,23 +49,23 @@ export class MessagePlayerButtonsHandler {
       new ButtonBuilder()
         .setCustomId(ButtonIDs.stopMusic)
         .setStyle(ButtonStyle.Danger)
-        .setEmoji('<:stopwhite:1014551716043173989>'),
+        .setEmoji(AudioPlayerIcons.stop),
       new ButtonBuilder()
         .setCustomId(ButtonIDs.pauseMusic)
         .setStyle(ButtonStyle.Primary)
-        .setEmoji('<:pausewhite:1014551696174764133>'),
+        .setEmoji(AudioPlayerIcons.pause),
       new ButtonBuilder()
         .setCustomId(ButtonIDs.toggleLoopMode)
         .setStyle(ButtonStyle.Primary)
-        .setEmoji('<:repeatmodewhite:1014551751858331731>'),
+        .setEmoji(AudioPlayerIcons.toogleLoopMode),
       new ButtonBuilder()
         .setCustomId(ButtonIDs.previousSong)
         .setStyle(ButtonStyle.Primary)
-        .setEmoji('<:previousbutton:1092107334542696512>'),
+        .setEmoji(AudioPlayerIcons.previous),
       new ButtonBuilder()
         .setCustomId(ButtonIDs.skipSong)
         .setStyle(ButtonStyle.Primary)
-        .setEmoji('<:skipbutton:1092107438234275900>')
+        .setEmoji(AudioPlayerIcons.skip)
     );
 
     this.rowSecondary.addComponents(
@@ -72,18 +73,18 @@ export class MessagePlayerButtonsHandler {
       new ButtonBuilder()
         .setCustomId(ButtonIDs.shuffle)
         .setStyle(ButtonStyle.Primary)
-        .setEmoji('<:shufflebutton:1092107651384614912>'),
+        .setEmoji(AudioPlayerIcons.shuffle),
       new ButtonBuilder()
         .setCustomId(ButtonIDs.showQueue)
         .setStyle(ButtonStyle.Secondary)
-        .setEmoji('<:songlistwhite:1014551771705782405>')
+        .setEmoji(AudioPlayerIcons.list)
     );
 
     this.rowWithOnlyStop.addComponents(
       new ButtonBuilder()
         .setCustomId(ButtonIDs.stopMusic)
         .setStyle(ButtonStyle.Danger)
-        .setEmoji('<:stopwhite:1014551716043173989>')
+        .setEmoji(AudioPlayerIcons.stop)
     );
 
     this.collector = textChannel.createMessageComponentCollector({
@@ -102,7 +103,7 @@ export class MessagePlayerButtonsHandler {
         }
 
         switch (ButtonInteraction.customId) {
-          case ButtonIDs.stopMusic:
+          case ButtonIDs.stopMusic: {
             const guild = ButtonInteraction.guild as Guild;
 
             const player = this.client.audioPlayer.playersManager.get(guild.id);
@@ -117,7 +118,7 @@ export class MessagePlayerButtonsHandler {
 
             await ButtonInteraction.deferUpdate();
             break;
-
+          }
           case ButtonIDs.pauseMusic:
             await this.client.audioPlayer.pauseResume(ButtonInteraction.guild as Guild);
             await ButtonInteraction.deferUpdate();

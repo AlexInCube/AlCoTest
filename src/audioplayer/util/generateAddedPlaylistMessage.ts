@@ -1,12 +1,15 @@
 import { Playlist } from 'distube';
 import { EmbedBuilder } from 'discord.js';
 import i18next from 'i18next';
+import { getIconFromSource } from './getIconFromSource.js';
 
 export function generateAddedPlaylistMessage(playlist: Playlist) {
+  const serviceIcon = getIconFromSource(playlist.source);
+
   return new EmbedBuilder()
-    .setTitle(playlist.name ?? i18next.t('audioplayer:player_embed_unknown'))
+    .setTitle(`${serviceIcon} ${playlist.name}` ?? i18next.t('audioplayer:player_embed_unknown'))
     .setURL(playlist.url ?? null)
-    .setAuthor({ name: `🎵${i18next.t('audioplayer:event_add_list')}🎵` })
+    .setAuthor({ name: `${i18next.t('audioplayer:event_add_list')}` })
     .setThumbnail(playlist.thumbnail ?? null)
     .addFields(
       {

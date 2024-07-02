@@ -1,5 +1,5 @@
 <p align="center">
-    <img width="96" src="logo.png" alt="BotLogo">
+    <img width="96" src="icons/logo.png" alt="BotLogo">
 </p>
 <h1 align="center">AICTest</h1>
 <p align="center">

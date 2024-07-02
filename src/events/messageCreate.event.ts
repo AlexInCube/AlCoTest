@@ -1,9 +1,7 @@
 import { BotEvent } from '../Types.js';
 import { Client, Events, Message, TextChannel } from 'discord.js';
 import { textCommandsHandler } from './messageHandlers/textCommandsHandler.js';
-import {
-  AudioPlayerEventMessageCreate
-} from '../audioplayer/eventsHandlers/AudioPlayerEventMessageCreate.js';
+import { AudioPlayerEventMessageCreate } from '../audioplayer/eventsHandlers/AudioPlayerEventMessageCreate.js';
 
 const event: BotEvent = {
   name: Events.MessageCreate,
