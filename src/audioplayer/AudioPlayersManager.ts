@@ -1,4 +1,4 @@
-import { Client, Collection, GuildTextBasedChannel, TextChannel } from 'discord.js';
+import { Client, Collection, GuildTextBasedChannel } from 'discord.js';
 import { Queue } from 'distube';
 import { MessagePlayer } from './MessagePlayer.js';
 

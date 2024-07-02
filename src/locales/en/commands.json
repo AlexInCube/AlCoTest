@@ -17,6 +17,7 @@
   "play_desc": "Playing requested song",
   "play_arg_link": "Links from {{services}} or any text",
   "play_stream": "Live",
+  "play_error_songs_limit": "You cant add new songs, because queue hit the limit in {{queueLimit}} songs",
   "download_desc": "Download song from the link",
   "download_arg_request": "Links from {{services}}",
   "download_please_wait": "Please wait, it can take a long time",

@@ -1,6 +1,6 @@
 {
   "name": "aicbot",
-  "version": "3.0.0-dev-3",
+  "version": "3.0.0-dev-4",
   "description": "Discord Bot for playing music",
   "main": "build/main.js",
   "scripts": {
@@ -40,7 +40,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^20.14.8",
+    "@types/node": "^20.14.9",
     "@types/node-os-utils": "^1.3.4",
     "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
@@ -49,6 +49,6 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
     "prettier": "^3.3.2",
-    "typescript": "^5.5.2"
+    "typescript": "^5.5.3"
   }
 }

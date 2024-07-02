@@ -1,7 +1,7 @@
 import { CommandArgument, ICommand } from '../../CommandTypes.js';
 import {
   ApplicationCommandOptionChoiceData,
-  AutocompleteInteraction, GuildChannel,
+  AutocompleteInteraction, Client, Guild,
   GuildMember,
   Message,
   PermissionsBitField,
@@ -10,12 +10,11 @@ import {
   VoiceChannel
 } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
-import { isValidURL } from '../../utilities/isValidURL.js';
 import { truncateString } from '../../utilities/truncateString.js';
 import i18next from 'i18next';
-import { SearchResultType, YouTubePlugin, YouTubeSearchResultSong } from '@distube/youtube';
-import { ExtractorPlugin } from 'distube';
+import { SearchResultType } from '@distube/youtube';
 import ytsr from '@distube/ytsr';
+import { queueSongsLimit } from '../../audioplayer/AudioPlayerCore.js';
 
 export const services = 'Youtube, Spotify, Soundcloud, Yandex Music, HTTP-stream';
 export default function (): ICommand {
@@ -31,6 +30,15 @@ export default function (): ICommand {
 
         const member = message.member as GuildMember;
         const channel = message.channel as TextChannel;
+
+        if (queueSongsIsFull(message.client, message.guild as Guild)){
+          await message.reply({
+            content: i18next.t('commands:play_error_songs_limit', {
+              queueLimit: queueSongsLimit
+            }) as string
+          });
+          return
+        }
 
         await message.client.audioPlayer.play(
           member.voice.channel as VoiceBasedChannel,
@@ -60,12 +68,24 @@ export default function (): ICommand {
       execute: async (interaction) => {
         const songQuery = interaction.options.getString('request');
 
+        if (queueSongsIsFull(interaction.client, interaction.guild as Guild)){
+          await interaction.reply({
+            content: i18next.t('commands:play_error_songs_limit', {
+              queueLimit: queueSongsLimit
+            }) as string
+          });
+          return
+        }
+
         await interaction.reply({
           content: i18next.t('general:thinking') as string
         });
         await interaction.deleteReply();
 
         const member = interaction.member as GuildMember;
+
+
+
         if (songQuery) {
           await interaction.client.audioPlayer.play(member.voice.channel as VoiceChannel, interaction.channel as TextChannel, songQuery, {
             member: interaction.member as GuildMember,
@@ -114,4 +134,12 @@ export async function songSearchAutocomplete(interaction: AutocompleteInteractio
   }
 
   await interaction.respond([]);
+}
+
+function queueSongsIsFull(client: Client, guild: Guild): boolean{
+  const queue = client.audioPlayer.distube.getQueue(guild)
+
+  if (!queue) return false
+
+  return queue.songs.length >= queueSongsLimit
 }

@@ -22,6 +22,8 @@ import {
 } from 'discord.js';
 import { joinVoiceChannel } from '@discordjs/voice';
 
+export const queueSongsLimit = 500;
+
 export const loggerPrefixAudioplayer = `Audioplayer`;
 
 export class AudioPlayerCore {
@@ -41,8 +43,6 @@ export class AudioPlayerCore {
       plugins: LoadPlugins()
     });
 
-    this.client.distube = this.distube;
-
     this.setupEvents();
   }
 
@@ -55,8 +55,6 @@ export class AudioPlayerCore {
     try {
       // I am need manual connect user to a voice channel, because when I am using only Distube "play"
       // method, getVoiceConnection in @discordjs/voice is not working
-      //await this.distube.voices.join(voiceChannel);
-
       joinVoiceChannel({
         channelId: voiceChannel.id,
         guildId: voiceChannel.guildId,
@@ -71,7 +69,7 @@ export class AudioPlayerCore {
   }
 
   async stop(guild: Guild) {
-    const queue = this.distube.getQueue(guild)
+    const queue = this.distube.getQueue(guild);
 
     if (queue) {
       await queue.stop();
@@ -96,7 +94,7 @@ export class AudioPlayerCore {
     await player.update();
   }
 
-  async resume(guild: Guild){
+  async resume(guild: Guild) {
     const queue = this.distube.getQueue(guild);
     if (!queue) return;
     const player = this.playersManager.get(queue.id);
@@ -333,8 +331,16 @@ export class AudioPlayerCore {
         }
       })
       .on(DistubeEvents.ADD_LIST, async (queue, playlist) => {
-        if (queue.textChannel) {
-          await queue.textChannel.send({ embeds: [generateAddedPlaylistMessage(playlist)] });
+        if (!queue.textChannel) return;
+
+        await queue.textChannel.send({ embeds: [generateAddedPlaylistMessage(playlist)] });
+        if (queue.songs.length >= queueSongsLimit) {
+          await queue.textChannel.send({
+            content: i18next.t('audioplayer:event_add_list_limit', {
+              queueLimit: queueSongsLimit
+            }) as string
+          });
+          queue.songs.length = queueSongsLimit;
         }
 
         const player = this.playersManager.get(queue.id);
