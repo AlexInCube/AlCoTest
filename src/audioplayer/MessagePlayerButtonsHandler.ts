@@ -13,17 +13,17 @@ import {
 import { checkMemberInVoiceWithBot } from '../utilities/checkMemberInVoiceWithBot.js';
 import { generateErrorEmbed } from '../utilities/generateErrorEmbed.js';
 import { loggerError } from '../utilities/logger.js';
-import { generateSkipMessage, generateSkipMessageFailure } from '../commands/audio/skip.command.js';
-import { generateMessageAudioPlayerStop } from '../commands/audio/stop.command.js';
+import { generateSkipEmbed, generateSkipEmbedFailure } from '../commands/audio/skip.command.js';
 import {
-  generateMessageAudioPlayerPrevious,
-  generateMessageAudioPlayerPreviousFailure
-} from '../commands/audio/previous.command.js';
-import {
-  generateMessageAudioPlayerShuffle,
-  generateMessageAudioPlayerShuffleFailure
+  generateEmbedAudioPlayerShuffle,
+  generateEmbedAudioPlayerShuffleFailure
 } from '../commands/audio/shuffle.command.js';
 import { AudioPlayerIcons, AudioPlayerState } from './AudioPlayerTypes.js';
+import { generateEmbedAudioPlayerStop } from '../commands/audio/stop.command.js';
+import {
+  generateEmbedAudioPlayerPrevious,
+  generateEmbedAudioPlayerPreviousFailure
+} from '../commands/audio/previous.command.js';
 
 enum ButtonIDs {
   stopMusic = 'stopMusic',
@@ -133,7 +133,7 @@ export class MessagePlayerButtonsHandler {
 
             if (player) {
               await player.textChannel.send({
-                content: generateMessageAudioPlayerStop(ButtonInteraction.member as GuildMember)
+                embeds: [generateEmbedAudioPlayerStop(ButtonInteraction.member as GuildMember)]
               });
             }
 
@@ -151,14 +151,13 @@ export class MessagePlayerButtonsHandler {
             const song = await this.client.audioPlayer.previous(ButtonInteraction.guild as Guild);
             if (song) {
               await ButtonInteraction.reply({
-                content: generateMessageAudioPlayerPrevious(
-                  ButtonInteraction.member as GuildMember,
-                  song
-                )
+                embeds: [
+                  generateEmbedAudioPlayerPrevious(ButtonInteraction.member as GuildMember, song)
+                ]
               });
             } else {
               await ButtonInteraction.reply({
-                content: generateMessageAudioPlayerPreviousFailure(),
+                embeds: [generateEmbedAudioPlayerPreviousFailure()],
                 ephemeral: true
               });
             }
@@ -170,11 +169,11 @@ export class MessagePlayerButtonsHandler {
 
             if (song) {
               await ButtonInteraction.reply({
-                content: generateSkipMessage(song, ButtonInteraction.member as GuildMember)
+                embeds: [generateSkipEmbed(song, ButtonInteraction.member as GuildMember)]
               });
             } else {
               await ButtonInteraction.reply({
-                content: generateSkipMessageFailure(),
+                embeds: [generateSkipEmbedFailure()],
                 ephemeral: true
               });
             }
@@ -204,10 +203,10 @@ export class MessagePlayerButtonsHandler {
           case ButtonIDs.shuffle: {
             if (await this.client.audioPlayer.shuffle(ButtonInteraction.guild as Guild)) {
               await ButtonInteraction.reply({
-                content: generateMessageAudioPlayerShuffle(ButtonInteraction.member as GuildMember)
+                embeds: [generateEmbedAudioPlayerShuffle(ButtonInteraction.member as GuildMember)]
               });
             } else {
-              await ButtonInteraction.reply(generateMessageAudioPlayerShuffleFailure());
+              await ButtonInteraction.reply({ embeds: [generateEmbedAudioPlayerShuffleFailure()] });
             }
             break;
           }

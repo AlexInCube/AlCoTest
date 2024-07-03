@@ -7,6 +7,7 @@ import { checkBotInVoice } from '../utilities/checkBotInVoice.js';
 import i18next from 'i18next';
 import { ENV } from '../EnvironmentVariables.js';
 import { loggerError } from '../utilities/logger.js';
+import { generateSimpleEmbed } from '../utilities/generateSimpleEmbed.js';
 
 export class MessagePlayer {
   private readonly client: Client;
@@ -47,7 +48,9 @@ export class MessagePlayer {
     try {
       this.afkTimer = setTimeout(async () => {
         await this.client.audioPlayer.stop(this.textChannel.guild);
-        await this.textChannel.send(i18next.t('audioplayer:event_empty') as string);
+        await this.textChannel.send({
+          embeds: [generateSimpleEmbed(i18next.t('audioplayer:event_empty') as string)]
+        });
         await this.stopAfkTimer();
         await this.stopFinishTimer();
       }, this.afkTime);
@@ -74,7 +77,9 @@ export class MessagePlayer {
           if (queue) return;
           if (checkBotInVoice(this.textChannel.guild)) {
             await this.client.audioPlayer.stop(this.textChannel.guild);
-            await this.textChannel.send(i18next.t('audioplayer:event_finish_time') as string);
+            await this.textChannel.send({
+              embeds: [generateSimpleEmbed(i18next.t('audioplayer:event_finish_time') as string)]
+            });
             await this.stopFinishTimer();
             await this.stopAfkTimer();
           }

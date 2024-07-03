@@ -1,5 +1,5 @@
 import { CommandArgument, ICommand } from '../../CommandTypes.js';
-import { GuildMember, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, GuildMember, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
 import {
   AudioCommandWrapperInteraction,
@@ -7,6 +7,7 @@ import {
 } from '../../audioplayer/util/AudioCommandWrappers.js';
 import { formatSecondsToTime } from '../../utilities/formatSecondsToTime.js';
 import i18next from 'i18next';
+import { generateSimpleEmbed } from '../../utilities/generateSimpleEmbed.js';
 
 export default function (): ICommand {
   return {
@@ -21,11 +22,11 @@ export default function (): ICommand {
           if (time) {
             if (await message.client.audioPlayer.rewind(message.guild!, time)) {
               await message.reply({
-                content: generateMessageAudioPlayerRewind(message.member!, time)
+                embeds: [generateEmbedAudioPlayerRewind(message.member!, time)]
               });
             }
           } else {
-            await message.reply({ content: generateMessageAudioPlayerRewindFailure() });
+            await message.reply({ embeds: [generateEmbedAudioPlayerRewindFailure()] });
           }
         });
       }
@@ -50,12 +51,12 @@ export default function (): ICommand {
           if (time) {
             if (await interaction.client.audioPlayer.rewind(interaction.guild!, time)) {
               await interaction.reply({
-                content: generateMessageAudioPlayerRewind(interaction.member as GuildMember, time)
+                embeds: [generateEmbedAudioPlayerRewind(interaction.member as GuildMember, time)]
               });
             }
           } else {
             await interaction.reply({
-              content: generateMessageAudioPlayerRewindFailure(),
+              embeds: [generateEmbedAudioPlayerRewindFailure()],
               ephemeral: true
             });
           }
@@ -93,10 +94,12 @@ function hmsToSeconds(str: string): number | undefined {
   return s;
 }
 
-export function generateMessageAudioPlayerRewind(member: GuildMember, time: number) {
-  return `${member} ${i18next.t('commands:rewind_success')} ${formatSecondsToTime(time)}`;
+export function generateEmbedAudioPlayerRewind(member: GuildMember, time: number): EmbedBuilder {
+  return generateSimpleEmbed(
+    `${member} ${i18next.t('commands:rewind_success')} ${formatSecondsToTime(time)}`
+  );
 }
 
-export function generateMessageAudioPlayerRewindFailure() {
-  return i18next.t('commands:rewind_failure');
+export function generateEmbedAudioPlayerRewindFailure(): EmbedBuilder {
+  return generateSimpleEmbed(i18next.t('commands:rewind_failure'));
 }

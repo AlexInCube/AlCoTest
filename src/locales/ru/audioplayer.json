@@ -1,7 +1,7 @@
 {
   "audio_commands_wrapper_song_processing": "Песни всё ещё обрабатываются, подожди",
   "audio_commands_wrapper_player_not_exist": "Плеера не существует",
-  "play_error": "Попробуйте другую ссылку",
+  "play_error": "Попробуйте другую песню, с этой какая-то ерунда происходит.",
   "download_song_error": "Что-то пошло не так при получении ссылки на скачивание",
   "show_queue_title": "Сейчас играет",
   "show_queue_songs_in_queue": "Песни в очереди",

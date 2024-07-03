@@ -1,5 +1,5 @@
 import { CommandArgument, ICommand } from '../../CommandTypes.js';
-import { GuildMember, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, GuildMember, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
 import {
   AudioCommandWrapperInteraction,
@@ -8,6 +8,7 @@ import {
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
 import { Song } from 'distube';
 import i18next from 'i18next';
+import { generateSimpleEmbed } from '../../utilities/generateSimpleEmbed.js';
 
 export default function (): ICommand {
   return {
@@ -32,9 +33,9 @@ export default function (): ICommand {
         await AudioCommandWrapperText(message, async () => {
           const song = await message.client.audioPlayer.jump(message.guild!, pos!);
           if (song) {
-            await message.reply(generateMessageAudioPlayerJump(message.member!, song));
+            await message.reply({ embeds: [generateEmbedAudioPlayerJump(message.member!, song)] });
           } else {
-            await message.reply(generateMessageAudioPlayerJumpFailure());
+            await message.reply({ embeds: [generateEmbedAudioPlayerJumpFailure()] });
           }
         });
       }
@@ -59,11 +60,11 @@ export default function (): ICommand {
         await AudioCommandWrapperInteraction(interaction, async () => {
           const song = await interaction.client.audioPlayer.jump(interaction.guild!, pos!);
           if (song) {
-            await interaction.reply(
-              generateMessageAudioPlayerJump(interaction.member as GuildMember, song)
-            );
+            await interaction.reply({
+              embeds: [generateEmbedAudioPlayerJump(interaction.member as GuildMember, song)]
+            });
           } else {
-            await interaction.reply(generateMessageAudioPlayerJumpFailure());
+            await interaction.reply({ embeds: [generateEmbedAudioPlayerJumpFailure()] });
           }
         });
       }
@@ -78,10 +79,12 @@ export default function (): ICommand {
   };
 }
 
-function generateMessageAudioPlayerJump(member: GuildMember, song: Song) {
-  return `:fast_forward: ${member} ${i18next.t('commands:jump_success')} ${song.name} :fast_forward:`;
+function generateEmbedAudioPlayerJump(member: GuildMember, song: Song): EmbedBuilder {
+  return generateSimpleEmbed(
+    `:fast_forward: ${member} ${i18next.t('commands:jump_success')} ${song.name} :fast_forward:`
+  );
 }
 
-function generateMessageAudioPlayerJumpFailure() {
-  return i18next.t('commands:jump_failure');
+function generateEmbedAudioPlayerJumpFailure(): EmbedBuilder {
+  return generateSimpleEmbed(i18next.t('commands:jump_failure'));
 }

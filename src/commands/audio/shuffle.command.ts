@@ -1,11 +1,18 @@
 import { ICommand } from '../../CommandTypes.js';
-import { GuildMember, Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
+import {
+  EmbedBuilder,
+  GuildMember,
+  Message,
+  PermissionsBitField,
+  SlashCommandBuilder
+} from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
 import {
   AudioCommandWrapperInteraction,
   AudioCommandWrapperText
 } from '../../audioplayer/util/AudioCommandWrappers.js';
 import i18next from 'i18next';
+import { generateSimpleEmbed } from '../../utilities/generateSimpleEmbed.js';
 export default function (): ICommand {
   return {
     text_data: {
@@ -14,9 +21,9 @@ export default function (): ICommand {
       execute: async (message: Message): Promise<void> => {
         await AudioCommandWrapperText(message, async (): Promise<void> => {
           if (await message.client.audioPlayer.shuffle(message.guild!)) {
-            await message.reply({ content: generateMessageAudioPlayerShuffle(message.member!) });
+            await message.reply({ embeds: [generateEmbedAudioPlayerShuffle(message.member!)] });
           } else {
-            await message.reply(generateMessageAudioPlayerShuffleFailure());
+            await message.reply({ embeds: [generateEmbedAudioPlayerShuffleFailure()] });
           }
         });
       }
@@ -29,10 +36,10 @@ export default function (): ICommand {
         await AudioCommandWrapperInteraction(interaction, async (): Promise<void> => {
           if (await interaction.client.audioPlayer.shuffle(interaction.guild!)) {
             await interaction.reply({
-              content: generateMessageAudioPlayerShuffle(interaction.member as GuildMember)
+              embeds: [generateEmbedAudioPlayerShuffle(interaction.member as GuildMember)]
             });
           } else {
-            await interaction.reply(generateMessageAudioPlayerShuffleFailure());
+            await interaction.reply({ embeds: [generateEmbedAudioPlayerShuffleFailure()] });
           }
         });
       }
@@ -47,10 +54,10 @@ export default function (): ICommand {
   };
 }
 
-export function generateMessageAudioPlayerShuffle(member: GuildMember): string {
-  return `${member} ${i18next.t('commands:shuffle_success')}`;
+export function generateEmbedAudioPlayerShuffle(member: GuildMember): EmbedBuilder {
+  return generateSimpleEmbed(`${member} ${i18next.t('commands:shuffle_success')}`);
 }
 
-export function generateMessageAudioPlayerShuffleFailure(): string {
-  return i18next.t('commands:shuffle_failure');
+export function generateEmbedAudioPlayerShuffleFailure(): EmbedBuilder {
+  return generateSimpleEmbed(i18next.t('commands:shuffle_failure'));
 }

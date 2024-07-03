@@ -1,5 +1,11 @@
 import { ICommand } from '../../CommandTypes.js';
-import { GuildMember, Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
+import {
+  EmbedBuilder,
+  GuildMember,
+  Message,
+  PermissionsBitField,
+  SlashCommandBuilder
+} from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
 import {
   AudioCommandWrapperInteraction,
@@ -7,6 +13,7 @@ import {
 } from '../../audioplayer/util/AudioCommandWrappers.js';
 import { Song } from 'distube';
 import i18next from 'i18next';
+import { generateSimpleEmbed } from '../../utilities/generateSimpleEmbed.js';
 
 export default function (): ICommand {
   return {
@@ -17,9 +24,9 @@ export default function (): ICommand {
         await AudioCommandWrapperText(message, async () => {
           const song = await message.client.audioPlayer.skip(message.guild!);
           if (song) {
-            await message.reply({ content: generateSkipMessage(song, message.member!) });
+            await message.reply({ embeds: [generateSkipEmbed(song, message.member!)] });
           } else {
-            await message.reply({ content: generateSkipMessageFailure() });
+            await message.reply({ embeds: [generateSkipEmbedFailure()] });
           }
         });
       }
@@ -33,10 +40,10 @@ export default function (): ICommand {
           const song = await interaction.client.audioPlayer.skip(interaction.guild!);
           if (song) {
             await interaction.reply({
-              content: generateSkipMessage(song, interaction.member as GuildMember)
+              embeds: [generateSkipEmbed(song, interaction.member as GuildMember)]
             });
           } else {
-            await interaction.reply({ content: generateSkipMessageFailure(), ephemeral: true });
+            await interaction.reply({ embeds: [generateSkipEmbedFailure()], ephemeral: true });
           }
         });
       }
@@ -51,10 +58,12 @@ export default function (): ICommand {
   };
 }
 
-export function generateSkipMessage(song: Song, member: GuildMember): string {
-  return `:fast_forward: ${member} ${i18next.t('commands:skip_success')} ${song.name} - ${song.uploader.name} :fast_forward:`;
+export function generateSkipEmbed(song: Song, member: GuildMember): EmbedBuilder {
+  return generateSimpleEmbed(
+    `:fast_forward: ${member} ${i18next.t('commands:skip_success')} ${song.name} - ${song.uploader.name} :fast_forward:`
+  );
 }
 
-export function generateSkipMessageFailure(): string {
-  return i18next.t('commands:skip_failure');
+export function generateSkipEmbedFailure(): EmbedBuilder {
+  return generateSimpleEmbed(i18next.t('commands:skip_failure'));
 }

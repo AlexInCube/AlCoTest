@@ -1,5 +1,5 @@
 import { ICommand } from '../../CommandTypes.js';
-import { GuildMember, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, GuildMember, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
 import {
   AudioCommandWrapperInteraction,
@@ -7,6 +7,7 @@ import {
 } from '../../audioplayer/util/AudioCommandWrappers.js';
 import { Song } from 'distube';
 import i18next from 'i18next';
+import { generateSimpleEmbed } from '../../utilities/generateSimpleEmbed.js';
 
 export default function (): ICommand {
   return {
@@ -18,10 +19,10 @@ export default function (): ICommand {
           const song = await message.client.audioPlayer.previous(message.guild!);
           if (song) {
             await message.reply({
-              content: generateMessageAudioPlayerPrevious(message.member as GuildMember, song)
+              embeds: [generateEmbedAudioPlayerPrevious(message.member as GuildMember, song)]
             });
           } else {
-            await message.reply({ content: generateMessageAudioPlayerPreviousFailure() });
+            await message.reply({ embeds: [generateEmbedAudioPlayerPreviousFailure()] });
           }
         });
       }
@@ -35,11 +36,11 @@ export default function (): ICommand {
           const song = await interaction.client.audioPlayer.previous(interaction.guild!);
           if (song) {
             await interaction.reply({
-              content: generateMessageAudioPlayerPrevious(interaction.member as GuildMember, song)
+              embeds: [generateEmbedAudioPlayerPrevious(interaction.member as GuildMember, song)]
             });
           } else {
             await interaction.reply({
-              content: generateMessageAudioPlayerPreviousFailure(),
+              embeds: [generateEmbedAudioPlayerPreviousFailure()],
               ephemeral: true
             });
           }
@@ -56,10 +57,12 @@ export default function (): ICommand {
   };
 }
 
-export function generateMessageAudioPlayerPrevious(member: GuildMember, song: Song) {
-  return `:rewind: ${member} ${i18next.t('audioplayer:previous_success')} ${song.name} :rewind:`;
+export function generateEmbedAudioPlayerPrevious(member: GuildMember, song: Song): EmbedBuilder {
+  return generateSimpleEmbed(
+    `:rewind: ${member} ${i18next.t('commands:previous_success')} ${song.name} - ${song.uploader.name} :rewind:`
+  );
 }
 
-export function generateMessageAudioPlayerPreviousFailure() {
-  return i18next.t('audioplayer:previous_error_song_not_exists');
+export function generateEmbedAudioPlayerPreviousFailure() {
+  return generateSimpleEmbed(i18next.t('commands:previous_error_song_not_exists'));
 }

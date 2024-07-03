@@ -21,6 +21,7 @@ import {
   VoiceBasedChannel
 } from 'discord.js';
 import { joinVoiceChannel } from '@discordjs/voice';
+import { generateWarningEmbed } from '../utilities/generateWarningEmbed.js';
 
 export const queueSongsLimit = 500;
 
@@ -64,7 +65,9 @@ export class AudioPlayerCore {
       await this.distube.play(voiceChannel, song, options);
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
-      await textChannel.send({ embeds: [generateErrorEmbed(i18next.t('audioplayer:play_error'))] });
+      await textChannel.send({
+        embeds: [generateErrorEmbed(e.message, i18next.t('audioplayer:play_error') as string)]
+      });
     }
   }
 
@@ -336,9 +339,13 @@ export class AudioPlayerCore {
         await queue.textChannel.send({ embeds: [generateAddedPlaylistMessage(playlist)] });
         if (queue.songs.length >= queueSongsLimit) {
           await queue.textChannel.send({
-            content: i18next.t('audioplayer:event_add_list_limit', {
-              queueLimit: queueSongsLimit
-            }) as string
+            embeds: [
+              generateWarningEmbed(
+                i18next.t('audioplayer:event_add_list_limit', {
+                  queueLimit: queueSongsLimit
+                }) as string
+              )
+            ]
           });
           queue.songs.length = queueSongsLimit;
         }
