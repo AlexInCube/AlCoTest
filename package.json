@@ -17,7 +17,7 @@
     "@discordjs/voice": "^0.16.1",
     "@distube/direct-link": "^1.0.1",
     "@distube/file": "^1.0.1",
-    "@distube/soundcloud": "^2.0.2",
+    "@distube/soundcloud": "2.0.1",
     "@distube/spotify": "^2.0.2",
     "@distube/youtube": "^1.0.2",
     "@distube/yt-dlp": "^2.0.1",
