@@ -9,7 +9,7 @@ export default function (): ICommand {
     text_data: {
       name: 'setprefix',
       description: i18next.t('commands:set_prefix_desc'),
-      arguments: [new CommandArgument('символ', true)],
+      arguments: [new CommandArgument('newprefix', true)],
       execute: async (message: Message, args: string[]): Promise<void> => {
         const prefix: string = args[0];
         if (!prefix) return;
@@ -50,7 +50,7 @@ export default function (): ICommand {
 async function changePrefixTo(guild: Guild, prefix: string): Promise<string> {
   if (prefix === '/' || prefix === '@' || prefix === '#')
     return i18next.t('commands:set_prefix_restrict_prefixes', { prefixes: '/ @ #' }) as string;
-  if (prefix.length > 1) return i18next.t('commands:set_prefix_length_error') as string;
+  if (prefix.length > 2) return i18next.t('commands:set_prefix_length_error') as string;
   await setGuildOption(guild, 'prefix', prefix);
   return i18next.t('commands:set_prefix_success_change', { prefix: prefix }) as string;
 }
