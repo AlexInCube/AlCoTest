@@ -19,7 +19,7 @@ const handler = async (client: Client) => {
   const commandsDir = path.join(getDirName(import.meta.url), '../commands');
 
   const scanResult: string[] = getAllCommandFilesInDir(commandsDir); // Recursion for scan "commands" folder for files end with ".command.js"
-  const buildersArray: SlashBuilder[] = []; // Prepare builders array for send into Discord REST API
+  const buildersArray: SlashBuilder[] = []; // Prepare a builder array for sending into Discord REST API
 
   for (const filePath of scanResult) {
     const importPath = `file:///${filePath}`;

@@ -1,7 +1,7 @@
 import { BotEvent } from '../Types.js';
 import { Client, Events, Message, TextChannel } from 'discord.js';
 import { textCommandsHandler } from './messageHandlers/textCommandsHandler.js';
-import { playerMessageHandler } from './messageHandlers/playerMessageHandler.js';
+import { AudioPlayerEventMessageCreate } from '../audioplayer/eventsHandlers/AudioPlayerEventMessageCreate.js';
 
 const event: BotEvent = {
   name: Events.MessageCreate,
@@ -9,7 +9,7 @@ const event: BotEvent = {
     await textCommandsHandler(client, message);
 
     if (!message.guild) return;
-    await playerMessageHandler(message.channel as TextChannel);
+    await AudioPlayerEventMessageCreate(message.channel as TextChannel);
   }
 };
 

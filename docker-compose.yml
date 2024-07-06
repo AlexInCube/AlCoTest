@@ -11,7 +11,7 @@ services:
     volumes:
       - ./data:/data/db
     ports:
-      - '27018:27017'
+      - '27017:27017'
   aicbot:
     container_name: aicbot
     image: alexincube/aicotest:latest

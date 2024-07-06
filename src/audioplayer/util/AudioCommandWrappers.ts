@@ -1,4 +1,4 @@
-import { generateErrorEmbed } from '../../../utilities/generateErrorEmbed.js';
+import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
 import { ChatInputCommandInteraction, Message } from 'discord.js';
 import i18next from 'i18next';
 

@@ -4,11 +4,13 @@ import fs, { createReadStream, ReadStream } from 'fs';
 import { pipeline } from 'stream/promises';
 import { v4 as uuidv4 } from 'uuid';
 import { unlink } from 'fs/promises';
-import { isURL } from 'distube';
+import { isURL, Playlist, Song } from 'distube';
 import i18next from 'i18next';
 
-fs.rmSync('./downloads', { recursive: true, force: true });
-fs.mkdirSync('./downloads');
+const downloadFolderPath = process.cwd() + '/downloads';
+
+fs.rmSync(downloadFolderPath, { recursive: true, force: true });
+fs.mkdirSync(downloadFolderPath);
 
 class DownloadSongError extends Error {
   constructor(message: DownloadSongMessage) {
@@ -17,34 +19,37 @@ class DownloadSongError extends Error {
   }
 }
 
-type DownloadSongMessage = 'is_not_url' | 'not_found' | 'song_is_too_large' | 'failed_loading';
-const maxDownloadSize = 10000000; //bytes
+type DownloadSongMessage =
+  | 'is_not_url'
+  | 'not_found'
+  | 'song_is_too_large'
+  | 'failed_loading'
+  | 'this_is_playlist';
+
+const maxDownloadSize = 2.5e7; //bytes
+const maxDownloadSizeMB = maxDownloadSize / 1000000;
 
 export async function downloadSong(
   client: Client,
   request: string
 ): Promise<ReadStream | undefined> {
-  let streamUrl = '';
+  let streamUrl: string | undefined = '';
 
   if (!isURL(request)) {
     throw new DownloadSongError('is_not_url');
   }
 
-  for (const plugin of client.audioPlayer.distube.customPlugins) {
-    if (await plugin.validate(request)) {
-      streamUrl = await plugin.getStreamURL(request);
-      break;
-    }
+  const song: Song | Playlist = await client.audioPlayer.distube.handler.resolve(request);
+  if (song instanceof Playlist) {
+    throw new DownloadSongError('this_is_playlist');
   }
 
-  for (const plugin of client.audioPlayer.distube.extractorPlugins) {
-    if (await plugin.validate(request)) {
-      streamUrl = await plugin.getStreamURL(request);
-      break;
-    }
-  }
+  await client.audioPlayer.distube.handler.attachStreamInfo(song);
 
-  if (streamUrl === '') {
+  // @ts-expect-error Url property exists, I know it
+  streamUrl = song.stream.playFromSource ? song.stream.url : song.stream.song?.stream.url;
+
+  if (streamUrl === '' || streamUrl === undefined) {
     throw new DownloadSongError('not_found');
   }
 
@@ -68,6 +73,7 @@ async function convertWebmToMp3(webmStream: ReadableStream<Uint8Array>) {
   const file = fs.createWriteStream(file_name);
   const duplex = prism.FFmpeg.from(webmStream);
 
+  // @ts-expect-error Duplex can be provided to pipeline function
   await pipeline(duplex, file);
   return createReadStream(file_name);
 }
@@ -88,7 +94,7 @@ export async function deleteMP3file(fileName: string) {
 export function DownloadSongErrorGetLocale(errorMessage: DownloadSongMessage) {
   if (errorMessage === 'song_is_too_large') {
     return i18next.t(`commands:download_song_error_${errorMessage}`, {
-      maxDownloadSize: maxDownloadSize / 1000000
+      maxDownloadSize: maxDownloadSizeMB
     });
   }
   return i18next.t(`commands:download_song_error_${errorMessage}`);

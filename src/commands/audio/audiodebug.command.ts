@@ -1,6 +1,7 @@
 import { ICommand } from '../../CommandTypes.js';
 import { PermissionsBitField } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
+import { isOverpoweredUser } from '../../utilities/isOverpoweredUser.js';
 
 export default function (): ICommand {
   return {
@@ -8,6 +9,8 @@ export default function (): ICommand {
       name: 'audiodebug',
       description: 'Debug info about audioplayers',
       execute: async (message) => {
+        if (!isOverpoweredUser(message.author.id)) return;
+
         await message.reply({
           content: message.client.audioPlayer.playersManager.debug(),
           allowedMentions: { users: [] }

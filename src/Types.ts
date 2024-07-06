@@ -1,11 +1,9 @@
-import { Client, Collection } from 'discord.js';
+import { Client, ClientEvents, Collection } from 'discord.js';
 import { ICommand, ICommandGroup } from './CommandTypes.js';
-import { AudioPlayerCore } from './commands/audio/audioPlayer/AudioPlayerCore.js';
-import { DisTube } from 'distube';
+import { AudioPlayerCore } from './audioplayer/AudioPlayerCore.js';
 
 declare module 'discord.js' {
   export interface Client {
-    distube: DisTube;
     commands: Collection<string, ICommand>;
     commandsGroups: Collection<string, ICommandGroup>;
     audioPlayer: AudioPlayerCore;
@@ -13,7 +11,7 @@ declare module 'discord.js' {
 }
 
 export interface BotEvent {
-  name: string;
+  name: keyof ClientEvents;
   once?: boolean | false;
   execute: (client: Client, ...args: any) => void;
 }

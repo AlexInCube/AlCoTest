@@ -8,7 +8,7 @@ import {
   VoiceChannel
 } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
-import { isAudioFile } from './util/isAudioFile.js';
+import { isAudioFile } from '../../audioplayer/util/isAudioFile.js';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
 import i18next from 'i18next';
 

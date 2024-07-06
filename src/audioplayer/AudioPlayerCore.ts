@@ -1,3 +1,15 @@
+import { DisTube, PlayOptions, Queue, RepeatMode, Song, Events as DistubeEvents } from 'distube';
+import { AudioPlayersManager } from './AudioPlayersManager.js';
+import { pagination } from '../utilities/pagination/pagination.js';
+import { ButtonStyles, ButtonTypes } from '../utilities/pagination/paginationTypes.js';
+import { clamp } from '../utilities/clamp.js';
+import { generateErrorEmbed } from '../utilities/generateErrorEmbed.js';
+import i18next from 'i18next';
+import { loggerError, loggerSend } from '../utilities/logger.js';
+import { ENV } from '../EnvironmentVariables.js';
+import { LoadPlugins } from './LoadPlugins.js';
+import { generateAddedPlaylistMessage } from './util/generateAddedPlaylistMessage.js';
+import { generateAddedSongMessage } from './util/generateAddedSongMessage.js';
 import {
   Client,
   CommandInteraction,
@@ -8,91 +20,12 @@ import {
   TextChannel,
   VoiceBasedChannel
 } from 'discord.js';
-import {
-  CustomPlugin,
-  DisTube,
-  ExtractorPlugin,
-  Playlist,
-  PlayOptions,
-  Queue,
-  RepeatMode,
-  SearchResult,
-  Song
-} from 'distube';
-import { AudioPlayersManager } from './AudioPlayersManager.js';
-import { SpotifyPlugin } from '@distube/spotify';
-import { YtDlpPlugin } from '@distube/yt-dlp';
-import { SoundCloudPlugin } from '@distube/soundcloud';
-import { pagination } from '../../../utilities/pagination/pagination.js';
-import { ButtonStyles, ButtonTypes } from '../../../utilities/pagination/paginationTypes.js';
-import { clamp } from '../../../utilities/clamp.js';
-import { generateErrorEmbed } from '../../../utilities/generateErrorEmbed.js';
 import { joinVoiceChannel } from '@discordjs/voice';
-import i18next from 'i18next';
+import { generateWarningEmbed } from '../utilities/generateWarningEmbed.js';
 
-import { YandexMusicPlugin } from 'distube-yandex-music-plugin';
-import { loggerError, loggerWarn } from '../../../utilities/logger.js';
-import { BOT_YOUTUBE_COOKIE, ENV } from '../../../EnvironmentVariables.js';
+export const queueSongsLimit = 500;
 
-const loggerPrefixAudioplayer = `Audioplayer`;
-
-function LoadPlugins(): Array<CustomPlugin | ExtractorPlugin> {
-  const plugins: Array<CustomPlugin | ExtractorPlugin> = [];
-
-  if (!BOT_YOUTUBE_COOKIE) {
-    loggerWarn(
-      'BOT_YOUTUBE_COOKIE is not provided, 18+ videos from Youtube is not available',
-      loggerPrefixAudioplayer
-    );
-  }
-
-  if (ENV.BOT_SPOTIFY_CLIENT_ID && ENV.BOT_SPOTIFY_CLIENT_SECRET) {
-    plugins.push(
-      new SpotifyPlugin({
-        parallel: true,
-        emitEventsAfterFetching: true,
-        api: {
-          clientId: ENV.BOT_SPOTIFY_CLIENT_ID,
-          clientSecret: ENV.BOT_SPOTIFY_CLIENT_SECRET
-        }
-      })
-    );
-  } else {
-    loggerWarn(
-      'Spotify plugin is disabled, because BOT_SPOTIFY_CLIENT_ID and BOT_SPOTIFY_CLIENT_SECRET are wrong or not provided',
-      loggerPrefixAudioplayer
-    );
-  }
-
-  if (ENV.BOT_YANDEXMUSIC_TOKEN) {
-    plugins.push(
-      new YandexMusicPlugin({
-        oauthToken: ENV.BOT_YANDEXMUSIC_TOKEN
-      })
-    );
-  } else {
-    loggerWarn(
-      'Yandex Music plugin is disabled, because BOT_YANDEXMUSIC_TOKEN are wrong or not provided',
-      loggerPrefixAudioplayer
-    );
-  }
-
-  plugins.push(new SoundCloudPlugin());
-  if (!ENV.BOT_SOUNDCLOUD_CLIENT_ID || !ENV.BOT_SOUNDCLOUD_TOKEN) {
-    loggerWarn(
-      'Some Soundcloud features is disabled, because BOT_SOUNDCLOUD_CLIENT_ID or BOT_SOUNDCLOUD_TOKEN are wrong or not provided',
-      loggerPrefixAudioplayer
-    );
-  }
-
-  plugins.push(
-    new YtDlpPlugin({
-      update: true
-    })
-  );
-
-  return plugins;
-}
+export const loggerPrefixAudioplayer = `Audioplayer`;
 
 export class AudioPlayerCore {
   client: Client;
@@ -103,19 +36,13 @@ export class AudioPlayerCore {
     this.client.audioPlayer = this;
     this.playersManager = new AudioPlayersManager(this.client);
     this.distube = new DisTube(this.client, {
-      leaveOnEmpty: true,
-      emptyCooldown: ENV.NODE_ENV === 'production' ? 120 : 5,
-      leaveOnFinish: false,
-      leaveOnStop: true,
-      youtubeCookie: BOT_YOUTUBE_COOKIE ?? undefined,
       nsfw: true,
       emitAddListWhenCreatingQueue: true,
       emitAddSongWhenCreatingQueue: true,
       savePreviousSongs: true,
+      joinNewVoiceChannel: true,
       plugins: LoadPlugins()
     });
-
-    this.client.distube = this.distube;
 
     this.setupEvents();
   }
@@ -123,31 +50,37 @@ export class AudioPlayerCore {
   async play(
     voiceChannel: VoiceBasedChannel,
     textChannel: TextChannel,
-    song: string | Song | SearchResult,
+    song: string | Song,
     options?: PlayOptions
   ) {
-    await this.distube.voices.join(voiceChannel);
-
-    joinVoiceChannel({
-      channelId: voiceChannel.id,
-      guildId: voiceChannel.guildId,
-      adapterCreator: voiceChannel.guild.voiceAdapterCreator
-    });
-
     try {
+      // I am need manual connect user to a voice channel, because when I am using only Distube "play"
+      // method, getVoiceConnection in @discordjs/voice is not working
+      joinVoiceChannel({
+        channelId: voiceChannel.id,
+        guildId: voiceChannel.guildId,
+        adapterCreator: voiceChannel.guild.voiceAdapterCreator
+      });
+
       await this.distube.play(voiceChannel, song, options);
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
-      await textChannel.send({ embeds: [generateErrorEmbed(i18next.t('audioplayer:play_error'))] });
+      await textChannel.send({
+        embeds: [generateErrorEmbed(e.message, i18next.t('audioplayer:play_error') as string)]
+      });
     }
   }
 
   async stop(guild: Guild) {
-    if (this.distube.getQueue(guild)) {
-      await this.distube.stop(guild);
+    const queue = this.distube.getQueue(guild);
+
+    if (queue) {
+      await queue.stop();
+      queue.voice.leave();
     } else {
-      await this.distube.voices.leave(guild);
+      this.distube.voices.leave(guild);
     }
+
     await this.playersManager.remove(guild.id);
   }
 
@@ -156,11 +89,37 @@ export class AudioPlayerCore {
     if (!queue) return;
     const player = this.playersManager.get(queue.id);
     if (!player) return;
+    if (!queue.paused) {
+      this.distube.pause(guild);
+      await player.setState('pause');
+    }
+
+    await player.update();
+  }
+
+  async resume(guild: Guild) {
+    const queue = this.distube.getQueue(guild);
+    if (!queue) return;
+    const player = this.playersManager.get(queue.id);
+    if (!player) return;
     if (queue.paused) {
-      await this.distube.resume(guild);
+      this.distube.resume(guild);
+      await player.setState('playing');
+    }
+
+    await player.update();
+  }
+
+  async pauseResume(guild: Guild) {
+    const queue = this.distube.getQueue(guild);
+    if (!queue) return;
+    const player = this.playersManager.get(queue.id);
+    if (!player) return;
+    if (queue.paused) {
+      this.distube.resume(guild);
       await player.setState('playing');
     } else {
-      await this.distube.pause(guild);
+      this.distube.pause(guild);
       await player.setState('pause');
     }
 
@@ -175,15 +134,15 @@ export class AudioPlayerCore {
 
     switch (queue.repeatMode) {
       case RepeatMode.DISABLED:
-        await queue.setRepeatMode(RepeatMode.SONG);
+        queue.setRepeatMode(RepeatMode.SONG);
         player.embedBuilder.setLoopMode('song');
         break;
       case RepeatMode.SONG:
-        await queue.setRepeatMode(RepeatMode.QUEUE);
+        queue.setRepeatMode(RepeatMode.QUEUE);
         player.embedBuilder.setLoopMode('queue');
         break;
       case RepeatMode.QUEUE:
-        await queue.setRepeatMode(RepeatMode.DISABLED);
+        queue.setRepeatMode(RepeatMode.DISABLED);
         player.embedBuilder.setLoopMode('disabled');
         break;
     }
@@ -195,7 +154,7 @@ export class AudioPlayerCore {
     try {
       const queue = this.distube.getQueue(guild);
       if (queue) {
-        await this.distube.skip(guild);
+        await this.distube.skip(guild.id);
         return queue.songs[0];
       }
     } catch (e) {
@@ -251,13 +210,14 @@ export class AudioPlayerCore {
       const player = this.playersManager.get(queue.id);
       if (!player) return false;
       if (time < 0) time = 0;
-      await this.distube.seek(guild, time);
+      this.distube.seek(guild, time);
       await player.setState('playing');
       return true;
     } catch (e) {
       return false;
     }
   }
+
   async showQueue(interaction: Interaction) {
     if (!interaction.guild) return;
     const queue = this.distube.getQueue(interaction.guild);
@@ -280,13 +240,18 @@ export class AudioPlayerCore {
           `${i + 1}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`;
       }
 
-      return new EmbedBuilder()
+      const page = new EmbedBuilder()
         .setAuthor({ name: `${i18next.t('audioplayer:show_queue_songs_in_queue')}: ` })
         .setTitle(queue.songs[0].name!)
-        .setURL(queue.songs[0].url)
         .setDescription(
           `**${i18next.t('audioplayer:show_queue_title')}: **\n${queueList}`.slice(0, 4096)
         );
+
+      if (queue.songs[0].url) {
+        page.setURL(queue.songs[0].url);
+      }
+
+      return page;
     }
 
     const arrayEmbeds: Array<EmbedBuilder> = [];
@@ -330,12 +295,18 @@ export class AudioPlayerCore {
   }
 
   private setupEvents() {
+    if (ENV.BOT_VERBOSE_LOGGING) {
+      this.distube
+        .on(DistubeEvents.DEBUG, (message) => {
+          loggerSend(message, loggerPrefixAudioplayer);
+        })
+        .on(DistubeEvents.FFMPEG_DEBUG, (message) => {
+          loggerSend(message, loggerPrefixAudioplayer);
+        });
+    }
+
     this.distube
-      .on('empty', async (queue) => {
-        await queue.textChannel?.send(i18next.t('audioplayer:event_empty') as string);
-        await this.playersManager.remove(queue.id);
-      })
-      .on('initQueue', async (queue) => {
+      .on(DistubeEvents.INIT_QUEUE, async (queue) => {
         await this.playersManager.add(queue.id, queue.textChannel as TextChannel, queue);
 
         const player = this.playersManager.get(queue.id);
@@ -343,16 +314,16 @@ export class AudioPlayerCore {
           await player.init();
         }
       })
-      .on('playSong', async (queue) => {
+      .on(DistubeEvents.PLAY_SONG, async (queue) => {
         const player = this.playersManager.get(queue.id);
         if (player) {
           await player.setState('playing');
         }
       })
-      .on('disconnect', async (queue) => {
+      .on(DistubeEvents.DISCONNECT, async (queue) => {
         await this.playersManager.remove(queue.id);
       })
-      .on('addSong', async (queue, song) => {
+      .on(DistubeEvents.ADD_SONG, async (queue, song) => {
         if (queue.textChannel) {
           await queue.textChannel.send({ embeds: [generateAddedSongMessage(song)] });
         }
@@ -362,9 +333,21 @@ export class AudioPlayerCore {
           await player.update();
         }
       })
-      .on('addList', async (queue, playlist) => {
-        if (queue.textChannel) {
-          await queue.textChannel.send({ embeds: [generateAddedPlaylistMessage(playlist)] });
+      .on(DistubeEvents.ADD_LIST, async (queue, playlist) => {
+        if (!queue.textChannel) return;
+
+        await queue.textChannel.send({ embeds: [generateAddedPlaylistMessage(playlist)] });
+        if (queue.songs.length >= queueSongsLimit) {
+          await queue.textChannel.send({
+            embeds: [
+              generateWarningEmbed(
+                i18next.t('audioplayer:event_add_list_limit', {
+                  queueLimit: queueSongsLimit
+                }) as string
+              )
+            ]
+          });
+          queue.songs.length = queueSongsLimit;
         }
 
         const player = this.playersManager.get(queue.id);
@@ -372,67 +355,17 @@ export class AudioPlayerCore {
           await player.update();
         }
       })
-      .on('finishSong', async (queue) => {
+      .on(DistubeEvents.FINISH_SONG, async (queue) => {
         if (!this.playersManager.has(queue.id)) return;
         if (queue._next || queue._prev || queue.stopped || queue.songs.length > 1) return;
-        this.playersManager.get(queue.id)?.setState('waiting');
+        await this.playersManager.get(queue.id)?.setState('waiting');
       })
-      .on('error', async (channel, error) => {
-        channel?.send({
+      .on(DistubeEvents.ERROR, async (error, queue) => {
+        queue.textChannel?.send({
           embeds: [
             generateErrorEmbed(`${error.name} + \n\n + ${error.message} \n\n + ${error.stack}`)
           ]
         });
       });
   }
-}
-
-function generateAddedSongMessage(song: Song) {
-  return new EmbedBuilder()
-    .setTitle(song.name ?? i18next.t('audioplayer:player_embed_unknown'))
-    .setURL(song.url ?? null)
-    .setAuthor({ name: `🎵${i18next.t('audioplayer:event_add_song')}🎵` })
-    .setThumbnail(song.thumbnail ?? null)
-    .addFields(
-      {
-        name: `${i18next.t('audioplayer:player_embed_requester')}`,
-        value: `${song.member!.user.toString()}`,
-        inline: true
-      },
-      {
-        name: `${i18next.t('audioplayer:event_add_song_length')}`,
-        value: `\`${song.formattedDuration}\``,
-        inline: true
-      },
-      {
-        name: `${i18next.t('audioplayer:event_add_song_author')}`,
-        value: `\`${song.uploader.name ?? i18next.t('audioplayer:player_embed_unknown')}\``,
-        inline: true
-      }
-    );
-}
-
-function generateAddedPlaylistMessage(playlist: Playlist) {
-  return new EmbedBuilder()
-    .setTitle(playlist.name ?? i18next.t('audioplayer:player_embed_unknown'))
-    .setURL(playlist.url ?? null)
-    .setAuthor({ name: `🎵${i18next.t('audioplayer:event_add_list')}🎵` })
-    .setThumbnail(playlist.thumbnail ?? null)
-    .addFields(
-      {
-        name: `${i18next.t('audioplayer:player_embed_requester')}`,
-        value: `${playlist.member!.user.toString()}`,
-        inline: true
-      },
-      {
-        name: `${i18next.t('audioplayer:event_add_list_songs_count')}`,
-        value: `\`${playlist.songs.length}\``,
-        inline: true
-      },
-      {
-        name: `${i18next.t('audioplayer:event_add_song_length')}`,
-        value: `\`${playlist.formattedDuration}\``,
-        inline: true
-      }
-    );
 }

@@ -1,7 +1,7 @@
 {
   "audio_commands_wrapper_song_processing": "Song is processing, please wait",
   "audio_commands_wrapper_player_not_exist": "Player is not exists",
-  "play_error": "With this link is something wrong",
+  "play_error": "With this song is something wrong",
   "download_song_error": "Something went wrong, when retrieving link to audio",
   "show_queue_title": "Now playing",
   "show_queue_songs_in_queue": "Songs in queue",
@@ -12,6 +12,7 @@
   "event_add_song_author": "Author",
   "event_add_list": "Playlist added",
   "event_add_list_songs_count": "Songs count",
+  "event_add_list_limit": "Some songs are added, but its trimmed to {{queueLimit}}",
   "player_embed_unknown": "Unknown",
   "player_embed_requester": "Requester",
   "player_embed_author": "Author",

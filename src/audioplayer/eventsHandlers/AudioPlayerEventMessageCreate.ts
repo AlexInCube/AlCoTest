@@ -2,7 +2,7 @@ import { TextChannel } from 'discord.js';
 import { ENV } from '../../EnvironmentVariables.js';
 import { loggerError } from '../../utilities/logger.js';
 
-export async function playerMessageHandler(textChannel: TextChannel) {
+export async function AudioPlayerEventMessageCreate(textChannel: TextChannel) {
   try {
     const player = textChannel.client.audioPlayer.playersManager.get(textChannel.guild.id);
     if (player) {

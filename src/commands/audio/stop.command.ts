@@ -1,11 +1,18 @@
 import { ICommand } from '../../CommandTypes.js';
-import { GuildMember, Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
+import {
+  EmbedBuilder,
+  GuildMember,
+  Message,
+  PermissionsBitField,
+  SlashCommandBuilder
+} from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
 import {
   AudioCommandWrapperInteraction,
   AudioCommandWrapperText
-} from './util/AudioCommandWrappers.js';
+} from '../../audioplayer/util/AudioCommandWrappers.js';
 import i18next from 'i18next';
+import { generateSimpleEmbed } from '../../utilities/generateSimpleEmbed.js';
 
 export default function (): ICommand {
   return {
@@ -15,7 +22,7 @@ export default function (): ICommand {
       execute: async (message: Message) => {
         await AudioCommandWrapperText(message, async () => {
           await message.client.audioPlayer.stop(message.guild!);
-          await message.reply({ content: generateMessageAudioPlayerStop(message.member!) });
+          await message.reply({ embeds: [generateEmbedAudioPlayerStop(message.member!)] });
         });
       }
     },
@@ -27,7 +34,7 @@ export default function (): ICommand {
         await AudioCommandWrapperInteraction(interaction, async () => {
           await interaction.client.audioPlayer.stop(interaction.guild!);
           await interaction.reply({
-            content: generateMessageAudioPlayerStop(interaction.member as GuildMember)
+            embeds: [generateEmbedAudioPlayerStop(interaction.member as GuildMember)]
           });
         });
       }
@@ -42,6 +49,6 @@ export default function (): ICommand {
   };
 }
 
-export function generateMessageAudioPlayerStop(member: GuildMember): string {
-  return `${member} ${i18next.t('commands:stop_success')}`;
+export function generateEmbedAudioPlayerStop(member: GuildMember): EmbedBuilder {
+  return generateSimpleEmbed(`${member} ${i18next.t('commands:stop_success')}`);
 }

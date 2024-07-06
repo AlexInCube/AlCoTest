@@ -1,4 +1,4 @@
-import { Client, Collection, TextChannel } from 'discord.js';
+import { Client, Collection, GuildTextBasedChannel } from 'discord.js';
 import { Queue } from 'distube';
 import { MessagePlayer } from './MessagePlayer.js';
 
@@ -10,10 +10,10 @@ export class AudioPlayersManager {
   }
   async add(
     guildId: string,
-    textChannel: TextChannel,
+    textChannel: GuildTextBasedChannel,
     queue: Queue
   ): Promise<MessagePlayer | undefined> {
-    if (await this.client.guilds.cache.get(guildId)) {
+    if (this.client.guilds.cache.get(guildId)) {
       if (!this.collection.has(guildId)) {
         this.collection.set(guildId, new MessagePlayer(this.client, textChannel, queue));
       }

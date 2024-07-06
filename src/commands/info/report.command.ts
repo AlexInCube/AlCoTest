@@ -1,17 +1,13 @@
 import { ICommand } from '../../CommandTypes.js';
 import {
-  ActionRowBuilder,
   ChatInputCommandInteraction,
   Message,
-  ModalActionRowComponentBuilder,
-  ModalBuilder,
   PermissionsBitField,
-  SlashCommandBuilder,
-  TextInputBuilder,
-  TextInputStyle
+  SlashCommandBuilder
 } from 'discord.js';
 import { GroupInfo } from './InfoTypes.js';
 import i18next from 'i18next';
+import { generateSimpleEmbed } from '../../utilities/generateSimpleEmbed.js';
 
 export default function (): ICommand {
   return {
@@ -19,7 +15,7 @@ export default function (): ICommand {
       name: 'report',
       description: i18next.t('commands:report_desc'),
       execute: async (message: Message) => {
-        await message.reply(i18next.t('commands:report_text_error') as string);
+        await message.reply({ embeds: [generateReportEmbed()] });
       }
     },
     slash_data: {
@@ -27,7 +23,7 @@ export default function (): ICommand {
         .setName('report')
         .setDescription(i18next.t('commands:report_desc')),
       execute: async (interaction: ChatInputCommandInteraction) => {
-        await interaction.showModal(generateModalWindow());
+        await interaction.reply({ embeds: [generateReportEmbed()], ephemeral: true });
       }
     },
     group: GroupInfo,
@@ -35,24 +31,12 @@ export default function (): ICommand {
   };
 }
 
-function generateModalWindow() {
-  const modal = new ModalBuilder()
-    .setCustomId('reportModal')
-    .setTitle(i18next.t('commands:report_modal_title'));
-
-  const reportInput = new TextInputBuilder()
-    .setCustomId('reportInput')
-    .setLabel(i18next.t('commands:report_modal_text_label'))
-    .setStyle(TextInputStyle.Paragraph)
-    .setMinLength(20)
-    .setPlaceholder(i18next.t('commands:report_modal_text_placeholder'))
-    .setRequired(true);
-
-  const firstActionRow = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
-    reportInput
+function generateReportEmbed() {
+  return generateSimpleEmbed(
+    i18next.t('commands:report_message', {
+      issueLink: 'https://github.com/AlexInCube/AlCoTest/issues/new/choose',
+      discussionLink: 'https://github.com/AlexInCube/AlCoTest/discussions/new?category=q-a',
+      interpolation: { escapeValue: false }
+    })
   );
-
-  modal.addComponents(firstActionRow);
-
-  return modal;
 }

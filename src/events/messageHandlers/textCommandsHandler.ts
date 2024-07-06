@@ -123,9 +123,6 @@ export async function textCommandsHandler(client: Client, message: Message) {
     await command.text_data.execute(message, args);
   } catch (e) {
     if (ENV.BOT_VERBOSE_LOGGING)
-      loggerError(
-        `${i18next.t('commandshandlers:text_command_error')}: ${e}`,
-        loggerPrefixCommandHandler
-      );
+      loggerError(`commandshandlers:text_command_error: ${e}`, loggerPrefixCommandHandler);
   }
 }

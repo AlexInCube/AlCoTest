@@ -1,8 +1,10 @@
 import { EmbedBuilder, User } from 'discord.js';
-import { AudioPlayerLoopMode, AudioPlayerState } from './AudioPlayerTypes.js';
-import { getNoun } from '../../../utilities/getNoun.js';
-import { formatSecondsToTime } from '../../../utilities/formatSecondsToTime.js';
+import { AudioPlayerLoopMode, AudioPlayerState, AudioSourceIcons } from './AudioPlayerTypes.js';
+import { getNoun } from '../utilities/getNoun.js';
+import { formatSecondsToTime } from '../utilities/formatSecondsToTime.js';
 import i18next from 'i18next';
+import { Playlist, Song } from 'distube';
+import { getIconFromSource } from './util/getIconFromSource.js';
 
 export class MessagePlayerEmbedBuilder extends EmbedBuilder {
   private playerState: AudioPlayerState = 'loading';
@@ -16,11 +18,13 @@ export class MessagePlayerEmbedBuilder extends EmbedBuilder {
   private titleUrl: string | null = null;
   private thumbnailURL: string | null = null;
   private formattedDuration = '00:00';
+  private sourceIcon: AudioSourceIcons;
 
   constructor() {
     super();
     this.setPlayerState('loading');
     this.setNextSong(undefined);
+    this.sourceIcon = AudioSourceIcons.other;
   }
 
   update() {
@@ -35,7 +39,7 @@ export class MessagePlayerEmbedBuilder extends EmbedBuilder {
         });
       }
       this.setThumbnail(this.thumbnailURL);
-      this.setTitle(this.title);
+      this.setTitle(this.sourceIcon + " " + this.title);
       this.setURL(this.titleUrl);
       this.addFields({
         name: i18next.t('audioplayer:player_embed_author'),
@@ -73,6 +77,10 @@ export class MessagePlayerEmbedBuilder extends EmbedBuilder {
     }
 
     return this;
+  }
+
+  setSongSource(playable: Song | Playlist) {
+    this.sourceIcon = getIconFromSource(playable.source);
   }
 
   setSongTitle(name: string, url: string) {

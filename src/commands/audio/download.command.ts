@@ -6,7 +6,7 @@ import {
   deleteMP3file,
   DownloadSongErrorGetLocale,
   getSongFileAttachment
-} from './util/downloadSong.js';
+} from '../../audioplayer/util/downloadSong.js';
 import i18next from 'i18next';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
 import { ReadStream } from 'fs';
