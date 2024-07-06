@@ -1,7 +1,7 @@
 name: Wiki
 on:
   push:
-    branches: [main, 3.0-dev]
+    branches: ['master']
     paths:
       - wiki/**
       - .github/workflows/wiki.yml

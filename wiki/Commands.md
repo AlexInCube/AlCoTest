@@ -28,6 +28,7 @@ Prefix length cannot be longer than two symbols.
 The bot philosophy built around audioplayer to reduce commands using.
 
 Use [/play](#play) or [/playfile](#playfile) to spawn audioplayer
+
 ![play-audioplayer](images/commands/play-audioplayer.png)
 
 Most of the time of using bot, you need only add songs by [/play](#play) or [/playfile](#playfile)
@@ -60,6 +61,7 @@ Do the same things as play command, but accept MP3/WAV/OGG files instead of text
 ### playing
 
 Return the current playback time of the song
+
 ![playing](images/commands/playing.png)
 
 ### download
