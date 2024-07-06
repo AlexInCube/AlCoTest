@@ -1,4 +1,4 @@
-[!Caution]
+[!CAUTION]
 Don't share this API data with anyone because you can get compromised.
 If this happens, reset the tokens and get them again.
 
@@ -21,12 +21,12 @@ You can edit your application's name, description, and avatar here. Once you've 
 
 ![discord-dev-enable-intents](./images/discord-dev-enable-intents.png)
 
-## 🍪 YouTube Cookie (optional)
+## YouTube Cookie (optional)
 Preferable to provide cookies for YouTube.
 This will allow you to play 18+ videos and bypass YouTube rate limiting error (429 Error).
 I highly recommend that you create a new Google account from which you can get the cookie.
 
-[!Warning]
+[!WARNING]
 Time to time, cookies are resets by YouTube, so you need to retrieve it again.
 It's so annoying, but hasn't figured out a way to automate the cookie retrieval process.
 If you know workaround, please create the [issue](https://github.com/AlexInCube/AlCoTest/issues/new/choose)
@@ -40,7 +40,7 @@ If you know workaround, please create the [issue](https://github.com/AlexInCube/
 ## Yandex Music (optional)
 If you do not provide token and UID, Yandex Music will not work at all.
 
-[!Warning]
+[!WARNING]
 If your bot is outside Russia VDS, you must have a Yandex Plus subscription to play songs.
 
 ### Token
@@ -57,7 +57,7 @@ This must look like this ![yandex-extension](./images/yandex-music-extension.png
 ## Spotify (optional)
 Spotify Module can work without provided data, but for more stability better provide custom application data.
 
-[!Warning]
+[!WARNING]
 If you want to fetch playlist with more than 100 songs, this API data is required!
 
 1. Login in [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)

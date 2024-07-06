@@ -1,4 +1,3 @@
-# How to setup bot?
 ## ⚙️ Configure .env
 You can use Docker Compose or install all dependencies and source code locally.
 But in both cases, you need to configure .env file. 
@@ -7,10 +6,10 @@ Also you need retrieve token, client id and enable intents on Discord Developer 
 
 - Create file .env.production
 - Fill all fields in .env.production. If the field is marked as (Optional), you can skip it.
-- (Required) To get Discord Token and enable intents, follow the [Discord Developer Portal](API-Configure.md#discord-developer-portal-required) section. 
-- (Optional) To get Spotify Secret and ID, follow the [Spotify](API-Configure.md#spotify-optional) section.
-- (Optional) To get Yandex Music token, follow the [Yandex Music](API-Configure.md#yandex-music-optional) section.
-- (Optional) To get SoundCloud token, follow the [Soundcloud](API-Configure.md#soundcloud-optional) section.
+- (Required) To get Discord Token and enable intents, follow the [Discord Developer Portal](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#discord-developer-portal-required) section. 
+- (Optional) To get Spotify Secret and ID, follow the [Spotify](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#spotify-optional) section.
+- (Optional) To get Yandex Music token, follow the [Yandex Music](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#yandex-music-optional) section.
+- (Optional) To get SoundCloud token, follow the [Soundcloud](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#soundcloud-optional) section.
 
 | Name                         | Example               | Description                                                             | Required? |
 |------------------------------|-----------------------|-------------------------------------------------------------------------|-----------|
@@ -30,13 +29,13 @@ Also you need retrieve token, client id and enable intents on Discord Developer 
 | `BOT_SOUNDCLOUD_TOKEN`       |                       | Provide to fetch more data with SoundCloud Go+ account                  | ❌         |
 
 ## 🐋 Run in Docker (recommended)
-[!Note]
+[!NOTE]
 Using Docker provides the auto-update feature
 
 - Install [Docker](https://www.docker.com/get-started/)
 - Copy docker-compose.yml, Dockerfile in empty folder
 - Follow the [Configure .env](#-configure-env) section and copy .env.production in folder with docker-compose.yml etc.
-- (Optional) Follow the [YouTube Cookie](API-Configure.md#-youtube-cookie-optional) section and copy yt-cookies.json in the folder with docker-compose.yml etc.
+- (Optional) Follow the [YouTube Cookie](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#-youtube-cookie-optional) section and copy yt-cookies.json in the folder with docker-compose.yml etc.
 - Your file structure must be like this
 ```
 AICoTest/
@@ -53,7 +52,7 @@ AICoTest/
 - Install FFMpeg. Follow this [guide](https://www.wikihow.com/Install-FFmpeg-on-Windows)
 - Clone repository to your computer
 - Follow the [Configure .env](#-configure-env) section and copy .env.production in folder with repository.
-- (Optional) Follow the [YouTube Cookie](API-Configure.md#-youtube-cookie-optional) and copy yt-cookies.json in the folder with repository.
+- (Optional) Follow the [YouTube Cookie](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#-youtube-cookie-optional) and copy yt-cookies.json in the folder with repository.
 - Install Node.js packages in the folder with repository
 ```npm
 npm install
