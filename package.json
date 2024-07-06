@@ -1,6 +1,6 @@
 {
   "name": "aicbot",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Discord Bot for playing music",
   "main": "build/main.js",
   "scripts": {
@@ -17,7 +17,7 @@
     "@discordjs/voice": "^0.16.1",
     "@distube/direct-link": "^1.0.1",
     "@distube/file": "^1.0.1",
-    "@distube/soundcloud": "^2.0.1",
+    "@distube/soundcloud": "^2.0.2",
     "@distube/spotify": "^2.0.2",
     "@distube/youtube": "^1.0.2",
     "@distube/yt-dlp": "^2.0.1",
@@ -40,7 +40,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^20.14.9",
+    "@types/node": "^20.14.10",
     "@types/node-os-utils": "^1.3.4",
     "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
