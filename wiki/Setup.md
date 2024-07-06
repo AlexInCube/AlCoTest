@@ -29,8 +29,8 @@ Also you need retrieve token, client id and enable intents on Discord Developer 
 | `BOT_SOUNDCLOUD_TOKEN`       |                       | Provide to fetch more data with SoundCloud Go+ account                  | ❌         |
 
 ## 🐋 Run in Docker (recommended)
-[!NOTE]
-Using Docker provides the auto-update feature
+> [!NOTE]
+> Using Docker provides the auto-update feature
 
 - Install [Docker](https://www.docker.com/get-started/)
 - Copy docker-compose.yml, Dockerfile in empty folder
