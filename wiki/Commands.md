@@ -100,6 +100,12 @@ Skip current playing song
 
 Kill the audioplayer
 
+### lyrics
+
+Example: /lyrics faded alan walker
+
+Searching a provided query for song lyrics and return text
+
 ### audiodebug
 
 Give the current count of spawned audioplayers

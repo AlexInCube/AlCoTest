@@ -3,6 +3,9 @@ name: Publish Docker image
 on:
   push:
     branches: ['master']
+    paths-ignore:
+      - '**/wiki/**'
+      - '/wiki/**'
 
 env:
   IMAGE_TAG: alexincube/aicotest

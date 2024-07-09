@@ -34,6 +34,7 @@ export default function (): ICommand {
       execute: async (interaction) => {
         const songQuery = interaction.options.getString('request')!;
 
+        await interaction.deferReply()
         await interaction.reply({ embeds: [await generateLyricsEmbed(songQuery)] });
       }
     },

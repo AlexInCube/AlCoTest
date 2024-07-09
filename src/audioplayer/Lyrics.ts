@@ -27,14 +27,18 @@ export async function generateLyricsEmbed(songQuery: string) {
     return generateErrorEmbed(i18next.t('commands:lyrics_embed_lyrics_not_found'));
   }
 
-  const lyrics = await geniusSong.lyrics();
+  try{
+    const lyrics = await geniusSong.lyrics();
 
-  const lyricsText = lyrics.slice(0, 4096);
+    const lyricsText = lyrics.slice(0, 4096);
 
-  return new EmbedBuilder()
-    .setTitle(geniusSong.title)
-    .setURL(geniusSong.url)
-    .setDescription(lyricsText)
-    .setColor(Colors.Yellow)
-    .setFooter({ text: i18next.t('commands:lyrics_embed_text_not_correct') });
+    return new EmbedBuilder()
+      .setTitle(geniusSong.title)
+      .setURL(geniusSong.url)
+      .setDescription(lyricsText)
+      .setColor(Colors.Yellow)
+      .setFooter({ text: i18next.t('commands:lyrics_embed_text_not_correct') });
+  } catch (e){
+    return generateErrorEmbed(i18next.t('commands:lyrics_embed_lyrics_not_found'));
+  }
 }
