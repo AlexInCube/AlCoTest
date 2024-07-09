@@ -20,7 +20,7 @@ import ytsr from '@distube/ytsr';
 import { queueSongsLimit } from '../../audioplayer/AudioPlayerCore.js';
 import { generateWarningEmbed } from '../../utilities/generateWarningEmbed.js';
 
-export const services = 'Youtube, Spotify, Soundcloud, Yandex Music, HTTP-stream';
+export const services = 'Youtube, Spotify, Soundcloud, Yandex Music, Apple Music, HTTP-stream';
 export default function (): ICommand {
   return {
     text_data: {
@@ -30,6 +30,8 @@ export default function (): ICommand {
         new CommandArgument(i18next.t('commands:play_arg_link', { services: services }), true)
       ],
       execute: async (message: Message, args: string[]) => {
+        // Play command accept only one arg is a query string.
+        // In text command system we need to merge all words for request in one string
         const songQuery = args.join(' ');
 
         const member = message.member as GuildMember;

@@ -1,6 +1,6 @@
 {
   "name": "aicbot",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "Discord Bot for playing music",
   "main": "build/main.js",
   "scripts": {
@@ -29,6 +29,7 @@
     "distube-apple-music": "^0.1.0",
     "distube-yandex-music-plugin": "^1.0.4",
     "dotenv": "^16.4.5",
+    "genius-lyrics": "^4.4.7",
     "i18next": "^22.5.1",
     "i18next-fs-backend": "^2.3.1",
     "mongoose": "^7.7.0",

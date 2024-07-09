@@ -19,13 +19,22 @@ export type SlashBuilder =
   | SlashCommandSubcommandsOnlyBuilder
   | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
 export interface ICommand {
-  text_data: ITextCommandData; // Related to text commands
-  slash_data?: ISlashCommandData; // Related to slash commands
-  group: ICommandGroup; // Group for better orientation in /help
-  user_permissions?: Array<PermissionResolvable>; // Permissions for user, to allow executing commands
-  bot_permissions: Array<PermissionResolvable>; // Permissions for bot, to try to execute commands
-  hidden?: boolean; // Hidden from everything (disable slash_data property if true)
-  guild_data?: IGuildData; // Guild related data such as voice settings
+  // Disable command registering
+  disable?: boolean | false;
+  // Related to text commands
+  text_data: ITextCommandData;
+  // Related to slash commands
+  slash_data?: ISlashCommandData;
+  // Group for better orientation in /help
+  group: ICommandGroup;
+  // Permissions for user, to allow executing commands
+  user_permissions?: Array<PermissionResolvable>;
+  // Permissions for bot, to try to execute commands
+  bot_permissions: Array<PermissionResolvable>;
+  // Hidden from everything (disable slash_data property if true)
+  hidden?: boolean;
+  // Guild related data such as voice settings
+  guild_data?: IGuildData;
 }
 
 interface ITextCommandData {

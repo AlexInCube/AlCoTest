@@ -1,5 +1,5 @@
 import { Client, Collection, REST, Routes } from 'discord.js';
-import { loggerError, loggerSend } from '../utilities/logger.js';
+import { loggerError, loggerSend, loggerWarn } from '../utilities/logger.js';
 import { ICommand, ICommandGroup, SlashBuilder } from '../CommandTypes.js';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -30,6 +30,12 @@ const handler = async (client: Client) => {
     const commandModule = await import(importPath);
 
     const command: ICommand = commandModule.default();
+
+    if (command.disable) {
+      loggerWarn(`Command is disabled: ${importPath}`, loggerPrefixCommandHandler);
+      continue;
+    }
+
     const group: ICommandGroup = command.group;
 
     commands.set(command.text_data.name, command);

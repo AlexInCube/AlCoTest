@@ -41,7 +41,9 @@ const envVariables = z.object({
   BOT_SPOTIFY_CLIENT_ID: z.string().optional(),
 
   BOT_YANDEXMUSIC_TOKEN: z.string().optional(),
-  BOT_YANDEXMUSIC_UID: z.coerce.number().optional()
+  BOT_YANDEXMUSIC_UID: z.coerce.number().optional(),
+
+  BOT_GENIUS_TOKEN: z.string().optional()
 });
 
 export const ENV = envVariables.parse(process.env);

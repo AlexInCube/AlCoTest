@@ -22,6 +22,7 @@ You can edit your application's name, description, and avatar here. Once you've 
 ![discord-dev-enable-intents](images/api-configure/discord-dev-enable-intents.png)
 
 # YouTube Cookie (optional)
+
 Preferable to provide cookies for YouTube.
 This will allow you to play 18+ videos and bypass YouTube rate limiting error (429 Error).
 I highly recommend that you create a new Google account from which you can get the cookie.
@@ -38,23 +39,27 @@ I highly recommend that you create a new Google account from which you can get t
 5. Create file yt-cookies.json and paste cookie in this file
 
 # Yandex Music (optional)
+
 If you do not provide token and UID, Yandex Music will not work at all.
 
 > [!WARNING]
 > If your bot is outside Russia VDS, you must have a Yandex Plus subscription to play songs.
 
 ## Token
-1. Login into [Yandex](https://passport.yandex.ru/auth) account. 
+
+1. Login into [Yandex](https://passport.yandex.ru/auth) account.
 2. Download [browser extension](https://chromewebstore.google.com/detail/yandex-music-token/lcbjeookjibfhjjopieifgjnhlegmkib)
-This must look like this ![yandex-extension](images/api-configure/yandex-music-extension.png)
+   This must look like this ![yandex-extension](images/api-configure/yandex-music-extension.png)
 3. Click "Скопировать токен" button.
 
 ## UID
+
 1. Login into [Yandex](https://passport.yandex.ru/auth) account.
 2. You can retrieve uid by opening [Yandex Mail](https://mail.yandex.ru) and copy uid from the url in the address bar.
-![yandex-uid](images/api-configure/yandex-music-uid.png)
+   ![yandex-uid](images/api-configure/yandex-music-uid.png)
 
 # Spotify (optional)
+
 Spotify Module can work without provided data, but for more stability better provide custom application data.
 
 > [!WARNING]
@@ -76,3 +81,12 @@ Spotify Module can work without provided data, but for more stability better pro
 4. Find the request that has the name session (you can filter by typing session in the filter box) and click on it
 5. Go to the Payload tab
 6. You should see your client id in the Query String Parameters section, and your oauth token (access_token) in the Request Payload section
+
+# Genius (optional)
+
+> [!WARNING]
+> Provide to enable /lyrics command and lyrics button in audioplayer
+
+1. Go to [Genius](https://genius.com/login) and login.
+2. Go to [Genius Developer Dashboard](https://genius.com/api-clients/new) and create a new app
+3. Generate and copy client access token

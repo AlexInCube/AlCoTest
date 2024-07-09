@@ -24,6 +24,7 @@ import {
   generateEmbedAudioPlayerPrevious,
   generateEmbedAudioPlayerPreviousFailure
 } from '../commands/audio/previous.command.js';
+import { ENV } from '../EnvironmentVariables.js';
 
 enum ButtonIDs {
   stopMusic = 'stopMusic',
@@ -33,7 +34,8 @@ enum ButtonIDs {
   skipSong = 'skipSong',
   //downloadSong = 'downloadSong',
   shuffle = 'shuffle',
-  showQueue = 'showQueue'
+  showQueue = 'showQueue',
+  lyrics = 'lyrics'
 }
 
 const rowPrimary = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -93,6 +95,15 @@ const rowSecondary = new ActionRowBuilder<ButtonBuilder>().addComponents(
     .setStyle(ButtonStyle.Secondary)
     .setEmoji(AudioPlayerIcons.list)
 );
+
+if (ENV.BOT_GENIUS_TOKEN) {
+  rowSecondary.addComponents(
+    new ButtonBuilder()
+      .setCustomId(ButtonIDs.lyrics)
+      .setStyle(ButtonStyle.Secondary)
+      .setEmoji(AudioPlayerIcons.lyrics)
+  );
+}
 
 const rowWithOnlyStop = new ActionRowBuilder<ButtonBuilder>().addComponents(
   new ButtonBuilder()
@@ -209,6 +220,10 @@ export class MessagePlayerButtonsHandler {
               await ButtonInteraction.reply({ embeds: [generateEmbedAudioPlayerShuffleFailure()] });
             }
             break;
+          }
+
+          case ButtonIDs.lyrics: {
+            await this.client.audioPlayer.showLyrics(ButtonInteraction);
           }
         }
       } catch (e) {

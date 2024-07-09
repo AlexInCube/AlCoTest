@@ -2,7 +2,6 @@ import { ExtractorPlugin, InfoExtractorPlugin, PlayableExtractorPlugin } from 'd
 import { BOT_YOUTUBE_COOKIE, ENV } from '../EnvironmentVariables.js';
 import { loggerSend, loggerWarn } from '../utilities/logger.js';
 import { SpotifyPlugin } from '@distube/spotify';
-import { SoundCloudPlugin } from '@distube/soundcloud';
 import { YtDlpPlugin } from '@distube/yt-dlp';
 import { loggerPrefixAudioplayer } from './AudioPlayerCore.js';
 import { YouTubePlugin } from '@distube/youtube';
@@ -10,6 +9,7 @@ import { DirectLinkPlugin } from '@distube/direct-link';
 import { FilePlugin } from '@distube/file';
 import { AppleMusicPlugin } from 'distube-apple-music';
 import { YandexMusicPlugin } from 'distube-yandex-music-plugin';
+import { SoundCloudPlugin } from '@distube/soundcloud';
 
 export type DistubePlugin = ExtractorPlugin | InfoExtractorPlugin | PlayableExtractorPlugin;
 

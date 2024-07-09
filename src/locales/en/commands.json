@@ -65,5 +65,9 @@
   "status_embed_cpu": "CPU",
   "status_embed_cpu_usage": "CPU Usage",
   "status_embed_ram_usage": "RAM Usage",
-  "status_embed_guilds_count": "Servers count"
+  "status_embed_guilds_count": "Servers count",
+  "lyrics_desc": "Searching lyrics",
+  "lyrics_arg_query": "title of song",
+  "lyrics_embed_text_not_correct": "The text may not be correct",
+  "lyrics_embed_lyrics_not_found": "Lyrics not found"
 }

@@ -65,5 +65,9 @@
   "status_embed_cpu": "Процессор",
   "status_embed_cpu_usage": "Нагрузка на процессор",
   "status_embed_ram_usage": "Используется ОЗУ",
-  "status_embed_guilds_count": "Количество серверов"
+  "status_embed_guilds_count": "Количество серверов",
+  "lyrics_desc": "Ищет текст песни",
+  "lyrics_arg_query": "Название песни",
+  "lyrics_embed_text_not_correct": "Текст может быть неверным",
+  "lyrics_embed_lyrics_not_found": "Текст песни не найден"
 }

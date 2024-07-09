@@ -11,6 +11,7 @@ import { LoadPlugins } from './LoadPlugins.js';
 import { generateAddedPlaylistMessage } from './util/generateAddedPlaylistMessage.js';
 import { generateAddedSongMessage } from './util/generateAddedSongMessage.js';
 import {
+  ButtonInteraction,
   Client,
   CommandInteraction,
   Embed,
@@ -22,6 +23,7 @@ import {
 } from 'discord.js';
 import { joinVoiceChannel } from '@discordjs/voice';
 import { generateWarningEmbed } from '../utilities/generateWarningEmbed.js';
+import { generateLyricsEmbed } from './Lyrics.js';
 
 export const queueSongsLimit = 500;
 
@@ -216,6 +218,26 @@ export class AudioPlayerCore {
     } catch (e) {
       return false;
     }
+  }
+
+  async showLyrics(interaction: ButtonInteraction) {
+    if (!interaction.guild) return;
+    const queue = this.distube.getQueue(interaction.guild);
+    if (!queue) {
+      return;
+    }
+
+    const song = queue.songs[0];
+
+    let lyricsQuery: string;
+
+    if (song.source === 'youtube') {
+      lyricsQuery = song.name!;
+    } else {
+      lyricsQuery = `${song.name} - ${song.uploader.name}`;
+    }
+
+    await interaction.reply({ embeds: [await generateLyricsEmbed(lyricsQuery)] });
   }
 
   async showQueue(interaction: Interaction) {
