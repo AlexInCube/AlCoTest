@@ -35,7 +35,7 @@ export default function (): ICommand {
         const songQuery = interaction.options.getString('request')!;
 
         await interaction.deferReply()
-        await interaction.reply({ embeds: [await generateLyricsEmbed(songQuery)] });
+        await interaction.editReply({ embeds: [await generateLyricsEmbed(songQuery)] });
       }
     },
     group: GroupAudio,

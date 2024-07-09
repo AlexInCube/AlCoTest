@@ -369,8 +369,8 @@ packages:
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
-  '@vladfrangu/async_event_emitter@2.4.1':
-    resolution: {integrity: sha512-cedU1DrzO4oliUigSAOqSgts6wEfGGSbpO1hYxvKbz8sr7a0meyP3GxnL6hIUtBK0nMG6zHfIYWcqOIb+MRI7w==}
+  '@vladfrangu/async_event_emitter@2.4.3':
+    resolution: {integrity: sha512-wn15EJHUk2RDtCw6wVJndUhFbfJYwyNhSD9s+yiQi5c2MmXDy3KLWvZ5LrcOzt3CHdscoAnaJrxIRKBI1QQgGw==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
   abbrev@1.1.1:
@@ -1556,7 +1556,7 @@ snapshots:
       '@discordjs/util': 1.1.0
       '@sapphire/async-queue': 1.5.2
       '@sapphire/snowflake': 3.5.3
-      '@vladfrangu/async_event_emitter': 2.4.1
+      '@vladfrangu/async_event_emitter': 2.4.3
       discord-api-types: 0.37.83
       magic-bytes.js: 1.10.0
       tslib: 2.6.2
@@ -1588,7 +1588,7 @@ snapshots:
       '@discordjs/util': 1.1.0
       '@sapphire/async-queue': 1.5.2
       '@types/ws': 8.5.10
-      '@vladfrangu/async_event_emitter': 2.4.1
+      '@vladfrangu/async_event_emitter': 2.4.3
       discord-api-types: 0.37.83
       tslib: 2.6.2
       ws: 8.18.0
@@ -1830,7 +1830,7 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@vladfrangu/async_event_emitter@2.4.1': {}
+  '@vladfrangu/async_event_emitter@2.4.3': {}
 
   abbrev@1.1.1:
     optional: true
