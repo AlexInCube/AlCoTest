@@ -383,9 +383,16 @@ export class AudioPlayerCore {
         await this.playersManager.get(queue.id)?.setState('waiting');
       })
       .on(DistubeEvents.ERROR, async (error, queue) => {
-        queue.textChannel?.send({
+        let errorName = `ERROR`
+        const errorMessage = `${error.name} + \n\n + ${error.message}`
+
+        if (queue.songs.length >= 1){
+          errorName = queue.songs[0].name!;
+        }
+
+        await queue.textChannel?.send({
           embeds: [
-            generateErrorEmbed(`${error.name} + \n\n + ${error.message} \n\n + ${error.stack}`)
+            generateErrorEmbed(errorMessage, errorName)
           ]
         });
       });
