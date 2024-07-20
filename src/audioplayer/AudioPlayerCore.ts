@@ -318,12 +318,13 @@ export class AudioPlayerCore {
 
   private setupEvents() {
     if (ENV.BOT_VERBOSE_LOGGING) {
-      this.distube.on(DistubeEvents.DEBUG, (message) => {
-        loggerSend(message, loggerPrefixAudioplayer);
-      });
-      // .on(DistubeEvents.FFMPEG_DEBUG, (message) => {
-      //   loggerSend(message, loggerPrefixAudioplayer);
-      // });
+      this.distube
+        .on(DistubeEvents.DEBUG, (message) => {
+          loggerSend(message, loggerPrefixAudioplayer);
+        })
+        .on(DistubeEvents.FFMPEG_DEBUG, (message) => {
+          loggerSend(message, loggerPrefixAudioplayer);
+        });
     }
 
     this.distube
