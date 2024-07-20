@@ -318,13 +318,12 @@ export class AudioPlayerCore {
 
   private setupEvents() {
     if (ENV.BOT_VERBOSE_LOGGING) {
-      this.distube
-        .on(DistubeEvents.DEBUG, (message) => {
-          loggerSend(message, loggerPrefixAudioplayer);
-        })
-        .on(DistubeEvents.FFMPEG_DEBUG, (message) => {
-          loggerSend(message, loggerPrefixAudioplayer);
-        });
+      this.distube.on(DistubeEvents.DEBUG, (message) => {
+        loggerSend(message, loggerPrefixAudioplayer);
+      });
+      // .on(DistubeEvents.FFMPEG_DEBUG, (message) => {
+      //   loggerSend(message, loggerPrefixAudioplayer);
+      // });
     }
 
     this.distube
@@ -383,17 +382,15 @@ export class AudioPlayerCore {
         await this.playersManager.get(queue.id)?.setState('waiting');
       })
       .on(DistubeEvents.ERROR, async (error, queue) => {
-        let errorName = `ERROR`
-        const errorMessage = `${error.name} + \n\n + ${error.message}`
+        let errorName = `ERROR`;
+        const errorMessage = `${error.name} + \n\n + ${error.message}`;
 
-        if (queue.songs.length >= 1){
+        if (queue.songs.length >= 1) {
           errorName = queue.songs[0].name!;
         }
 
         await queue.textChannel?.send({
-          embeds: [
-            generateErrorEmbed(errorMessage, errorName)
-          ]
+          embeds: [generateErrorEmbed(errorMessage, errorName)]
         });
       });
   }

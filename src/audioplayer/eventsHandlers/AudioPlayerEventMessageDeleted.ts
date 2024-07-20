@@ -2,7 +2,7 @@ import { Client, Message, TextChannel } from 'discord.js';
 import { ENV } from '../../EnvironmentVariables.js';
 import { loggerError } from '../../utilities/logger.js';
 
-export async function AudioPlayerEventMessageDeleted(client: Client, message: Message){
+export async function AudioPlayerEventMessageDeleted(client: Client, message: Message) {
   if (!message.guild) return;
 
   const textChannel = message.channel as TextChannel;

@@ -128,7 +128,7 @@ export const pagination = async (options: PaginationOptions) => {
     return interaction.user.id === author.id && parseInt(interaction.customId) <= 4;
   };
 
-  const collectorOptions = (filter?): any => {
+  const collectorOptions = (filter?): never => {
     const opt = {
       filter: filter || customFilter || defaultFilter,
       componentType: ComponentType.Button
