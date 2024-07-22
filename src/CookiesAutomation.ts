@@ -23,9 +23,15 @@ export async function getYoutubeCookie() {
   const page = await browser.newPage();
   await page.goto('https://www.youtube.com', { waitUntil: 'networkidle2' });
 
-  // Press "Sign In" button on YouTube
-  await page.click('#buttons > ytd-button-renderer > yt-button-shape > a');
-
+  try {
+    // Press "Sign In" button on YouTube in accept cookie usage
+    await page.click(
+      '#topbar > div.top-buttons.style-scope.ytd-consent-bump-v2-lightbox > div:nth-child(2) > ytd-button-renderer > yt-button-shape > a'
+    );
+  } catch (e) {
+    // Press "Sign In" on navbar
+    await page.click('#buttons > ytd-button-renderer > yt-button-shape > a');
+  }
   // Type Email in form
   await page.waitForSelector('#identifierId', { visible: true });
   await page.type('#identifierId', ENV.BOT_GOOGLE_EMAIL);
