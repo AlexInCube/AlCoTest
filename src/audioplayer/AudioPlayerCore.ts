@@ -29,6 +29,8 @@ export const queueSongsLimit = 500;
 
 export const loggerPrefixAudioplayer = `Audioplayer`;
 
+const plugins = await LoadPlugins();
+
 export class AudioPlayerCore {
   client: Client;
   playersManager: AudioPlayersManager;
@@ -43,7 +45,7 @@ export class AudioPlayerCore {
       emitAddSongWhenCreatingQueue: true,
       savePreviousSongs: true,
       joinNewVoiceChannel: true,
-      plugins: LoadPlugins()
+      plugins: plugins
     });
 
     this.setupEvents();

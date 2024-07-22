@@ -1,12 +1,10 @@
 import { z } from 'zod';
 import * as dotenv from 'dotenv';
-import { loggerError, loggerSend } from './utilities/logger.js';
-import fs from 'fs';
+import { loggerSend } from './utilities/logger.js';
 
 const loggerPrefixEnv = 'ENV';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
-loggerSend(`Loaded .env.${process.env.NODE_ENV}`, loggerPrefixEnv);
 
 const envVariables = z.object({
   NODE_ENV: z.enum(['development', 'production']),
@@ -34,6 +32,9 @@ const envVariables = z.object({
   BOT_DISCORD_CLIENT_ID: z.string(),
   BOT_DISCORD_OVERPOWERED_ID: z.string(),
 
+  BOT_GOOGLE_EMAIL: z.string().optional(),
+  BOT_GOOGLE_PASSWORD: z.string().optional(),
+
   BOT_SOUNDCLOUD_CLIENT_ID: z.string().optional(),
   BOT_SOUNDCLOUD_TOKEN: z.string().optional(),
 
@@ -48,16 +49,4 @@ const envVariables = z.object({
 
 export const ENV = envVariables.parse(process.env);
 
-export let BOT_YOUTUBE_COOKIE = undefined;
-
-try {
-  BOT_YOUTUBE_COOKIE = JSON.parse(
-    fs.readFileSync('yt-cookies.json', { encoding: 'utf8', flag: 'r' })
-  );
-  loggerSend('Cookie file is loaded', loggerPrefixEnv);
-} catch (e) {
-  loggerError(
-    'Cookie file is not provided or cookie is wrong. Please, follow instructions in README.md',
-    loggerPrefixEnv
-  );
-}
+loggerSend(`Loaded .env.${process.env.NODE_ENV}`, loggerPrefixEnv);

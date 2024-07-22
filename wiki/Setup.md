@@ -8,6 +8,7 @@ Also you need retrieve token, client id and enable intents on Discord Developer 
 - Create file .env.production (if you developer create .env.development)
 - Fill all fields in .env.* If the field is marked as (Optional), you can skip it.
 - (Required) To get Discord Token and enable intents, follow the [Discord Developer Portal](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#discord-developer-portal-required) section.
+- (Optional) To get YouTube cookies and bypass different errors with YouTube, follow the [YouTube](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#-youtube-cookie-optional) section
 - (Optional) To get Spotify Secret and ID, follow the [Spotify](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#spotify-optional) section.
 - (Optional) To get Yandex Music token, follow the [Yandex Music](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#yandex-music-optional) section.
 - (Optional) To get SoundCloud token, follow the [Soundcloud](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#soundcloud-optional) section.
@@ -23,6 +24,8 @@ Also you need retrieve token, client id and enable intents on Discord Developer 
 | `BOT_DISCORD_TOKEN`          | ODEzNzUwMTY1N...      | Token from Discord Developer Portal                                       | ✔️       |
 | `BOT_DISCORD_CLIENT_ID`      | 813750165783...       | Application ID from Discord Developer Portal                              | ✔️       |
 | `BOT_DISCORD_OVERPOWERED_ID` | 29016845994426....    | Discord bot owner user ID, required for having more bot control for owner | ✔️       |
+| `BOT_GOOGLE_EMAIL`           |                       | Used to automate cookies fetching for YouTube                             | ❌        |
+| `BOT_GOOGLE_PASSWORD`        |                       | Used to automate cookies fetching for YouTube                           ❌ |          |
 | `BOT_SPOTIFY_CLIENT_SECRET`  |                       | Used when the Spotify module cannot get the credentials automatically     | ❌        |
 | `BOT_SPOTIFY_CLIENT_ID`      |                       | Used when the Spotify module get the credentials automatically            | ❌        |
 | `BOT_YANDEXMUSIC_TOKEN`      |                       | Provide to enable Yandex Music module                                     | ❌        |
@@ -46,7 +49,7 @@ Also you need retrieve token, client id and enable intents on Discord Developer 
 AICoTest/
   ├─ .env.production
   ├─ docker-compose.yml
-  ├─ yt-cookies.yml
+  ├─ yt-cookies.json
 ```
 
 - Run command `docker-compose up --detach --force-recreate` from folder with files

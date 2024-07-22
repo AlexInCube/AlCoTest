@@ -32,7 +32,7 @@ services:
       - type: bind
         source: ./yt-cookies.json
         target: /bot/yt-cookies.json
-        read_only: true
+        read_only: false
     links:
       - aicbot-mongo
     depends_on:

@@ -13,6 +13,20 @@ RUN pnpm prune --prod
 
 FROM base as prod
 
+RUN apk update && apk add --no-cache nmap && \
+echo @edge https://dl-cdn.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories && \
+echo @edge https://dl-cdn.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories && \
+apk update && \
+apk add --no-cache \
+chromium \
+harfbuzz \
+"freetype>2.8" \
+ttf-freefont \
+nss
+
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 aicbot
 

@@ -25,18 +25,28 @@ You can edit your application's name, description, and avatar here. Once you've 
 
 Preferable to provide cookies for YouTube.
 This will allow you to play 18+ videos and bypass YouTube rate limiting error (429 Error).
-I highly recommend that you create a new Google account from which you can get the cookie.
 
 > [!WARNING]
 > Time to time, cookies are resets by YouTube, so you need to retrieve it again.
-> It's so annoying, but hasn't figured out a way to automate the cookie retrieval process.
-> If you know workaround, please create the [issue](https://github.com/AlexInCube/AlCoTest/issues/new/choose)
 
-1. Install an extension for extracting cookie, [EditThisCookie](https://www.editthiscookie.com/blog/2014/03/install-editthiscookie/)
+> [!NOTE]
+> I highly recommend that you create a new Google account from which you can get the cookie.
+
+## Manual extract cookies
+
+1. Install any extension for extracting cookie, for example, [EditThisCookie](https://www.editthiscookie.com/blog/2014/03/install-editthiscookie/)
 2. Go to [YouTube](https://www.youtube.com/)
 3. Log in to your account. (You should use a new account for this purpose)
 4. Click on the extension icon and click "Export" button.
 5. Create file yt-cookies.json and paste cookie in this file
+
+## Automation cookies fetch
+
+> [!WARNING]
+> Disable two-factor auth on Gmail or script can't bypass the Google protection
+
+1. Create file yt-cookies.json (don't paste anything in this file)
+2. Fill the fields BOT_GOOGLE_EMAIL and BOT_GOOGLE_PASSWORD in .env file
 
 # Yandex Music (optional)
 
