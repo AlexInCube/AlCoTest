@@ -6,6 +6,8 @@ on:
     paths-ignore:
       - '**/wiki/**'
       - '/wiki/**'
+      - 'docker-compose.yml'
+      - '.env'
 
 env:
   IMAGE_TAG: alexincube/aicotest

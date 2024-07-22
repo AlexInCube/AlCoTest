@@ -48,12 +48,18 @@ export async function getYoutubeCookie() {
   }
 
   const cookies = await page.cookies();
+
+  await browser.close();
+
+  if (cookies.length < 10) {
+    loggerError('Something went wrong during authentication to Google');
+    return undefined;
+  }
+
   const cookiesJson = JSON.stringify(cookies, null, 2);
   fs.writeFileSync('yt-cookies.json', cookiesJson);
 
   //loggerSend(cookiesJson);
-
-  await browser.close();
 
   if (!cookies) loggerError('Failed to fetch YouTube cookies');
   if (cookiesJson) loggerSend('YouTube Cookies fetched successfully');

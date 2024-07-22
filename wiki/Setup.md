@@ -36,9 +36,6 @@ Also you need retrieve token, client id and enable intents on Discord Developer 
 
 # 🐋 Run in Docker (recommended)
 
-> [!NOTE]
-> Using Docker provides the auto-update feature
-
 - Install [Docker](https://www.docker.com/get-started/)
 - Copy docker-compose.yml, Dockerfile in empty folder
 - Follow the [Configure .env](#-configure-env) section and copy .env.production in folder with docker-compose.yml etc.
