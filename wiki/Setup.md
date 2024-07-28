@@ -16,7 +16,8 @@ Also you need retrieve token, client id and enable intents on Discord Developer 
 
 | Name                         | Example               | Description                                                               | Required |
 |------------------------------|-----------------------|---------------------------------------------------------------------------|----------|
-| `BOT_VERBOSE_LOGGING`        | false                 | The bot will give more information to the console, useful for debugging   | ❌        |
+| `BOT_VERBOSE_LOGGING`        | false                 | The bot will give more info to the console, useful for debugging          | ❌        |
+| `BOT_FFMPEG_LOGGING=false`   | false                 | The bot will give info about FFMPEGto the console, useful for debugging   |          |
 | `BOT_COMMAND_PREFIX`         | //                    | Used only for text commands                                               | ✔️       |
 | `BOT_LANGUAGE`               | en                    | Supported values: en ru                                                   | ❌        |
 | `MONGO_URI`                  | mongodb://mongo:27017 | The public key for sending notifications                                  | ✔️       |
@@ -25,7 +26,7 @@ Also you need retrieve token, client id and enable intents on Discord Developer 
 | `BOT_DISCORD_CLIENT_ID`      | 813750165783...       | Application ID from Discord Developer Portal                              | ✔️       |
 | `BOT_DISCORD_OVERPOWERED_ID` | 29016845994426....    | Discord bot owner user ID, required for having more bot control for owner | ✔️       |
 | `BOT_GOOGLE_EMAIL`           |                       | Used to automate cookies fetching for YouTube                             | ❌        |
-| `BOT_GOOGLE_PASSWORD`        |                       | Used to automate cookies fetching for YouTube                           ❌ |          |
+| `BOT_GOOGLE_PASSWORD`        |                       | Used to automate cookies fetching for YouTube ❌                           |          |
 | `BOT_SPOTIFY_CLIENT_SECRET`  |                       | Used when the Spotify module cannot get the credentials automatically     | ❌        |
 | `BOT_SPOTIFY_CLIENT_ID`      |                       | Used when the Spotify module get the credentials automatically            | ❌        |
 | `BOT_YANDEXMUSIC_TOKEN`      |                       | Provide to enable Yandex Music module                                     | ❌        |
@@ -77,7 +78,9 @@ npm run build
 ```
 npm run production
 ```
+
 or if you are a developer
+
 ```
 npm run development
 ```

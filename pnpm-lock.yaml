@@ -54,8 +54,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(distube@5.0.2(@discordjs/voice@0.17.0(opusscript@0.1.1))(discord.js@14.15.3))
       distube-yandex-music-plugin:
-        specifier: ^1.0.4
-        version: 1.0.4(distube@5.0.2(@discordjs/voice@0.17.0(opusscript@0.1.1))(discord.js@14.15.3))
+        specifier: ^1.0.5
+        version: 1.0.5(distube@5.0.2(@discordjs/voice@0.17.0(opusscript@0.1.1))(discord.js@14.15.3))
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -84,7 +84,7 @@ importers:
         specifier: ^1.3.5
         version: 1.3.5(opusscript@0.1.1)
       puppeteer:
-        specifier: ^22.13.1
+        specifier: 22.13.1
         version: 22.13.1(typescript@5.5.3)
       puppeteer-extra:
         specifier: ^3.3.6
@@ -650,8 +650,8 @@ packages:
     peerDependencies:
       distube: '5'
 
-  distube-yandex-music-plugin@1.0.4:
-    resolution: {integrity: sha512-A3VnMHqyoKxsp/2S1ZSuYpSOQboY2H2kr4zwIY7OYoVBAy4ZDbzKC2IWB47F49n+bz6kgi4tnps5WI+8wg2DRg==}
+  distube-yandex-music-plugin@1.0.5:
+    resolution: {integrity: sha512-sHsnUxdFFVzqTNPhmC9w6nYsseVS2Tsuwgy5IedPCj4bJLTc3iOWUbNBAYNgQnsxPPExH7S/kFWjxXQ/0NAoKg==}
     peerDependencies:
       distube: '5'
 
@@ -2404,7 +2404,7 @@ snapshots:
       isomorphic-unfetch: 4.0.2
       node-html-parser: 6.1.13
 
-  distube-yandex-music-plugin@1.0.4(distube@5.0.2(@discordjs/voice@0.17.0(opusscript@0.1.1))(discord.js@14.15.3)):
+  distube-yandex-music-plugin@1.0.5(distube@5.0.2(@discordjs/voice@0.17.0(opusscript@0.1.1))(discord.js@14.15.3)):
     dependencies:
       distube: 5.0.2(@discordjs/voice@0.17.0(opusscript@0.1.1))(discord.js@14.15.3)
       ym-api-meowed: 1.3.4

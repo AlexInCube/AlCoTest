@@ -19,7 +19,11 @@ export async function getYoutubeCookie() {
 
   loggerSend('Trying to fetch cookie from Google Auth, this might be take a time');
 
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+    headless: true,
+    slowMo: 2000,
+    args: ['--remote-debugging-port=9222', '--remote-debugging-address=0.0.0.0', '--no-sandbox']
+  });
   const page = await browser.newPage();
   await page.goto('https://www.youtube.com', { waitUntil: 'networkidle2' });
 
@@ -72,3 +76,9 @@ export async function getYoutubeCookie() {
 
   return cookies;
 }
+
+/*
+function checkCookiesValid(){
+  distube.resolve
+}
+*/

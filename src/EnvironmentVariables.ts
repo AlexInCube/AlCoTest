@@ -21,6 +21,18 @@ const envVariables = z.object({
     )
     .optional()
     .default(false),
+  BOT_FFMPEG_LOGGING: z
+    .preprocess(
+      (v) =>
+        z
+          .enum(['true', 'false'])
+          .transform((v) => JSON.parse(v))
+          .catch(v)
+          .parse(v),
+      z.boolean()
+    )
+    .optional()
+    .default(false),
 
   BOT_LANGUAGE: z.enum(['en', 'ru']).optional().default('en'),
   BOT_COMMAND_PREFIX: z.string().min(1),

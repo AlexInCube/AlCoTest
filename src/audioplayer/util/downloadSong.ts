@@ -6,11 +6,23 @@ import { v4 as uuidv4 } from 'uuid';
 import { unlink } from 'fs/promises';
 import { isURL, Playlist, Song } from 'distube';
 import i18next from 'i18next';
+import path from 'path';
 
 const downloadFolderPath = process.cwd() + '/downloads';
 
-fs.rmSync(downloadFolderPath, { recursive: true, force: true });
-fs.mkdirSync(downloadFolderPath);
+if (fs.existsSync(downloadFolderPath)) {
+  fs.readdir(downloadFolderPath, (err, files) => {
+    if (err) throw err;
+
+    for (const file of files) {
+      fs.unlink(path.join(downloadFolderPath, file), (err) => {
+        if (err) throw err;
+      });
+    }
+  });
+} else {
+  fs.mkdirSync(downloadFolderPath);
+}
 
 class DownloadSongError extends Error {
   constructor(message: DownloadSongMessage) {

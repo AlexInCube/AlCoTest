@@ -1,4 +1,4 @@
-import { DisTube, PlayOptions, Queue, RepeatMode, Song, Events as DistubeEvents } from 'distube';
+import { DisTube, PlayOptions, Queue, RepeatMode, Song, Events as DistubeEvents, Playlist } from 'distube';
 import { AudioPlayersManager } from './AudioPlayersManager.js';
 import { pagination } from '../utilities/pagination/pagination.js';
 import { ButtonStyles, ButtonTypes } from '../utilities/pagination/paginationTypes.js';
@@ -58,6 +58,8 @@ export class AudioPlayerCore {
     options?: PlayOptions
   ) {
     try {
+      const playableThing: Song | Playlist = await this.distube.handler.resolve(song)
+
       // I am need manual connect user to a voice channel, because when I am using only Distube "play"
       // method, getVoiceConnection in @discordjs/voice is not working
       joinVoiceChannel({
@@ -66,12 +68,17 @@ export class AudioPlayerCore {
         adapterCreator: voiceChannel.guild.voiceAdapterCreator
       });
 
-      await this.distube.play(voiceChannel, song, options);
+      await this.distube.play(voiceChannel, playableThing, options);
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
       await textChannel.send({
-        embeds: [generateErrorEmbed(e.message, i18next.t('audioplayer:play_error') as string)]
+        embeds: [generateErrorEmbed(`${song}\n${e.message}`, i18next.t('audioplayer:play_error') as string)]
       });
+
+      const queue = this.distube.getQueue(voiceChannel.guildId)
+
+      if (!queue) return
+      if (queue.songs.length === 0) await this.stop(voiceChannel.guild)
     }
   }
 
@@ -231,15 +238,7 @@ export class AudioPlayerCore {
 
     const song = queue.songs[0];
 
-    let lyricsQuery: string;
-
-    if (song.source === 'youtube') {
-      lyricsQuery = song.name!;
-    } else {
-      lyricsQuery = `${song.name} - ${song.uploader.name}`;
-    }
-
-    await interaction.reply({ embeds: [await generateLyricsEmbed(lyricsQuery)] });
+    await interaction.reply({ embeds: [await generateLyricsEmbed(song.name!)] });
   }
 
   async showQueue(interaction: Interaction) {
@@ -320,13 +319,15 @@ export class AudioPlayerCore {
 
   private setupEvents() {
     if (ENV.BOT_VERBOSE_LOGGING) {
-      this.distube
-        .on(DistubeEvents.DEBUG, (message) => {
-          loggerSend(message, loggerPrefixAudioplayer);
-        })
-        .on(DistubeEvents.FFMPEG_DEBUG, (message) => {
-          loggerSend(message, loggerPrefixAudioplayer);
-        });
+      this.distube.on(DistubeEvents.DEBUG, (message) => {
+        loggerSend(message, loggerPrefixAudioplayer);
+      });
+    }
+
+    if (ENV.BOT_FFMPEG_LOGGING) {
+      this.distube.on(DistubeEvents.FFMPEG_DEBUG, (message) => {
+        loggerSend(message, loggerPrefixAudioplayer);
+      });
     }
 
     this.distube
