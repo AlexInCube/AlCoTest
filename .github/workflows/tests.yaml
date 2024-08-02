@@ -30,7 +30,7 @@ jobs:
         run: |
           pwd
           touch .env.development
-          echo ${{ secrets.ENV_DEVELOPMENT }} >> .env.development
+          echo ${{ secrets.ENV_DEVELOPMENT }} > .env.development
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
