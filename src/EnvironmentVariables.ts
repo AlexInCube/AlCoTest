@@ -1,10 +1,15 @@
 import { z } from 'zod';
 import * as dotenv from 'dotenv';
 import { loggerSend } from './utilities/logger.js';
+import path from 'path';
 
 const loggerPrefixEnv = 'ENV';
 
-dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
+const envPath = path.resolve(process.cwd(), `.env.${process.env.NODE_ENV}`);
+
+loggerSend(`Checking environment variables for ${envPath}`, loggerPrefixEnv);
+
+dotenv.config({ path: envPath });
 
 const envVariables = z.object({
   NODE_ENV: z.enum(['development', 'production']),
@@ -61,4 +66,4 @@ const envVariables = z.object({
 
 export const ENV = envVariables.parse(process.env);
 
-loggerSend(`Loaded .env.${process.env.NODE_ENV}`, loggerPrefixEnv);
+loggerSend(`Loaded variables from ${envPath}`, loggerPrefixEnv);
