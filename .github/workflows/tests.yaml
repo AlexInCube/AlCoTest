@@ -46,5 +46,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Display files
+        run: ls -a
+
       - name: Run tests
         run: pnpm run test
