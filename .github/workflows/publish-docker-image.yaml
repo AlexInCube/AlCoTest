@@ -8,6 +8,7 @@ on:
       - '/wiki/**'
       - 'docker-compose.yml'
       - '.env'
+      - '*.sh'
 
 env:
   IMAGE_TAG: alexincube/aicotest

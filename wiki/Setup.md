@@ -52,6 +52,11 @@ AICoTest/
 
 - Run command `docker-compose up --detach --force-recreate` from folder with files
 
+> [!NOTE]
+> If you use terminal, Linux or Git Bash etc...,
+> you can copy runInDocker.sh or updateAndRunInDocker.sh to folder with other files.
+> And run command ```sh updateAndRunInDocker.sh``` to update bot image and restart containers.
+
 # 🖥️ Run locally (if you are not a developer, this way is no sense)
 
 - Install [Node.js 22](https://nodejs.org/en/download/prebuilt-installer) or higher
