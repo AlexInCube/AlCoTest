@@ -33,7 +33,7 @@ jobs:
           file_name: .env.development
           fail_on_empty: true
           sort_keys: false
-          directory: 'AlCoTest/AlCoTest'
+          directory: '.'
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
