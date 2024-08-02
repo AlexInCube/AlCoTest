@@ -1,14 +1,10 @@
 name: Publish Docker image
 
 on:
-  push:
+  workflow_run:
+    workflows: [ "tests" ]
+    types: ['completed']
     branches: ['master']
-    paths-ignore:
-      - '**/wiki/**'
-      - '/wiki/**'
-      - 'docker-compose.yml'
-      - '.env'
-      - '*.sh'
 
 env:
   IMAGE_TAG: alexincube/aicotest
