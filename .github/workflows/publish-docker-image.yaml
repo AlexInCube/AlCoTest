@@ -1,20 +1,17 @@
 name: Publish Docker image
 
 on:
-  push:
+  workflow_run:
+    workflows: [ "tests", "linters" ]
+    types: ['completed']
     branches: ['master']
-    paths-ignore:
-      - '**/wiki/**'
-      - '/wiki/**'
-      - 'docker-compose.yml'
-      - '.env'
-      - '*.sh'
 
 env:
   IMAGE_TAG: alexincube/aicotest
 
 jobs:
   push_to_registry:
+    if: github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success'
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
     steps:

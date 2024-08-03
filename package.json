@@ -1,13 +1,17 @@
 {
   "name": "aicbot",
-  "version": "3.3.1",
+  "version": "3.4.0",
   "description": "Discord Bot for playing music",
   "main": "build/main.js",
   "scripts": {
     "build": "tsc",
     "development": "tsc&& cross-env NODE_ENV=development node build/main.js",
     "production": "cross-env NODE_ENV=production node build/main.js",
-    "cookies_grabbing": "cross-env NODE_ENV=development node build/Script_getCookie.js"
+    "cookies_grabbing": "cross-env NODE_ENV=development node build/Script_getCookie.js",
+    "test": "tsc&& cross-env NODE_ENV=development node --test",
+    "eslint": "eslint \"src/**/*.{ts,js}\"",
+    "prettier:format": "prettier --write \"**/*.{ts,js}\"",
+    "prettier:check": "prettier --check \"**/*.{ts,js}\""
   },
   "type": "module",
   "keywords": [],
