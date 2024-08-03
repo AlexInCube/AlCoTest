@@ -33,8 +33,6 @@ import { joinVoiceChannel } from '@discordjs/voice';
 import { generateWarningEmbed } from '../utilities/generateWarningEmbed.js';
 import { generateLyricsEmbed } from './Lyrics.js';
 
-export const queueSongsLimit = 500;
-
 export const loggerPrefixAudioplayer = `Audioplayer`;
 
 const plugins = await LoadPlugins();
@@ -372,17 +370,17 @@ export class AudioPlayerCore {
         if (!queue.textChannel) return;
 
         await queue.textChannel.send({ embeds: [generateAddedPlaylistMessage(playlist)] });
-        if (queue.songs.length >= queueSongsLimit) {
+        if (queue.songs.length >= ENV.BOT_MAX_SONGS_IN_QUEUE) {
           await queue.textChannel.send({
             embeds: [
               generateWarningEmbed(
                 i18next.t('audioplayer:event_add_list_limit', {
-                  queueLimit: queueSongsLimit
+                  queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
                 }) as string
               )
             ]
           });
-          queue.songs.length = queueSongsLimit;
+          queue.songs.length = ENV.BOT_MAX_SONGS_IN_QUEUE;
         }
 
         const player = this.playersManager.get(queue.id);

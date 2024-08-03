@@ -20,7 +20,7 @@ if (fs.existsSync(envPath)) {
 }
 
 const envVariables = z.object({
-  NODE_ENV: z.enum(['development', 'production']),
+  NODE_ENV: z.enum(['development', 'production']).default('development'),
 
   BOT_VERBOSE_LOGGING: z
     .preprocess(
@@ -49,6 +49,8 @@ const envVariables = z.object({
 
   BOT_LANGUAGE: z.enum(['en', 'ru']).optional().default('en'),
   BOT_COMMAND_PREFIX: z.string().min(1),
+
+  BOT_MAX_SONGS_IN_QUEUE: z.coerce.number().positive().min(1).optional().default(500),
 
   MONGO_URI: z.string(),
   MONGO_DATABASE_NAME: z.string(),
