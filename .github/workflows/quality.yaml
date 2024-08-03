@@ -1,4 +1,4 @@
-name: Code Quality
+name: Lint
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: ['**']
 
 jobs:
-  linters:
+  run-linters:
     name: Run linters
     runs-on: ubuntu-latest
 
