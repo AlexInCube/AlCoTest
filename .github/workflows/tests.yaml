@@ -46,5 +46,10 @@ jobs:
           touch .env.development
           echo '${{ secrets.ENV_DEVELOPMENT }}' > .env.development
 
+      - name: Make yt-cookies.json
+        run:
+          touch yt-cookies.json
+          echo '${{ secrets.YOUTUBE_COOKIES }}' > yt-cookies.json
+
       - name: Run tests
         run: pnpm run test

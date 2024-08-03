@@ -21,7 +21,6 @@ export async function getYoutubeCookie() {
 
   const browser = await puppeteer.launch({
     headless: true,
-    slowMo: 2000,
     args: ['--remote-debugging-port=9222', '--remote-debugging-address=0.0.0.0', '--no-sandbox']
   });
   const page = await browser.newPage();
