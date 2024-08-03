@@ -112,17 +112,13 @@ describe('Audio Services', () => {
       assert.ok(song);
     });
 
-    it(
-      'Playlist',
-      { skip: 'Playlists in Apple Music is not correct implemented right now, so skip this test' },
-      async () => {
-        const playlist = await distube.handler.resolve(
-          'https://music.apple.com/us/album/cyberpunk-2077-original-score/1544457960'
-        );
+    it('Playlist', async () => {
+      const playlist = await distube.handler.resolve(
+        'https://music.apple.com/us/album/cyberpunk-2077-original-score/1544457960'
+      );
 
-        assert.ok(playlist);
-      }
-    );
+      assert.ok(playlist);
+    });
   });
 });
 
