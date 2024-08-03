@@ -2,22 +2,14 @@ import { z } from 'zod';
 import * as dotenv from 'dotenv';
 import { loggerSend } from './utilities/logger.js';
 import path from 'path';
-import fs from 'fs';
 
 const loggerPrefixEnv = 'ENV';
 
 const envPath = path.resolve(process.cwd(), `.env.${process.env.NODE_ENV}`);
 
-loggerSend(`Checking environment variables in ${envPath}`, loggerPrefixEnv);
-if (fs.existsSync(envPath)) {
-  dotenv.config({ path: envPath });
-  loggerSend(`Environment variables is found in ${envPath}`, loggerPrefixEnv);
-} else {
-  loggerSend(
-    `Environment variables are not found in ${envPath}, trying to load variables from OS environment variables`,
-    loggerPrefixEnv
-  );
-}
+loggerSend(`Checking environment variables for ${envPath}`, loggerPrefixEnv);
+
+dotenv.config({ path: envPath });
 
 const envVariables = z.object({
   NODE_ENV: z.enum(['development', 'production']),
@@ -74,8 +66,4 @@ const envVariables = z.object({
 
 export const ENV = envVariables.parse(process.env);
 
-if (fs.existsSync(envPath)) {
-  loggerSend(`Environment variables is loaded from ${envPath}`, loggerPrefixEnv);
-} else {
-  loggerSend(`Environment variables is loaded from OS environment variables`, loggerPrefixEnv);
-}
+loggerSend(`Loaded variables from ${envPath}`, loggerPrefixEnv);
