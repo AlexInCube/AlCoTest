@@ -17,8 +17,8 @@ import { truncateString } from '../../utilities/truncateString.js';
 import i18next from 'i18next';
 import { SearchResultType } from '@distube/youtube';
 import ytsr from '@distube/ytsr';
-import { queueSongsLimit } from '../../audioplayer/AudioPlayerCore.js';
 import { generateWarningEmbed } from '../../utilities/generateWarningEmbed.js';
+import { ENV } from '../../EnvironmentVariables.js';
 
 export const services = 'Youtube, Spotify, Soundcloud, Yandex Music, Apple Music, HTTP-stream';
 export default function (): ICommand {
@@ -42,7 +42,7 @@ export default function (): ICommand {
             embeds: [
               generateWarningEmbed(
                 i18next.t('commands:play_error_songs_limit', {
-                  queueLimit: queueSongsLimit
+                  queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
                 }) as string
               )
             ]
@@ -83,7 +83,7 @@ export default function (): ICommand {
             embeds: [
               generateWarningEmbed(
                 i18next.t('commands:play_error_songs_limit', {
-                  queueLimit: queueSongsLimit
+                  queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
                 }) as string
               )
             ],
@@ -162,5 +162,5 @@ function queueSongsIsFull(client: Client, guild: Guild): boolean {
 
   if (!queue) return false;
 
-  return queue.songs.length >= queueSongsLimit;
+  return queue.songs.length >= ENV.BOT_MAX_SONGS_IN_QUEUE;
 }

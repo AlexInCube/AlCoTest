@@ -6,7 +6,7 @@ But in both cases, you need to configure .env file.
 Also you need retrieve token, client id and enable intents on Discord Developer Portal.
 
 - Create file .env.production (if you developer create .env.development)
-- Fill all fields in .env.* If the field is marked as (Optional), you can skip it.
+- Fill all fields in .env.\* If the field is marked as (Optional), you can skip it.
 - (Required) To get Discord Token and enable intents, follow the [Discord Developer Portal](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#discord-developer-portal-required) section.
 - (Optional) To get YouTube cookies and bypass different errors with YouTube, follow the [YouTube](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#-youtube-cookie-optional) section
 - (Optional) To get Spotify Secret and ID, follow the [Spotify](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#spotify-optional) section.
@@ -19,6 +19,7 @@ Also you need retrieve token, client id and enable intents on Discord Developer 
 | `BOT_VERBOSE_LOGGING`        | false                 | The bot will give more info to the console, useful for debugging          | ❌        |
 | `BOT_FFMPEG_LOGGING=false`   | false                 | The bot will give info about FFMPEGto the console, useful for debugging   |          |
 | `BOT_COMMAND_PREFIX`         | //                    | Used only for text commands                                               | ✔️       |
+| `BOT_MAX_SONGS_IN_QUEUE`     | 500                   | Define max songs count per queue                                          | ❌        |
 | `BOT_LANGUAGE`               | en                    | Supported values: en ru                                                   | ❌        |
 | `MONGO_URI`                  | mongodb://mongo:27017 | The public key for sending notifications                                  | ✔️       |
 | `MONGO_DATABASE_NAME`        | aicbot                | Database name in MongoDB                                                  | ✔️       |
@@ -55,7 +56,7 @@ AICoTest/
 > [!NOTE]
 > If you use terminal, Linux or Git Bash etc...,
 > you can copy runInDocker.sh or updateAndRunInDocker.sh to folder with other files.
-> And run command ```sh updateAndRunInDocker.sh``` to update bot image and restart containers.
+> And run command `sh updateAndRunInDocker.sh` to update bot image and restart containers.
 
 # 🖥️ Run locally (if you are not a developer, this way is no sense)
 
