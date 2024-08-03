@@ -47,7 +47,7 @@ jobs:
           echo '${{ secrets.ENV_DEVELOPMENT }}' > .env.development
 
       - name: Make yt-cookies.json
-        run:
+        run: |
           touch yt-cookies.json
           echo '${{ secrets.YOUTUBE_COOKIES }}' > yt-cookies.json
 
