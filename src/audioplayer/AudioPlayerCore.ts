@@ -1,12 +1,4 @@
-import {
-  DisTube,
-  PlayOptions,
-  Queue,
-  RepeatMode,
-  Song,
-  Events as DistubeEvents,
-  Playlist
-} from 'distube';
+import { DisTube, PlayOptions, Queue, RepeatMode, Song, Events as DistubeEvents, Playlist } from 'distube';
 import { AudioPlayersManager } from './AudioPlayersManager.js';
 import { pagination } from '../utilities/pagination/pagination.js';
 import { ButtonStyles, ButtonTypes } from '../utilities/pagination/paginationTypes.js';
@@ -66,7 +58,7 @@ export class AudioPlayerCore {
     options?: PlayOptions
   ) {
     try {
-      const playableThing: Song | Playlist = await this.distube.handler.resolve(song);
+      const playableThing: Song | Playlist = await this.distube.handler.resolve(song)
 
       // I am need manual connect user to a voice channel, because when I am using only Distube "play"
       // method, getVoiceConnection in @discordjs/voice is not working
@@ -80,15 +72,13 @@ export class AudioPlayerCore {
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
       await textChannel.send({
-        embeds: [
-          generateErrorEmbed(`${song}\n${e.message}`, i18next.t('audioplayer:play_error') as string)
-        ]
+        embeds: [generateErrorEmbed(`${song}\n${e.message}`, i18next.t('audioplayer:play_error') as string)]
       });
 
-      const queue = this.distube.getQueue(voiceChannel.guildId);
+      const queue = this.distube.getQueue(voiceChannel.guildId)
 
-      if (!queue) return;
-      if (queue.songs.length === 0) await this.stop(voiceChannel.guild);
+      if (!queue) return
+      if (queue.songs.length === 0) await this.stop(voiceChannel.guild)
     }
   }
 
