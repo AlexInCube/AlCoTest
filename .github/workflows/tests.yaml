@@ -25,6 +25,7 @@ jobs:
     steps:
       - name: Make env file
         run: |
+          pwd
           touch .env.development
           echo '${{ secrets.ENV_DEVELOPMENT }}' > .env.development
 
