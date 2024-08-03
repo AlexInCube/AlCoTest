@@ -1,26 +1,13 @@
 import { z } from 'zod';
 import * as dotenv from 'dotenv';
 import { loggerSend } from './utilities/logger.js';
-import path from 'path';
-import fs from 'fs';
 
 const loggerPrefixEnv = 'ENV';
 
-const envPath = path.resolve(process.cwd(), `.env.${process.env.NODE_ENV}`);
-
-loggerSend(`Checking environment variables in ${envPath}`, loggerPrefixEnv);
-if (fs.existsSync(envPath)) {
-  dotenv.config({ path: envPath });
-  loggerSend(`Environment variables is found in ${envPath}`, loggerPrefixEnv);
-} else {
-  loggerSend(
-    `Environment variables are not found in ${envPath}, trying to load variables from OS environment variables`,
-    loggerPrefixEnv
-  );
-}
+dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
 const envVariables = z.object({
-  NODE_ENV: z.enum(['development', 'production']).default('development'),
+  NODE_ENV: z.enum(['development', 'production']),
 
   BOT_VERBOSE_LOGGING: z
     .preprocess(
@@ -50,8 +37,6 @@ const envVariables = z.object({
   BOT_LANGUAGE: z.enum(['en', 'ru']).optional().default('en'),
   BOT_COMMAND_PREFIX: z.string().min(1),
 
-  BOT_MAX_SONGS_IN_QUEUE: z.coerce.number().positive().min(1).optional().default(500),
-
   MONGO_URI: z.string(),
   MONGO_DATABASE_NAME: z.string(),
 
@@ -76,8 +61,4 @@ const envVariables = z.object({
 
 export const ENV = envVariables.parse(process.env);
 
-if (fs.existsSync(envPath)) {
-  loggerSend(`Environment variables is loaded from ${envPath}`, loggerPrefixEnv);
-} else {
-  loggerSend(`Environment variables is loaded from OS environment variables`, loggerPrefixEnv);
-}
+loggerSend(`Loaded .env.${process.env.NODE_ENV}`, loggerPrefixEnv);

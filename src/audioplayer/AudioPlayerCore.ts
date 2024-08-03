@@ -1,12 +1,4 @@
-import {
-  DisTube,
-  PlayOptions,
-  Queue,
-  RepeatMode,
-  Song,
-  Events as DistubeEvents,
-  Playlist
-} from 'distube';
+import { DisTube, PlayOptions, Queue, RepeatMode, Song, Events as DistubeEvents, Playlist } from 'distube';
 import { AudioPlayersManager } from './AudioPlayersManager.js';
 import { pagination } from '../utilities/pagination/pagination.js';
 import { ButtonStyles, ButtonTypes } from '../utilities/pagination/paginationTypes.js';
@@ -32,6 +24,8 @@ import {
 import { joinVoiceChannel } from '@discordjs/voice';
 import { generateWarningEmbed } from '../utilities/generateWarningEmbed.js';
 import { generateLyricsEmbed } from './Lyrics.js';
+
+export const queueSongsLimit = 500;
 
 export const loggerPrefixAudioplayer = `Audioplayer`;
 
@@ -64,7 +58,7 @@ export class AudioPlayerCore {
     options?: PlayOptions
   ) {
     try {
-      const playableThing: Song | Playlist = await this.distube.handler.resolve(song);
+      const playableThing: Song | Playlist = await this.distube.handler.resolve(song)
 
       // I am need manual connect user to a voice channel, because when I am using only Distube "play"
       // method, getVoiceConnection in @discordjs/voice is not working
@@ -78,15 +72,13 @@ export class AudioPlayerCore {
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
       await textChannel.send({
-        embeds: [
-          generateErrorEmbed(`${song}\n${e.message}`, i18next.t('audioplayer:play_error') as string)
-        ]
+        embeds: [generateErrorEmbed(`${song}\n${e.message}`, i18next.t('audioplayer:play_error') as string)]
       });
 
-      const queue = this.distube.getQueue(voiceChannel.guildId);
+      const queue = this.distube.getQueue(voiceChannel.guildId)
 
-      if (!queue) return;
-      if (queue.songs.length === 0) await this.stop(voiceChannel.guild);
+      if (!queue) return
+      if (queue.songs.length === 0) await this.stop(voiceChannel.guild)
     }
   }
 
@@ -370,17 +362,17 @@ export class AudioPlayerCore {
         if (!queue.textChannel) return;
 
         await queue.textChannel.send({ embeds: [generateAddedPlaylistMessage(playlist)] });
-        if (queue.songs.length >= ENV.BOT_MAX_SONGS_IN_QUEUE) {
+        if (queue.songs.length >= queueSongsLimit) {
           await queue.textChannel.send({
             embeds: [
               generateWarningEmbed(
                 i18next.t('audioplayer:event_add_list_limit', {
-                  queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
+                  queueLimit: queueSongsLimit
                 }) as string
               )
             ]
           });
-          queue.songs.length = ENV.BOT_MAX_SONGS_IN_QUEUE;
+          queue.songs.length = queueSongsLimit;
         }
 
         const player = this.playersManager.get(queue.id);
