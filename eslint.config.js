@@ -9,7 +9,8 @@ export default tseslint.config(eslint.configs.recommended, ...tseslint.configs.r
   plugins: {
     'typescript-eslint': ParserTypeScript,
     prettier: prettierPlugin
-  }, ignores: ['build', 'node_modules', 'coverage', 'eslint.config.js'],
+  },
+  ignores: ['build', 'node_modules', 'coverage', 'eslint.config.js'],
   languageOptions: {
     globals: {
       ...globals.node,
@@ -20,12 +21,12 @@ export default tseslint.config(eslint.configs.recommended, ...tseslint.configs.r
     }
   },
   rules: {
-      ...prettierPlugin.configs.recommended.rules,
-      ...eslintConfigPrettier.rules,
+    ...prettierPlugin.configs.recommended.rules,
+    ...eslintConfigPrettier.rules,
     '@typescript-eslint/no-var-requires': 0,
     '@typescript-eslint/no-non-null-assertion': 0,
-    '@typescript-eslint/no-explicit-any': "warn",
+    '@typescript-eslint/no-explicit-any': 'warn',
     'prettier/prettier': ['error', { endOfLine: 'auto' }],
-    'no-constant-binary-expression': "off"
+    'no-constant-binary-expression': 'off'
   }
 });
