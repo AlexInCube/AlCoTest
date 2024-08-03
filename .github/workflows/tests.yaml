@@ -23,6 +23,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Make env file
+        run: |
+          pwd
+          touch .env.development
+          echo '${{ secrets.ENV_DEVELOPMENT }}' > .env.development
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -39,12 +45,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Make env file
-        run: |
-          pwd
-          touch .env.development
-          echo '${{ secrets.ENV_DEVELOPMENT }}' > .env.development
 
       - name: Run tests
         run: pnpm run test
