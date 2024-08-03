@@ -23,17 +23,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Make env file
         uses: SpicyPizza/create-envfile@v2.0
         with:
+          envkey_DEBUG: true
           envkey_SECRET_KEY: ${{ secrets.ENV_DEVELOPMENT }}
           file_name: .env.development
           fail_on_empty: true
           sort_keys: false
-          directory: '${{ github.workspace }}/AlCoTest/AlCoTest'
+
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
