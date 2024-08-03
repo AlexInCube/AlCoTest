@@ -1,11 +1,12 @@
 import * as assert from 'node:assert';
-import { describe, it, before } from 'node:test';
+import { describe, it, before, after } from 'node:test';
 import { DisTube } from 'distube';
 import { Client } from 'discord.js';
 import { clientIntents } from '../../ClientIntents.js';
 import { LoadPlugins } from '../LoadPlugins.js';
 import '../../EnvironmentVariables.js';
 import { loggerWarn } from '../../utilities/logger.js';
+import * as process from 'node:process';
 
 let distube: DisTube;
 const djsClient: Client = new Client({ intents: clientIntents });
@@ -123,4 +124,10 @@ describe('Audio Services', () => {
       }
     );
   });
+});
+
+after(() => {
+  setTimeout(() => {
+    process.exit(0);
+  }, 1000);
 });
