@@ -6,9 +6,10 @@ import { LoadPlugins } from '../LoadPlugins.js';
 import '../../EnvironmentVariables.js';
 import { loggerWarn } from '../../utilities/logger.js';
 import * as process from 'node:process';
+import { clientIntents } from '../../ClientIntents.js';
 
 let distube: DisTube;
-const djsClient: Client = new Client({ intents: [] });
+const djsClient: Client = new Client({ intents: clientIntents });
 
 before(async () => {
   loggerWarn('If you want to run all this tests successfully, provide all optional .env variables');
