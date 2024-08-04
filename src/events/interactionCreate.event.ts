@@ -1,4 +1,4 @@
-import { BotEvent } from '../Types.js';
+import { BotEvent } from '../DiscordTypes.js';
 import { slashCommandHandler } from './interactionHandlers/slashCommandHandler.js';
 import { autocompleteHandler } from './interactionHandlers/autocompleteHandler.js';
 import { Client, Events, Interaction } from 'discord.js';

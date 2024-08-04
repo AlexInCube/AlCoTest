@@ -1,5 +1,6 @@
 import { ICommand } from '../../CommandTypes.js';
 import {
+  Guild,
   GuildMember,
   Message,
   PermissionsBitField,
@@ -11,6 +12,9 @@ import { GroupAudio } from './AudioTypes.js';
 import { isAudioFile } from '../../audioplayer/util/isAudioFile.js';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
 import i18next from 'i18next';
+import { queueSongsIsFull } from '../../audioplayer/util/queueSongsIsFull.js';
+import { generateWarningEmbed } from '../../utilities/generateWarningEmbed.js';
+import { ENV } from '../../EnvironmentVariables.js';
 
 const audioFormats = { formats: 'mp3/wav/ogg' };
 
@@ -20,6 +24,19 @@ export default function (): ICommand {
       name: 'playfile',
       description: i18next.t('commands:play_file_desc'),
       execute: async (message: Message) => {
+        if (queueSongsIsFull(message.client, message.guild as Guild)) {
+          await message.reply({
+            embeds: [
+              generateWarningEmbed(
+                i18next.t('commands:play_error_songs_limit', {
+                  queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
+                }) as string
+              )
+            ]
+          });
+          return;
+        }
+
         const musicFile = message.attachments.first();
 
         if (!musicFile) {
@@ -63,6 +80,20 @@ export default function (): ICommand {
             .setRequired(true)
         ),
       execute: async (interaction) => {
+        if (queueSongsIsFull(interaction.client, interaction.guild as Guild)) {
+          await interaction.reply({
+            embeds: [
+              generateWarningEmbed(
+                i18next.t('commands:play_error_songs_limit', {
+                  queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
+                }) as string
+              )
+            ],
+            ephemeral: true
+          });
+          return;
+        }
+
         const musicFile = interaction.options.getAttachment('file', true);
 
         if (!isAudioFile(musicFile.name)) {

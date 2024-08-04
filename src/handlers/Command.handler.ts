@@ -3,7 +3,7 @@ import { loggerError, loggerSend, loggerWarn } from '../utilities/logger.js';
 import { ICommand, ICommandGroup, SlashBuilder } from '../CommandTypes.js';
 import * as fs from 'fs';
 import * as path from 'path';
-import '../Types.js';
+import '../DiscordTypes.js';
 import getDirName from '../utilities/getDirName.js';
 import { ENV } from '../EnvironmentVariables.js';
 

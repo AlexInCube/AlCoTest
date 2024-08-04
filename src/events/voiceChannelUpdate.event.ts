@@ -1,4 +1,4 @@
-import { BotEvent } from '../Types';
+import { BotEvent } from '../DiscordTypes.js';
 import { Client, Events, VoiceState } from 'discord.js';
 import { AudioPlayerEventVoiceChannelUpdate } from '../audioplayer/eventsHandlers/AudioPlayerEventVoiceChannelUpdate.js';
 

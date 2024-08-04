@@ -1,5 +1,5 @@
 import { Client } from 'discord.js';
-import { BotEvent } from '../Types.js';
+import { BotEvent } from '../DiscordTypes.js';
 import { loggerSend } from '../utilities/logger.js';
 import getDirName from '../utilities/getDirName.js';
 import fs from 'node:fs/promises';

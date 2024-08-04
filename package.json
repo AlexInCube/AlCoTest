@@ -1,6 +1,6 @@
 {
   "name": "aicbot",
-  "version": "3.4.0",
+  "version": "3.5.0-dev",
   "description": "Discord Bot for playing music",
   "main": "build/main.js",
   "scripts": {

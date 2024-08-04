@@ -1,5 +1,3 @@
-import { MongoCheckConnection } from '../../handlers/Mongo.handler.js';
-import { getGuildOption } from '../../handlers/MongoSchemas/SchemaGuild.js';
 import { ICommand } from '../../CommandTypes.js';
 import { generateSpecificCommandHelp } from '../../commands/info/help.command.js';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
@@ -12,6 +10,7 @@ import { loggerError } from '../../utilities/logger.js';
 import i18next from 'i18next';
 import { loggerPrefixCommandHandler } from '../../handlers/Command.handler.js';
 import { ENV } from '../../EnvironmentVariables.js';
+import { getGuildPrefix } from '../../schemas/SchemaGuild.js';
 
 export async function textCommandsHandler(client: Client, message: Message) {
   try {
@@ -21,10 +20,8 @@ export async function textCommandsHandler(client: Client, message: Message) {
 
     if (!message.content.startsWith(ENV.BOT_COMMAND_PREFIX)) {
       if (message.guild) {
-        if (MongoCheckConnection()) {
-          const guildPrefix = await getGuildOption(message.guild, 'prefix');
-          if (guildPrefix) prefix = guildPrefix;
-        }
+        const guildPrefix = await getGuildPrefix(message.guild);
+        if (guildPrefix) prefix = guildPrefix;
       }
     }
 

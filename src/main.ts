@@ -10,7 +10,7 @@ import loadLocale from './locales/Locale.js';
 
 await loadLocale();
 
-import { handlersLoad } from './handlers/handlersLoad.js';
+import { handlersLoad } from './handlersLoad.js';
 
 const client = new Client<true>({
   intents: clientIntents,

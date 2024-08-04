@@ -9,9 +9,11 @@ import {
   PermissionsBitField,
   SlashCommandBuilder
 } from 'discord.js';
-import '../../Types.js';
+import '../../DiscordTypes.js';
 import { GroupInfo } from './InfoTypes.js';
 import i18next from 'i18next';
+import { ENV } from '../../EnvironmentVariables.js';
+import { getGuildPrefix } from '../../schemas/SchemaGuild.js';
 
 export default function (): ICommand {
   return {
@@ -42,7 +44,7 @@ export default function (): ICommand {
         } else {
           // Если указана конкретная команда
           await message.reply({
-            embeds: [await generateCommandsEmbedList(message.client)],
+            embeds: [await generateCommandsEmbedList(message.client, message.guild)],
             allowedMentions: { users: [] }
           });
         }
@@ -81,7 +83,7 @@ export default function (): ICommand {
           });
         } else {
           await interaction.reply({
-            embeds: [await generateCommandsEmbedList(interaction.client)],
+            embeds: [await generateCommandsEmbedList(interaction.client, interaction.guild)],
             ephemeral: true
           });
         }
@@ -188,11 +190,20 @@ export function generateSpecificCommandHelp(
   return helpEmbed;
 }
 
-export async function generateCommandsEmbedList(client: Client): Promise<EmbedBuilder> {
+export async function generateCommandsEmbedList(
+  client: Client,
+  guild: Guild | null
+): Promise<EmbedBuilder> {
+  let guildPrefix: string | undefined = undefined;
+  if (guild) guildPrefix = await getGuildPrefix(guild);
+
   const helpEmbed = new EmbedBuilder()
     .setColor('#436df7')
-    .setTitle(i18next.t('commands:help_about_commands'))
-    .setDescription(`Bot github: https://github.com/AlexInCube/AlCoTest`);
+    .setTitle(i18next.t('commands:help_about_commands')).setDescription(`
+    ${i18next.t('commands:help_embed_description', { prefix: ENV.BOT_COMMAND_PREFIX, interpolation: { escapeValue: false } })} ${guildPrefix ? i18next.t('commands:help_embed_description_server_prefix', { prefix: guildPrefix, interpolation: { escapeValue: false } }) : ''}
+    \n
+    GitHub: https://github.com/AlexInCube/AlCoTest
+    `);
 
   client.commandsGroups.forEach((group) => {
     let commandsList = '';

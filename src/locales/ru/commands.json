@@ -13,6 +13,8 @@
   "help_permissions_for_user": "Права требуемые для пользователя",
   "help_permissions_not_required": "Права не требуются",
   "help_about_commands": "Справка о командах",
+  "help_embed_description": "Вы можете использовать текстовые и слэш-команды.\nДля текстовых команд глобальный префикс {{prefix}}",
+  "help_embed_description_server_prefix": "и у сервера префикс {{prefix}}",
   "invite_desc": "Ссылка на приглашение этого бота",
   "play_desc": "Проигрывает музыку указанную пользователем",
   "play_arg_link": "Ссылка с {{services}} или любой текст",
