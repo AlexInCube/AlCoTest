@@ -1,5 +1,6 @@
 import { Client, VoiceState } from 'discord.js';
 import { isVoiceChannelEmpty } from 'distube';
+import { getGuildOptionLeaveOnEmpty } from '../../schemas/SchemaGuild.js';
 
 export async function AudioPlayerEventVoiceChannelUpdate(
   client: Client,
@@ -8,6 +9,8 @@ export async function AudioPlayerEventVoiceChannelUpdate(
 ) {
   const messagePlayer = client.audioPlayer.playersManager.get(oldState.guild.id);
   if (!messagePlayer) return;
+
+  if (!await getGuildOptionLeaveOnEmpty(oldState.guild.id)) return;
 
   if (isVoiceChannelEmpty(oldState)) {
     await messagePlayer.startAfkTimer();

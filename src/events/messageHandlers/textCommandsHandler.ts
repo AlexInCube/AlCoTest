@@ -10,7 +10,7 @@ import { loggerError } from '../../utilities/logger.js';
 import i18next from 'i18next';
 import { loggerPrefixCommandHandler } from '../../handlers/Command.handler.js';
 import { ENV } from '../../EnvironmentVariables.js';
-import { getGuildPrefix } from '../../schemas/SchemaGuild.js';
+import { getGuildOptionPrefix } from '../../schemas/SchemaGuild.js';
 
 export async function textCommandsHandler(client: Client, message: Message) {
   try {
@@ -20,7 +20,7 @@ export async function textCommandsHandler(client: Client, message: Message) {
 
     if (!message.content.startsWith(ENV.BOT_COMMAND_PREFIX)) {
       if (message.guild) {
-        const guildPrefix = await getGuildPrefix(message.guild);
+        const guildPrefix = await getGuildOptionPrefix(message.guild.id);
         if (guildPrefix) prefix = guildPrefix;
       }
     }

@@ -9,6 +9,8 @@ export default async function mongoHandler() {
   mongoose.set('strictQuery', 'throw');
   mongoose.pluralize(null);
 
+  loggerSend("Connecting to MongoDB, please wait",  loggerPrefixMongo);
+
   try {
     await mongoose.connect(`${MONGO_URI}/${ENV.MONGO_DATABASE_NAME}`);
     loggerSend('Connection was successful', loggerPrefixMongo);

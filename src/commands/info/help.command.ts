@@ -13,7 +13,7 @@ import '../../DiscordTypes.js';
 import { GroupInfo } from './InfoTypes.js';
 import i18next from 'i18next';
 import { ENV } from '../../EnvironmentVariables.js';
-import { getGuildPrefix } from '../../schemas/SchemaGuild.js';
+import { getGuildOptionPrefix } from '../../schemas/SchemaGuild.js';
 
 export default function (): ICommand {
   return {
@@ -195,7 +195,7 @@ export async function generateCommandsEmbedList(
   guild: Guild | null
 ): Promise<EmbedBuilder> {
   let guildPrefix: string | undefined = undefined;
-  if (guild) guildPrefix = await getGuildPrefix(guild);
+  if (guild) guildPrefix = await getGuildOptionPrefix(guild.id);
 
   const helpEmbed = new EmbedBuilder()
     .setColor('#436df7')

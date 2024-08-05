@@ -9,7 +9,7 @@ import { ENV } from '../EnvironmentVariables.js';
 import { loggerError } from '../utilities/logger.js';
 import { generateSimpleEmbed } from '../utilities/generateSimpleEmbed.js';
 
-export class MessagePlayer {
+export class PlayerInstance {
   private readonly client: Client;
   // TextChannel where player was created
   readonly textChannel: GuildTextBasedChannel;
@@ -37,11 +37,14 @@ export class MessagePlayer {
   private afkTime = 20000; // in ms
   private afkTimer: NodeJS.Timeout | undefined;
 
+  private leaveOnEmpty: boolean;
+
   constructor(client: Client, txtChannel: GuildTextBasedChannel, queue: Queue) {
     this.client = client;
     this.textChannel = txtChannel;
     this.queue = queue;
     this.buttonsHandler = new MessagePlayerButtonsHandler(this.client, this.textChannel);
+    this.leaveOnEmpty = false;
   }
 
   async startAfkTimer() {
@@ -237,12 +240,27 @@ export class MessagePlayer {
       this.queue = queue;
     }
 
-    if (state === 'waiting') {
+    if (this.state === 'waiting' && this.leaveOnEmpty) {
       await this.startFinishTimer();
     } else if (queue) {
       await this.stopFinishTimer();
     }
 
+    await this.update();
+  }
+
+  async setLeaveOnEmpty(mode: boolean) {
+    this.embedBuilder.setLeaveOnEmpty(mode);
+
+    if (this.state === 'waiting') {
+      if (mode) {
+        await this.startFinishTimer();
+      }
+      if (!mode) {
+        await this.stopAfkTimer();
+        await this.stopFinishTimer();
+      }
+    }
     await this.update();
   }
 

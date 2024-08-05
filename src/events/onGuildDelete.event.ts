@@ -6,7 +6,7 @@ import { Events } from 'discord.js';
 const event: BotEvent = {
   name: Events.GuildDelete,
   execute: async (client: Client, guild: Guild) => {
-    await deleteGuildSettings(guild);
+    await deleteGuildSettings(guild.id);
   }
 };
 

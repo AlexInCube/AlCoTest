@@ -6,7 +6,7 @@ import { ENV } from './EnvironmentVariables.js';
 import path from 'path';
 import { pathToFileURL } from 'url';
 
-const loggerPrefixHandlersManager = 'Handlers';
+const loggerPrefixHandlersManager = 'handlers';
 export async function handlersLoad(client: Client): Promise<void> {
   try {
     const handlersDir = path.join(getDirName(import.meta.url), 'handlers');

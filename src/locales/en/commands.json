@@ -71,5 +71,8 @@
   "lyrics_desc": "Searching lyrics",
   "lyrics_arg_query": "title of song",
   "lyrics_embed_text_not_correct": "The text may not be correct",
-  "lyrics_embed_lyrics_not_found": "Lyrics not found"
+  "lyrics_embed_lyrics_not_found": "Lyrics not found",
+  "247_desc": "Toggle 24/7 mode. If enabled, bot will stay in channel when no remain songs to play.",
+  "247_enabled": "Mode 24/7 is activated",
+  "247_disabled": "Mode 24/7 is disabled"
 }

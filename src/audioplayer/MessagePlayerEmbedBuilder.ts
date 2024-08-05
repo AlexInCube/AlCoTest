@@ -19,12 +19,14 @@ export class MessagePlayerEmbedBuilder extends EmbedBuilder {
   private thumbnailURL: string | null = null;
   private formattedDuration = '00:00';
   private sourceIcon: AudioSourceIcons;
+  private leaveOnEmpty: boolean;
 
   constructor() {
     super();
     this.setPlayerState('loading');
     this.setNextSong(undefined);
     this.sourceIcon = AudioSourceIcons.other;
+    this.leaveOnEmpty = true;
   }
 
   update() {
@@ -95,11 +97,15 @@ export class MessagePlayerEmbedBuilder extends EmbedBuilder {
 
     switch (this.playerState) {
       case 'waiting':
-        this.setAuthor({ name: `💿 ${i18next.t('audioplayer:player_embed_state_waiting')} 💿` })
-          .setColor('#43f7f7')
-          .setURL(null)
-          .setTitle(null)
-          .setThumbnail(null);
+        {
+          this.setAuthor({
+            name: `💿 ${this.leaveOnEmpty ? i18next.t('audioplayer:player_embed_state_waiting_leave_on_empty_true') : i18next.t('audioplayer:player_embed_state_waiting_leave_on_empty_false')} 💿`
+          })
+            .setColor('#43f7f7')
+            .setURL(null)
+            .setTitle(null)
+            .setThumbnail(null);
+        }
         break;
       case 'pause':
         this.setAuthor({
@@ -166,5 +172,9 @@ export class MessagePlayerEmbedBuilder extends EmbedBuilder {
     } else {
       this.formattedDuration = formatSecondsToTime(formattedDuration);
     }
+  }
+
+  setLeaveOnEmpty(mode: boolean) {
+    this.leaveOnEmpty = mode;
   }
 }
