@@ -49,14 +49,14 @@ export async function getGuildOptionPrefix(guildID: string): Promise<string> {
 }
 
 export async function setGuildOptionPrefix(guildID: string, prefix: string): Promise<void> {
-  let guild: GuildModelClass = await getOrCreateGuildSettings(guildID);
-  guild.set({ options: { prefix: prefix } })
+  const guild: GuildModelClass = await getOrCreateGuildSettings(guildID);
+  guild.set({ options: { prefix: prefix } });
   await guild.save();
 }
 
 export async function setGuildOptionLeaveOnEmpty(guildID: string, mode: boolean): Promise<void> {
-  let guild: GuildModelClass = await getOrCreateGuildSettings(guildID);
-  guild.set({ options: { leaveOnEmpty: mode } })
+  const guild: GuildModelClass = await getOrCreateGuildSettings(guildID);
+  guild.set({ options: { leaveOnEmpty: mode } });
   await guild.save();
 }
 
@@ -65,9 +65,12 @@ export async function getGuildOptionLeaveOnEmpty(guildID: string): Promise<boole
   return guild.options.leaveOnEmpty;
 }
 
-export async function setGuildOptionVoiceStatus(guildID: string, voiceStatus: boolean): Promise<void> {
-  let guild: GuildModelClass = await getOrCreateGuildSettings(guildID);
-  guild.set({ options: { voiceStatus: voiceStatus } })
+export async function setGuildOptionVoiceStatus(
+  guildID: string,
+  voiceStatus: boolean
+): Promise<void> {
+  const guild: GuildModelClass = await getOrCreateGuildSettings(guildID);
+  guild.set({ options: { voiceStatus: voiceStatus } });
   await guild.save();
 }
 

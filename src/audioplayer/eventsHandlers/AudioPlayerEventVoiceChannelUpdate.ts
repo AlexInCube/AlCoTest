@@ -10,7 +10,7 @@ export async function AudioPlayerEventVoiceChannelUpdate(
   const messagePlayer = client.audioPlayer.playersManager.get(oldState.guild.id);
   if (!messagePlayer) return;
 
-  if (!await getGuildOptionLeaveOnEmpty(oldState.guild.id)) return;
+  if (!(await getGuildOptionLeaveOnEmpty(oldState.guild.id))) return;
 
   if (isVoiceChannelEmpty(oldState)) {
     await messagePlayer.startAfkTimer();

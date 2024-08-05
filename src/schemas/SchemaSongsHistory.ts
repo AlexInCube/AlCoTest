@@ -9,8 +9,8 @@ interface ISongHistoryUnit {
 const SchemaSongsHistoryUnit = new Schema<ISongHistoryUnit>({
   name: String,
   timestamp: Date,
-  requester: String,
-})
+  requester: String
+});
 
 export interface ISchemaSongsHistory {
   songsHistory: Array<ISongHistoryUnit>;
@@ -22,4 +22,3 @@ export const SchemaSongsHistoryList = new Schema<ISchemaSongsHistory>({
 
 const SongsHistoryListModel = model<ISchemaSongsHistory>('song_history', SchemaSongsHistoryList);
 class SongsHistoryListModelClass extends SongsHistoryListModel {}
-

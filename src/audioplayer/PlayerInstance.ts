@@ -250,6 +250,7 @@ export class PlayerInstance {
   }
 
   async setLeaveOnEmpty(mode: boolean) {
+    this.leaveOnEmpty = mode;
     this.embedBuilder.setLeaveOnEmpty(mode);
 
     if (this.state === 'waiting') {
