@@ -353,7 +353,8 @@ export class AudioPlayersManager {
 
         const player = this.playersManager.get(queue.id);
         if (player) {
-          player.embedBuilder.setLeaveOnEmpty(await getGuildOptionLeaveOnEmpty(queue.id));
+          const leaveOnEmpty = await getGuildOptionLeaveOnEmpty(queue.id);
+          await player.setLeaveOnEmpty(leaveOnEmpty);
           await player.init();
         }
       })

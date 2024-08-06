@@ -27,14 +27,14 @@ importers:
         specifier: ^2.0.2
         version: 2.0.2(distube@5.0.2(@discordjs/voice@0.17.0(opusscript@0.1.1))(discord.js@14.15.3))
       '@distube/youtube':
-        specifier: ^1.0.2
-        version: 1.0.2(distube@5.0.2(@discordjs/voice@0.17.0(opusscript@0.1.1))(discord.js@14.15.3))
+        specifier: ^1.0.4
+        version: 1.0.4(distube@5.0.2(@discordjs/voice@0.17.0(opusscript@0.1.1))(discord.js@14.15.3))
       '@distube/yt-dlp':
         specifier: ^2.0.1
         version: 2.0.1(distube@5.0.2(@discordjs/voice@0.17.0(opusscript@0.1.1))(discord.js@14.15.3))
       '@distube/ytdl-core':
-        specifier: ^4.14.1
-        version: 4.14.1
+        specifier: ^4.14.3
+        version: 4.14.3
       '@distube/ytsr':
         specifier: ^2.0.4
         version: 2.0.4
@@ -212,8 +212,8 @@ packages:
     peerDependencies:
       distube: '5'
 
-  '@distube/youtube@1.0.2':
-    resolution: {integrity: sha512-vNOE7kGhg3pC87iqT3Q4eu+yTae8Nr3J1XDR67YMH9HAg1RsPjwM7TvfabZoGxIUiPl4ua/PG6s8Nfxf2U9cxQ==}
+  '@distube/youtube@1.0.4':
+    resolution: {integrity: sha512-7iQbtLSv4kpgiX2XtP28CB3z2kgaxw6F8+jNu1RztnW7ckPK3N/8Ayl1yh41YpbrRIHbNMzIVTwguYG0s2ZOuA==}
     peerDependencies:
       distube: '5'
 
@@ -222,8 +222,8 @@ packages:
     peerDependencies:
       distube: '5'
 
-  '@distube/ytdl-core@4.14.1':
-    resolution: {integrity: sha512-ymtw6IZyyUAzE+9Nbnhxa7PcFkPI+5OF9ckJZtqnI7gHlEH41jew6Z/im7mOAhmmiy6ppYXoAL0GhJIGRSGR1g==}
+  '@distube/ytdl-core@4.14.3':
+    resolution: {integrity: sha512-z6i5EVGEuKhuvuRNyIqafBSs5aRA28HssnWehCRhEtYrxeFgXImfmpKTjUusHYU5vQt1swSVPVb2JCd22P0CPA==}
     engines: {node: '>=14.0'}
 
   '@distube/ytpl@1.2.1':
@@ -1906,9 +1906,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@distube/youtube@1.0.2(distube@5.0.2(@discordjs/voice@0.17.0(opusscript@0.1.1))(discord.js@14.15.3))':
+  '@distube/youtube@1.0.4(distube@5.0.2(@discordjs/voice@0.17.0(opusscript@0.1.1))(discord.js@14.15.3))':
     dependencies:
-      '@distube/ytdl-core': 4.14.1
+      '@distube/ytdl-core': 4.14.3
       '@distube/ytpl': 1.2.1
       '@distube/ytsr': 2.0.4
       distube: 5.0.2(@discordjs/voice@0.17.0(opusscript@0.1.1))(discord.js@14.15.3)
@@ -1921,7 +1921,7 @@ snapshots:
       distube: 5.0.2(@discordjs/voice@0.17.0(opusscript@0.1.1))(discord.js@14.15.3)
       undici: 6.19.5
 
-  '@distube/ytdl-core@4.14.1':
+  '@distube/ytdl-core@4.14.3':
     dependencies:
       http-cookie-agent: 6.0.5(tough-cookie@4.1.4)(undici@5.28.4)
       m3u8stream: 0.8.6

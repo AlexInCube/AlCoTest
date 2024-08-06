@@ -43,7 +43,7 @@ export async function deleteGuildSettings(guildID: string): Promise<void> {
 
 export async function getGuildOptionPrefix(guildID: string): Promise<string> {
   const guild: GuildModelClass = await getOrCreateGuildSettings(guildID);
-  return guild.options.prefix;
+  return guild.options.prefix ?? ENV.BOT_COMMAND_PREFIX;
 }
 
 export async function setGuildOptionPrefix(guildID: string, prefix: string): Promise<void> {
@@ -60,5 +60,5 @@ export async function setGuildOptionLeaveOnEmpty(guildID: string, mode: boolean)
 
 export async function getGuildOptionLeaveOnEmpty(guildID: string): Promise<boolean> {
   const guild: GuildModelClass = await getOrCreateGuildSettings(guildID);
-  return guild.options.leaveOnEmpty;
+  return guild.options.leaveOnEmpty ?? true;
 }

@@ -1,6 +1,6 @@
 {
   "name": "aicbot",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "description": "Discord Bot for playing music",
   "main": "build/main.js",
   "scripts": {
@@ -27,9 +27,9 @@
     "@distube/file": "^1.0.1",
     "@distube/soundcloud": "^2.0.3",
     "@distube/spotify": "^2.0.2",
-    "@distube/youtube": "^1.0.2",
+    "@distube/youtube": "^1.0.4",
     "@distube/yt-dlp": "^2.0.1",
-    "@distube/ytdl-core": "^4.14.1",
+    "@distube/ytdl-core": "^4.14.3",
     "@distube/ytsr": "^2.0.4",
     "@eslint/js": "^9.8.0",
     "cross-env": "7.0.3",
