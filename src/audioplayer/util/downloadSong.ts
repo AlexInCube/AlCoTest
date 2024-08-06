@@ -110,12 +110,12 @@ export function DownloadSongErrorGetLocale(errorMessage: DownloadSongMessage) {
     });
   }
 
-  const localeToken = `commands:download_song_error_${errorMessage}`
-  const locale =  i18next.t(localeToken)
+  const localeToken = `commands:download_song_error_${errorMessage}`;
+  const locale = i18next.t(localeToken);
 
-  if (localeToken !== locale){
-    return locale
+  if (localeToken !== locale) {
+    return locale;
   }
 
-  return errorMessage
+  return errorMessage;
 }

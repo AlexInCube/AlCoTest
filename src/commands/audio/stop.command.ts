@@ -1,6 +1,7 @@
 import { ICommand } from '../../CommandTypes.js';
 import {
-  EmbedBuilder, Guild,
+  EmbedBuilder,
+  Guild,
   GuildMember,
   Message,
   PermissionsBitField,

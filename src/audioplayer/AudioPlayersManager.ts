@@ -412,7 +412,7 @@ export class AudioPlayersManager {
           errorName = song.name!;
         }
 
-        if (queue.songs.length === 0) await this.stop(queue.id)
+        if (queue.songs.length === 0) await this.stop(queue.id);
 
         await queue.textChannel?.send({
           embeds: [generateErrorEmbed(errorMessage, errorName)]
