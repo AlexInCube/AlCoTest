@@ -87,21 +87,21 @@ export class AudioPlayersManager {
       const queue = this.distube.getQueue(voiceChannel.guildId);
 
       if (!queue) return;
-      if (queue.songs.length === 0) await this.stop(voiceChannel.guild);
+      if (queue.songs.length === 0) await this.stop(voiceChannel.guild.id);
     }
   }
 
-  async stop(guild: Guild) {
-    const queue = this.distube.getQueue(guild);
+  async stop(guildId: string) {
+    const queue = this.distube.getQueue(guildId);
 
     if (queue) {
       await queue.stop();
       queue.voice.leave();
     } else {
-      this.distube.voices.leave(guild);
+      this.distube.voices.leave(guildId);
     }
 
-    await this.playersManager.remove(guild.id);
+    await this.playersManager.remove(guildId);
   }
 
   async pause(guild: Guild) {
@@ -404,13 +404,15 @@ export class AudioPlayersManager {
         if (queue._next || queue._prev || queue.stopped || queue.songs.length > 1) return;
         await this.playersManager.get(queue.id)?.setState('waiting');
       })
-      .on(DistubeEvents.ERROR, async (error, queue) => {
+      .on(DistubeEvents.ERROR, async (error, queue, song) => {
         let errorName = `ERROR`;
         const errorMessage = `${error.name} + \n\n + ${error.message}`;
 
-        if (queue.songs.length >= 1) {
-          errorName = queue.songs[0].name!;
+        if (song) {
+          errorName = song.name!;
         }
+
+        if (queue.songs.length === 0) await this.stop(queue.id)
 
         await queue.textChannel?.send({
           embeds: [generateErrorEmbed(errorMessage, errorName)]

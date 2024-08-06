@@ -50,7 +50,7 @@ export class PlayerInstance {
   async startAfkTimer() {
     try {
       this.afkTimer = setTimeout(async () => {
-        await this.client.audioPlayer.stop(this.textChannel.guild);
+        await this.client.audioPlayer.stop(this.textChannel.guild.id);
         await this.textChannel.send({
           embeds: [generateSimpleEmbed(i18next.t('audioplayer:event_empty') as string)]
         });
@@ -79,7 +79,7 @@ export class PlayerInstance {
           // loggerSend('try to stop player on cooldown')
           if (queue) return;
           if (checkBotInVoice(this.textChannel.guild)) {
-            await this.client.audioPlayer.stop(this.textChannel.guild);
+            await this.client.audioPlayer.stop(this.textChannel.guild.id);
             await this.textChannel.send({
               embeds: [generateSimpleEmbed(i18next.t('audioplayer:event_finish_time') as string)]
             });

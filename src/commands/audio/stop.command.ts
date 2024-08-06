@@ -1,6 +1,6 @@
 import { ICommand } from '../../CommandTypes.js';
 import {
-  EmbedBuilder,
+  EmbedBuilder, Guild,
   GuildMember,
   Message,
   PermissionsBitField,
@@ -21,7 +21,7 @@ export default function (): ICommand {
       description: i18next.t('commands:stop_desc'),
       execute: async (message: Message) => {
         await AudioCommandWrapperText(message, async () => {
-          await message.client.audioPlayer.stop(message.guild!);
+          await message.client.audioPlayer.stop((message.guild as Guild).id);
           await message.reply({ embeds: [generateEmbedAudioPlayerStop(message.member!)] });
         });
       }
@@ -32,7 +32,7 @@ export default function (): ICommand {
         .setDescription(i18next.t('commands:stop_desc')),
       execute: async (interaction) => {
         await AudioCommandWrapperInteraction(interaction, async () => {
-          await interaction.client.audioPlayer.stop(interaction.guild!);
+          await interaction.client.audioPlayer.stop((interaction.guild as Guild).id);
           await interaction.reply({
             embeds: [generateEmbedAudioPlayerStop(interaction.member as GuildMember)]
           });

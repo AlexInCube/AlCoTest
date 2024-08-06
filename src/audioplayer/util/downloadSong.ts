@@ -109,5 +109,13 @@ export function DownloadSongErrorGetLocale(errorMessage: DownloadSongMessage) {
       maxDownloadSize: maxDownloadSizeMB
     });
   }
-  return i18next.t(`commands:download_song_error_${errorMessage}`);
+
+  const localeToken = `commands:download_song_error_${errorMessage}`
+  const locale =  i18next.t(localeToken)
+
+  if (localeToken !== locale){
+    return locale
+  }
+
+  return errorMessage
 }

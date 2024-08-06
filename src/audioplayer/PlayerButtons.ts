@@ -148,7 +148,7 @@ export class PlayerButtons {
               });
             }
 
-            await this.client.audioPlayer.stop(guild);
+            await this.client.audioPlayer.stop(guild.id);
 
             await ButtonInteraction.deferUpdate();
             break;
