@@ -13,6 +13,8 @@
   "help_permissions_for_user": "Permissions required for user",
   "help_permissions_not_required": "Permissions not required",
   "help_about_commands": "Commands list",
+  "help_embed_description": "You can use text and slash command systems.\nFor text commands global prefix is {{prefix}}",
+  "help_embed_description_server_prefix": "and server prefix is {{prefix}}",
   "invite_desc": "Invite link of this bot",
   "play_desc": "Playing requested song",
   "play_arg_link": "Links from {{services}} or any text",
@@ -69,5 +71,8 @@
   "lyrics_desc": "Searching lyrics",
   "lyrics_arg_query": "title of song",
   "lyrics_embed_text_not_correct": "The text may not be correct",
-  "lyrics_embed_lyrics_not_found": "Lyrics not found"
+  "lyrics_embed_lyrics_not_found": "Lyrics not found",
+  "247_desc": "Toggle 24/7 mode. If enabled, bot will stay in a channel when no remain songs to play.",
+  "247_enabled": "Mode 24/7 is activated",
+  "247_disabled": "Mode 24/7 is disabled"
 }

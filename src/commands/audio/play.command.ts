@@ -2,7 +2,6 @@ import { CommandArgument, ICommand } from '../../CommandTypes.js';
 import {
   ApplicationCommandOptionChoiceData,
   AutocompleteInteraction,
-  Client,
   Guild,
   GuildMember,
   Message,
@@ -19,6 +18,7 @@ import { SearchResultType } from '@distube/youtube';
 import ytsr from '@distube/ytsr';
 import { generateWarningEmbed } from '../../utilities/generateWarningEmbed.js';
 import { ENV } from '../../EnvironmentVariables.js';
+import { queueSongsIsFull } from '../../audioplayer/util/queueSongsIsFull.js';
 
 export const services = 'Youtube, Spotify, Soundcloud, Yandex Music, Apple Music, HTTP-stream';
 export default function (): ICommand {
@@ -76,8 +76,6 @@ export default function (): ICommand {
         ),
       autocomplete: songSearchAutocomplete,
       execute: async (interaction) => {
-        const songQuery = interaction.options.getString('request');
-
         if (queueSongsIsFull(interaction.client, interaction.guild as Guild)) {
           await interaction.reply({
             embeds: [
@@ -91,6 +89,8 @@ export default function (): ICommand {
           });
           return;
         }
+
+        const songQuery = interaction.options.getString('request');
 
         await interaction.reply({
           content: i18next.t('general:thinking') as string
@@ -155,12 +155,4 @@ export async function songSearchAutocomplete(interaction: AutocompleteInteractio
   }
 
   await interaction.respond([]);
-}
-
-function queueSongsIsFull(client: Client, guild: Guild): boolean {
-  const queue = client.audioPlayer.distube.getQueue(guild);
-
-  if (!queue) return false;
-
-  return queue.songs.length >= ENV.BOT_MAX_SONGS_IN_QUEUE;
 }

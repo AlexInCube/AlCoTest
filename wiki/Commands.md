@@ -1,10 +1,13 @@
 # About command system
+
 Bot supports slash and text command systems.
 
 ## Slash commands
+
 Nothing special, start writing / and select command from the list
 
 ## Text commands
+
 If a bot owner does not change the default prefix in .env.production file, the prefix is //
 
 > [!NOTE]
@@ -12,10 +15,13 @@ If a bot owner does not change the default prefix in .env.production file, the p
 > administrator can set the second text prefix for server using [/setPrefix](#setprefix) command
 
 # Commands list
+
 ## Admin
+
 It Can be used only by server administrators (people who have a role with "Administrator" permission)
 
 ### setPrefix
+
 Changes bot prefix for the server
 
 Example: /newPrefix $$
@@ -47,7 +53,7 @@ bot will recreate the player so that the player is always at the bottom of the c
 
 Example: /play https://open.spotify.com/track/46gSk82duJtX3TTA182ruG?si=c668ab77755f4d88
 
-Spawn audioplayer in a text channel if not exists. 
+Spawn audioplayer in a text channel if not exists.
 Accept songs/playlist from links.
 Support searching on YouTube
 when you write something like this ![play-autocomplete](images/commands/play-autocomplete.png)
@@ -106,6 +112,12 @@ Example: /lyrics faded alan walker
 
 Searching a provided query for song lyrics and return text
 
+### 247
+
+Toggle 24/7 mode.
+If enabled, bot will stay in a channel when no remain songs to play.
+And when all users leave a voice channel with bot
+
 ### audiodebug
 
 Give the current count of spawned audioplayers
@@ -117,21 +129,26 @@ Give the current count of spawned audioplayers
 ## Fun
 
 ### alcotest
+
 Generate random number for 0 to 100
 
 ## Info
 
 ### help
-Return the command list or certain command description 
+
+Return the command list or certain command description
 
 Command list example: /help
 Certain command example: /help play
 
 ### inviteLink
+
 Return the link for inviting the bot. Give the link to the administrator on another server.
 
 ### status
+
 Return bot status data, about: OS, Ram Usage, Cpu Model, Cpu Usage, AICoTest Version, Servers Count.
 
 ### report
+
 Return links to GitHub Issues or GitHub Discussions.

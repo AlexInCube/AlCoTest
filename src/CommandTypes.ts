@@ -33,7 +33,7 @@ export interface ICommand {
   bot_permissions: Array<PermissionResolvable>;
   // Hidden from everything (disable slash_data property if true)
   hidden?: boolean;
-  // Guild related data such as voice settings
+  // guild related data such as voice settings
   guild_data?: IGuildData;
 }
 

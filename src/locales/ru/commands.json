@@ -13,6 +13,8 @@
   "help_permissions_for_user": "Права требуемые для пользователя",
   "help_permissions_not_required": "Права не требуются",
   "help_about_commands": "Справка о командах",
+  "help_embed_description": "Вы можете использовать текстовые и слэш-команды.\nДля текстовых команд глобальный префикс {{prefix}}",
+  "help_embed_description_server_prefix": "и у сервера префикс {{prefix}}",
   "invite_desc": "Ссылка на приглашение этого бота",
   "play_desc": "Проигрывает музыку указанную пользователем",
   "play_arg_link": "Ссылка с {{services}} или любой текст",
@@ -69,5 +71,8 @@
   "lyrics_desc": "Ищет текст песни",
   "lyrics_arg_query": "Название песни",
   "lyrics_embed_text_not_correct": "Текст может быть неверным",
-  "lyrics_embed_lyrics_not_found": "Текст песни не найден"
+  "lyrics_embed_lyrics_not_found": "Текст песни не найден",
+  "247_desc": "Переключает 24/7 режим. Если включено, бот остаётся в канале, даже когда закончились песни.",
+  "247_enabled": "Режим 24/7 включён",
+  "247_disabled": "Режим 24/7 отключён"
 }

@@ -1,20 +1,24 @@
 import { Client } from 'discord.js';
-import getDirName from '../utilities/getDirName.js';
+import getDirName from './utilities/getDirName.js';
 import fs from 'node:fs/promises';
-import { loggerError, loggerSend } from '../utilities/logger.js';
-import { ENV } from '../EnvironmentVariables.js';
+import { loggerError, loggerSend } from './utilities/logger.js';
+import { ENV } from './EnvironmentVariables.js';
+import path from 'path';
+import { pathToFileURL } from 'url';
 
-const loggerPrefixHandlersManager = 'Handlers';
+const loggerPrefixHandlersManager = 'handlers';
 export async function handlersLoad(client: Client): Promise<void> {
   try {
-    const handlersDir = getDirName(import.meta.url);
+    const handlersDir = path.join(getDirName(import.meta.url), 'handlers');
     const handlersFiles = await getAllHandlersFilesInDir(handlersDir);
 
     for (const file of handlersFiles) {
       if (ENV.BOT_VERBOSE_LOGGING)
         loggerSend(`Try to load handler from: ${file}`, loggerPrefixHandlersManager);
 
-      const handler = await import(`./${file}`);
+      const handlerPath = pathToFileURL(path.join(handlersDir, file)).href;
+
+      const handler = await import(handlerPath);
       await handler.default(client);
 
       if (ENV.BOT_VERBOSE_LOGGING)

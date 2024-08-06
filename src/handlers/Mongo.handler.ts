@@ -6,8 +6,10 @@ export const loggerPrefixMongo = 'MongoDB';
 
 export default async function mongoHandler() {
   const MONGO_URI = ENV.MONGO_URI;
-  mongoose.set('strictQuery', true);
+  mongoose.set('strictQuery', 'throw');
   mongoose.pluralize(null);
+
+  loggerSend('Connecting to MongoDB, please wait', loggerPrefixMongo);
 
   try {
     await mongoose.connect(`${MONGO_URI}/${ENV.MONGO_DATABASE_NAME}`);
@@ -16,12 +18,4 @@ export default async function mongoHandler() {
     loggerError(`Connection error while connecting: \n` + error, loggerPrefixMongo);
     throw error;
   }
-}
-
-export function MongoCheckConnection() {
-  if (mongoose.connection.readyState === 0) {
-    loggerSend('Connection is not established', loggerPrefixMongo);
-    return false;
-  }
-  return true;
 }

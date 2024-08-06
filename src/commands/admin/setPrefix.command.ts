@@ -1,8 +1,8 @@
 import { CommandArgument, ICommand } from '../../CommandTypes.js';
 import { Guild, Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
-import { setGuildOption } from '../../handlers/MongoSchemas/SchemaGuild.js';
 import { GroupAdmin } from './AdminTypes.js';
 import i18next from 'i18next';
+import { setGuildOptionPrefix } from '../../schemas/SchemaGuild.js';
 
 export default function (): ICommand {
   return {
@@ -42,7 +42,7 @@ export default function (): ICommand {
       guild_only: true
     },
     group: GroupAdmin,
-    user_permissions: [PermissionsBitField.Flags.Administrator],
+    user_permissions: [PermissionsBitField.Flags.ManageGuild],
     bot_permissions: [PermissionsBitField.Flags.SendMessages]
   };
 }
@@ -51,6 +51,6 @@ async function changePrefixTo(guild: Guild, prefix: string): Promise<string> {
   if (prefix === '/' || prefix === '@' || prefix === '#')
     return i18next.t('commands:set_prefix_restrict_prefixes', { prefixes: '/ @ #' }) as string;
   if (prefix.length > 2) return i18next.t('commands:set_prefix_length_error') as string;
-  await setGuildOption(guild, 'prefix', prefix);
+  await setGuildOptionPrefix(guild.id, prefix);
   return i18next.t('commands:set_prefix_success_change', { prefix: prefix }) as string;
 }

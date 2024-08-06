@@ -112,7 +112,7 @@ const rowWithOnlyStop = new ActionRowBuilder<ButtonBuilder>().addComponents(
     .setEmoji(AudioPlayerIcons.stop)
 );
 
-export class MessagePlayerButtonsHandler {
+export class PlayerButtons {
   private collector: InteractionCollector<ButtonInteraction>;
   private client: Client;
   private components: Array<ActionRowBuilder<ButtonBuilder>>;
@@ -197,7 +197,7 @@ export class MessagePlayerButtonsHandler {
             break;
 
           // case ButtonIDs.downloadSong: {
-          //     const song = this.client.audioplayer.distube.getQueue(ButtonInteraction.guild as Guild)?.songs[0]
+          //     const song = this.client.audioplayer.distube.getQueue(ButtonInteraction.guild as guild)?.songs[0]
           //
           //     if (!song) {
           //         await ButtonInteraction.reply({embeds: [generateErrorEmbed(i18next.t("audioplayer:download_song_error"))]})

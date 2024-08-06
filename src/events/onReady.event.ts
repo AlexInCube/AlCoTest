@@ -1,4 +1,4 @@
-import { BotEvent } from '../Types.js';
+import { BotEvent } from '../DiscordTypes.js';
 import { loggerSend } from '../utilities/logger.js';
 import { Events } from 'discord.js';
 

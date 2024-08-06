@@ -1,4 +1,4 @@
-import { BotEvent } from '../Types.js';
+import { BotEvent } from '../DiscordTypes.js';
 import { Client, Events, Message, TextChannel } from 'discord.js';
 import { textCommandsHandler } from './messageHandlers/textCommandsHandler.js';
 import { AudioPlayerEventMessageCreate } from '../audioplayer/eventsHandlers/AudioPlayerEventMessageCreate.js';
