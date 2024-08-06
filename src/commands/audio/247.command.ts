@@ -13,7 +13,7 @@ export default function (): ICommand {
         .setDescription(i18next.t('commands:247_desc')),
       execute: async (interaction) => {
         const newMode = await toggleLeaveOnEmpty(interaction.guild as Guild);
-        await interaction.reply({ embeds: [generateToggleLeaveOnEmptyMessage(newMode)] });
+        await interaction.reply({ embeds: [generateToggleLeaveOnEmptyEmbed(newMode)] });
       }
     },
     text_data: {
@@ -21,23 +21,19 @@ export default function (): ICommand {
       description: i18next.t('commands:247_desc'),
       execute: async (message) => {
         const newMode = await toggleLeaveOnEmpty(message.guild as Guild);
-        await message.reply({ embeds: [generateToggleLeaveOnEmptyMessage(newMode)] });
+        await message.reply({ embeds: [generateToggleLeaveOnEmptyEmbed(newMode)] });
       }
     },
     guild_data: {
       guild_only: true
     },
     group: GroupAudio,
-    bot_permissions: [
-      PermissionsBitField.Flags.SendMessages,
-      PermissionsBitField.Flags.ViewChannel,
-      PermissionsBitField.Flags.ManageMessages
-    ],
+    bot_permissions: [PermissionsBitField.Flags.SendMessages],
     user_permissions: [PermissionsBitField.Flags.ManageGuild]
   };
 }
 
-function generateToggleLeaveOnEmptyMessage(newMode: boolean) {
+function generateToggleLeaveOnEmptyEmbed(newMode: boolean) {
   return generateSimpleEmbed(
     `${newMode ? i18next.t('commands:247_disabled') : i18next.t('commands:247_enabled')}`
   );

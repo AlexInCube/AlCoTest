@@ -13,5 +13,6 @@ declare module 'discord.js' {
 export interface BotEvent {
   name: keyof ClientEvents;
   once?: boolean | false;
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   execute: (client: Client, ...args: any) => void;
 }

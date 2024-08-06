@@ -1,7 +1,7 @@
 import { Client, GuildTextBasedChannel, Message } from 'discord.js';
-import { MessagePlayerEmbedBuilder } from './MessagePlayerEmbedBuilder.js';
+import { PlayerEmbed } from './PlayerEmbed.js';
 import { Queue, Song } from 'distube';
-import { MessagePlayerButtonsHandler } from './MessagePlayerButtonsHandler.js';
+import { PlayerButtons } from './PlayerButtons.js';
 import { AudioPlayerState } from './AudioPlayerTypes.js';
 import { checkBotInVoice } from '../utilities/checkBotInVoice.js';
 import i18next from 'i18next';
@@ -16,9 +16,9 @@ export class PlayerInstance {
   // Player state
   private state: AudioPlayerState = 'loading';
   // Player embed interface
-  embedBuilder: MessagePlayerEmbedBuilder = new MessagePlayerEmbedBuilder();
+  embedBuilder: PlayerEmbed = new PlayerEmbed();
   // Player buttons for embed
-  private buttonsHandler: MessagePlayerButtonsHandler;
+  private buttonsHandler: PlayerButtons;
   // Message where player is stored right now
   private messageWithPlayer: Message | undefined;
   private queue: Queue;
@@ -43,7 +43,7 @@ export class PlayerInstance {
     this.client = client;
     this.textChannel = txtChannel;
     this.queue = queue;
-    this.buttonsHandler = new MessagePlayerButtonsHandler(this.client, this.textChannel);
+    this.buttonsHandler = new PlayerButtons(this.client, this.textChannel);
     this.leaveOnEmpty = false;
   }
 

@@ -6,7 +6,7 @@ import i18next from 'i18next';
 import { Playlist, Song } from 'distube';
 import { getIconFromSource } from './util/getIconFromSource.js';
 
-export class MessagePlayerEmbedBuilder extends EmbedBuilder {
+export class PlayerEmbed extends EmbedBuilder {
   private playerState: AudioPlayerState = 'loading';
   private requester: User | undefined = undefined;
   private uploader = i18next.t('audioplayer:player_embed_unknown');

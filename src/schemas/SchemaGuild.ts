@@ -18,9 +18,7 @@ const SchemaGuild = new Schema<ISchemaGuild>({
   guildID: { type: String, required: true, unique: true },
   options: {
     prefix: { type: String, default: ENV.BOT_COMMAND_PREFIX },
-    leaveOnEmpty: { type: Boolean, default: true },
-    voiceStatus: { type: Boolean, default: true },
-    songsHistory: { type: Array, default: [] }
+    leaveOnEmpty: { type: Boolean, default: true }
   }
 });
 
@@ -63,18 +61,4 @@ export async function setGuildOptionLeaveOnEmpty(guildID: string, mode: boolean)
 export async function getGuildOptionLeaveOnEmpty(guildID: string): Promise<boolean> {
   const guild: GuildModelClass = await getOrCreateGuildSettings(guildID);
   return guild.options.leaveOnEmpty;
-}
-
-export async function setGuildOptionVoiceStatus(
-  guildID: string,
-  voiceStatus: boolean
-): Promise<void> {
-  const guild: GuildModelClass = await getOrCreateGuildSettings(guildID);
-  guild.set({ options: { voiceStatus: voiceStatus } });
-  await guild.save();
-}
-
-export async function getGuildOptionVoiceStatus(guildID: string): Promise<boolean> {
-  const guild: GuildModelClass = await getOrCreateGuildSettings(guildID);
-  return guild.options.voiceStatus;
 }

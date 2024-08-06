@@ -112,7 +112,7 @@ const rowWithOnlyStop = new ActionRowBuilder<ButtonBuilder>().addComponents(
     .setEmoji(AudioPlayerIcons.stop)
 );
 
-export class MessagePlayerButtonsHandler {
+export class PlayerButtons {
   private collector: InteractionCollector<ButtonInteraction>;
   private client: Client;
   private components: Array<ActionRowBuilder<ButtonBuilder>>;
