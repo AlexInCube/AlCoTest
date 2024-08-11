@@ -40,10 +40,12 @@ async function generateSongHistoryEmbed(guild: Guild): Promise<EmbedBuilder> {
 
   if (!history) throw Error(`Can't find guild songs history: ${guild.id}`);
 
-  const historyEmbed = new EmbedBuilder().setTitle(`История песен для сервера ${guild.name}`);
+  const historyEmbed = new EmbedBuilder().setTitle(
+    `${i18next.t('commands:history_embed_title')} ${guild.name}`
+  );
 
   if (history.songsHistory.length === 0) {
-    historyEmbed.setTitle('На этом сервере ещё не было отыграно ни одной песни, станьте первым!');
+    historyEmbed.setTitle(i18next.t('commands:history_embed_no_songs'));
     return historyEmbed;
   }
 

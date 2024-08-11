@@ -1,9 +1,6 @@
 import mongoose, { Document, model, Schema } from 'mongoose';
 import { ENV } from '../EnvironmentVariables.js';
-import {
-  deleteGuildSongsHistory,
-  SongsHistoryListModelClass
-} from './SchemaSongsHistory.js';
+import { deleteGuildSongsHistory, SongsHistoryListModelClass } from './SchemaSongsHistory.js';
 
 interface GuildOptions {
   prefix: string;
