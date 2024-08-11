@@ -33,6 +33,7 @@ import { joinVoiceChannel } from '@discordjs/voice';
 import { generateWarningEmbed } from '../utilities/generateWarningEmbed.js';
 import { generateLyricsEmbed } from './Lyrics.js';
 import { getGuildOptionLeaveOnEmpty, setGuildOptionLeaveOnEmpty } from '../schemas/SchemaGuild.js';
+import { addSongToGuildSongsHistory } from '../schemas/SchemaSongsHistory.js';
 
 export const loggerPrefixAudioplayer = `Audioplayer`;
 
@@ -372,12 +373,16 @@ export class AudioPlayersManager {
           await queue.textChannel.send({ embeds: [generateAddedSongMessage(song)] });
         }
 
+        await addSongToGuildSongsHistory(queue.id, song);
+
         const player = this.playersManager.get(queue.id);
         if (player) {
           await player.update();
         }
       })
       .on(DistubeEvents.ADD_LIST, async (queue, playlist) => {
+        await addSongToGuildSongsHistory(queue.id, playlist);
+
         if (!queue.textChannel) return;
 
         await queue.textChannel.send({ embeds: [generateAddedPlaylistMessage(playlist)] });

@@ -1,17 +1,20 @@
-import { Document, model, Schema } from 'mongoose';
+import mongoose, { Document, model, Schema } from 'mongoose';
 import { ENV } from '../EnvironmentVariables.js';
-import { ISchemaSongsHistory } from './SchemaSongsHistory.js';
+import {
+  deleteGuildSongsHistory,
+  SongsHistoryListModelClass
+} from './SchemaSongsHistory.js';
 
 interface GuildOptions {
   prefix: string;
   leaveOnEmpty: boolean;
   voiceStatus: boolean;
-  songsHistory: ISchemaSongsHistory;
 }
 
 interface ISchemaGuild extends Document {
   guildID: string;
   options: GuildOptions;
+  songsHistory: SongsHistoryListModelClass;
 }
 
 const SchemaGuild = new Schema<ISchemaGuild>({
@@ -19,12 +22,13 @@ const SchemaGuild = new Schema<ISchemaGuild>({
   options: {
     prefix: { type: String, default: ENV.BOT_COMMAND_PREFIX },
     leaveOnEmpty: { type: Boolean, default: true }
-  }
+  },
+  songsHistory: { type: mongoose.Schema.Types.ObjectId, ref: 'songHistory', required: false }
 });
 
 const GuildModel = model<ISchemaGuild>('guild', SchemaGuild);
 
-class GuildModelClass extends GuildModel {} // This workaround required for better TypeScript support
+export class GuildModelClass extends GuildModel {} // This workaround required for better TypeScript support
 
 export async function getOrCreateGuildSettings(guildID: string): Promise<GuildModelClass> {
   const guild = await GuildModelClass.findOne({ guildID });
@@ -38,6 +42,7 @@ export async function getOrCreateGuildSettings(guildID: string): Promise<GuildMo
 
 export async function deleteGuildSettings(guildID: string): Promise<void> {
   const guild: GuildModelClass = await getOrCreateGuildSettings(guildID);
+  await deleteGuildSongsHistory(guildID);
   await guild?.deleteOne();
 }
 

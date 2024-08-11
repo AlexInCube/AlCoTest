@@ -6,6 +6,7 @@ import * as path from 'path';
 import '../DiscordTypes.js';
 import getDirName from '../utilities/getDirName.js';
 import { ENV } from '../EnvironmentVariables.js';
+import * as process from 'node:process';
 
 export const loggerPrefixCommandHandler = 'Commands';
 
@@ -37,6 +38,11 @@ const handler = async (client: Client) => {
     }
 
     const group: ICommandGroup = command.group;
+
+    if (commands.has(command.text_data.name)) {
+      loggerError(`Duplicate command name: ${command.text_data.name}`, loggerPrefixCommandHandler);
+      process.exit(1);
+    }
 
     commands.set(command.text_data.name, command);
 
