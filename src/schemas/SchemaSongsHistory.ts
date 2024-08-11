@@ -55,7 +55,7 @@ export async function getOrCreateGuildSongsHistory(guildID: string) {
 
 export async function deleteGuildSongsHistory(guildID: string) {
   const guild: GuildModelClass = await getOrCreateGuildSettings(guildID);
-  await guild.songsHistory.deleteOne();
+  await SongsHistoryListModelClass.deleteOne({ _id: guild.songsHistory });
 }
 
 export async function addSongToGuildSongsHistory(

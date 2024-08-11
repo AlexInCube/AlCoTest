@@ -15,12 +15,13 @@ export default async function loadLocale() {
     fallbackLng: 'en',
     ns: [
       'mongodb',
-      'commandshandlers',
+      'commandsHandlers',
       'commands',
       'commandsGroups',
       'general',
       'permissions',
-      'audioplayer'
+      'audioplayer',
+      'welcomeMessage'
     ],
     backend: {
       loadPath: join(getDirName(import.meta.url), '../locales/{{lng}}/{{ns}}.json')

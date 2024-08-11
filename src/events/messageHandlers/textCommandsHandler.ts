@@ -64,7 +64,7 @@ export async function textCommandsHandler(client: Client, message: Message) {
       // If command allowed only in guild, check voice_required and voice_with_bot_only properties
       if (!message.guild) {
         await message.reply({
-          embeds: [generateErrorEmbed(i18next.t('commandshandlers:command_only_in_guilds'))]
+          embeds: [generateErrorEmbed(i18next.t('commandsHandlers:command_only_in_guilds'))]
         });
         return;
       }
@@ -82,7 +82,7 @@ export async function textCommandsHandler(client: Client, message: Message) {
 
         if (!checkMemberInVoice(message.member!)) {
           await message.reply({
-            embeds: [generateErrorEmbed(i18next.t('commandshandlers:command_only_in_voice'))]
+            embeds: [generateErrorEmbed(i18next.t('commandsHandlers:command_only_in_voice'))]
           });
           return;
         }
@@ -96,9 +96,9 @@ export async function textCommandsHandler(client: Client, message: Message) {
         await message.reply({
           embeds: [
             generateErrorEmbed(
-              `:no_entry: ${i18next.t('commandshandlers:bot_not_enough_permissions_1')} :no_entry:.\n` +
-                `${i18next.t('commandshandlers:bot_not_enough_permissions_2')} \n` +
-                `${i18next.t('commandshandlers:bot_not_enough_permissions_3')}`
+              `:no_entry: ${i18next.t('commandsHandlers:bot_not_enough_permissions_1')} :no_entry:.\n` +
+                `${i18next.t('commandsHandlers:bot_not_enough_permissions_2')} \n` +
+                `${i18next.t('commandsHandlers:bot_not_enough_permissions_3')}`
             )
           ]
         });
@@ -110,7 +110,7 @@ export async function textCommandsHandler(client: Client, message: Message) {
       if (member) {
         if (!CheckMemberPermissions(member, command.user_permissions)) {
           await message.reply({
-            embeds: [generateErrorEmbed(i18next.t('commandshandlers:user_not_enough_permissions'))]
+            embeds: [generateErrorEmbed(i18next.t('commandsHandlers:user_not_enough_permissions'))]
           });
           return;
         }
@@ -120,6 +120,6 @@ export async function textCommandsHandler(client: Client, message: Message) {
     await command.text_data.execute(message, args);
   } catch (e) {
     if (ENV.BOT_VERBOSE_LOGGING)
-      loggerError(`commandshandlers:text_command_error: ${e}`, loggerPrefixCommandHandler);
+      loggerError(`Error when executing text command: ${e}`, loggerPrefixCommandHandler);
   }
 }
