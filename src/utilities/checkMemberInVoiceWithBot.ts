@@ -20,7 +20,7 @@ export async function checkMemberInVoiceWithBot(
           return response;
         }
       } else {
-        response.errorMessage = i18next.t('commandshandlers:voice_join_in_any_channel');
+        response.errorMessage = i18next.t('commandsHandlers:voice_join_in_any_channel');
         return response;
       }
 
@@ -29,7 +29,7 @@ export async function checkMemberInVoiceWithBot(
         .then((channel) => {
           if (channel) {
             if (channel instanceof VoiceChannel) {
-              response.errorMessage = `${i18next.t('commandshandlers:voice_join_in_channel')} ${channel.name}`;
+              response.errorMessage = `${i18next.t('commandsHandlers:voice_join_in_channel')} ${channel.name}`;
             }
           }
         });

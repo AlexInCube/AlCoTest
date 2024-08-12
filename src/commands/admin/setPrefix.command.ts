@@ -52,5 +52,8 @@ async function changePrefixTo(guild: Guild, prefix: string): Promise<string> {
     return i18next.t('commands:set_prefix_restrict_prefixes', { prefixes: '/ @ #' }) as string;
   if (prefix.length > 2) return i18next.t('commands:set_prefix_length_error') as string;
   await setGuildOptionPrefix(guild.id, prefix);
-  return i18next.t('commands:set_prefix_success_change', { prefix: prefix }) as string;
+  return i18next.t('commands:set_prefix_success_change', {
+    prefix,
+    interpolation: { escapeValue: false }
+  }) as string;
 }

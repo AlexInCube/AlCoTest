@@ -1,3 +1,8 @@
+/*
+  Read wiki if you want to know what all of this variable do.
+  Or if you are too smart, you can continue to read the code
+ */
+
 import { z } from 'zod';
 import * as dotenv from 'dotenv';
 import { loggerSend } from './utilities/logger.js';
@@ -51,6 +56,7 @@ const envVariables = z.object({
   BOT_COMMAND_PREFIX: z.string().min(1),
 
   BOT_MAX_SONGS_IN_QUEUE: z.coerce.number().positive().min(1).optional().default(500),
+  BOT_MAX_SONGS_HISTORY_SIZE: z.coerce.number().nonnegative().optional().default(60),
 
   MONGO_URI: z.string(),
   MONGO_DATABASE_NAME: z.string(),
@@ -79,5 +85,8 @@ export const ENV = envVariables.parse(process.env);
 if (fs.existsSync(envPath)) {
   loggerSend(`Environment variables is loaded from ${envPath}`, loggerPrefixEnv);
 } else {
-  loggerSend(`Environment variables is loaded from OS environment variables`, loggerPrefixEnv);
+  loggerSend(
+    `Environment variables is loaded from OS / Docker environment variables`,
+    loggerPrefixEnv
+  );
 }

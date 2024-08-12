@@ -74,5 +74,8 @@
   "lyrics_embed_lyrics_not_found": "Lyrics not found",
   "247_desc": "Toggle 24/7 mode. If enabled, bot will stay in a channel when no remain songs to play.",
   "247_enabled": "Mode 24/7 is activated",
-  "247_disabled": "Mode 24/7 is disabled"
+  "247_disabled": "Mode 24/7 is disabled",
+  "history_desc": "View the history of last played songs/playlists",
+  "history_embed_no_songs": "No songs have been played on this server yet, be the first who play the song",
+  "history_embed_title": "Songs history for server"
 }

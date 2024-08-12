@@ -15,7 +15,7 @@ import { generateErrorEmbed } from '../utilities/generateErrorEmbed.js';
 import i18next from 'i18next';
 import { loggerError, loggerSend } from '../utilities/logger.js';
 import { ENV } from '../EnvironmentVariables.js';
-import { LoadPlugins } from './LoadPlugins.js';
+import { DistubePlugin } from './LoadPlugins.js';
 import { generateAddedPlaylistMessage } from './util/generateAddedPlaylistMessage.js';
 import { generateAddedSongMessage } from './util/generateAddedSongMessage.js';
 import {
@@ -33,16 +33,15 @@ import { joinVoiceChannel } from '@discordjs/voice';
 import { generateWarningEmbed } from '../utilities/generateWarningEmbed.js';
 import { generateLyricsEmbed } from './Lyrics.js';
 import { getGuildOptionLeaveOnEmpty, setGuildOptionLeaveOnEmpty } from '../schemas/SchemaGuild.js';
+import { addSongToGuildSongsHistory } from '../schemas/SchemaSongsHistory.js';
 
 export const loggerPrefixAudioplayer = `Audioplayer`;
-
-const plugins = await LoadPlugins();
 
 export class AudioPlayersManager {
   client: Client;
   playersManager: AudioPlayersStore;
   distube: DisTube;
-  constructor(client: Client) {
+  constructor(client: Client, plugins: Array<DistubePlugin>) {
     this.client = client;
     this.client.audioPlayer = this;
     this.playersManager = new AudioPlayersStore(this.client);
@@ -52,7 +51,7 @@ export class AudioPlayersManager {
       emitAddSongWhenCreatingQueue: true,
       savePreviousSongs: true,
       joinNewVoiceChannel: true,
-      plugins: plugins
+      plugins
     });
 
     this.setupEvents();
@@ -372,12 +371,20 @@ export class AudioPlayersManager {
           await queue.textChannel.send({ embeds: [generateAddedSongMessage(song)] });
         }
 
+        if (ENV.BOT_MAX_SONGS_HISTORY_SIZE > 0) {
+          await addSongToGuildSongsHistory(queue.id, song);
+        }
+
         const player = this.playersManager.get(queue.id);
         if (player) {
           await player.update();
         }
       })
       .on(DistubeEvents.ADD_LIST, async (queue, playlist) => {
+        if (ENV.BOT_MAX_SONGS_HISTORY_SIZE > 0) {
+          await addSongToGuildSongsHistory(queue.id, playlist);
+        }
+
         if (!queue.textChannel) return;
 
         await queue.textChannel.send({ embeds: [generateAddedPlaylistMessage(playlist)] });

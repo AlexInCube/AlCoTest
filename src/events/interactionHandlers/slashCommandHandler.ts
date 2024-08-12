@@ -22,7 +22,7 @@ export async function slashCommandHandler(interaction: Interaction) {
     if (command.guild_data?.guild_only) {
       if (!interaction.guild) {
         await interaction.reply({
-          embeds: [generateErrorEmbed(i18next.t('commandshandlers:command_only_in_guilds'))],
+          embeds: [generateErrorEmbed(i18next.t('commandsHandlers:command_only_in_guilds'))],
           ephemeral: true
         });
         return;
@@ -44,7 +44,7 @@ export async function slashCommandHandler(interaction: Interaction) {
 
         if (!checkMemberInVoice(<GuildMember>interaction.member)) {
           await interaction.reply({
-            embeds: [generateErrorEmbed(i18next.t('commandshandlers:command_only_in_voice'))],
+            embeds: [generateErrorEmbed(i18next.t('commandsHandlers:command_only_in_voice'))],
             ephemeral: true
           });
           return;
@@ -58,9 +58,9 @@ export async function slashCommandHandler(interaction: Interaction) {
         await interaction.reply({
           embeds: [
             generateErrorEmbed(
-              `:no_entry: ${i18next.t('commandshandlers:bot_not_enough_permissions_1')} :no_entry:.\n` +
-                `${i18next.t('commandshandlers:bot_not_enough_permissions_2')} \n` +
-                `${i18next.t('commandshandlers:bot_not_enough_permissions_3')}`
+              `:no_entry: ${i18next.t('commandsHandlers:bot_not_enough_permissions_1')} :no_entry:.\n` +
+                `${i18next.t('commandsHandlers:bot_not_enough_permissions_2')} \n` +
+                `${i18next.t('commandsHandlers:bot_not_enough_permissions_3')}`
             )
           ],
           ephemeral: true

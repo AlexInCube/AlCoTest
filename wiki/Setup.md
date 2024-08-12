@@ -14,27 +14,28 @@ Also you need retrieve token, client id and enable intents on Discord Developer 
 - (Optional) To get SoundCloud token, follow the [Soundcloud](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#soundcloud-optional) section.
 - (Optional) To get Genius token, follow the [Genius](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#genius-optional) section.
 
-| Name                         | Example               | Description                                                               | Required |
-|------------------------------|-----------------------|---------------------------------------------------------------------------|----------|
-| `BOT_VERBOSE_LOGGING`        | false                 | The bot will give more info to the console, useful for debugging          | ❌        |
-| `BOT_FFMPEG_LOGGING=false`   | false                 | The bot will give info about FFMPEGto the console, useful for debugging   |          |
-| `BOT_COMMAND_PREFIX`         | //                    | Used only for text commands                                               | ✔️       |
-| `BOT_MAX_SONGS_IN_QUEUE`     | 500                   | Define max songs count per queue                                          | ❌        |
-| `BOT_LANGUAGE`               | en                    | Supported values: en ru                                                   | ❌        |
-| `MONGO_URI`                  | mongodb://mongo:27017 | The public key for sending notifications                                  | ✔️       |
-| `MONGO_DATABASE_NAME`        | aicbot                | Database name in MongoDB                                                  | ✔️       |
-| `BOT_DISCORD_TOKEN`          | ODEzNzUwMTY1N...      | Token from Discord Developer Portal                                       | ✔️       |
-| `BOT_DISCORD_CLIENT_ID`      | 813750165783...       | Application ID from Discord Developer Portal                              | ✔️       |
-| `BOT_DISCORD_OVERPOWERED_ID` | 29016845994426....    | Discord bot owner user ID, required for having more bot control for owner | ✔️       |
-| `BOT_GOOGLE_EMAIL`           |                       | Used to automate cookies fetching for YouTube                             | ❌        |
-| `BOT_GOOGLE_PASSWORD`        |                       | Used to automate cookies fetching for YouTube ❌                           |          |
-| `BOT_SPOTIFY_CLIENT_SECRET`  |                       | Used when the Spotify module cannot get the credentials automatically     | ❌        |
-| `BOT_SPOTIFY_CLIENT_ID`      |                       | Used when the Spotify module get the credentials automatically            | ❌        |
-| `BOT_YANDEXMUSIC_TOKEN`      |                       | Provide to enable Yandex Music module                                     | ❌        |
-| `BOT_YANDEXMUSIC_UID`        |                       | Provide to enable Yandex Music module                                     | ❌        |
-| `BOT_SOUNDCLOUD_CLIENT_ID`   |                       | Provide to fetch more data with SoundCloud Go+ account                    | ❌        |
-| `BOT_SOUNDCLOUD_TOKEN`       |                       | Provide to fetch more data with SoundCloud Go+ account                    | ❌        |
-| `BOT_GENIUS_TOKEN`           |                       | Provide to fetch songs lyrics from Genius                                 |          |
+| Name                         | Example               | Description                                                                                                                                 | Required |
+|------------------------------|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| `BOT_VERBOSE_LOGGING`        | false                 | The bot will give more info to the console, useful for debugging                                                                            | ❌        |
+| `BOT_FFMPEG_LOGGING`         | false                 | The bot will give info about FFMPEGto the console, useful for debugging                                                                     | ❌        |
+| `BOT_COMMAND_PREFIX`         | //                    | Used only for text commands                                                                                                                 | ✔️       |
+| `BOT_MAX_SONGS_IN_QUEUE`     | 500                   | Define max songs count per queue                                                                                                            | ❌        |
+| `BOT_MAX_SONGS_HISTORY_SIZE` | 60                    | Define max songs history per guild, set to 0 if you want to disable history (this will not delete history in database which already exists) | ❌        |
+| `BOT_LANGUAGE`               | en                    | Supported values: en ru                                                                                                                     | ❌        |
+| `MONGO_URI`                  | mongodb://mongo:27017 | The public key for sending notifications                                                                                                    | ✔️       |
+| `MONGO_DATABASE_NAME`        | aicbot                | Database name in MongoDB                                                                                                                    | ✔️       |
+| `BOT_DISCORD_TOKEN`          | ODEzNzUwMTY1N...      | Token from Discord Developer Portal                                                                                                         | ✔️       |
+| `BOT_DISCORD_CLIENT_ID`      | 813750165783...       | Application ID from Discord Developer Portal                                                                                                | ✔️       |
+| `BOT_DISCORD_OVERPOWERED_ID` | 29016845994426....    | Discord bot owner user ID, required for having more bot control for owner                                                                   | ✔️       |
+| `BOT_GOOGLE_EMAIL`           |                       | Used to automate cookies fetching for YouTube                                                                                               | ❌        |
+| `BOT_GOOGLE_PASSWORD`        |                       | Used to automate cookies fetching for YouTube                                                                                               | ❌        |
+| `BOT_SPOTIFY_CLIENT_SECRET`  |                       | Used when the Spotify module cannot get the credentials automatically                                                                       | ❌        |
+| `BOT_SPOTIFY_CLIENT_ID`      |                       | Used when the Spotify module get the credentials automatically                                                                              | ❌        |
+| `BOT_YANDEXMUSIC_TOKEN`      |                       | Provide to enable Yandex Music module                                                                                                       | ❌        |
+| `BOT_YANDEXMUSIC_UID`        |                       | Provide to enable Yandex Music module                                                                                                       | ❌        |
+| `BOT_SOUNDCLOUD_CLIENT_ID`   |                       | Provide to fetch more data with SoundCloud Go+ account                                                                                      | ❌        |
+| `BOT_SOUNDCLOUD_TOKEN`       |                       | Provide to fetch more data with SoundCloud Go+ account                                                                                      | ❌        |
+| `BOT_GENIUS_TOKEN`           |                       | Provide to fetch songs lyrics from Genius                                                                                                   | ❌        |
 
 # 🐋 Run in Docker (recommended)
 
