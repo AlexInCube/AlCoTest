@@ -118,6 +118,10 @@ Toggle 24/7 mode.
 If enabled, bot will stay in a channel when no remain songs to play.
 And when all users leave a voice channel with bot
 
+### history
+
+Return song history of the current server where the command is executed.
+
 ### audiodebug
 
 Give the current count of spawned audioplayers
