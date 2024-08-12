@@ -8,7 +8,7 @@ import { DirectLinkPlugin } from '@distube/direct-link';
 import { FilePlugin } from '@distube/file';
 import { AppleMusicPlugin } from 'distube-apple-music';
 import { YandexMusicPlugin } from 'distube-yandex-music-plugin';
-import { SoundCloudPlugin } from '@distube/soundcloud';
+import { SoundCloudPlugin } from './plugins/soundcloud.js';
 import { getYoutubeCookie } from '../CookiesAutomation.js';
 import Cron from 'node-cron';
 
