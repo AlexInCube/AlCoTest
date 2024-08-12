@@ -1,6 +1,7 @@
 import { model, Schema } from 'mongoose';
 import { getOrCreateGuildSettings, GuildModelClass } from './SchemaGuild.js';
 import { Playlist, Song } from 'distube';
+import { ENV } from '../EnvironmentVariables.js';
 
 interface ISchemaSongHistoryUnit {
   name: string;
@@ -74,7 +75,7 @@ export async function addSongToGuildSongsHistory(
     });
   }
 
-  if (history.songsHistory.length > 15) {
+  if (history.songsHistory.length > ENV.BOT_MAX_SONGS_HISTORY_SIZE) {
     history.songsHistory.shift();
   }
 

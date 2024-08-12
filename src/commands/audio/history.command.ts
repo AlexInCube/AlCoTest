@@ -1,18 +1,31 @@
 import { ICommand } from '../../CommandTypes.js';
 import i18next from 'i18next';
-import { EmbedBuilder, Guild, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
+import {
+  CommandInteraction,
+  Embed,
+  EmbedBuilder,
+  Guild,
+  Message,
+  PermissionsBitField,
+  SlashCommandBuilder
+} from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
-import { getOrCreateGuildSongsHistory } from '../../schemas/SchemaSongsHistory.js';
+import {
+  getOrCreateGuildSongsHistory,
+  ISchemaSongsHistory
+} from '../../schemas/SchemaSongsHistory.js';
+import { pagination } from '../../utilities/pagination/pagination.js';
+import { ButtonStyles, ButtonTypes } from '../../utilities/pagination/paginationTypes.js';
+import { ENV } from '../../EnvironmentVariables.js';
 
 export default function (): ICommand {
   return {
+    disable: ENV.BOT_MAX_SONGS_HISTORY_SIZE === 0,
     text_data: {
       name: 'history',
       description: i18next.t('commands:history_desc'),
       execute: async (message) => {
-        await message.reply({
-          embeds: [await generateSongHistoryEmbed(message.guild as Guild)]
-        });
+        await replyWithSongHistory(message.guild as Guild, undefined, message);
       }
     },
     slash_data: {
@@ -20,11 +33,7 @@ export default function (): ICommand {
         .setName('history')
         .setDescription(i18next.t('commands:history_desc')),
       execute: async (interaction) => {
-        await interaction.deferReply();
-
-        await interaction.editReply({
-          embeds: [await generateSongHistoryEmbed(interaction.guild as Guild)]
-        });
+        await replyWithSongHistory(interaction.guild as Guild, interaction);
       }
     },
     guild_data: {
@@ -35,38 +44,91 @@ export default function (): ICommand {
   };
 }
 
-async function generateSongHistoryEmbed(guild: Guild): Promise<EmbedBuilder> {
-  const history = await getOrCreateGuildSongsHistory(guild.id);
+async function replyWithSongHistory(
+  guild: Guild,
+  interaction?: CommandInteraction,
+  message?: Message
+): Promise<void> {
+  const history: ISchemaSongsHistory | null = await getOrCreateGuildSongsHistory(guild.id);
 
   if (!history) throw Error(`Can't find guild songs history: ${guild.id}`);
 
-  const historyEmbed = new EmbedBuilder().setTitle(
-    `${i18next.t('commands:history_embed_title')} ${guild.name}`
-  );
-
   if (history.songsHistory.length === 0) {
-    historyEmbed.setTitle(i18next.t('commands:history_embed_no_songs'));
-    return historyEmbed;
+    await interaction?.reply({
+      embeds: [new EmbedBuilder().setTitle(i18next.t('commands:history_embed_no_songs'))]
+    });
+    await message?.reply({
+      embeds: [new EmbedBuilder().setTitle(i18next.t('commands:history_embed_no_songs'))]
+    });
   }
 
-  let queueList = '';
+  function buildPage(history: ISchemaSongsHistory, pageNumber: number, entriesPerPage: number) {
+    let songsList = '';
 
-  for (let i = 0; i < history.songsHistory.length; i++) {
-    const song = history.songsHistory[i];
+    const startingIndex = pageNumber * entriesPerPage;
 
-    const songDate = song.createdAt
-      ? `<t:${Math.round(song.createdAt.getTime() / 1000)}:f>`
-      : '<t:0:f>';
+    for (
+      let i = startingIndex;
+      i < Math.min(startingIndex + entriesPerPage, history.songsHistory.length);
+      i++
+    ) {
+      const song = history.songsHistory[i];
 
-    queueList +=
-      `${i + 1}. ` +
-      `[${song.name}](${song.url})` +
-      ` - <@${song.requester}>` +
-      ` - ${songDate}` +
-      '\n';
+      const songDate = song.createdAt
+        ? `<t:${Math.round(song.createdAt.getTime() / 1000)}:f>`
+        : '<t:0:f>';
+
+      songsList +=
+        `${i + 1}. ` +
+        `[${song.name}](${song.url})` +
+        ` - <@${song.requester}>` +
+        ` - ${songDate}` +
+        '\n';
+    }
+
+    return new EmbedBuilder()
+      .setTitle(`${i18next.t('commands:history_embed_title')} ${guild.name}`)
+      .setDescription(`${songsList}`.slice(0, 4096));
   }
 
-  historyEmbed.setDescription(queueList);
+  const arrayEmbeds: Array<EmbedBuilder> = [];
+  const entriesPerPage = 20;
+  const pages = Math.ceil(history.songsHistory.length / entriesPerPage);
 
-  return historyEmbed;
+  for (let i = 0; i < pages; i++) {
+    arrayEmbeds.push(buildPage(history, i, entriesPerPage));
+  }
+
+  await pagination({
+    embeds: arrayEmbeds as unknown as Embed[],
+    // @ts-expect-error I need to provide Interaction or Message for different command systems.
+    author: interaction?.user ?? message?.author,
+    message: message,
+    interaction: interaction,
+    ephemeral: true,
+    fastSkip: true,
+    pageTravel: false,
+    buttons: [
+      {
+        type: ButtonTypes.first,
+        emoji: '⬅️',
+        style: ButtonStyles.Secondary
+      },
+      {
+        type: ButtonTypes.previous,
+        emoji: '◀️',
+        style: ButtonStyles.Secondary
+      },
+      {
+        type: ButtonTypes.next,
+        emoji: '▶️',
+        style: ButtonStyles.Secondary
+      },
+      {
+        type: ButtonTypes.last,
+        emoji: '➡️',
+        style: ButtonStyles.Secondary
+      }
+    ]
+  });
 }

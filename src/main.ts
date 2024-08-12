@@ -1,16 +1,15 @@
 import { clientIntents } from './ClientIntents.js';
-
-loggerSend(`Starting bot on version ${process.env.npm_package_version}`);
-
 import { Client, Partials } from 'discord.js';
 import { loggerError, loggerSend } from './utilities/logger.js';
 import { loginBot } from './utilities/loginBot.js';
 import { AudioPlayersManager } from './audioplayer/AudioPlayersManager.js';
 import loadLocale from './locales/Locale.js';
+import { handlersLoad } from './handlersLoad.js';
+import { LoadPlugins } from './audioplayer/LoadPlugins.js';
+
+loggerSend(`Starting bot on version ${process.env.npm_package_version}`);
 
 await loadLocale();
-
-import { handlersLoad } from './handlersLoad.js';
 
 const client = new Client<true>({
   intents: clientIntents,
@@ -21,7 +20,7 @@ client.rest.on('rateLimited', (args) => {
   loggerError(`Client encountered a rate limit: ${JSON.stringify(args)}`);
 });
 
-new AudioPlayersManager(client);
+new AudioPlayersManager(client, await LoadPlugins());
 
 await handlersLoad(client);
 
