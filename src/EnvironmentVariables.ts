@@ -85,5 +85,8 @@ export const ENV = envVariables.parse(process.env);
 if (fs.existsSync(envPath)) {
   loggerSend(`Environment variables is loaded from ${envPath}`, loggerPrefixEnv);
 } else {
-  loggerSend(`Environment variables is loaded from OS environment variables`, loggerPrefixEnv);
+  loggerSend(
+    `Environment variables is loaded from OS / Docker environment variables`,
+    loggerPrefixEnv
+  );
 }
