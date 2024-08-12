@@ -7,3 +7,5 @@ runInDocker.*
 yt-cookies.json
 wiki
 build
+.npmrc
+binding.gyp
