@@ -15,6 +15,7 @@ services:
   aicbot:
     container_name: aicbot
     image: alexincube/aicotest:latest
+    restart: always
     deploy:
       restart_policy:
         condition: on-failure

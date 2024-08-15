@@ -127,7 +127,7 @@ Return song history of the current server where the command is executed.
 Give the current count of spawned audioplayers
 
 > [!NOTE]
-> This command supported only by text command system
+> This command supported only by text command system.
 > Also you must be overpowered user.
 
 ## Fun
