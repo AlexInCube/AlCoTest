@@ -79,10 +79,17 @@
   "history_embed_no_songs": "No songs have been played on this server yet, be the first who play the song",
   "history_embed_title": "Songs history for server",
   "pl_arg_name": "playlist name",
+  "pl_error_playlist_not_exists": "Playlist ``{{name}}`` is not exists",
   "pl-create_desc": "Create a empty playlist",
   "pl-create_success": "Playlist ``{{name}}`` created",
   "pl-create_error_duplicate": "Playlist with name ``{{name}}`` already exists",
   "pl-create_error_max_playlists_count": "You already created maximum playlists ({{count}}), delete previous playlists to create new",
   "pl-create_error_validation": "Name must have length from {{min}} to {{max}}",
-  "pl-create_error": "Error when creating playlists"
+  "pl-create_error": "Unknown error when creating playlists",
+  "pl-my_desc": "List of created playlists",
+  "pl-my_embed_title": "List of your playlists",
+  "pl-my_embed_error": "You dont have any playlists, use /pl-create to create your first playlist",
+  "pl-delete_desc": "Delete playlist by its name",
+  "pl-delete_embed_deleted": "Playlist {{name}} is deleted",
+  "pl-delete_error": "Unknown error when deleting playlist"
 }

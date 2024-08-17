@@ -32,14 +32,14 @@ export default function (): ICommand {
         .setDescription(i18next.t('commands:pl-create_desc'))
         .addStringOption((option) =>
           option
-            .setName('name')
+            .setName('playlist_name')
             .setDescription(i18next.t('commands:pl_arg_name'))
             .setRequired(true)
             .setMinLength(PlaylistNameMinLength)
             .setMaxLength(PlaylistNameMaxLength)
         ),
       execute: async (interaction) => {
-        const playlistName = interaction.options.getString('name')!;
+        const playlistName = interaction.options.getString('playlist_name')!;
 
         await plCreateAndReply(playlistName, interaction, interaction.user.id);
       }

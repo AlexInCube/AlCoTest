@@ -2,6 +2,7 @@ import { CommandArgument, ICommand } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
 import { Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import i18next from 'i18next';
+import { UserPlaylistNamesAutocomplete } from '../../schemas/SchemaPlaylist.js';
 
 export default function (): ICommand {
   return {
@@ -17,12 +18,13 @@ export default function (): ICommand {
         .setDescription(i18next.t('commands:pl-play_desc'))
         .addStringOption((option) =>
           option
-            .setName('request')
+            .setName('playlist_name')
             .setDescription(i18next.t('commands:pl-play_arg'))
             .setAutocomplete(true)
             .setRequired(true)
         ),
-      execute: async (interaction) => {}
+      execute: async (interaction) => {},
+      autocomplete: UserPlaylistNamesAutocomplete
     },
     group: GroupAudio,
     guild_data: {

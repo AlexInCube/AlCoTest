@@ -2,6 +2,7 @@ import { Document, model, Schema } from 'mongoose';
 import { Song } from 'distube';
 import { ENV } from '../EnvironmentVariables.js';
 import { getOrCreateUser } from './SchemaUser.js';
+import { ApplicationCommandOptionChoiceData, AutocompleteInteraction } from 'discord.js';
 
 interface ISchemaSongPlaylistUnit {
   name: string;
@@ -32,7 +33,7 @@ export const PlaylistNameMaxLength = 50;
 export const SchemaPlaylist = new Schema<ISchemaPlaylist>(
   {
     name: { type: String, required: true, maxlength: PlaylistNameMaxLength, minlength: PlaylistNameMinLength },
-    songs: { type: [SchemaSongPlaylistUnit], default: [] }
+    songs: { type: [SchemaSongPlaylistUnit], default: [], select: false }
   },
   {
     timestamps: {
@@ -54,9 +55,10 @@ export class PlaylistAlreadyExists extends Error {
 }
 
 export class PlaylistIsNotExists extends Error {
-  constructor() {
+  constructor(playlistName: string) {
     super();
     this.name = 'PlaylistIsNotExistsError';
+    this.message = `This playlist is not exists ${playlistName}`;
   }
 }
 
@@ -114,13 +116,21 @@ export async function UserPlaylistGetPlaylists(userID: string): Promise<Array<Pl
 }
 
 export async function UserPlaylistDelete(userID: string, name: string): Promise<void> {
+  const user = await (await getOrCreateUser(userID)).populate('playlists');
   const playlist = await UserPlaylistGet(userID, name);
-  playlist?.deleteOne();
+
+  if (!playlist || !user.playlists) throw new PlaylistIsNotExists(name);
+
+  await playlist.deleteOne({ name });
+
+  user.playlists = user.playlists.filter((playlist) => playlist.name !== name);
+
+  await user.save();
 }
 
 export async function UserPlaylistAddSong(userID: string, name: string, song: Song): Promise<void> {
   const playlist = await UserPlaylistGet(userID, name);
-  if (!playlist) throw new Error(`Playlist is not exists: ${playlist}`);
+  if (!playlist) throw new PlaylistIsNotExists(name);
 
   if (playlist.songs.length > ENV.BOT_MAX_SONGS_IN_USER_PLAYLIST) {
     throw new Error(`Playlists can contain only ${ENV.BOT_MAX_SONGS_IN_USER_PLAYLIST}`);
@@ -133,9 +143,27 @@ export async function UserPlaylistAddSong(userID: string, name: string, song: So
 
 export async function UserPlaylistRemoveSong(userID: string, name: string, index: number): Promise<void> {
   const playlist = await UserPlaylistGet(userID, name);
-  if (!playlist) throw new Error(`Playlist is not exists: ${playlist}`);
+  if (!playlist) throw new PlaylistIsNotExists(name);
 
   playlist.songs.splice(index, 1);
 
   await playlist.save();
+}
+
+export async function UserPlaylistNamesAutocomplete(interaction: AutocompleteInteraction) {
+  const focusedValue = interaction.options.getFocused(true);
+
+  const playlists = await UserPlaylistGetPlaylists(interaction.user.id);
+  let finalResult: Array<ApplicationCommandOptionChoiceData> = [];
+
+  if (playlists) {
+    finalResult = playlists?.map((playlists) => {
+      return {
+        name: playlists.name,
+        value: playlists.name
+      };
+    });
+  }
+
+  await interaction.respond(finalResult);
 }

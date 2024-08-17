@@ -132,7 +132,7 @@ export async function songSearchAutocomplete(interaction: AutocompleteInteractio
       type: SearchResultType.VIDEO
     });
 
-    const finalResult = choices.items.map((video: ytsr.Video) => {
+    const finalResult: Array<ApplicationCommandOptionChoiceData> = choices.items.map((video: ytsr.Video) => {
       const duration = video.isLive ? liveText : video.duration;
       let choiceString = `${duration} | ${truncateString(video.author?.name ?? ' ', 20)} | `;
       choiceString += truncateString(video.name, 100 - choiceString.length);
@@ -142,7 +142,7 @@ export async function songSearchAutocomplete(interaction: AutocompleteInteractio
       };
     });
 
-    await interaction.respond(finalResult as Array<ApplicationCommandOptionChoiceData>);
+    await interaction.respond(finalResult);
     return;
   }
 

@@ -5,6 +5,9 @@
 <p align="center">
 Cool audiobot for Discord created by <a href="https://vk.com/alexincube"><b>@AlexInCube</b></a></p>
 
+## 🖥️ Setup
+- Go to [Wiki Setup Section](https://github.com/AlexInCube/AlCoTest/wiki/Setup)
+
 ## 🌟 Features
 - Command /alcotest which shows your alcohol count in blood
 - Audioplayer based on [Distube](https://github.com/skick1234/DisTube) with buttons
