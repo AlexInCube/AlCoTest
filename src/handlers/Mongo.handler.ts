@@ -7,7 +7,9 @@ export const loggerPrefixMongo = 'MongoDB';
 export default async function mongoHandler() {
   const MONGO_URI = ENV.MONGO_URI;
   mongoose.set('strictQuery', 'throw');
-  mongoose.pluralize(null);
+  mongoose.pluralize(function (name) {
+    return name;
+  });
 
   loggerSend('Connecting to MongoDB, please wait', loggerPrefixMongo);
 

@@ -7,9 +7,7 @@ export async function AudioCommandWrapperText(message: Message, callback: () => 
   if (player) {
     if (player.getState() == 'loading') {
       await message.reply({
-        embeds: [
-          generateErrorEmbed(i18next.t('audioplayer:audio_commands_wrapper_song_processing'))
-        ]
+        embeds: [generateErrorEmbed(i18next.t('audioplayer:audio_commands_wrapper_song_processing'))]
       });
       return;
     }
@@ -20,17 +18,12 @@ export async function AudioCommandWrapperText(message: Message, callback: () => 
     });
   }
 }
-export async function AudioCommandWrapperInteraction(
-  interaction: ChatInputCommandInteraction,
-  callback: () => void
-) {
+export async function AudioCommandWrapperInteraction(interaction: ChatInputCommandInteraction, callback: () => void) {
   const player = interaction.client.audioPlayer.playersManager.get(interaction.guildId!);
   if (player) {
     if (player.getState() == 'loading') {
       await interaction.reply({
-        embeds: [
-          generateErrorEmbed(i18next.t('audioplayer:audio_commands_wrapper_song_processing'))
-        ],
+        embeds: [generateErrorEmbed(i18next.t('audioplayer:audio_commands_wrapper_song_processing'))],
         ephemeral: true
       });
       return;
@@ -38,9 +31,7 @@ export async function AudioCommandWrapperInteraction(
     callback();
   } else {
     await interaction.reply({
-      embeds: [
-        generateErrorEmbed(i18next.t('audioplayer:audio_commands_wrapper_player_not_exist'))
-      ],
+      embeds: [generateErrorEmbed(i18next.t('audioplayer:audio_commands_wrapper_player_not_exist'))],
       ephemeral: true
     });
   }

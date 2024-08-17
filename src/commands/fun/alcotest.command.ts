@@ -16,9 +16,7 @@ export default function (): ICommand {
       }
     },
     slash_data: {
-      slash_builder: new SlashCommandBuilder()
-        .setName('alcotest')
-        .setDescription(i18next.t('commands:alcotest_desc')),
+      slash_builder: new SlashCommandBuilder().setName('alcotest').setDescription(i18next.t('commands:alcotest_desc')),
       execute: async (interaction) => {
         await interaction.reply({
           content: generateAlcoTestMessage(),

@@ -13,25 +13,20 @@ export async function handlersLoad(client: Client): Promise<void> {
     const handlersFiles = await getAllHandlersFilesInDir(handlersDir);
 
     for (const file of handlersFiles) {
-      if (ENV.BOT_VERBOSE_LOGGING)
-        loggerSend(`Try to load handler from: ${file}`, loggerPrefixHandlersManager);
+      if (ENV.BOT_VERBOSE_LOGGING) loggerSend(`Try to load handler from: ${file}`, loggerPrefixHandlersManager);
 
       const handlerPath = pathToFileURL(path.join(handlersDir, file)).href;
 
       const handler = await import(handlerPath);
       await handler.default(client);
 
-      if (ENV.BOT_VERBOSE_LOGGING)
-        loggerSend(`Handler is loaded from: ${file}`, loggerPrefixHandlersManager);
+      if (ENV.BOT_VERBOSE_LOGGING) loggerSend(`Handler is loaded from: ${file}`, loggerPrefixHandlersManager);
     }
 
     loggerSend(`Loaded handlers: ${handlersFiles.length} total`, loggerPrefixHandlersManager);
   } catch (e) {
     loggerError(e);
-    loggerSend(
-      'Bot is shutting down, because handler loading throw error',
-      loggerPrefixHandlersManager
-    );
+    loggerSend('Bot is shutting down, because handler loading throw error', loggerPrefixHandlersManager);
     process.exit();
   }
 }

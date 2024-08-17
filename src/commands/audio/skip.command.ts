@@ -1,11 +1,5 @@
 import { ICommand } from '../../CommandTypes.js';
-import {
-  EmbedBuilder,
-  GuildMember,
-  Message,
-  PermissionsBitField,
-  SlashCommandBuilder
-} from 'discord.js';
+import { EmbedBuilder, GuildMember, Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
 import {
   AudioCommandWrapperInteraction,
@@ -32,9 +26,7 @@ export default function (): ICommand {
       }
     },
     slash_data: {
-      slash_builder: new SlashCommandBuilder()
-        .setName('skip')
-        .setDescription(i18next.t('commands:skip_desc')),
+      slash_builder: new SlashCommandBuilder().setName('skip').setDescription(i18next.t('commands:skip_desc')),
       execute: async (interaction) => {
         await AudioCommandWrapperInteraction(interaction, async () => {
           const song = await interaction.client.audioPlayer.skip(interaction.guild!);

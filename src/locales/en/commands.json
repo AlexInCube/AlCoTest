@@ -77,5 +77,12 @@
   "247_disabled": "Mode 24/7 is disabled",
   "history_desc": "View the history of last played songs/playlists",
   "history_embed_no_songs": "No songs have been played on this server yet, be the first who play the song",
-  "history_embed_title": "Songs history for server"
+  "history_embed_title": "Songs history for server",
+  "pl_arg_name": "playlist name",
+  "pl-create_desc": "Create a empty playlist",
+  "pl-create_success": "Playlist ``{{name}}`` created",
+  "pl-create_error_duplicate": "Playlist with name ``{{name}}`` already exists",
+  "pl-create_error_max_playlists_count": "You already created maximum playlists ({{count}}), delete previous playlists to create new",
+  "pl-create_error_validation": "Name must have length from {{min}} to {{max}}",
+  "pl-create_error": "Error when creating playlists"
 }

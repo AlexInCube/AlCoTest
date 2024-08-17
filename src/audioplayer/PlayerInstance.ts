@@ -100,9 +100,7 @@ export class PlayerInstance {
   }
   // Update embed interface to represent the current state of player, BUT THIS NOT PUSHES UPDATED EMBED TO MESSAGE
   private updateEmbedState() {
-    const queue: Queue | undefined = this.client.audioPlayer.distube.getQueue(
-      this.textChannel.guild.id
-    );
+    const queue: Queue | undefined = this.client.audioPlayer.distube.getQueue(this.textChannel.guild.id);
     if (queue) {
       this.queue = queue;
     }

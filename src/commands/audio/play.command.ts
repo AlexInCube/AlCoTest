@@ -26,9 +26,7 @@ export default function (): ICommand {
     text_data: {
       name: 'play',
       description: i18next.t('commands:play_desc'),
-      arguments: [
-        new CommandArgument(i18next.t('commands:play_arg_link', { services: services }), true)
-      ],
+      arguments: [new CommandArgument(i18next.t('commands:play_arg_link', { services: services }), true)],
       execute: async (message: Message, args: string[]) => {
         // Play command accept only one arg is a query string.
         // In text command system we need to merge all words for request in one string
@@ -50,15 +48,10 @@ export default function (): ICommand {
           return;
         }
 
-        await message.client.audioPlayer.play(
-          member.voice.channel as VoiceBasedChannel,
-          channel,
-          songQuery,
-          {
-            member: member,
-            textChannel: channel
-          }
-        );
+        await message.client.audioPlayer.play(member.voice.channel as VoiceBasedChannel, channel, songQuery, {
+          member: member,
+          textChannel: channel
+        });
 
         await message.delete();
       }
@@ -122,8 +115,7 @@ export default function (): ICommand {
       PermissionsBitField.Flags.Connect,
       PermissionsBitField.Flags.ViewChannel,
       PermissionsBitField.Flags.Speak,
-      PermissionsBitField.Flags.ManageMessages,
-      PermissionsBitField.Flags.AttachFiles
+      PermissionsBitField.Flags.ManageMessages
     ]
   };
 }

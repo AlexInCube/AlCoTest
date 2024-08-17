@@ -1,12 +1,4 @@
-import {
-  DisTube,
-  PlayOptions,
-  Queue,
-  RepeatMode,
-  Song,
-  Events as DistubeEvents,
-  Playlist
-} from 'distube';
+import { DisTube, PlayOptions, Queue, RepeatMode, Song, Events as DistubeEvents, Playlist } from 'distube';
 import { AudioPlayersStore } from './AudioPlayersStore.js';
 import { pagination } from '../utilities/pagination/pagination.js';
 import { ButtonStyles, ButtonTypes } from '../utilities/pagination/paginationTypes.js';
@@ -57,12 +49,7 @@ export class AudioPlayersManager {
     this.setupEvents();
   }
 
-  async play(
-    voiceChannel: VoiceBasedChannel,
-    textChannel: TextChannel,
-    song: string | Song,
-    options?: PlayOptions
-  ) {
+  async play(voiceChannel: VoiceBasedChannel, textChannel: TextChannel, song: string | Song, options?: PlayOptions) {
     try {
       const playableThing: Song | Playlist = await this.distube.handler.resolve(song);
 
@@ -78,9 +65,7 @@ export class AudioPlayersManager {
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
       await textChannel.send({
-        embeds: [
-          generateErrorEmbed(`${song}\n${e.message}`, i18next.t('audioplayer:play_error') as string)
-        ]
+        embeds: [generateErrorEmbed(`${song}\n${e.message}`, i18next.t('audioplayer:play_error') as string)]
       });
 
       const queue = this.distube.getQueue(voiceChannel.guildId);
@@ -261,22 +246,15 @@ export class AudioPlayersManager {
 
       const startingIndex = pageNumber * entriesPerPage;
 
-      for (
-        let i = startingIndex;
-        i < Math.min(startingIndex + entriesPerPage, queue.songs.length);
-        i++
-      ) {
+      for (let i = startingIndex; i < Math.min(startingIndex + entriesPerPage, queue.songs.length); i++) {
         const song = queue.songs[i];
-        queueList +=
-          `${i + 1}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`;
+        queueList += `${i + 1}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`;
       }
 
       const page = new EmbedBuilder()
         .setAuthor({ name: `${i18next.t('audioplayer:show_queue_songs_in_queue')}: ` })
         .setTitle(queue.songs[0].name!)
-        .setDescription(
-          `**${i18next.t('audioplayer:show_queue_title')}: **\n${queueList}`.slice(0, 4096)
-        );
+        .setDescription(`**${i18next.t('audioplayer:show_queue_title')}: **\n${queueList}`.slice(0, 4096));
 
       if (queue.songs[0].url) {
         page.setURL(queue.songs[0].url);

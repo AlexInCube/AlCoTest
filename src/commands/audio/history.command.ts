@@ -10,10 +10,7 @@ import {
   SlashCommandBuilder
 } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
-import {
-  getOrCreateGuildSongsHistory,
-  ISchemaSongsHistory
-} from '../../schemas/SchemaSongsHistory.js';
+import { getOrCreateGuildSongsHistory, ISchemaSongsHistory } from '../../schemas/SchemaSongsHistory.js';
 import { pagination } from '../../utilities/pagination/pagination.js';
 import { ButtonStyles, ButtonTypes } from '../../utilities/pagination/paginationTypes.js';
 import { ENV } from '../../EnvironmentVariables.js';
@@ -29,9 +26,7 @@ export default function (): ICommand {
       }
     },
     slash_data: {
-      slash_builder: new SlashCommandBuilder()
-        .setName('history')
-        .setDescription(i18next.t('commands:history_desc')),
+      slash_builder: new SlashCommandBuilder().setName('history').setDescription(i18next.t('commands:history_desc')),
       execute: async (interaction) => {
         await replyWithSongHistory(interaction.guild as Guild, interaction);
       }
@@ -44,11 +39,7 @@ export default function (): ICommand {
   };
 }
 
-async function replyWithSongHistory(
-  guild: Guild,
-  interaction?: CommandInteraction,
-  message?: Message
-): Promise<void> {
+async function replyWithSongHistory(guild: Guild, interaction?: CommandInteraction, message?: Message): Promise<void> {
   const history: ISchemaSongsHistory | null = await getOrCreateGuildSongsHistory(guild.id);
 
   if (!history) throw Error(`Can't find guild songs history: ${guild.id}`);
@@ -67,23 +58,12 @@ async function replyWithSongHistory(
 
     const startingIndex = pageNumber * entriesPerPage;
 
-    for (
-      let i = startingIndex;
-      i < Math.min(startingIndex + entriesPerPage, history.songsHistory.length);
-      i++
-    ) {
+    for (let i = startingIndex; i < Math.min(startingIndex + entriesPerPage, history.songsHistory.length); i++) {
       const song = history.songsHistory[i];
 
-      const songDate = song.createdAt
-        ? `<t:${Math.round(song.createdAt.getTime() / 1000)}:f>`
-        : '<t:0:f>';
+      const songDate = song.createdAt ? `<t:${Math.round(song.createdAt.getTime() / 1000)}:f>` : '<t:0:f>';
 
-      songsList +=
-        `${i + 1}. ` +
-        `[${song.name}](${song.url})` +
-        ` - <@${song.requester}>` +
-        ` - ${songDate}` +
-        '\n';
+      songsList += `${i + 1}. ` + `[${song.name}](${song.url})` + ` - <@${song.requester}>` + ` - ${songDate}` + '\n';
     }
 
     return new EmbedBuilder()

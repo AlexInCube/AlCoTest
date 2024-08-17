@@ -1,4 +1,4 @@
-import mongoose, { Document, model, Schema } from 'mongoose';
+import { Document, model, Schema } from 'mongoose';
 import { ENV } from '../EnvironmentVariables.js';
 import { deleteGuildSongsHistory, SongsHistoryListModelClass } from './SchemaSongsHistory.js';
 
@@ -20,7 +20,7 @@ const SchemaGuild = new Schema<ISchemaGuild>({
     prefix: { type: String, default: ENV.BOT_COMMAND_PREFIX },
     leaveOnEmpty: { type: Boolean, default: true }
   },
-  songsHistory: { type: mongoose.Schema.Types.ObjectId, ref: 'songHistory', required: false }
+  songsHistory: { type: Schema.Types.ObjectId, ref: 'songHistory', required: false }
 });
 
 const GuildModel = model<ISchemaGuild>('guild', SchemaGuild);

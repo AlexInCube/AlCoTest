@@ -8,9 +8,7 @@ import { generateSimpleEmbed } from '../../utilities/generateSimpleEmbed.js';
 export default function (): ICommand {
   return {
     slash_data: {
-      slash_builder: new SlashCommandBuilder()
-        .setName('247')
-        .setDescription(i18next.t('commands:247_desc')),
+      slash_builder: new SlashCommandBuilder().setName('247').setDescription(i18next.t('commands:247_desc')),
       execute: async (interaction) => {
         const newMode = await toggleLeaveOnEmpty(interaction.guild as Guild);
         await interaction.reply({ embeds: [generateToggleLeaveOnEmptyEmbed(newMode)] });
@@ -34,9 +32,7 @@ export default function (): ICommand {
 }
 
 function generateToggleLeaveOnEmptyEmbed(newMode: boolean) {
-  return generateSimpleEmbed(
-    `${newMode ? i18next.t('commands:247_disabled') : i18next.t('commands:247_enabled')}`
-  );
+  return generateSimpleEmbed(`${newMode ? i18next.t('commands:247_disabled') : i18next.t('commands:247_enabled')}`);
 }
 
 async function toggleLeaveOnEmpty(guild: Guild) {

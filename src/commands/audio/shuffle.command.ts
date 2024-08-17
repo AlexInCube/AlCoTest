@@ -1,11 +1,5 @@
 import { ICommand } from '../../CommandTypes.js';
-import {
-  EmbedBuilder,
-  GuildMember,
-  Message,
-  PermissionsBitField,
-  SlashCommandBuilder
-} from 'discord.js';
+import { EmbedBuilder, GuildMember, Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
 import {
   AudioCommandWrapperInteraction,
@@ -29,9 +23,7 @@ export default function (): ICommand {
       }
     },
     slash_data: {
-      slash_builder: new SlashCommandBuilder()
-        .setName('shuffle')
-        .setDescription(i18next.t('commands:shuffle_desc')),
+      slash_builder: new SlashCommandBuilder().setName('shuffle').setDescription(i18next.t('commands:shuffle_desc')),
       execute: async (interaction): Promise<void> => {
         await AudioCommandWrapperInteraction(interaction, async (): Promise<void> => {
           if (await interaction.client.audioPlayer.shuffle(interaction.guild!)) {

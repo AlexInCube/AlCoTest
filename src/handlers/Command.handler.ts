@@ -25,8 +25,7 @@ const handler = async (client: Client) => {
   for (const filePath of scanResult) {
     const importPath = `file:///${filePath}`;
 
-    if (ENV.BOT_VERBOSE_LOGGING)
-      loggerSend(`Try to load command from: ${importPath}`, loggerPrefixCommandHandler);
+    if (ENV.BOT_VERBOSE_LOGGING) loggerSend(`Try to load command from: ${importPath}`, loggerPrefixCommandHandler);
 
     const commandModule = await import(importPath);
 
@@ -61,10 +60,7 @@ const handler = async (client: Client) => {
     }
 
     if (ENV.BOT_VERBOSE_LOGGING)
-      loggerSend(
-        `Command ${command.text_data.name} is loaded from: ${importPath}`,
-        loggerPrefixCommandHandler
-      );
+      loggerSend(`Command ${command.text_data.name} is loaded from: ${importPath}`, loggerPrefixCommandHandler);
   }
 
   const rest = new REST({ version: '10' }).setToken(ENV.BOT_DISCORD_TOKEN);

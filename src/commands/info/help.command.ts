@@ -132,9 +132,7 @@ export function generateSpecificCommandHelp(
     });
   }
 
-  helpEmbed
-    .setTitle(`/${command.text_data.name} ${argument_string}`)
-    .setDescription(command.text_data.description);
+  helpEmbed.setTitle(`/${command.text_data.name} ${argument_string}`).setDescription(command.text_data.description);
 
   helpEmbed.addFields({
     name: `✉️ ${i18next.t('commands:help_allowed_in_dm')}`,
@@ -190,16 +188,12 @@ export function generateSpecificCommandHelp(
   return helpEmbed;
 }
 
-export async function generateCommandsEmbedList(
-  client: Client,
-  guild: Guild | null
-): Promise<EmbedBuilder> {
+export async function generateCommandsEmbedList(client: Client, guild: Guild | null): Promise<EmbedBuilder> {
   let guildPrefix: string | undefined = undefined;
   if (guild) guildPrefix = await getGuildOptionPrefix(guild.id);
 
-  const helpEmbed = new EmbedBuilder()
-    .setColor('#436df7')
-    .setTitle(i18next.t('commands:help_about_commands')).setDescription(`
+  const helpEmbed = new EmbedBuilder().setColor('#436df7').setTitle(i18next.t('commands:help_about_commands'))
+    .setDescription(`
     ${i18next.t('commands:help_embed_description', { prefix: ENV.BOT_COMMAND_PREFIX, interpolation: { escapeValue: false } })} ${guildPrefix ? i18next.t('commands:help_embed_description_server_prefix', { prefix: guildPrefix, interpolation: { escapeValue: false } }) : ''}
     \n
     GitHub: https://github.com/AlexInCube/AlCoTest

@@ -1,11 +1,5 @@
 import { BotEvent } from '../DiscordTypes.js';
-import {
-  Client,
-  Guild,
-  GuildBasedChannel,
-  GuildTextBasedChannel,
-  PermissionsBitField
-} from 'discord.js';
+import { Client, Guild, GuildBasedChannel, GuildTextBasedChannel, PermissionsBitField } from 'discord.js';
 import { getOrCreateGuildSettings } from '../schemas/SchemaGuild.js';
 import { Events } from 'discord.js';
 import { CheckBotPermissions } from '../utilities/checkPermissions.js';

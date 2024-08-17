@@ -1,10 +1,5 @@
 import { ICommand } from '../../CommandTypes.js';
-import {
-  ChatInputCommandInteraction,
-  Message,
-  PermissionsBitField,
-  SlashCommandBuilder
-} from 'discord.js';
+import { ChatInputCommandInteraction, Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import { GroupInfo } from './InfoTypes.js';
 import i18next from 'i18next';
 import { generateSimpleEmbed } from '../../utilities/generateSimpleEmbed.js';
@@ -19,9 +14,7 @@ export default function (): ICommand {
       }
     },
     slash_data: {
-      slash_builder: new SlashCommandBuilder()
-        .setName('report')
-        .setDescription(i18next.t('commands:report_desc')),
+      slash_builder: new SlashCommandBuilder().setName('report').setDescription(i18next.t('commands:report_desc')),
       execute: async (interaction: ChatInputCommandInteraction) => {
         await interaction.reply({ embeds: [generateReportEmbed()], ephemeral: true });
       }

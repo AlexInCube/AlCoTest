@@ -71,7 +71,6 @@ export async function slashCommandHandler(interaction: Interaction) {
 
     await command.slash_data.execute(interaction);
   } catch (e) {
-    if (ENV.BOT_VERBOSE_LOGGING)
-      loggerError(`Error when executing slash command: ${e}`, loggerPrefixCommandHandler);
+    if (ENV.BOT_VERBOSE_LOGGING) loggerError(`Error when executing slash command: ${e}`, loggerPrefixCommandHandler);
   }
 }

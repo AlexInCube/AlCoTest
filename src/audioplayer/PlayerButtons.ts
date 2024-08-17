@@ -39,14 +39,8 @@ enum ButtonIDs {
 }
 
 const rowPrimary = new ActionRowBuilder<ButtonBuilder>().addComponents(
-  new ButtonBuilder()
-    .setCustomId(ButtonIDs.stopMusic)
-    .setStyle(ButtonStyle.Danger)
-    .setEmoji(AudioPlayerIcons.stop),
-  new ButtonBuilder()
-    .setCustomId(ButtonIDs.pauseMusic)
-    .setStyle(ButtonStyle.Primary)
-    .setEmoji(AudioPlayerIcons.pause),
+  new ButtonBuilder().setCustomId(ButtonIDs.stopMusic).setStyle(ButtonStyle.Danger).setEmoji(AudioPlayerIcons.stop),
+  new ButtonBuilder().setCustomId(ButtonIDs.pauseMusic).setStyle(ButtonStyle.Primary).setEmoji(AudioPlayerIcons.pause),
   new ButtonBuilder()
     .setCustomId(ButtonIDs.toggleLoopMode)
     .setStyle(ButtonStyle.Primary)
@@ -55,21 +49,12 @@ const rowPrimary = new ActionRowBuilder<ButtonBuilder>().addComponents(
     .setCustomId(ButtonIDs.previousSong)
     .setStyle(ButtonStyle.Primary)
     .setEmoji(AudioPlayerIcons.previous),
-  new ButtonBuilder()
-    .setCustomId(ButtonIDs.skipSong)
-    .setStyle(ButtonStyle.Primary)
-    .setEmoji(AudioPlayerIcons.skip)
+  new ButtonBuilder().setCustomId(ButtonIDs.skipSong).setStyle(ButtonStyle.Primary).setEmoji(AudioPlayerIcons.skip)
 );
 
 const rowPrimaryPaused = new ActionRowBuilder<ButtonBuilder>().addComponents(
-  new ButtonBuilder()
-    .setCustomId(ButtonIDs.stopMusic)
-    .setStyle(ButtonStyle.Danger)
-    .setEmoji(AudioPlayerIcons.stop),
-  new ButtonBuilder()
-    .setCustomId(ButtonIDs.pauseMusic)
-    .setStyle(ButtonStyle.Success)
-    .setEmoji(AudioPlayerIcons.play),
+  new ButtonBuilder().setCustomId(ButtonIDs.stopMusic).setStyle(ButtonStyle.Danger).setEmoji(AudioPlayerIcons.stop),
+  new ButtonBuilder().setCustomId(ButtonIDs.pauseMusic).setStyle(ButtonStyle.Success).setEmoji(AudioPlayerIcons.play),
   new ButtonBuilder()
     .setCustomId(ButtonIDs.toggleLoopMode)
     .setStyle(ButtonStyle.Primary)
@@ -78,38 +63,23 @@ const rowPrimaryPaused = new ActionRowBuilder<ButtonBuilder>().addComponents(
     .setCustomId(ButtonIDs.previousSong)
     .setStyle(ButtonStyle.Primary)
     .setEmoji(AudioPlayerIcons.previous),
-  new ButtonBuilder()
-    .setCustomId(ButtonIDs.skipSong)
-    .setStyle(ButtonStyle.Primary)
-    .setEmoji(AudioPlayerIcons.skip)
+  new ButtonBuilder().setCustomId(ButtonIDs.skipSong).setStyle(ButtonStyle.Primary).setEmoji(AudioPlayerIcons.skip)
 );
 
 const rowSecondary = new ActionRowBuilder<ButtonBuilder>().addComponents(
   //new ButtonBuilder().setCustomId(ButtonIDs.downloadSong).setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>'),
-  new ButtonBuilder()
-    .setCustomId(ButtonIDs.shuffle)
-    .setStyle(ButtonStyle.Primary)
-    .setEmoji(AudioPlayerIcons.shuffle),
-  new ButtonBuilder()
-    .setCustomId(ButtonIDs.showQueue)
-    .setStyle(ButtonStyle.Secondary)
-    .setEmoji(AudioPlayerIcons.list)
+  new ButtonBuilder().setCustomId(ButtonIDs.shuffle).setStyle(ButtonStyle.Primary).setEmoji(AudioPlayerIcons.shuffle),
+  new ButtonBuilder().setCustomId(ButtonIDs.showQueue).setStyle(ButtonStyle.Secondary).setEmoji(AudioPlayerIcons.list)
 );
 
 if (ENV.BOT_GENIUS_TOKEN) {
   rowSecondary.addComponents(
-    new ButtonBuilder()
-      .setCustomId(ButtonIDs.lyrics)
-      .setStyle(ButtonStyle.Secondary)
-      .setEmoji(AudioPlayerIcons.lyrics)
+    new ButtonBuilder().setCustomId(ButtonIDs.lyrics).setStyle(ButtonStyle.Secondary).setEmoji(AudioPlayerIcons.lyrics)
   );
 }
 
 const rowWithOnlyStop = new ActionRowBuilder<ButtonBuilder>().addComponents(
-  new ButtonBuilder()
-    .setCustomId(ButtonIDs.stopMusic)
-    .setStyle(ButtonStyle.Danger)
-    .setEmoji(AudioPlayerIcons.stop)
+  new ButtonBuilder().setCustomId(ButtonIDs.stopMusic).setStyle(ButtonStyle.Danger).setEmoji(AudioPlayerIcons.stop)
 );
 
 export class PlayerButtons {
@@ -162,9 +132,7 @@ export class PlayerButtons {
             const song = await this.client.audioPlayer.previous(ButtonInteraction.guild as Guild);
             if (song) {
               await ButtonInteraction.reply({
-                embeds: [
-                  generateEmbedAudioPlayerPrevious(ButtonInteraction.member as GuildMember, song)
-                ]
+                embeds: [generateEmbedAudioPlayerPrevious(ButtonInteraction.member as GuildMember, song)]
               });
             } else {
               await ButtonInteraction.reply({

@@ -95,9 +95,7 @@ function hmsToSeconds(str: string): number | undefined {
 }
 
 export function generateEmbedAudioPlayerRewind(member: GuildMember, time: number): EmbedBuilder {
-  return generateSimpleEmbed(
-    `${member} ${i18next.t('commands:rewind_success')} ${formatSecondsToTime(time)}`
-  );
+  return generateSimpleEmbed(`${member} ${i18next.t('commands:rewind_success')} ${formatSecondsToTime(time)}`);
 }
 
 export function generateEmbedAudioPlayerRewindFailure(): EmbedBuilder {

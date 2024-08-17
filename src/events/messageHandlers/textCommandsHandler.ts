@@ -119,7 +119,6 @@ export async function textCommandsHandler(client: Client, message: Message) {
 
     await command.text_data.execute(message, args);
   } catch (e) {
-    if (ENV.BOT_VERBOSE_LOGGING)
-      loggerError(`Error when executing text command: ${e}`, loggerPrefixCommandHandler);
+    if (ENV.BOT_VERBOSE_LOGGING) loggerError(`Error when executing text command: ${e}`, loggerPrefixCommandHandler);
   }
 }

@@ -92,18 +92,12 @@ export async function LoadPlugins(): Promise<Array<DistubePlugin>> {
 
 function setupYtCookieSchedule() {
   if (ENV.BOT_GOOGLE_EMAIL && ENV.BOT_GOOGLE_PASSWORD) {
-    loggerSend(
-      'Google data is provided, setup cron job for cookies fetching',
-      loggerPrefixAudioplayerPluginsLoader
-    );
+    loggerSend('Google data is provided, setup cron job for cookies fetching', loggerPrefixAudioplayerPluginsLoader);
     Cron.schedule('0 0 * * *', async () => {
       const cookies = await getYoutubeCookie();
       if (!cookies) return;
       YtPlugin.cookies = cookies;
-      loggerSend(
-        'Cookies is fetched again through Google Auth',
-        loggerPrefixAudioplayerPluginsLoader
-      );
+      loggerSend('Cookies is fetched again through Google Auth', loggerPrefixAudioplayerPluginsLoader);
     });
   }
 }
@@ -115,9 +109,7 @@ async function loadPluginsPartYoutube(plugins: Array<DistubePlugin>) {
 
   if (fs.existsSync('yt-cookies.json')) {
     try {
-      YtPlugin.cookies = JSON.parse(
-        fs.readFileSync('yt-cookies.json', { encoding: 'utf8', flag: 'r' })
-      );
+      YtPlugin.cookies = JSON.parse(fs.readFileSync('yt-cookies.json', { encoding: 'utf8', flag: 'r' }));
       loggerSend("'yt-cookies.json' is loaded", loggerPrefixAudioplayerPluginsLoader);
     } catch (e) {
       loggerError("'yt-cookies.json' error when parsing", loggerPrefixAudioplayerPluginsLoader);
