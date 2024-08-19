@@ -79,6 +79,7 @@
   "history_embed_no_songs": "No songs have been played on this server yet, be the first who play the song",
   "history_embed_title": "Songs history for server",
   "pl_arg_name": "playlist name",
+  "pl_arg_song_id": "song id in playlist",
   "pl_error_playlist_not_exists": "Playlist ``{{name}}`` is not exists",
   "pl-create_desc": "Create a empty playlist",
   "pl-create_success": "Playlist ``{{name}}`` created",
@@ -91,5 +92,17 @@
   "pl-my_embed_error": "You dont have any playlists, use /pl-create to create your first playlist",
   "pl-delete_desc": "Delete playlist by its name",
   "pl-delete_embed_deleted": "Playlist {{name}} is deleted",
-  "pl-delete_error": "Unknown error when deleting playlist"
+  "pl-delete_error": "Unknown error when deleting playlist",
+  "pl-display_desc": "Display songs in playlist",
+  "pl-display_embed_no_songs": "This playlist not have any songs",
+  "pl-add_desc": "Adds song to a playlist",
+  "pl-add_error_song_must_be_link": "You must pass the LINK to the song",
+  "pl-add_error_song_must_not_be_playlist": "Links to playlists of services cannot be used in bot playlists",
+  "pl-add_error_song_must_not_be_live_stream": "You cannot use links to live streams in bot playlists",
+  "pl-add_error_playlist_max_songs_limit": "The playlist ``{{name}}`` has reached the maximum number of songs ({{count}}), remove past songs using /pl-remove",
+  "pl-add_error_unknown": "Unknown error when adding a song to a playlist",
+  "pl-add_success": "The song ``{{song}}`` has been successfully added to the playlist ``{{playlist}}``",
+  "pl-remove_desc": "Removes a song from a playlist",
+  "pl-remove_success": "The song ``{{song}}`` has been successfully removed from the playlist ``{{playlist}}``",
+  "pl-remove_error_unknown": "Unknown error when deleting a song from a playlist"
 }

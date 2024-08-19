@@ -48,9 +48,10 @@ const PlaylistModel = model<ISchemaPlaylist>('playlist', SchemaPlaylist);
 export class PlaylistModelClass extends PlaylistModel {} // This workaround required for better TypeScript support
 
 export class PlaylistAlreadyExists extends Error {
-  constructor() {
+  constructor(playlistName: string) {
     super();
     this.name = 'PlaylistAlreadyExistsError';
+    this.message = `Playlist with name ${playlistName} already exists`;
   }
 }
 
@@ -58,14 +59,15 @@ export class PlaylistIsNotExists extends Error {
   constructor(playlistName: string) {
     super();
     this.name = 'PlaylistIsNotExistsError';
-    this.message = `This playlist is not exists ${playlistName}`;
+    this.message = `Playlist with name ${playlistName} is not exists`;
   }
 }
 
-export class PlaylistSongsLimitExists extends Error {
-  constructor() {
+export class PlaylistMaxSongsLimit extends Error {
+  constructor(playlistName: string) {
     super();
     this.name = 'PlaylistSongsLimitExistsError';
+    this.message = `You cant add more songs to playlist ${playlistName}, max songs limit is ${ENV.BOT_MAX_SONGS_IN_USER_PLAYLIST}`;
   }
 }
 
@@ -73,12 +75,29 @@ export class PlaylistMaxPlaylistsCount extends Error {
   constructor() {
     super();
     this.name = 'PlaylistMaxPlaylistsCountError';
+    this.message = `You cant create more playlists, max playlists count for user is ${ENV.BOT_MAX_PLAYLISTS_PER_USER}`;
+  }
+}
+
+export class PlaylistSongIsNotValid extends Error {
+  constructor() {
+    super();
+    this.name = 'PlaylistSongIsNotValid';
+    this.message = 'Cannot validate song url in any service';
+  }
+}
+
+export class PlaylistSongAlreadyInPlaylist extends Error {
+  constructor(playlistName: string, songName: string) {
+    super();
+    this.name = 'PlaylistSongAlreadyInPlaylist';
+    this.message = `Song ${songName} already in playlist ${playlistName}`;
   }
 }
 
 export async function UserPlaylistCreate(userID: string, name: string): Promise<void> {
   const playlist = await UserPlaylistGet(userID, name);
-  if (playlist) throw new PlaylistAlreadyExists();
+  if (playlist) throw new PlaylistAlreadyExists(name);
   const user = await getOrCreateUser(userID);
 
   if (!user.playlists) {
@@ -101,11 +120,19 @@ export async function UserPlaylistCreate(userID: string, name: string): Promise<
   await user.save();
 }
 
-export async function UserPlaylistGet(userID: string, name: string): Promise<PlaylistModelClass | null | undefined> {
-  const user = await (await getOrCreateUser(userID)).populate('playlists');
+export async function UserPlaylistGet(
+  userID: string,
+  name: string,
+  withSongs: boolean = false
+): Promise<PlaylistModelClass | null | undefined> {
+  const user = await getOrCreateUser(userID);
+  const userWithPlaylists = await user.populate({
+    path: 'playlists',
+    select: withSongs ? ['name', 'songs', 'createdAt'] : undefined
+  });
 
-  if (!user.playlists) return null;
-  return user.playlists.find((playlist) => playlist.name === name);
+  if (!userWithPlaylists.playlists) return null;
+  return userWithPlaylists.playlists.find((playlist) => playlist.name === name);
 }
 
 export async function UserPlaylistGetPlaylists(userID: string): Promise<Array<PlaylistModelClass> | null> {
@@ -129,11 +156,11 @@ export async function UserPlaylistDelete(userID: string, name: string): Promise<
 }
 
 export async function UserPlaylistAddSong(userID: string, name: string, song: Song): Promise<void> {
-  const playlist = await UserPlaylistGet(userID, name);
+  const playlist = await UserPlaylistGet(userID, name, true);
   if (!playlist) throw new PlaylistIsNotExists(name);
 
   if (playlist.songs.length > ENV.BOT_MAX_SONGS_IN_USER_PLAYLIST) {
-    throw new Error(`Playlists can contain only ${ENV.BOT_MAX_SONGS_IN_USER_PLAYLIST}`);
+    throw new PlaylistMaxSongsLimit(name);
   }
 
   playlist.songs.push({ name: song.name!, url: song.url! });
@@ -141,17 +168,23 @@ export async function UserPlaylistAddSong(userID: string, name: string, song: So
   await playlist.save();
 }
 
-export async function UserPlaylistRemoveSong(userID: string, name: string, index: number): Promise<void> {
-  const playlist = await UserPlaylistGet(userID, name);
+export async function UserPlaylistRemoveSong(
+  userID: string,
+  name: string,
+  index: number
+): Promise<ISchemaSongPlaylistUnit> {
+  const playlist = await UserPlaylistGet(userID, name, true);
   if (!playlist) throw new PlaylistIsNotExists(name);
 
+  const song = playlist.songs[index];
   playlist.songs.splice(index, 1);
 
   await playlist.save();
+  return song;
 }
 
 export async function UserPlaylistNamesAutocomplete(interaction: AutocompleteInteraction) {
-  const focusedValue = interaction.options.getFocused(true);
+  // const focusedValue = interaction.options.getFocused(true);
 
   const playlists = await UserPlaylistGetPlaylists(interaction.user.id);
   let finalResult: Array<ApplicationCommandOptionChoiceData> = [];

@@ -49,13 +49,15 @@ export default function (): ICommand {
   };
 }
 
-async function plCreateAndReply(name: string, ctx: Message | ChatInputCommandInteraction, userID: string) {
+async function plCreateAndReply(playlistName: string, ctx: Message | ChatInputCommandInteraction, userID: string) {
   try {
-    await UserPlaylistCreate(userID, name);
+    await UserPlaylistCreate(userID, playlistName);
 
     await ctx.reply({
       embeds: [
-        generateSimpleEmbed(i18next.t('commands:pl-create_success', { name, interpolation: { escapeValue: false } }))
+        generateSimpleEmbed(
+          i18next.t('commands:pl-create_success', { name: playlistName, interpolation: { escapeValue: false } })
+        )
       ],
       ephemeral: true
     });
@@ -65,7 +67,7 @@ async function plCreateAndReply(name: string, ctx: Message | ChatInputCommandInt
         embeds: [
           generateErrorEmbed(
             i18next.t('commands:pl-create_error_duplicate', {
-              name,
+              name: playlistName,
               interpolation: { escapeValue: false }
             })
           )

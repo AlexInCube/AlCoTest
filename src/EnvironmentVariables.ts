@@ -57,7 +57,7 @@ const envVariables = z.object({
 
   BOT_MAX_SONGS_IN_QUEUE: z.coerce.number().positive().min(1).optional().default(500),
   BOT_MAX_SONGS_HISTORY_SIZE: z.coerce.number().nonnegative().optional().default(60),
-  BOT_MAX_PLAYLISTS_PER_USER: z.coerce.number().positive().min(1).optional().default(25),
+  BOT_MAX_PLAYLISTS_PER_USER: z.coerce.number().positive().min(1).max(50).optional().default(25),
   BOT_MAX_SONGS_IN_USER_PLAYLIST: z.coerce.number().positive().min(1).optional().default(500),
 
   MONGO_URI: z.string(),

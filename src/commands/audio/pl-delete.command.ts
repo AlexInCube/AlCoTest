@@ -68,6 +68,7 @@ async function plDeleteAndReply(ctx: Message | ChatInputCommandInteraction, user
         ],
         ephemeral: true
       });
+      return;
     }
 
     await ctx.reply({ embeds: [generateErrorEmbed(i18next.t('commands:pl-delete_error'))], ephemeral: true });
