@@ -104,5 +104,7 @@
   "pl-add_success": "The song ``{{song}}`` has been successfully added to the playlist ``{{playlist}}``",
   "pl-remove_desc": "Removes a song from a playlist",
   "pl-remove_success": "The song ``{{song}}`` has been successfully removed from the playlist ``{{playlist}}``",
-  "pl-remove_error_unknown": "Unknown error when deleting a song from a playlist"
+  "pl-remove_error_unknown": "Unknown error when deleting a song from a playlist",
+  "pl-play_desc": "Adds a custom playlist to the play queue",
+  "pl-play_error_unknown": "Unknown error while adding a playlist to the queue"
 }

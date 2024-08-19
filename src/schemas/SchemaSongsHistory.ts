@@ -64,6 +64,7 @@ export async function addSongToGuildSongsHistory(guildID: string, resource: Song
 
   if (!history) return;
 
+  // Users' playlists cannot be added to history, because they don't have url
   if (resource.name && resource.member?.id && resource.url) {
     history.songsHistory.push({
       name: resource.name ?? 'unknown',

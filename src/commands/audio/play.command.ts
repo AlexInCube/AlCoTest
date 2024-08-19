@@ -2,13 +2,13 @@ import { CommandArgument, ICommand } from '../../CommandTypes.js';
 import {
   ApplicationCommandOptionChoiceData,
   AutocompleteInteraction,
+  ChatInputCommandInteraction,
   Guild,
   GuildMember,
   Message,
   PermissionsBitField,
   SlashCommandBuilder,
   TextChannel,
-  VoiceBasedChannel,
   VoiceChannel
 } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
@@ -32,28 +32,7 @@ export default function (): ICommand {
         // In text command system we need to merge all words for request in one string
         const songQuery = args.join(' ');
 
-        const member = message.member as GuildMember;
-        const channel = message.channel as TextChannel;
-
-        if (queueSongsIsFull(message.client, message.guild as Guild)) {
-          await message.reply({
-            embeds: [
-              generateWarningEmbed(
-                i18next.t('commands:play_error_songs_limit', {
-                  queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
-                }) as string
-              )
-            ]
-          });
-          return;
-        }
-
-        await message.client.audioPlayer.play(member.voice.channel as VoiceBasedChannel, channel, songQuery, {
-          member: member,
-          textChannel: channel
-        });
-
-        await message.delete();
+        await playAndReply(message, songQuery);
       }
     },
     slash_data: {
@@ -69,40 +48,9 @@ export default function (): ICommand {
         ),
       autocomplete: songSearchAutocomplete,
       execute: async (interaction) => {
-        if (queueSongsIsFull(interaction.client, interaction.guild as Guild)) {
-          await interaction.reply({
-            embeds: [
-              generateWarningEmbed(
-                i18next.t('commands:play_error_songs_limit', {
-                  queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
-                }) as string
-              )
-            ],
-            ephemeral: true
-          });
-          return;
-        }
+        const songQuery = interaction.options.getString('request')!;
 
-        const songQuery = interaction.options.getString('request');
-
-        await interaction.reply({
-          content: i18next.t('general:thinking') as string
-        });
-        await interaction.deleteReply();
-
-        const member = interaction.member as GuildMember;
-
-        if (songQuery) {
-          await interaction.client.audioPlayer.play(
-            member.voice.channel as VoiceChannel,
-            interaction.channel as TextChannel,
-            songQuery,
-            {
-              member: interaction.member as GuildMember,
-              textChannel: interaction.channel as TextChannel
-            }
-          );
-        }
+        await playAndReply(interaction, songQuery);
       }
     },
     group: GroupAudio,
@@ -147,4 +95,27 @@ export async function songSearchAutocomplete(interaction: AutocompleteInteractio
   }
 
   await interaction.respond([]);
+}
+
+async function playAndReply(ctx: Message | ChatInputCommandInteraction, songQuery: string) {
+  if (queueSongsIsFull(ctx.client, ctx.guild as Guild)) {
+    await ctx.reply({
+      embeds: [
+        generateWarningEmbed(
+          i18next.t('commands:play_error_songs_limit', {
+            queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
+          }) as string
+        )
+      ],
+      ephemeral: true
+    });
+    return;
+  }
+
+  const member = ctx.member as GuildMember;
+
+  await ctx.client.audioPlayer.play(member.voice.channel as VoiceChannel, ctx.channel as TextChannel, songQuery, {
+    member,
+    textChannel: ctx.channel as TextChannel
+  });
 }

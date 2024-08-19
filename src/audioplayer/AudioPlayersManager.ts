@@ -49,7 +49,12 @@ export class AudioPlayersManager {
     this.setupEvents();
   }
 
-  async play(voiceChannel: VoiceBasedChannel, textChannel: TextChannel, song: string | Song, options?: PlayOptions) {
+  async play(
+    voiceChannel: VoiceBasedChannel,
+    textChannel: TextChannel,
+    song: string | Song | Playlist,
+    options?: PlayOptions
+  ) {
     try {
       const playableThing: Song | Playlist = await this.distube.handler.resolve(song);
 

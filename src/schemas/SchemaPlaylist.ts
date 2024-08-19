@@ -124,15 +124,18 @@ export async function UserPlaylistGet(
   userID: string,
   name: string,
   withSongs: boolean = false
-): Promise<PlaylistModelClass | null | undefined> {
+): Promise<PlaylistModelClass> {
   const user = await getOrCreateUser(userID);
   const userWithPlaylists = await user.populate({
     path: 'playlists',
     select: withSongs ? ['name', 'songs', 'createdAt'] : undefined
   });
 
-  if (!userWithPlaylists.playlists) return null;
-  return userWithPlaylists.playlists.find((playlist) => playlist.name === name);
+  if (!userWithPlaylists.playlists) throw new PlaylistIsNotExists(name);
+
+  const playlist = userWithPlaylists.playlists.find((playlist) => playlist.name === name);
+  if (!playlist) throw new PlaylistIsNotExists(name);
+  return playlist;
 }
 
 export async function UserPlaylistGetPlaylists(userID: string): Promise<Array<PlaylistModelClass> | null> {
