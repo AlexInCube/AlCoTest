@@ -81,6 +81,7 @@
   "pl_arg_name": "playlist name",
   "pl_arg_song_id": "song id in playlist",
   "pl_error_playlist_not_exists": "Playlist ``{{name}}`` is not exists",
+  "pl_error_song_is_not_exists_in_playlist": "Song with ID ``{{id}}`` is not exists in playlist ``{{name}}``",
   "pl-create_desc": "Create a empty playlist",
   "pl-create_success": "Playlist ``{{name}}`` created",
   "pl-create_error_duplicate": "Playlist with name ``{{name}}`` already exists",

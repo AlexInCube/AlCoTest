@@ -97,7 +97,7 @@ function setupYtCookieSchedule() {
       const cookies = await getYoutubeCookie();
       if (!cookies) return;
       YtPlugin.cookies = cookies;
-      loggerSend('Cookies is fetched again through Google Auth', loggerPrefixAudioplayerPluginsLoader);
+      loggerSend('Cookies is fetched by cron job through Google Auth', loggerPrefixAudioplayerPluginsLoader);
     });
   }
 }

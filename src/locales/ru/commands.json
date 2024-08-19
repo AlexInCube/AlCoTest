@@ -81,6 +81,7 @@
   "pl_arg_name": "имя плейлиста",
   "pl_arg_song_id": "номер песни в плейлисте",
   "pl_error_playlist_not_exists": "Плейлист ``{{name}}`` не существует",
+  "pl_error_song_is_not_exists_in_playlist": "Песня с ID ``{{id}}`` не существует в плейлисте ``{{name}}``",
   "pl-create_desc": "Создание пустого плейлиста",
   "pl-create_success": "Плейлист ``{{name}}`` создан",
   "pl-create_error_duplicate": "Плейлист с именем ``{{name}}`` уже существует",

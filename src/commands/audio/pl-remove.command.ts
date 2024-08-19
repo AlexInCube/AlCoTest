@@ -2,7 +2,12 @@ import { CommandArgument, ICommand } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
 import { ChatInputCommandInteraction, Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import i18next from 'i18next';
-import { UserPlaylistNamesAutocomplete, UserPlaylistRemoveSong } from '../../schemas/SchemaPlaylist.js';
+import {
+  PlaylistIsNotExists,
+  PlaylistSongNotExists,
+  UserPlaylistNamesAutocomplete,
+  UserPlaylistRemoveSong
+} from '../../schemas/SchemaPlaylist.js';
 import { generateSimpleEmbed } from '../../utilities/generateSimpleEmbed.js';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
 import { ENV } from '../../EnvironmentVariables.js';
@@ -75,6 +80,37 @@ async function plRemoveAndReply(
       ephemeral: true
     });
   } catch (e) {
+    if (e instanceof PlaylistIsNotExists) {
+      await ctx.reply({
+        embeds: [
+          generateErrorEmbed(
+            i18next.t('commands:pl_error_playlist_not_exists', {
+              name: playlistName,
+              interpolation: { escapeValue: false }
+            })
+          )
+        ],
+        ephemeral: true
+      });
+      return;
+    }
+
+    if (e instanceof PlaylistSongNotExists) {
+      await ctx.reply({
+        embeds: [
+          generateErrorEmbed(
+            i18next.t('commands:pl_error_song_is_not_exists_in_playlist', {
+              name: playlistName,
+              id: songID + 1,
+              interpolation: { escapeValue: false }
+            })
+          )
+        ],
+        ephemeral: true
+      });
+      return;
+    }
+
     await ctx.reply({
       embeds: [generateErrorEmbed(i18next.t('commands:pl-remove_error_unknown'))],
       ephemeral: true

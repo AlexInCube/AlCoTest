@@ -87,6 +87,14 @@ export class PlaylistSongIsNotValid extends Error {
   }
 }
 
+export class PlaylistSongNotExists extends Error {
+  constructor(playlistName: string, songID: number) {
+    super();
+    this.name = 'PlaylistSongNotExists';
+    this.message = `Song with id ${songID} not exists in playlist ${playlistName}`;
+  }
+}
+/*
 export class PlaylistSongAlreadyInPlaylist extends Error {
   constructor(playlistName: string, songName: string) {
     super();
@@ -94,7 +102,7 @@ export class PlaylistSongAlreadyInPlaylist extends Error {
     this.message = `Song ${songName} already in playlist ${playlistName}`;
   }
 }
-
+*/
 export async function UserPlaylistCreate(userID: string, name: string): Promise<void> {
   const playlist = await UserPlaylistGet(userID, name);
   if (playlist) throw new PlaylistAlreadyExists(name);
@@ -180,6 +188,7 @@ export async function UserPlaylistRemoveSong(
   if (!playlist) throw new PlaylistIsNotExists(name);
 
   const song = playlist.songs[index];
+  if (!song) throw new PlaylistSongNotExists(name, index);
   playlist.songs.splice(index, 1);
 
   await playlist.save();
