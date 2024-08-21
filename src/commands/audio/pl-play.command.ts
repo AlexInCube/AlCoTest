@@ -1,7 +1,6 @@
-import { CommandArgument, ICommand } from '../../CommandTypes.js';
+import { CommandArgument, ICommand, ICommandContext } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
 import {
-  ChatInputCommandInteraction,
   Guild,
   GuildMember,
   Message,
@@ -18,6 +17,7 @@ import { ENV } from '../../EnvironmentVariables.js';
 import { Song } from 'distube';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
 import { loggerError } from '../../utilities/logger.js';
+import { commandEmptyReply } from '../../utilities/commandEmptyReply.js';
 
 export default function (): ICommand {
   return {
@@ -64,7 +64,7 @@ export default function (): ICommand {
   };
 }
 
-async function plPlayAndReply(ctx: Message | ChatInputCommandInteraction, playlistName: string, userID: string) {
+async function plPlayAndReply(ctx: ICommandContext, playlistName: string, userID: string) {
   try {
     if (queueSongsIsFull(ctx.client, ctx.guild as Guild)) {
       await ctx.reply({
@@ -87,6 +87,23 @@ async function plPlayAndReply(ctx: Message | ChatInputCommandInteraction, playli
         return (await ctx.client.audioPlayer.distube.handler.resolve(userSong.url)) as Song;
       })
     );
+
+    if (songs.length === 0) {
+      await ctx.reply({
+        embeds: [
+          generateErrorEmbed(
+            i18next.t('commands:pl-play_error_empty_playlist', {
+              name: playlistName,
+              interpolation: { escapeValue: false }
+            })
+          )
+        ],
+        ephemeral: true
+      });
+      return;
+    }
+
+    await commandEmptyReply(ctx);
 
     const member = ctx.member as GuildMember;
 
@@ -120,7 +137,7 @@ async function plPlayAndReply(ctx: Message | ChatInputCommandInteraction, playli
       return;
     }
 
-    await ctx.reply({ embeds: [generateErrorEmbed(i18next.t('commands:pl-add_error_unknown'))], ephemeral: true });
+    await ctx.reply({ embeds: [generateErrorEmbed(i18next.t('commands:pl-play_error_unknown'))], ephemeral: true });
     if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
   }
 }

@@ -1,6 +1,6 @@
-import { CommandArgument, ICommand } from '../../CommandTypes.js';
+import { CommandArgument, ICommand, ICommandContext } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
-import { ChatInputCommandInteraction, Message, PermissionsBitField, SlashCommandBuilder, User } from 'discord.js';
+import { Message, PermissionsBitField, SlashCommandBuilder, User } from 'discord.js';
 import i18next from 'i18next';
 import {
   PlaylistIsNotExists,
@@ -40,7 +40,7 @@ export default function (): ICommand {
         .addStringOption((option) =>
           option
             .setName('playlist_name')
-            .setDescription(i18next.t('commands:pl-add_link'))
+            .setDescription(i18next.t('commands:pl_arg_name'))
             .setAutocomplete(true)
             .setRequired(true)
         )
@@ -60,12 +60,7 @@ export default function (): ICommand {
   };
 }
 
-async function plAddAndReply(
-  playlistName: string,
-  url: string,
-  ctx: Message | ChatInputCommandInteraction,
-  user: User
-) {
+async function plAddAndReply(playlistName: string, url: string, ctx: ICommandContext, user: User) {
   try {
     if (!isValidURL(url)) {
       await ctx.reply({
@@ -75,7 +70,18 @@ async function plAddAndReply(
       return;
     }
 
-    const song = await ctx.client.audioPlayer.distube.handler.resolve(url);
+    const song = await ctx.client.audioPlayer.distube.handler
+      .resolve(url)
+      .then((result) => result)
+      .catch((err) => loggerError(err));
+
+    if (!song) {
+      await ctx.reply({
+        embeds: [generateErrorEmbed(i18next.t('commands:pl-add_error_song_must_be_support_in_bot_player'))],
+        ephemeral: true
+      });
+      return;
+    }
 
     if (song instanceof Playlist) {
       await ctx.reply({

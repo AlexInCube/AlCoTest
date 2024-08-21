@@ -1,14 +1,14 @@
 import {
   ActionRowBuilder,
   ButtonBuilder,
-  ButtonStyle,
-  InteractionCollector,
-  ComponentType,
-  Client,
-  GuildMember,
   ButtonInteraction,
+  ButtonStyle,
+  Client,
+  ComponentType,
   Guild,
-  GuildTextBasedChannel
+  GuildMember,
+  GuildTextBasedChannel,
+  InteractionCollector
 } from 'discord.js';
 import { checkMemberInVoiceWithBot } from '../utilities/checkMemberInVoiceWithBot.js';
 import { generateErrorEmbed } from '../utilities/generateErrorEmbed.js';
@@ -18,13 +18,16 @@ import {
   generateEmbedAudioPlayerShuffle,
   generateEmbedAudioPlayerShuffleFailure
 } from '../commands/audio/shuffle.command.js';
-import { AudioPlayerIcons, AudioPlayerState } from './AudioPlayerTypes.js';
+import { AudioPlayerIcons, AudioPlayerState } from './AudioPlayerIcons.js';
 import { generateEmbedAudioPlayerStop } from '../commands/audio/stop.command.js';
 import {
   generateEmbedAudioPlayerPrevious,
   generateEmbedAudioPlayerPreviousFailure
 } from '../commands/audio/previous.command.js';
 import { ENV } from '../EnvironmentVariables.js';
+import { UserPlaylistAddFavoriteSong } from '../schemas/SchemaPlaylist.js';
+import { generateSimpleEmbed } from '../utilities/generateSimpleEmbed.js';
+import i18next from 'i18next';
 
 enum ButtonIDs {
   stopMusic = 'stopMusic',
@@ -35,7 +38,8 @@ enum ButtonIDs {
   //downloadSong = 'downloadSong',
   shuffle = 'shuffle',
   showQueue = 'showQueue',
-  lyrics = 'lyrics'
+  lyrics = 'lyrics',
+  favorite = 'favorite'
 }
 
 const rowPrimary = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -69,7 +73,11 @@ const rowPrimaryPaused = new ActionRowBuilder<ButtonBuilder>().addComponents(
 const rowSecondary = new ActionRowBuilder<ButtonBuilder>().addComponents(
   //new ButtonBuilder().setCustomId(ButtonIDs.downloadSong).setStyle(ButtonStyle.Success).setEmoji('<:downloadwhite:1014553027614617650>'),
   new ButtonBuilder().setCustomId(ButtonIDs.shuffle).setStyle(ButtonStyle.Primary).setEmoji(AudioPlayerIcons.shuffle),
-  new ButtonBuilder().setCustomId(ButtonIDs.showQueue).setStyle(ButtonStyle.Secondary).setEmoji(AudioPlayerIcons.list)
+  new ButtonBuilder().setCustomId(ButtonIDs.showQueue).setStyle(ButtonStyle.Secondary).setEmoji(AudioPlayerIcons.list),
+  new ButtonBuilder()
+    .setCustomId(ButtonIDs.favorite)
+    .setStyle(ButtonStyle.Secondary)
+    .setEmoji(AudioPlayerIcons.favorite)
 );
 
 if (ENV.BOT_GENIUS_TOKEN) {
@@ -192,6 +200,38 @@ export class PlayerButtons {
 
           case ButtonIDs.lyrics: {
             await this.client.audioPlayer.showLyrics(ButtonInteraction);
+            break;
+          }
+
+          case ButtonIDs.favorite: {
+            try {
+              const queue = ButtonInteraction.client.audioPlayer.distube.getQueue(ButtonInteraction.guild as Guild);
+
+              if (!queue || queue.songs.length === 0) {
+                await ButtonInteraction.deferUpdate();
+                return;
+              }
+
+              await UserPlaylistAddFavoriteSong(ButtonInteraction.user.id, queue.songs[0]);
+
+              await ButtonInteraction.reply({
+                embeds: [
+                  generateSimpleEmbed(
+                    i18next.t('audioplayer:song_added_to_favorite', {
+                      name: queue.songs[0].name!,
+                      interpolation: { escapeValue: false }
+                    })
+                  )
+                ],
+                ephemeral: true
+              });
+            } catch (e) {
+              await ButtonInteraction.reply({
+                embeds: [generateErrorEmbed(e.message, e.name)],
+                ephemeral: true
+              });
+            }
+            break;
           }
         }
       } catch (e) {

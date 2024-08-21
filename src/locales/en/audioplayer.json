@@ -1,6 +1,7 @@
 {
   "audio_commands_wrapper_song_processing": "Song is processing, please wait",
   "audio_commands_wrapper_player_not_exist": "Player is not exists",
+  "song_added_to_favorite": "Song ``{{name}}`` added to favorite songs",
   "play_error": "With this song is something wrong",
   "download_song_error": "Something went wrong, when retrieving link to audio",
   "show_queue_title": "Now playing",

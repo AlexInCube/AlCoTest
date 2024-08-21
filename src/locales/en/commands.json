@@ -80,6 +80,7 @@
   "history_embed_title": "Songs history for server",
   "pl_arg_name": "playlist name",
   "pl_arg_song_id": "song id in playlist",
+  "pl_arg_song_url": "link to the song",
   "pl_error_playlist_not_exists": "Playlist ``{{name}}`` is not exists",
   "pl_error_song_is_not_exists_in_playlist": "Song with ID ``{{id}}`` is not exists in playlist ``{{name}}``",
   "pl-create_desc": "Create a empty playlist",
@@ -98,6 +99,7 @@
   "pl-display_embed_no_songs": "This playlist not have any songs",
   "pl-add_desc": "Adds song to a playlist",
   "pl-add_error_song_must_be_link": "You must pass the LINK to the song",
+  "pl-add_error_song_must_be_support_in_bot_player": "You can add only songs that supports in audioplayer",
   "pl-add_error_song_must_not_be_playlist": "Links to playlists of services cannot be used in bot playlists",
   "pl-add_error_song_must_not_be_live_stream": "You cannot use links to live streams in bot playlists",
   "pl-add_error_playlist_max_songs_limit": "The playlist ``{{name}}`` has reached the maximum number of songs ({{count}}), remove past songs using /pl-remove",
@@ -107,5 +109,6 @@
   "pl-remove_success": "The song ``{{song}}`` has been successfully removed from the playlist ``{{playlist}}``",
   "pl-remove_error_unknown": "Unknown error when deleting a song from a playlist",
   "pl-play_desc": "Adds a custom playlist to the play queue",
-  "pl-play_error_unknown": "Unknown error while adding a playlist to the queue"
+  "pl-play_error_unknown": "Unknown error while adding a playlist to the queue",
+  "pl-play_error_empty_playlist": "You cannot play empty playlists"
 }

@@ -1,8 +1,7 @@
-import { CommandArgument, ICommand } from '../../CommandTypes.js';
+import { CommandArgument, ICommand, ICommandContext } from '../../CommandTypes.js';
 import {
   ApplicationCommandOptionChoiceData,
   AutocompleteInteraction,
-  ChatInputCommandInteraction,
   Guild,
   GuildMember,
   Message,
@@ -19,6 +18,7 @@ import ytsr from '@distube/ytsr';
 import { generateWarningEmbed } from '../../utilities/generateWarningEmbed.js';
 import { ENV } from '../../EnvironmentVariables.js';
 import { queueSongsIsFull } from '../../audioplayer/util/queueSongsIsFull.js';
+import { commandEmptyReply } from '../../utilities/commandEmptyReply.js';
 
 export const services = 'Youtube, Spotify, Soundcloud, Yandex Music, Apple Music, HTTP-stream';
 export default function (): ICommand {
@@ -97,7 +97,7 @@ export async function songSearchAutocomplete(interaction: AutocompleteInteractio
   await interaction.respond([]);
 }
 
-async function playAndReply(ctx: Message | ChatInputCommandInteraction, songQuery: string) {
+async function playAndReply(ctx: ICommandContext, songQuery: string) {
   if (queueSongsIsFull(ctx.client, ctx.guild as Guild)) {
     await ctx.reply({
       embeds: [
@@ -111,6 +111,8 @@ async function playAndReply(ctx: Message | ChatInputCommandInteraction, songQuer
     });
     return;
   }
+
+  await commandEmptyReply(ctx);
 
   const member = ctx.member as GuildMember;
 

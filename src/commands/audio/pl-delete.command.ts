@@ -1,6 +1,6 @@
-import { CommandArgument, ICommand } from '../../CommandTypes.js';
+import { CommandArgument, ICommand, ICommandContext } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
-import { ChatInputCommandInteraction, Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
+import { Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import i18next from 'i18next';
 import {
   PlaylistIsNotExists,
@@ -47,7 +47,7 @@ export default function (): ICommand {
   };
 }
 
-async function plDeleteAndReply(ctx: Message | ChatInputCommandInteraction, userID: string, playlistName: string) {
+async function plDeleteAndReply(ctx: ICommandContext, userID: string, playlistName: string) {
   try {
     await UserPlaylistDelete(userID, playlistName);
 

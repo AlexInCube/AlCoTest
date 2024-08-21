@@ -65,3 +65,5 @@ interface IGuildData {
   voice_required?: boolean;
   voice_with_bot_only?: boolean; // Property enabled only if voice_required is true
 }
+
+export type ICommandContext = Message | ChatInputCommandInteraction;

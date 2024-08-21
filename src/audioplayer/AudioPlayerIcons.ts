@@ -10,7 +10,8 @@ export enum AudioPlayerIcons {
   skip = '<:skipbutton:1092107438234275900>',
   shuffle = '<:shufflebutton:1092107651384614912>',
   list = '<:songlistwhite:1014551771705782405>',
-  lyrics = '<:lyrics:1260156581794811974>'
+  lyrics = '<:lyrics:1260156581794811974>',
+  favorite = '<:favorite:1275199463631093860>'
 }
 
 export enum AudioSourceIcons {

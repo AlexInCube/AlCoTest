@@ -1,12 +1,6 @@
-import { ICommand } from '../../CommandTypes.js';
+import { ICommand, ICommandContext } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
-import {
-  ChatInputCommandInteraction,
-  EmbedBuilder,
-  Message,
-  PermissionsBitField,
-  SlashCommandBuilder
-} from 'discord.js';
+import { EmbedBuilder, Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import i18next from 'i18next';
 import { UserPlaylistGetPlaylists } from '../../schemas/SchemaPlaylist.js';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
@@ -31,7 +25,7 @@ export default function (): ICommand {
   };
 }
 
-async function plMyAndReply(ctx: Message | ChatInputCommandInteraction, userID: string) {
+async function plMyAndReply(ctx: ICommandContext, userID: string) {
   const playlists = await UserPlaylistGetPlaylists(userID);
 
   if (playlists && playlists.length > 0) {

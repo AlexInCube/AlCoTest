@@ -1,6 +1,6 @@
-import { CommandArgument, ICommand } from '../../CommandTypes.js';
+import { CommandArgument, ICommand, ICommandContext } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
-import { ChatInputCommandInteraction, Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
+import { Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import i18next from 'i18next';
 import {
   PlaylistAlreadyExists,
@@ -49,7 +49,7 @@ export default function (): ICommand {
   };
 }
 
-async function plCreateAndReply(playlistName: string, ctx: Message | ChatInputCommandInteraction, userID: string) {
+async function plCreateAndReply(playlistName: string, ctx: ICommandContext, userID: string) {
   try {
     await UserPlaylistCreate(userID, playlistName);
 

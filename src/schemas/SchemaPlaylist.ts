@@ -3,6 +3,7 @@ import { Song } from 'distube';
 import { ENV } from '../EnvironmentVariables.js';
 import { getOrCreateUser } from './SchemaUser.js';
 import { ApplicationCommandOptionChoiceData, AutocompleteInteraction } from 'discord.js';
+import { getSongsNoun } from '../audioplayer/util/getSongsNoun.js';
 
 interface ISchemaSongPlaylistUnit {
   name: string;
@@ -25,6 +26,9 @@ const SchemaSongPlaylistUnit = new Schema<ISchemaSongPlaylistUnit>(
 export interface ISchemaPlaylist extends Document {
   name: string;
   songs: Array<ISchemaSongPlaylistUnit>;
+  songsSize: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const PlaylistNameMinLength = 1;
@@ -33,7 +37,8 @@ export const PlaylistNameMaxLength = 50;
 export const SchemaPlaylist = new Schema<ISchemaPlaylist>(
   {
     name: { type: String, required: true, maxlength: PlaylistNameMaxLength, minlength: PlaylistNameMinLength },
-    songs: { type: [SchemaSongPlaylistUnit], default: [], select: false }
+    songs: { type: [SchemaSongPlaylistUnit], default: [], select: false },
+    songsSize: { type: Number, default: 0 }
   },
   {
     timestamps: {
@@ -42,6 +47,11 @@ export const SchemaPlaylist = new Schema<ISchemaPlaylist>(
     }
   }
 );
+
+SchemaPlaylist.pre('save', function (next) {
+  this.songsSize = this.songs.length;
+  next();
+});
 
 const PlaylistModel = model<ISchemaPlaylist>('playlist', SchemaPlaylist);
 
@@ -103,17 +113,30 @@ export class PlaylistSongAlreadyInPlaylist extends Error {
   }
 }
 */
-export async function UserPlaylistCreate(userID: string, name: string): Promise<void> {
-  const playlist = await UserPlaylistGet(userID, name);
+
+export async function UserPlaylistCreate(userID: string, name: string, bypassPlaylistsLimit = false): Promise<void> {
+  let playlist;
+
+  try {
+    playlist = await UserPlaylistGet(userID, name);
+  } catch (e) {
+    if (!(e instanceof PlaylistIsNotExists)) {
+      throw e;
+    }
+  }
+
   if (playlist) throw new PlaylistAlreadyExists(name);
+
   const user = await getOrCreateUser(userID);
 
   if (!user.playlists) {
     user.playlists = [];
   }
 
-  if (user.playlists.length >= ENV.BOT_MAX_PLAYLISTS_PER_USER) {
-    throw new PlaylistMaxPlaylistsCount();
+  if (!bypassPlaylistsLimit) {
+    if (user.playlists.length >= ENV.BOT_MAX_PLAYLISTS_PER_USER) {
+      throw new PlaylistMaxPlaylistsCount();
+    }
   }
 
   const newPlaylist = new PlaylistModelClass({
@@ -202,13 +225,29 @@ export async function UserPlaylistNamesAutocomplete(interaction: AutocompleteInt
   let finalResult: Array<ApplicationCommandOptionChoiceData> = [];
 
   if (playlists) {
-    finalResult = playlists?.map((playlists) => {
+    finalResult = playlists?.map((playlist) => {
       return {
-        name: playlists.name,
-        value: playlists.name
+        name: `${playlist.name} - ${playlist.songsSize} ${getSongsNoun(playlist.songsSize)}`,
+        value: playlist.name
       };
     });
   }
 
   await interaction.respond(finalResult);
+}
+
+export async function UserPlaylistAddFavoriteSong(userID: string, song: Song): Promise<void> {
+  try {
+    await UserPlaylistAddSong(userID, 'favorite-songs', song);
+  } catch (e) {
+    if (e instanceof PlaylistIsNotExists) {
+      await UserPlaylistCreate(userID, 'favorite-songs', true);
+
+      await UserPlaylistAddSong(userID, 'favorite-songs', song);
+
+      return;
+    }
+
+    throw e;
+  }
 }

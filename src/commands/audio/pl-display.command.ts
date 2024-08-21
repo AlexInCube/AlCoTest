@@ -1,13 +1,6 @@
-import { CommandArgument, ICommand } from '../../CommandTypes.js';
+import { CommandArgument, ICommand, ICommandContext } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
-import {
-  ChatInputCommandInteraction,
-  EmbedBuilder,
-  Message,
-  PermissionsBitField,
-  SlashCommandBuilder,
-  User
-} from 'discord.js';
+import { EmbedBuilder, Message, PermissionsBitField, SlashCommandBuilder, User } from 'discord.js';
 import i18next from 'i18next';
 import {
   PlaylistNameMaxLength,
@@ -54,7 +47,7 @@ export default function (): ICommand {
   };
 }
 
-async function plDisplayAndReply(playlistName: string, ctx: Message | ChatInputCommandInteraction, user: User) {
+async function plDisplayAndReply(playlistName: string, ctx: ICommandContext, user: User) {
   const playlist = await UserPlaylistGet(user.id, playlistName, true);
 
   if (!playlist) {

@@ -2,7 +2,7 @@ import { Client, GuildTextBasedChannel, Message } from 'discord.js';
 import { PlayerEmbed } from './PlayerEmbed.js';
 import { Queue, Song } from 'distube';
 import { PlayerButtons } from './PlayerButtons.js';
-import { AudioPlayerState } from './AudioPlayerTypes.js';
+import { AudioPlayerState } from './AudioPlayerIcons.js';
 import { checkBotInVoice } from '../utilities/checkBotInVoice.js';
 import i18next from 'i18next';
 import { ENV } from '../EnvironmentVariables.js';

@@ -1,6 +1,7 @@
 {
   "audio_commands_wrapper_song_processing": "Песни всё ещё обрабатываются, подожди",
   "audio_commands_wrapper_player_not_exist": "Плеера не существует",
+  "song_added_to_favorite": "Песня ``{{name}}`` добавлена в любимые",
   "play_error": "Попробуйте другую песню, с этой какая-то ерунда происходит.",
   "download_song_error": "Что-то пошло не так при получении ссылки на скачивание",
   "show_queue_title": "Сейчас играет",
