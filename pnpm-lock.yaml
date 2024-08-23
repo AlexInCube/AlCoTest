@@ -142,7 +142,7 @@ importers:
         specifier: ^5.5.4
         version: 5.5.4
       typescript-eslint:
-        specifier: 8.2.0
+        specifier: ^8.2.0
         version: 8.2.0(eslint@9.9.0)(typescript@5.5.4)
 
 packages:
