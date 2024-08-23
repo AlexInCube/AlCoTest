@@ -31,20 +31,12 @@ class DownloadSongError extends Error {
   }
 }
 
-type DownloadSongMessage =
-  | 'is_not_url'
-  | 'not_found'
-  | 'song_is_too_large'
-  | 'failed_loading'
-  | 'this_is_playlist';
+type DownloadSongMessage = 'is_not_url' | 'not_found' | 'song_is_too_large' | 'failed_loading' | 'this_is_playlist';
 
 const maxDownloadSize = 2.5e7; //bytes
 const maxDownloadSizeMB = maxDownloadSize / 1000000;
 
-export async function downloadSong(
-  client: Client,
-  request: string
-): Promise<ReadStream | undefined> {
+export async function downloadSong(client: Client, request: string): Promise<ReadStream | undefined> {
   let streamUrl: string | undefined = '';
 
   if (!isURL(request)) {
@@ -90,10 +82,7 @@ async function convertWebmToMp3(webmStream: ReadableStream<Uint8Array>) {
   return createReadStream(file_name);
 }
 
-export async function getSongFileAttachment(
-  client: Client,
-  query: string
-): Promise<AttachmentBuilder> {
+export async function getSongFileAttachment(client: Client, query: string): Promise<AttachmentBuilder> {
   const file = await downloadSong(client, query);
   if (!file) throw new DownloadSongError('failed_loading');
   return new AttachmentBuilder(file);

@@ -21,9 +21,7 @@ export default function (): ICommand {
       }
     },
     slash_data: {
-      slash_builder: new SlashCommandBuilder()
-        .setName('playing')
-        .setDescription(i18next.t('commands:playing_desc')),
+      slash_builder: new SlashCommandBuilder().setName('playing').setDescription(i18next.t('commands:playing_desc')),
       execute: async (interaction) => {
         await AudioCommandWrapperInteraction(interaction, async () => {
           await interaction.reply({

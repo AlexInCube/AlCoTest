@@ -1,10 +1,10 @@
 import { EmbedBuilder, User } from 'discord.js';
-import { AudioPlayerLoopMode, AudioPlayerState, AudioSourceIcons } from './AudioPlayerTypes.js';
-import { getNoun } from '../utilities/getNoun.js';
+import { AudioPlayerLoopMode, AudioPlayerState, AudioSourceIcons } from './AudioPlayerIcons.js';
 import { formatSecondsToTime } from '../utilities/formatSecondsToTime.js';
 import i18next from 'i18next';
 import { Playlist, Song } from 'distube';
 import { getIconFromSource } from './util/getIconFromSource.js';
+import { getSongsNoun } from './util/getSongsNoun.js';
 
 export class PlayerEmbed extends EmbedBuilder {
   private playerState: AudioPlayerState = 'loading';
@@ -51,12 +51,7 @@ export class PlayerEmbed extends EmbedBuilder {
       this.addFields({
         name: i18next.t('audioplayer:player_embed_queue'),
         value: `
-                \`${this.songsCount} ${getNoun(
-                  this.songsCount,
-                  i18next.t('audioplayer:player_embed_queue_noun_one'),
-                  i18next.t('audioplayer:player_embed_queue_noun_two'),
-                  i18next.t('audioplayer:player_embed_queue_noun_five')
-                )}\`
+                \`${this.songsCount} ${getSongsNoun(this.songsCount)}\`
                  \`${this.queueDuration}\`
                  `,
         inline: true

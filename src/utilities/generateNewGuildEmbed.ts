@@ -18,7 +18,5 @@ export function generateNewGuildEmbed(): EmbedBuilder {
         i18next.t('welcomeMessage:row_4')
     )
     .setColor(Colors.Yellow)
-    .setImage(
-      'https://github.com/AlexInCube/AlCoTest/blob/master/icons/repository-social.png?raw=true'
-    );
+    .setImage('https://github.com/AlexInCube/AlCoTest/blob/master/icons/repository-social.png?raw=true');
 }

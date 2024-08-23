@@ -41,9 +41,7 @@ export default function (): ICommand {
 
         if (!musicFile) {
           await message.reply({
-            embeds: [
-              generateErrorEmbed(i18next.t('commands:play_file_missing_attachment', audioFormats))
-            ]
+            embeds: [generateErrorEmbed(i18next.t('commands:play_file_missing_attachment', audioFormats))]
           });
           return;
         }
@@ -74,10 +72,7 @@ export default function (): ICommand {
         .setName('playfile')
         .setDescription(i18next.t('commands:play_file_desc'))
         .addAttachmentOption((option) =>
-          option
-            .setName('file')
-            .setDescription(i18next.t('commands:play_file_arg_file'))
-            .setRequired(true)
+          option.setName('file').setDescription(i18next.t('commands:play_file_arg_file')).setRequired(true)
         ),
       execute: async (interaction) => {
         if (queueSongsIsFull(interaction.client, interaction.guild as Guild)) {
@@ -98,9 +93,7 @@ export default function (): ICommand {
 
         if (!isAudioFile(musicFile.name)) {
           await interaction.reply({
-            embeds: [
-              generateErrorEmbed(i18next.t('commands:play_file_wrong_format', audioFormats))
-            ],
+            embeds: [generateErrorEmbed(i18next.t('commands:play_file_wrong_format', audioFormats))],
             ephemeral: true
           });
           return;

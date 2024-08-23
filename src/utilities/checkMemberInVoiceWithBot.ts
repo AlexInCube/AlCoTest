@@ -14,8 +14,7 @@ export async function checkMemberInVoiceWithBot(
     const connection = checkBotInVoice(member.guild);
     if (connection) {
       if (member.voice.channel) {
-        response.channelTheSame =
-          member.guild.members.me?.voice.channel?.id === member.voice?.channel.id;
+        response.channelTheSame = member.guild.members.me?.voice.channel?.id === member.voice?.channel.id;
         if (response.channelTheSame) {
           return response;
         }
@@ -24,15 +23,13 @@ export async function checkMemberInVoiceWithBot(
         return response;
       }
 
-      await member.guild.client.channels
-        .fetch(<string>member.guild.members.me?.voice.channel?.id)
-        .then((channel) => {
-          if (channel) {
-            if (channel instanceof VoiceChannel) {
-              response.errorMessage = `${i18next.t('commandsHandlers:voice_join_in_channel')} ${channel.name}`;
-            }
+      await member.guild.client.channels.fetch(<string>member.guild.members.me?.voice.channel?.id).then((channel) => {
+        if (channel) {
+          if (channel instanceof VoiceChannel) {
+            response.errorMessage = `${i18next.t('commandsHandlers:voice_join_in_channel')} ${channel.name}`;
           }
-        });
+        }
+      });
     }
   } catch (e) {
     return response;

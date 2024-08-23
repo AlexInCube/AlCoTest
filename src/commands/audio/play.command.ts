@@ -1,4 +1,4 @@
-import { CommandArgument, ICommand } from '../../CommandTypes.js';
+import { CommandArgument, ICommand, ReplyContext } from '../../CommandTypes.js';
 import {
   ApplicationCommandOptionChoiceData,
   AutocompleteInteraction,
@@ -8,7 +8,6 @@ import {
   PermissionsBitField,
   SlashCommandBuilder,
   TextChannel,
-  VoiceBasedChannel,
   VoiceChannel
 } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
@@ -19,6 +18,7 @@ import ytsr from '@distube/ytsr';
 import { generateWarningEmbed } from '../../utilities/generateWarningEmbed.js';
 import { ENV } from '../../EnvironmentVariables.js';
 import { queueSongsIsFull } from '../../audioplayer/util/queueSongsIsFull.js';
+import { commandEmptyReply } from '../../utilities/commandEmptyReply.js';
 
 export const services = 'Youtube, Spotify, Soundcloud, Yandex Music, Apple Music, HTTP-stream';
 export default function (): ICommand {
@@ -26,41 +26,13 @@ export default function (): ICommand {
     text_data: {
       name: 'play',
       description: i18next.t('commands:play_desc'),
-      arguments: [
-        new CommandArgument(i18next.t('commands:play_arg_link', { services: services }), true)
-      ],
+      arguments: [new CommandArgument(i18next.t('commands:play_arg_link', { services: services }), true)],
       execute: async (message: Message, args: string[]) => {
         // Play command accept only one arg is a query string.
         // In text command system we need to merge all words for request in one string
         const songQuery = args.join(' ');
 
-        const member = message.member as GuildMember;
-        const channel = message.channel as TextChannel;
-
-        if (queueSongsIsFull(message.client, message.guild as Guild)) {
-          await message.reply({
-            embeds: [
-              generateWarningEmbed(
-                i18next.t('commands:play_error_songs_limit', {
-                  queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
-                }) as string
-              )
-            ]
-          });
-          return;
-        }
-
-        await message.client.audioPlayer.play(
-          member.voice.channel as VoiceBasedChannel,
-          channel,
-          songQuery,
-          {
-            member: member,
-            textChannel: channel
-          }
-        );
-
-        await message.delete();
+        await playAndReply(message, songQuery);
       }
     },
     slash_data: {
@@ -76,40 +48,9 @@ export default function (): ICommand {
         ),
       autocomplete: songSearchAutocomplete,
       execute: async (interaction) => {
-        if (queueSongsIsFull(interaction.client, interaction.guild as Guild)) {
-          await interaction.reply({
-            embeds: [
-              generateWarningEmbed(
-                i18next.t('commands:play_error_songs_limit', {
-                  queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
-                }) as string
-              )
-            ],
-            ephemeral: true
-          });
-          return;
-        }
+        const songQuery = interaction.options.getString('request')!;
 
-        const songQuery = interaction.options.getString('request');
-
-        await interaction.reply({
-          content: i18next.t('general:thinking') as string
-        });
-        await interaction.deleteReply();
-
-        const member = interaction.member as GuildMember;
-
-        if (songQuery) {
-          await interaction.client.audioPlayer.play(
-            member.voice.channel as VoiceChannel,
-            interaction.channel as TextChannel,
-            songQuery,
-            {
-              member: interaction.member as GuildMember,
-              textChannel: interaction.channel as TextChannel
-            }
-          );
-        }
+        await playAndReply(interaction, songQuery);
       }
     },
     group: GroupAudio,
@@ -122,8 +63,7 @@ export default function (): ICommand {
       PermissionsBitField.Flags.Connect,
       PermissionsBitField.Flags.ViewChannel,
       PermissionsBitField.Flags.Speak,
-      PermissionsBitField.Flags.ManageMessages,
-      PermissionsBitField.Flags.AttachFiles
+      PermissionsBitField.Flags.ManageMessages
     ]
   };
 }
@@ -140,7 +80,7 @@ export async function songSearchAutocomplete(interaction: AutocompleteInteractio
       type: SearchResultType.VIDEO
     });
 
-    const finalResult = choices.items.map((video: ytsr.Video) => {
+    const finalResult: Array<ApplicationCommandOptionChoiceData> = choices.items.map((video: ytsr.Video) => {
       const duration = video.isLive ? liveText : video.duration;
       let choiceString = `${duration} | ${truncateString(video.author?.name ?? ' ', 20)} | `;
       choiceString += truncateString(video.name, 100 - choiceString.length);
@@ -150,9 +90,34 @@ export async function songSearchAutocomplete(interaction: AutocompleteInteractio
       };
     });
 
-    await interaction.respond(finalResult as Array<ApplicationCommandOptionChoiceData>);
+    await interaction.respond(finalResult);
     return;
   }
 
   await interaction.respond([]);
+}
+
+async function playAndReply(ctx: ReplyContext, songQuery: string) {
+  if (queueSongsIsFull(ctx.client, ctx.guild as Guild)) {
+    await ctx.reply({
+      embeds: [
+        generateWarningEmbed(
+          i18next.t('commands:play_error_songs_limit', {
+            queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
+          }) as string
+        )
+      ],
+      ephemeral: true
+    });
+    return;
+  }
+
+  await commandEmptyReply(ctx);
+
+  const member = ctx.member as GuildMember;
+
+  await ctx.client.audioPlayer.play(member.voice.channel as VoiceChannel, ctx.channel as TextChannel, songQuery, {
+    member,
+    textChannel: ctx.channel as TextChannel
+  });
 }

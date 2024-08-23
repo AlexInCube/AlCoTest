@@ -26,9 +26,7 @@ export default function (): ICommand {
       }
     },
     slash_data: {
-      slash_builder: new SlashCommandBuilder()
-        .setName('status')
-        .setDescription(i18next.t('commands:status_desc')),
+      slash_builder: new SlashCommandBuilder().setName('status').setDescription(i18next.t('commands:status_desc')),
       execute: async (interaction: ChatInputCommandInteraction) => {
         await interaction.reply({
           embeds: [await generateStatusEmbed(interaction.client)],
@@ -52,10 +50,7 @@ export async function generateStatusEmbed(client: Client): Promise<EmbedBuilder>
   }
 
   addState('Github', 'https://github.com/AlexInCube/AlCoTest');
-  addState(
-    i18next.t('commands:status_embed_bot_version'),
-    `\`${process.env.npm_package_version}\``
-  );
+  addState(i18next.t('commands:status_embed_bot_version'), `\`${process.env.npm_package_version}\``);
   // addState("Websocket Heartbeat", `\`${client.ws.ping}\``)
   addState(i18next.t('commands:status_embed_os'), `\`${os.platform()}\``);
   addState(i18next.t('commands:status_embed_cpu'), `\`${cpu.model()}\``);

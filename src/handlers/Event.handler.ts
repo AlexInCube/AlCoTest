@@ -18,8 +18,7 @@ const handler = async (client: Client) => {
     if (!file.endsWith('.event.js')) return;
 
     const importPath = pathToFileURL(path.resolve(eventsDir, file)).toString();
-    if (ENV.BOT_VERBOSE_LOGGING)
-      loggerSend(`Try to load event from: ${importPath}`, loggerPrefixEventHandler);
+    if (ENV.BOT_VERBOSE_LOGGING) loggerSend(`Try to load event from: ${importPath}`, loggerPrefixEventHandler);
 
     const eventModule = await import(importPath);
     const event: BotEvent = eventModule.default;

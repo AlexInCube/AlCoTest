@@ -45,10 +45,7 @@ export default function (): ICommand {
         .setName('jump')
         .setDescription(i18next.t('commands:jump_desc'))
         .addNumberOption((option) =>
-          option
-            .setName('position')
-            .setDescription(i18next.t('commands:jump_arg_position'))
-            .setRequired(true)
+          option.setName('position').setDescription(i18next.t('commands:jump_arg_position')).setRequired(true)
         ),
       execute: async (interaction) => {
         const pos = interaction.options.getNumber('position')! - 1;

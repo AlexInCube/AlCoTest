@@ -17,9 +17,7 @@ export default function (): ICommand {
       }
     },
     slash_data: {
-      slash_builder: new SlashCommandBuilder()
-        .setName('invite')
-        .setDescription(i18next.t('commands:invite_desc')),
+      slash_builder: new SlashCommandBuilder().setName('invite').setDescription(i18next.t('commands:invite_desc')),
       execute: async (interaction) => {
         await interaction.reply({
           content: generateLinkMessage(),

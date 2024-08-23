@@ -1,12 +1,5 @@
 import { ICommand } from '../../CommandTypes.js';
-import {
-  EmbedBuilder,
-  Guild,
-  GuildMember,
-  Message,
-  PermissionsBitField,
-  SlashCommandBuilder
-} from 'discord.js';
+import { EmbedBuilder, Guild, GuildMember, Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
 import {
   AudioCommandWrapperInteraction,
@@ -28,9 +21,7 @@ export default function (): ICommand {
       }
     },
     slash_data: {
-      slash_builder: new SlashCommandBuilder()
-        .setName('stop')
-        .setDescription(i18next.t('commands:stop_desc')),
+      slash_builder: new SlashCommandBuilder().setName('stop').setDescription(i18next.t('commands:stop_desc')),
       execute: async (interaction) => {
         await AudioCommandWrapperInteraction(interaction, async () => {
           await interaction.client.audioPlayer.stop((interaction.guild as Guild).id);

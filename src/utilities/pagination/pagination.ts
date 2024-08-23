@@ -50,8 +50,7 @@ export const pagination = async (options: PaginationOptions) => {
   const disableB = disableButtons || false;
   const ephemeralMessage = ephemeral !== null ? ephemeral : false;
 
-  if (!interaction && !message)
-    throw new Error('Pagination requires either an interaction or a message object');
+  if (!interaction && !message) throw new Error('Pagination requires either an interaction or a message object');
   const type = interaction ? 'interaction' : 'message';
 
   const getButtonData = (type: ButtonsTypes) => {
@@ -88,9 +87,7 @@ export const pagination = async (options: PaginationOptions) => {
     }, []);
   };
 
-  const components = (state?: boolean) => [
-    new ActionRowBuilder<ButtonBuilder>().addComponents(generateButtons(state))
-  ];
+  const components = (state?: boolean) => [new ActionRowBuilder<ButtonBuilder>().addComponents(generateButtons(state))];
 
   const changeFooter = () => {
     const embed = embeds[currentPage - 1];
@@ -143,9 +140,7 @@ export const pagination = async (options: PaginationOptions) => {
 
   if (pageTravel) {
     collectorModal = initialMessage.createMessageComponentCollector(
-      collectorOptions(
-        (_i: ModalSubmitInteraction) => _i.user.id === author.id && parseInt(_i.customId) === 5
-      )
+      collectorOptions((_i: ModalSubmitInteraction) => _i.user.id === author.id && parseInt(_i.customId) === 5)
     );
     collectorModal.on('collect', async (btnInteraction) => {
       // Show modal
@@ -156,16 +151,13 @@ export const pagination = async (options: PaginationOptions) => {
         .setLabel('Enter Page Number')
         .setStyle(TextInputStyle.Short);
 
-      const buildModal = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
-        inputPageNumber
-      );
+      const buildModal = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(inputPageNumber);
       modal.addComponents(buildModal);
       await btnInteraction.showModal(modal);
 
       await btnInteraction
         .awaitModalSubmit({
-          filter: (_i: ButtonInteraction) =>
-            _i.user.id === author.id && _i.customId === 'choose_page_modal',
+          filter: (_i: ButtonInteraction) => _i.user.id === author.id && _i.customId === 'choose_page_modal',
           time: 30000
         })
         .then(async (i) => {

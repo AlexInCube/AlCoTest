@@ -63,17 +63,13 @@ describe('Audio Services', () => {
 
   describe(`SoundCloud`, () => {
     it('Song', async () => {
-      const song = await distube.handler.resolve(
-        'https://soundcloud.com/u6lg5vfbfely/ninja-gaiden-2-ost-a-long-way'
-      );
+      const song = await distube.handler.resolve('https://soundcloud.com/u6lg5vfbfely/ninja-gaiden-2-ost-a-long-way');
 
       assert.ok(song);
     });
 
     it('Playlist', async () => {
-      const playlist = await distube.handler.resolve(
-        'https://soundcloud.com/u6lg5vfbfely/sets/music'
-      );
+      const playlist = await distube.handler.resolve('https://soundcloud.com/u6lg5vfbfely/sets/music');
 
       assert.ok(playlist);
     });
@@ -81,17 +77,13 @@ describe('Audio Services', () => {
 
   describe(`Yandex Music`, () => {
     it('Song', async () => {
-      const song = await distube.handler.resolve(
-        'https://music.yandex.com/album/10030/track/38634572'
-      );
+      const song = await distube.handler.resolve('https://music.yandex.com/album/10030/track/38634572');
 
       assert.ok(song);
     });
 
     it('Playlist', async () => {
-      const song = await distube.handler.resolve(
-        'https://music.yandex.ru/users/alexander.tsimbalistiy/playlists/1000'
-      );
+      const song = await distube.handler.resolve('https://music.yandex.ru/users/alexander.tsimbalistiy/playlists/1000');
 
       assert.ok(song);
     });
@@ -105,9 +97,7 @@ describe('Audio Services', () => {
 
   describe('Apple Music', () => {
     it('Song', async () => {
-      const song = await distube.handler.resolve(
-        'https://music.apple.com/us/album/v/1544457960?i=1544457962'
-      );
+      const song = await distube.handler.resolve('https://music.apple.com/us/album/v/1544457960?i=1544457962');
 
       assert.ok(song);
     });

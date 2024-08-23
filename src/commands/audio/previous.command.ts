@@ -28,9 +28,7 @@ export default function (): ICommand {
       }
     },
     slash_data: {
-      slash_builder: new SlashCommandBuilder()
-        .setName('previous')
-        .setDescription(i18next.t('commands:previous_desc')),
+      slash_builder: new SlashCommandBuilder().setName('previous').setDescription(i18next.t('commands:previous_desc')),
       execute: async (interaction) => {
         await AudioCommandWrapperInteraction(interaction, async () => {
           const song = await interaction.client.audioPlayer.previous(interaction.guild!);

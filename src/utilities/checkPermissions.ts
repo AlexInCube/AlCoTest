@@ -1,9 +1,6 @@
 import { GuildMember, PermissionResolvable, PermissionsBitField, TextChannel } from 'discord.js';
 
-export function CheckBotPermissions(
-  channel: TextChannel,
-  permissionsRequired: Array<PermissionResolvable>
-): boolean {
+export function CheckBotPermissions(channel: TextChannel, permissionsRequired: Array<PermissionResolvable>): boolean {
   const bot = channel.guild.members.me;
   if (!bot) return false;
 

@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose';
+import { Document, model, Schema } from 'mongoose';
 import { getOrCreateGuildSettings, GuildModelClass } from './SchemaGuild.js';
 import { Playlist, Song } from 'distube';
 import { ENV } from '../EnvironmentVariables.js';
@@ -23,11 +23,11 @@ const SchemaSongsHistoryUnit = new Schema<ISchemaSongHistoryUnit>(
   }
 );
 
-export interface ISchemaSongsHistory {
+export interface ISchemaSongsHistory extends Document {
   songsHistory: Array<ISchemaSongHistoryUnit>;
 }
 
-export const SchemaSongsHistoryList = new Schema<ISchemaSongsHistory>(
+export const SchemaSongsHistory = new Schema<ISchemaSongsHistory>(
   {
     songsHistory: { type: [SchemaSongsHistoryUnit], default: [] }
   },
@@ -39,7 +39,7 @@ export const SchemaSongsHistoryList = new Schema<ISchemaSongsHistory>(
   }
 );
 
-const SongsHistoryListModel = model<ISchemaSongsHistory>('songHistory', SchemaSongsHistoryList);
+const SongsHistoryListModel = model<ISchemaSongsHistory>('songHistory', SchemaSongsHistory);
 
 export class SongsHistoryListModelClass extends SongsHistoryListModel {} // This workaround required for better TypeScript support
 
@@ -59,14 +59,12 @@ export async function deleteGuildSongsHistory(guildID: string) {
   await SongsHistoryListModelClass.deleteOne({ _id: guild.songsHistory });
 }
 
-export async function addSongToGuildSongsHistory(
-  guildID: string,
-  resource: Song | Playlist
-): Promise<void> {
+export async function addSongToGuildSongsHistory(guildID: string, resource: Song | Playlist): Promise<void> {
   const history = await getOrCreateGuildSongsHistory(guildID);
 
   if (!history) return;
 
+  // Users' playlists cannot be added to history, because they don't have url
   if (resource.name && resource.member?.id && resource.url) {
     history.songsHistory.push({
       name: resource.name ?? 'unknown',

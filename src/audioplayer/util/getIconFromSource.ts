@@ -1,4 +1,4 @@
-import { AudioSourceIcons } from '../AudioPlayerTypes.js';
+import { AudioSourceIcons } from '../AudioPlayerIcons.js';
 
 export function getIconFromSource(source: string): AudioSourceIcons {
   switch (source) {

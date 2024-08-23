@@ -16,9 +16,7 @@ export default function (): ICommand {
     text_data: {
       name: 'download',
       description: i18next.t('commands:download_desc'),
-      arguments: [
-        new CommandArgument(i18next.t('commands:play_arg_link', { services: services }), true)
-      ],
+      arguments: [new CommandArgument(i18next.t('commands:play_arg_link', { services: services }), true)],
       execute: async (message, args) => {
         const songQuery = args.join(' ');
 

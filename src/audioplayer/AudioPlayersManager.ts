@@ -1,15 +1,5 @@
-import {
-  DisTube,
-  PlayOptions,
-  Queue,
-  RepeatMode,
-  Song,
-  Events as DistubeEvents,
-  Playlist
-} from 'distube';
+import { DisTube, Events as DistubeEvents, Playlist, PlayOptions, Queue, RepeatMode, Song } from 'distube';
 import { AudioPlayersStore } from './AudioPlayersStore.js';
-import { pagination } from '../utilities/pagination/pagination.js';
-import { ButtonStyles, ButtonTypes } from '../utilities/pagination/paginationTypes.js';
 import { clamp } from '../utilities/clamp.js';
 import { generateErrorEmbed } from '../utilities/generateErrorEmbed.js';
 import i18next from 'i18next';
@@ -22,7 +12,6 @@ import {
   ButtonInteraction,
   Client,
   CommandInteraction,
-  Embed,
   EmbedBuilder,
   Guild,
   Interaction,
@@ -34,6 +23,7 @@ import { generateWarningEmbed } from '../utilities/generateWarningEmbed.js';
 import { generateLyricsEmbed } from './Lyrics.js';
 import { getGuildOptionLeaveOnEmpty, setGuildOptionLeaveOnEmpty } from '../schemas/SchemaGuild.js';
 import { addSongToGuildSongsHistory } from '../schemas/SchemaSongsHistory.js';
+import { PaginationList } from './PaginationList.js';
 
 export const loggerPrefixAudioplayer = `Audioplayer`;
 
@@ -60,11 +50,11 @@ export class AudioPlayersManager {
   async play(
     voiceChannel: VoiceBasedChannel,
     textChannel: TextChannel,
-    song: string | Song,
+    query: string | Song | Playlist,
     options?: PlayOptions
   ) {
     try {
-      const playableThing: Song | Playlist = await this.distube.handler.resolve(song);
+      const playableThing: Song | Playlist = await this.distube.handler.resolve(query);
 
       // I am need manual connect user to a voice channel, because when I am using only Distube "play"
       // method, getVoiceConnection in @discordjs/voice is not working
@@ -78,9 +68,7 @@ export class AudioPlayersManager {
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
       await textChannel.send({
-        embeds: [
-          generateErrorEmbed(`${song}\n${e.message}`, i18next.t('audioplayer:play_error') as string)
-        ]
+        embeds: [generateErrorEmbed(`${query}\n${e.message}`, i18next.t('audioplayer:play_error') as string)]
       });
 
       const queue = this.distube.getQueue(voiceChannel.guildId);
@@ -261,22 +249,15 @@ export class AudioPlayersManager {
 
       const startingIndex = pageNumber * entriesPerPage;
 
-      for (
-        let i = startingIndex;
-        i < Math.min(startingIndex + entriesPerPage, queue.songs.length);
-        i++
-      ) {
+      for (let i = startingIndex; i < Math.min(startingIndex + entriesPerPage, queue.songs.length); i++) {
         const song = queue.songs[i];
-        queueList +=
-          `${i + 1}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`;
+        queueList += `${i + 1}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`;
       }
 
       const page = new EmbedBuilder()
         .setAuthor({ name: `${i18next.t('audioplayer:show_queue_songs_in_queue')}: ` })
         .setTitle(queue.songs[0].name!)
-        .setDescription(
-          `**${i18next.t('audioplayer:show_queue_title')}: **\n${queueList}`.slice(0, 4096)
-        );
+        .setDescription(`**${i18next.t('audioplayer:show_queue_title')}: **\n${queueList}`.slice(0, 4096));
 
       if (queue.songs[0].url) {
         page.setURL(queue.songs[0].url);
@@ -293,36 +274,7 @@ export class AudioPlayersManager {
       arrayEmbeds.push(buildPage(queue, i, entriesPerPage));
     }
 
-    await pagination({
-      embeds: arrayEmbeds as unknown as Embed[],
-      author: interaction.user,
-      interaction: interaction as CommandInteraction,
-      ephemeral: true,
-      fastSkip: true,
-      pageTravel: false,
-      buttons: [
-        {
-          type: ButtonTypes.first,
-          emoji: '⬅️',
-          style: ButtonStyles.Secondary
-        },
-        {
-          type: ButtonTypes.previous,
-          emoji: '◀️',
-          style: ButtonStyles.Secondary
-        },
-        {
-          type: ButtonTypes.next,
-          emoji: '▶️',
-          style: ButtonStyles.Secondary
-        },
-        {
-          type: ButtonTypes.last,
-          emoji: '➡️',
-          style: ButtonStyles.Secondary
-        }
-      ]
-    });
+    await PaginationList(interaction as CommandInteraction, arrayEmbeds, interaction.user);
   }
 
   async setLeaveOnEmpty(guild: Guild, mode: boolean) {

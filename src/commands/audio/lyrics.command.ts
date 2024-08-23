@@ -12,9 +12,7 @@ export default function (): ICommand {
     text_data: {
       name: 'lyrics',
       description: i18next.t('commands:lyrics_desc'),
-      arguments: [
-        new CommandArgument(i18next.t('commands:lyrics_arg_query', { services: services }), true)
-      ],
+      arguments: [new CommandArgument(i18next.t('commands:lyrics_arg_query', { services: services }), true)],
       execute: async (message: Message, args: string[]) => {
         const songQuery = args.join(' ');
 
