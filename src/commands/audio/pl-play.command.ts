@@ -1,4 +1,4 @@
-import { CommandArgument, ICommand, ICommandContext } from '../../CommandTypes.js';
+import { CommandArgument, ICommand, ReplyContext } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
 import {
   Guild,
@@ -64,7 +64,7 @@ export default function (): ICommand {
   };
 }
 
-async function plPlayAndReply(ctx: ICommandContext, playlistName: string, userID: string) {
+async function plPlayAndReply(ctx: ReplyContext, playlistName: string, userID: string) {
   try {
     if (queueSongsIsFull(ctx.client, ctx.guild as Guild)) {
       await ctx.reply({

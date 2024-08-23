@@ -1,4 +1,4 @@
-import { CommandArgument, ICommand, ICommandContext } from '../../CommandTypes.js';
+import { CommandArgument, ICommand, ReplyContext } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
 import { Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import i18next from 'i18next';
@@ -47,7 +47,7 @@ export default function (): ICommand {
   };
 }
 
-async function plDeleteAndReply(ctx: ICommandContext, userID: string, playlistName: string) {
+async function plDeleteAndReply(ctx: ReplyContext, userID: string, playlistName: string) {
   try {
     await UserPlaylistDelete(userID, playlistName);
 

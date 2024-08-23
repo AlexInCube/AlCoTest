@@ -1,4 +1,4 @@
-import { CommandArgument, ICommand, ICommandContext } from '../../CommandTypes.js';
+import { CommandArgument, ICommand, ReplyContext } from '../../CommandTypes.js';
 import {
   ApplicationCommandOptionChoiceData,
   AutocompleteInteraction,
@@ -97,7 +97,7 @@ export async function songSearchAutocomplete(interaction: AutocompleteInteractio
   await interaction.respond([]);
 }
 
-async function playAndReply(ctx: ICommandContext, songQuery: string) {
+async function playAndReply(ctx: ReplyContext, songQuery: string) {
   if (queueSongsIsFull(ctx.client, ctx.guild as Guild)) {
     await ctx.reply({
       embeds: [

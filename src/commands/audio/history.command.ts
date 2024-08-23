@@ -1,19 +1,10 @@
-import { ICommand } from '../../CommandTypes.js';
+import { ReplyContext, ICommand } from '../../CommandTypes.js';
 import i18next from 'i18next';
-import {
-  CommandInteraction,
-  Embed,
-  EmbedBuilder,
-  Guild,
-  Message,
-  PermissionsBitField,
-  SlashCommandBuilder
-} from 'discord.js';
+import { EmbedBuilder, Guild, PermissionsBitField, SlashCommandBuilder, User } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
 import { getOrCreateGuildSongsHistory, ISchemaSongsHistory } from '../../schemas/SchemaSongsHistory.js';
-import { pagination } from '../../utilities/pagination/pagination.js';
-import { ButtonStyles, ButtonTypes } from '../../utilities/pagination/paginationTypes.js';
 import { ENV } from '../../EnvironmentVariables.js';
+import { PaginationList } from '../../audioplayer/PaginationList.js';
 
 export default function (): ICommand {
   return {
@@ -22,13 +13,13 @@ export default function (): ICommand {
       name: 'history',
       description: i18next.t('commands:history_desc'),
       execute: async (message) => {
-        await replyWithSongHistory(message.guild as Guild, undefined, message);
+        await replyWithSongHistory(message.guild as Guild, message, message.author);
       }
     },
     slash_data: {
       slash_builder: new SlashCommandBuilder().setName('history').setDescription(i18next.t('commands:history_desc')),
       execute: async (interaction) => {
-        await replyWithSongHistory(interaction.guild as Guild, interaction);
+        await replyWithSongHistory(interaction.guild as Guild, interaction, interaction.user);
       }
     },
     guild_data: {
@@ -39,16 +30,13 @@ export default function (): ICommand {
   };
 }
 
-async function replyWithSongHistory(guild: Guild, interaction?: CommandInteraction, message?: Message): Promise<void> {
+async function replyWithSongHistory(guild: Guild, ctx: ReplyContext, user: User): Promise<void> {
   const history: ISchemaSongsHistory | null = await getOrCreateGuildSongsHistory(guild.id);
 
   if (!history) throw Error(`Can't find guild songs history: ${guild.id}`);
 
   if (history.songsHistory.length === 0) {
-    await interaction?.reply({
-      embeds: [new EmbedBuilder().setTitle(i18next.t('commands:history_embed_no_songs'))]
-    });
-    await message?.reply({
+    await ctx.reply({
       embeds: [new EmbedBuilder().setTitle(i18next.t('commands:history_embed_no_songs'))]
     });
   }
@@ -79,36 +67,5 @@ async function replyWithSongHistory(guild: Guild, interaction?: CommandInteracti
     arrayEmbeds.push(buildPage(history, i, entriesPerPage));
   }
 
-  await pagination({
-    embeds: arrayEmbeds as unknown as Embed[],
-    // @ts-expect-error I need to provide Interaction or Message for different command systems.
-    author: interaction?.user ?? message?.author,
-    message: message,
-    interaction: interaction,
-    ephemeral: true,
-    fastSkip: true,
-    pageTravel: false,
-    buttons: [
-      {
-        type: ButtonTypes.first,
-        emoji: '⬅️',
-        style: ButtonStyles.Secondary
-      },
-      {
-        type: ButtonTypes.previous,
-        emoji: '◀️',
-        style: ButtonStyles.Secondary
-      },
-      {
-        type: ButtonTypes.next,
-        emoji: '▶️',
-        style: ButtonStyles.Secondary
-      },
-      {
-        type: ButtonTypes.last,
-        emoji: '➡️',
-        style: ButtonStyles.Secondary
-      }
-    ]
-  });
+  await PaginationList(ctx, arrayEmbeds, user);
 }

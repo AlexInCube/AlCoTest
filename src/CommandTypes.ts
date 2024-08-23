@@ -1,6 +1,7 @@
 import {
   AutocompleteInteraction,
   ChatInputCommandInteraction,
+  CommandInteraction,
   Message,
   PermissionResolvable,
   SlashCommandBuilder,
@@ -66,4 +67,5 @@ interface IGuildData {
   voice_with_bot_only?: boolean; // Property enabled only if voice_required is true
 }
 
-export type ICommandContext = Message | ChatInputCommandInteraction;
+export type InteractionReplyContext = ChatInputCommandInteraction | CommandInteraction;
+export type ReplyContext = Message | InteractionReplyContext;

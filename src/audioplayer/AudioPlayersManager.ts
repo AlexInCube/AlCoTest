@@ -1,7 +1,5 @@
 import { DisTube, Events as DistubeEvents, Playlist, PlayOptions, Queue, RepeatMode, Song } from 'distube';
 import { AudioPlayersStore } from './AudioPlayersStore.js';
-import { pagination } from '../utilities/pagination/pagination.js';
-import { ButtonStyles, ButtonTypes } from '../utilities/pagination/paginationTypes.js';
 import { clamp } from '../utilities/clamp.js';
 import { generateErrorEmbed } from '../utilities/generateErrorEmbed.js';
 import i18next from 'i18next';
@@ -14,7 +12,6 @@ import {
   ButtonInteraction,
   Client,
   CommandInteraction,
-  Embed,
   EmbedBuilder,
   Guild,
   Interaction,
@@ -26,6 +23,7 @@ import { generateWarningEmbed } from '../utilities/generateWarningEmbed.js';
 import { generateLyricsEmbed } from './Lyrics.js';
 import { getGuildOptionLeaveOnEmpty, setGuildOptionLeaveOnEmpty } from '../schemas/SchemaGuild.js';
 import { addSongToGuildSongsHistory } from '../schemas/SchemaSongsHistory.js';
+import { PaginationList } from './PaginationList.js';
 
 export const loggerPrefixAudioplayer = `Audioplayer`;
 
@@ -276,36 +274,7 @@ export class AudioPlayersManager {
       arrayEmbeds.push(buildPage(queue, i, entriesPerPage));
     }
 
-    await pagination({
-      embeds: arrayEmbeds as unknown as Embed[],
-      author: interaction.user,
-      interaction: interaction as CommandInteraction,
-      ephemeral: true,
-      fastSkip: true,
-      pageTravel: false,
-      buttons: [
-        {
-          type: ButtonTypes.first,
-          emoji: '⬅️',
-          style: ButtonStyles.Secondary
-        },
-        {
-          type: ButtonTypes.previous,
-          emoji: '◀️',
-          style: ButtonStyles.Secondary
-        },
-        {
-          type: ButtonTypes.next,
-          emoji: '▶️',
-          style: ButtonStyles.Secondary
-        },
-        {
-          type: ButtonTypes.last,
-          emoji: '➡️',
-          style: ButtonStyles.Secondary
-        }
-      ]
-    });
+    await PaginationList(interaction as CommandInteraction, arrayEmbeds, interaction.user);
   }
 
   async setLeaveOnEmpty(guild: Guild, mode: boolean) {

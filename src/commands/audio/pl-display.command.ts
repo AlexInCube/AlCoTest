@@ -1,14 +1,17 @@
-import { CommandArgument, ICommand, ICommandContext } from '../../CommandTypes.js';
+import { CommandArgument, ICommand, ReplyContext } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
 import { EmbedBuilder, Message, PermissionsBitField, SlashCommandBuilder, User } from 'discord.js';
 import i18next from 'i18next';
 import {
+  ISchemaPlaylist,
   PlaylistNameMaxLength,
   PlaylistNameMinLength,
   UserPlaylistGet,
   UserPlaylistNamesAutocomplete
 } from '../../schemas/SchemaPlaylist.js';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
+import { PaginationList } from '../../audioplayer/PaginationList.js';
+import { getSongsNoun } from '../../audioplayer/util/getSongsNoun.js';
 
 export default function (): ICommand {
   return {
@@ -47,7 +50,7 @@ export default function (): ICommand {
   };
 }
 
-async function plDisplayAndReply(playlistName: string, ctx: ICommandContext, user: User) {
+async function plDisplayAndReply(playlistName: string, ctx: ReplyContext, user: User) {
   const playlist = await UserPlaylistGet(user.id, playlistName, true);
 
   if (!playlist) {
@@ -60,19 +63,42 @@ async function plDisplayAndReply(playlistName: string, ctx: ICommandContext, use
 
   const playlistEmbed = new EmbedBuilder().setAuthor({ name: user.displayName, iconURL: user.displayAvatarURL() });
 
-  let songs = ``;
+  function buildPage(playlist: ISchemaPlaylist, pageNumber: number, entriesPerPage: number) {
+    let songsList = '';
 
-  playlist.songs.forEach((song, index) => {
-    const songDate = song.createdAt ? `<t:${Math.round(song.createdAt.getTime() / 1000)}:f>` : '<t:0:f>';
+    const startingIndex = pageNumber * entriesPerPage;
 
-    songs += `${index + 1}. [${song.name}](${song.url}) - ${songDate} \n`;
-  });
+    for (let i = startingIndex; i < Math.min(startingIndex + entriesPerPage, playlist.songs.length); i++) {
+      const song = playlist.songs[i];
 
-  if (songs === '') {
-    playlistEmbed.setDescription(i18next.t('commands:pl-display_embed_no_songs'));
-  } else {
-    playlistEmbed.setDescription(songs);
+      const songDate = song.createdAt ? `<t:${Math.round(song.createdAt.getTime() / 1000)}:f>` : '<t:0:f>';
+
+      songsList += `${i + 1}. [${song.name}](${song.url}) - ${songDate} \n`;
+    }
+
+    return (
+      new EmbedBuilder()
+        .setAuthor({
+          name: `${user.displayName} - ${playlist.name} - ${playlist.songs.length} ${getSongsNoun(playlist.songs.length)}`,
+          iconURL: user.displayAvatarURL()
+        })
+        //.setTitle(`${i18next.t('commands:history_embed_title')} ${guild.name}`)
+        .setDescription(`${songsList}`.slice(0, 4096))
+    );
   }
 
-  await ctx.reply({ embeds: [playlistEmbed], ephemeral: true });
+  if (playlist.songsSize === 0) {
+    playlistEmbed.setDescription(i18next.t('commands:pl-display_embed_no_songs'));
+    await ctx.reply({ embeds: [playlistEmbed], ephemeral: true });
+  } else {
+    const arrayEmbeds: Array<EmbedBuilder> = [];
+    const entriesPerPage = 20;
+    const pages = Math.ceil(playlist.songs.length / entriesPerPage);
+
+    for (let i = 0; i < pages; i++) {
+      arrayEmbeds.push(buildPage(playlist, i, entriesPerPage));
+    }
+
+    await PaginationList(ctx, arrayEmbeds, user);
+  }
 }

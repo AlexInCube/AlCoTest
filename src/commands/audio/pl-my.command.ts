@@ -1,4 +1,4 @@
-import { ICommand, ICommandContext } from '../../CommandTypes.js';
+import { ICommand, ReplyContext } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
 import { EmbedBuilder, Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import i18next from 'i18next';
@@ -25,7 +25,7 @@ export default function (): ICommand {
   };
 }
 
-async function plMyAndReply(ctx: ICommandContext, userID: string) {
+async function plMyAndReply(ctx: ReplyContext, userID: string) {
   const playlists = await UserPlaylistGetPlaylists(userID);
 
   if (playlists && playlists.length > 0) {

@@ -6,6 +6,10 @@ Bot supports slash and text command systems.
 
 Nothing special, start writing / and select command from the list
 
+> [!NOTE]
+> Recommend using slash commands because most of these commands have an "invisible/ephemeral" messages,
+> so no one can see except you the output of command
+
 ## Text commands
 
 If a bot owner does not change the default prefix in .env.production file, the prefix is //
@@ -121,6 +125,46 @@ And when all users leave a voice channel with bot
 ### history
 
 Return song history of the current server where the command is executed.
+
+### pl-create
+
+Example: /pl-create Funny Music
+
+Create a playlist linked to user with given name
+
+### pl-play
+
+Example: /pl-play Funny Music
+
+Do the same things as a /play command, but add songs from playlist
+
+### pl-add
+
+Example: /pl-add Funny Music https://www.youtube.com/watch?v=dQw4w9WgXcQ
+
+Add a song to playlist
+
+### pl-display
+
+Example: /pl-display Funny Music
+
+Display the list of songs of given playlist
+
+### pl-remove
+
+Example: /pl-remove Funny Music 1
+
+Remove the song from playlist by ID, to get song ID in playlist, use the /pl-display
+
+### pl-my
+
+Display the list of playlists
+
+### pl-delete
+
+Example: /pl-delete Funny Music
+
+Delete the playlist
 
 ### audiodebug
 

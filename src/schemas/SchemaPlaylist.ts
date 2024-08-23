@@ -159,7 +159,7 @@ export async function UserPlaylistGet(
   const user = await getOrCreateUser(userID);
   const userWithPlaylists = await user.populate({
     path: 'playlists',
-    select: withSongs ? ['name', 'songs', 'createdAt'] : undefined
+    select: withSongs ? ['name', 'songs', 'createdAt', 'updatedAt', 'songsSize'] : undefined
   });
 
   if (!userWithPlaylists.playlists) throw new PlaylistIsNotExists(name);
