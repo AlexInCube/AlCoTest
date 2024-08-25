@@ -19,3 +19,10 @@ Cool audiobot for Discord created by <a href="https://vk.com/alexincube"><b>@Ale
 - Localization (English and Russian are currently supported)
 - Command /alcotest which shows your alcohol count in blood
 - Go to [Wiki](https://github.com/AlexInCube/AlCoTest/wiki) to get more information about features, commands, and others.
+
+## 🐛 Bugs or problems
+
+If you have issues, try to update your `docker-compose.yml`, `updateAndRunInDocker.sh` files.
+And run `sh updateAndRunInDocker.sh`. 
+If bugs are persisted on the latest version of bot,
+please create [issue](https://github.com/AlexInCube/AlCoTest/issues/new/choose).

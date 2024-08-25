@@ -9,7 +9,7 @@ services:
       - path: ./.env.development
         required: false
     volumes:
-      - ./data:/data/db
+      - "aicbot-mongo-volume:/data/db"
     ports:
       - '27017:27017'
   aicbot:
@@ -38,3 +38,7 @@ services:
       - aicbot-mongo
     depends_on:
       - aicbot-mongo
+
+volumes:
+  aicbot-mongo-volume:
+    external: true

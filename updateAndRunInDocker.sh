@@ -1,3 +1,5 @@
 #!/bin/sh
 docker image pull alexincube/aicotest:latest
-docker compose up --detach --force-recreate --no-build --remove-orphans
+docker volume create --name=aicbot-mongo-volume
+docker compose stop
+docker compose up --detach --no-build --remove-orphans
