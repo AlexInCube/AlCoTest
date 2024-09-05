@@ -9,7 +9,7 @@ services:
       - path: ./.env.development
         required: false
     volumes:
-      - "aicbot-mongo-volume:/data/db"
+      - 'aicbot-mongo-volume:/bitnami/mongodb'
     ports:
       - '27017:27017'
   aicbot:
