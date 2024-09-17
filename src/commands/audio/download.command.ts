@@ -1,5 +1,5 @@
 import { CommandArgument, ICommand } from '../../CommandTypes.js';
-import { PermissionsBitField, SlashCommandBuilder } from 'discord.js';
+import { PermissionsBitField, SlashCommandBuilder, TextChannel } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
 import { services } from './play.command.js';
 import {
@@ -20,7 +20,7 @@ export default function (): ICommand {
       execute: async (message, args) => {
         const songQuery = args.join(' ');
 
-        const reply = await message.channel.send({
+        const reply = await (message.channel as TextChannel).send({
           content: i18next.t('commands:download_please_wait') as string
         });
 

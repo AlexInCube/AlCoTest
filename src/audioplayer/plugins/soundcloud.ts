@@ -72,7 +72,7 @@ export class SoundCloudPlugin extends ExtractorPlugin {
         if (!data?.collection?.length) {
           throw new DisTubeError('SOUNDCLOUD_PLUGIN_NO_RESULT', `Cannot find any "${query}" ${type} on SoundCloud!`);
         }
-        return data.collection.map((t: any) => new SoundCloudSong(this, t, options));
+        return data.collection.map((t: SoundcloudTrackV2) => new SoundCloudSong(this, t, options));
       }
       case SearchType.Playlist: {
         const data = await this.soundcloud.playlists.searchV2({ q: query, limit });
@@ -80,7 +80,8 @@ export class SoundCloudPlugin extends ExtractorPlugin {
         return (
           await Promise.all(
             playlists.map(
-              async (p: any) => new SoundCloudPlaylist(this, await this.soundcloud.playlists.fetch(p), options)
+              async (p: SoundcloudPlaylistV2) =>
+                new SoundCloudPlaylist(this, await this.soundcloud.playlists.fetch(p), options)
             )
           )
         ).filter(isTruthy);
@@ -120,7 +121,7 @@ export class SoundCloudPlugin extends ExtractorPlugin {
       throw new DisTubeError('SOUNDCLOUD_PLUGIN_INVALID_SONG', 'Cannot get related songs from invalid song.');
     }
     const related = await this.soundcloud.tracks.relatedV2(song.url, 10);
-    return related.filter((t: { title: any }) => t.title).map((t: any) => new SoundCloudSong(this, t));
+    return related.filter((t: SoundcloudTrackV2) => t.title).map((t: SoundcloudTrackV2) => new SoundCloudSong(this, t));
   }
 
   async getStreamURL<T>(song: SoundCloudSong<T>) {
@@ -177,7 +178,7 @@ class SoundCloudPlaylist<T> extends Playlist<T> {
         name: info.title,
         url: info.permalink_url,
         thumbnail: info.artwork_url ?? undefined,
-        songs: info.tracks.map((s: any) => new SoundCloudSong(plugin, s, options))
+        songs: info.tracks.map((s: SoundcloudTrackV2) => new SoundCloudSong(plugin, s, options))
       },
       options
     );

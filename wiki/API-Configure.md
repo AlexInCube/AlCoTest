@@ -92,6 +92,12 @@ Spotify Module can work without provided data, but for more stability better pro
 5. Go to the Payload tab
 6. You should see your client id in the Query String Parameters section, and your oauth token (access_token) in the Request Payload section
 
+# VKontakte (optional)
+
+1. Token is required, to get it, follow the [link](https://oauth.vk.com/authorize?client_id=2685278&scope=65536&response_type=token&revoke=1)
+2. Click "Allow"
+3. Copy everything between access_token= and &expires_in
+
 # Genius (optional)
 
 > [!WARNING]
@@ -100,3 +106,5 @@ Spotify Module can work without provided data, but for more stability better pro
 1. Go to [Genius](https://genius.com/login) and login.
 2. Go to [Genius Developer Dashboard](https://genius.com/api-clients/new) and create a new app
 3. Generate and copy client access token
+
+

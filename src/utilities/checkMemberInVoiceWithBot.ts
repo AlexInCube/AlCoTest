@@ -31,7 +31,7 @@ export async function checkMemberInVoiceWithBot(
         }
       });
     }
-  } catch (e) {
+  } catch {
     return response;
   }
 

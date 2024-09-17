@@ -83,15 +83,31 @@ describe('Audio Services', () => {
     });
 
     it('Playlist', async () => {
-      const song = await distube.handler.resolve('https://music.yandex.ru/users/alexander.tsimbalistiy/playlists/1000');
+      const playlist = await distube.handler.resolve(
+        'https://music.yandex.ru/users/alexander.tsimbalistiy/playlists/1000'
+      );
+
+      assert.ok(playlist);
+    });
+
+    it('Album', async () => {
+      const album = await distube.handler.resolve('https://music.yandex.ru/album/5307396');
+
+      assert.ok(album);
+    });
+  });
+
+  describe(`VKontakte`, () => {
+    it('Song', async () => {
+      const song = await distube.handler.resolve('https://vk.com/audio-2001624323_122624323');
 
       assert.ok(song);
     });
 
-    it('Album', async () => {
-      const song = await distube.handler.resolve('https://music.yandex.ru/album/5307396');
+    it('Playlist', async () => {
+      const playlist = await distube.handler.resolve('https://vk.com/music/playlist/-192000782_406');
 
-      assert.ok(song);
+      assert.ok(playlist);
     });
   });
 

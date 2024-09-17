@@ -13,6 +13,7 @@ import { getYoutubeCookie } from '../CookiesAutomation.js';
 import Cron from 'node-cron';
 
 import fs from 'fs';
+import { VKMusicPlugin } from 'distube-vk-music-plugin';
 
 const loggerPrefixAudioplayerPluginsLoader = 'Audioplayer Plugin Loader';
 
@@ -22,6 +23,19 @@ const YtPlugin = new YouTubePlugin({});
 
 export async function LoadPlugins(): Promise<Array<DistubePlugin>> {
   const plugins: Array<DistubePlugin> = [];
+
+  if (ENV.BOT_VKONTAKTE_TOKEN) {
+    plugins.push(
+      new VKMusicPlugin({
+        token: ENV.BOT_VKONTAKTE_TOKEN
+      })
+    );
+  } else {
+    loggerWarn(
+      'VKontakte Music plugin is disabled, because BOT_VKONTAKTE_TOKEN are wrong or not provided',
+      loggerPrefixAudioplayerPluginsLoader
+    );
+  }
 
   await loadPluginsPartYoutube(plugins);
 
@@ -111,7 +125,7 @@ async function loadPluginsPartYoutube(plugins: Array<DistubePlugin>) {
     try {
       YtPlugin.cookies = JSON.parse(fs.readFileSync('yt-cookies.json', { encoding: 'utf8', flag: 'r' }));
       loggerSend("'yt-cookies.json' is loaded", loggerPrefixAudioplayerPluginsLoader);
-    } catch (e) {
+    } catch {
       loggerError("'yt-cookies.json' error when parsing", loggerPrefixAudioplayerPluginsLoader);
       if (ENV.BOT_GOOGLE_EMAIL && ENV.BOT_GOOGLE_PASSWORD) {
         YtPlugin.cookies = await getYoutubeCookie();

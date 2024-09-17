@@ -79,6 +79,8 @@ const envVariables = z.object({
   BOT_YANDEXMUSIC_TOKEN: z.string().optional(),
   BOT_YANDEXMUSIC_UID: z.coerce.number().optional(),
 
+  BOT_VKONTAKTE_TOKEN: z.string().optional(),
+
   BOT_GENIUS_TOKEN: z.string().optional()
 });
 

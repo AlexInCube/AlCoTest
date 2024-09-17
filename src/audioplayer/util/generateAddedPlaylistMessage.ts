@@ -7,7 +7,7 @@ export function generateAddedPlaylistMessage(playlist: Playlist) {
   const serviceIcon = getIconFromSource(playlist.source);
 
   return new EmbedBuilder()
-    .setTitle(`${serviceIcon} ${playlist.name}` ?? i18next.t('audioplayer:player_embed_unknown'))
+    .setTitle(playlist.name ? `${serviceIcon} ${playlist.name}` : i18next.t('audioplayer:player_embed_unknown'))
     .setURL(playlist.url ?? null)
     .setAuthor({ name: `${i18next.t('audioplayer:event_add_list')}` })
     .setThumbnail(playlist.thumbnail ?? null)
