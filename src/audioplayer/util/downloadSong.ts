@@ -77,7 +77,7 @@ async function convertWebmToMp3(webmStream: ReadableStream<Uint8Array>) {
   const file = fs.createWriteStream(file_name);
   const duplex = prism.FFmpeg.from(webmStream);
 
-  // @ts-expect-error Duplex can be provided to pipeline function
+  // Duplex can be provided to pipeline function
   await pipeline(duplex, file);
   return createReadStream(file_name);
 }

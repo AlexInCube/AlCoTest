@@ -23,7 +23,7 @@ export default function (): ICommand {
           if (pos < 1) {
             return;
           }
-        } catch (e) {
+        } catch {
           await message.reply({
             embeds: [generateErrorEmbed(i18next.t('commands:jump_is_not_number'))]
           });

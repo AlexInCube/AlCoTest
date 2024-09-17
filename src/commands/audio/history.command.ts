@@ -37,7 +37,8 @@ async function replyWithSongHistory(guild: Guild, ctx: ReplyContext, user: User)
 
   if (history.songsHistory.length === 0) {
     await ctx.reply({
-      embeds: [new EmbedBuilder().setTitle(i18next.t('commands:history_embed_no_songs'))]
+      embeds: [new EmbedBuilder().setTitle(i18next.t('commands:history_embed_no_songs'))],
+      ephemeral: true
     });
   }
 

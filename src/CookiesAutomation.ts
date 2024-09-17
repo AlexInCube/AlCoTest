@@ -31,7 +31,7 @@ export async function getYoutubeCookie() {
     await page.click(
       '#topbar > div.top-buttons.style-scope.ytd-consent-bump-v2-lightbox > div:nth-child(2) > ytd-button-renderer > yt-button-shape > a'
     );
-  } catch (e) {
+  } catch {
     // Press "Sign In" on navbar
     await page.click('#buttons > ytd-button-renderer > yt-button-shape > a');
   }
@@ -52,7 +52,7 @@ export async function getYoutubeCookie() {
       '#yDmH0d > c-wiz:nth-child(9) > div > div > div > div.L5MEH.Bokche.ypEC4c > div.lq3Znf > div:nth-child(1) > button > span';
     await page.waitForSelector(NotNowSelector, { timeout: 1e4 });
     await page.click(NotNowSelector);
-  } catch (e) {
+  } catch {
     await page.goto('https://www.youtube.com', { waitUntil: 'networkidle2' });
   }
 

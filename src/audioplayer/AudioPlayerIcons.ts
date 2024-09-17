@@ -21,5 +21,6 @@ export enum AudioSourceIcons {
   applemusic = '<:applemusic:1257591803260174467>',
   yandexmusic = '<:yandexmusic:1257591977105555506>',
   spotify = '<:spotify:1257591960726933576>',
-  soundcloud = '<:soundcloud:1257591943010193500>'
+  soundcloud = '<:soundcloud:1257591943010193500>',
+  vkontakte = '<:vk:1285731440163819611>'
 }

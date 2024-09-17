@@ -38,7 +38,7 @@ export async function generateLyricsEmbed(songQuery: string) {
       .setDescription(lyricsText)
       .setColor(Colors.Yellow)
       .setFooter({ text: i18next.t('commands:lyrics_embed_text_not_correct') });
-  } catch (e) {
+  } catch {
     return generateErrorEmbed(i18next.t('commands:lyrics_embed_lyrics_not_found'));
   }
 }

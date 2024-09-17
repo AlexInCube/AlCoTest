@@ -13,6 +13,7 @@ Also you need retrieve token, client id and enable intents on Discord Developer 
 - (Optional) To get Yandex Music token, follow the [Yandex Music](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#yandex-music-optional) section.
 - (Optional) To get SoundCloud token, follow the [Soundcloud](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#soundcloud-optional) section.
 - (Optional) To get Genius token, follow the [Genius](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#genius-optional) section.
+- (Optional) To get VKontakte token, follow the [VKontakte](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#vkontakte-optional) section.
 
 | Name                         | Example               | Description                                                                                                                                 | Required |
 |------------------------------|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -33,6 +34,7 @@ Also you need retrieve token, client id and enable intents on Discord Developer 
 | `BOT_SPOTIFY_CLIENT_ID`      |                       | Used when the Spotify module get the credentials automatically                                                                              | ❌        |
 | `BOT_YANDEXMUSIC_TOKEN`      |                       | Provide to enable Yandex Music module                                                                                                       | ❌        |
 | `BOT_YANDEXMUSIC_UID`        |                       | Provide to enable Yandex Music module                                                                                                       | ❌        |
+| `BOT_VKONTAKTE_TOKEN`        |                       | Provide to fetch songs from VKontakte                                                                                                       | ❌        |
 | `BOT_SOUNDCLOUD_CLIENT_ID`   |                       | Provide to fetch more data with SoundCloud Go+ account                                                                                      | ❌        |
 | `BOT_SOUNDCLOUD_TOKEN`       |                       | Provide to fetch more data with SoundCloud Go+ account                                                                                      | ❌        |
 | `BOT_GENIUS_TOKEN`           |                       | Provide to fetch songs lyrics from Genius                                                                                                   | ❌        |
