@@ -6,7 +6,7 @@ import { AudioPlayerState } from './AudioPlayerIcons.js';
 import { checkBotInVoice } from '../utilities/checkBotInVoice.js';
 import i18next from 'i18next';
 import { ENV } from '../EnvironmentVariables.js';
-import { loggerError, loggerSend } from '../utilities/logger.js';
+import { loggerError } from '../utilities/logger.js';
 import { generateSimpleEmbed } from '../utilities/generateSimpleEmbed.js';
 
 export class PlayerInstance {
@@ -248,7 +248,6 @@ export class PlayerInstance {
   }
 
   async setLeaveOnEmpty(mode: boolean) {
-    loggerSend('setLeaveOnEmpty');
     this.leaveOnEmpty = mode;
     this.embedBuilder.setLeaveOnEmpty(mode);
 
