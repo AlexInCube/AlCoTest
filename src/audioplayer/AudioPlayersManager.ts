@@ -220,7 +220,7 @@ export class AudioPlayersManager {
       this.distube.seek(guild, time);
       await player.setState('playing');
       return true;
-    } catch (e) {
+    } catch {
       return false;
     }
   }
@@ -298,84 +298,82 @@ export class AudioPlayersManager {
       });
     }
 
-    this.distube
-      .on(DistubeEvents.INIT_QUEUE, async (queue) => {
-        await this.playersManager.add(queue.id, queue.textChannel as TextChannel, queue);
+    this.distube.on(DistubeEvents.INIT_QUEUE, async (queue) => {
+      await this.playersManager.add(queue.id, queue.textChannel as TextChannel, queue);
 
-        const player = this.playersManager.get(queue.id);
-        if (player) {
-          const leaveOnEmpty = await getGuildOptionLeaveOnEmpty(queue.id);
-          await player.setLeaveOnEmpty(leaveOnEmpty);
-          await player.init();
-        }
-      })
-      .on(DistubeEvents.PLAY_SONG, async (queue) => {
-        const player = this.playersManager.get(queue.id);
-        if (player) {
-          await player.setState('playing');
-        }
-      })
-      .on(DistubeEvents.DISCONNECT, async (queue) => {
-        await this.playersManager.remove(queue.id);
-      })
-      .on(DistubeEvents.ADD_SONG, async (queue, song) => {
-        if (queue.textChannel) {
-          await queue.textChannel.send({ embeds: [generateAddedSongMessage(song)] });
-        }
+      const player = this.playersManager.get(queue.id);
+      if (!player) return;
 
-        if (ENV.BOT_MAX_SONGS_HISTORY_SIZE > 0) {
-          await addSongToGuildSongsHistory(queue.id, song);
-        }
+      await player.init();
+      await player.setLeaveOnEmpty(await getGuildOptionLeaveOnEmpty(queue.id));
+    });
+    this.distube.on(DistubeEvents.PLAY_SONG, async (queue) => {
+      const player = this.playersManager.get(queue.id);
+      if (player) {
+        await player.setState('playing');
+      }
+    });
+    this.distube.on(DistubeEvents.DISCONNECT, async (queue) => {
+      await this.playersManager.remove(queue.id);
+    });
+    this.distube.on(DistubeEvents.ADD_SONG, async (queue, song) => {
+      if (queue.textChannel) {
+        await queue.textChannel.send({ embeds: [generateAddedSongMessage(song)] });
+      }
 
-        const player = this.playersManager.get(queue.id);
-        if (player) {
-          await player.update();
-        }
-      })
-      .on(DistubeEvents.ADD_LIST, async (queue, playlist) => {
-        if (ENV.BOT_MAX_SONGS_HISTORY_SIZE > 0) {
-          await addSongToGuildSongsHistory(queue.id, playlist);
-        }
+      if (ENV.BOT_MAX_SONGS_HISTORY_SIZE > 0) {
+        await addSongToGuildSongsHistory(queue.id, song);
+      }
 
-        if (!queue.textChannel) return;
+      const player = this.playersManager.get(queue.id);
+      if (player) {
+        await player.update();
+      }
+    });
+    this.distube.on(DistubeEvents.ADD_LIST, async (queue, playlist) => {
+      if (ENV.BOT_MAX_SONGS_HISTORY_SIZE > 0) {
+        await addSongToGuildSongsHistory(queue.id, playlist);
+      }
 
-        await queue.textChannel.send({ embeds: [generateAddedPlaylistMessage(playlist)] });
-        if (queue.songs.length >= ENV.BOT_MAX_SONGS_IN_QUEUE) {
-          await queue.textChannel.send({
-            embeds: [
-              generateWarningEmbed(
-                i18next.t('audioplayer:event_add_list_limit', {
-                  queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
-                }) as string
-              )
-            ]
-          });
-          queue.songs.length = ENV.BOT_MAX_SONGS_IN_QUEUE;
-        }
+      if (!queue.textChannel) return;
 
-        const player = this.playersManager.get(queue.id);
-        if (player) {
-          await player.update();
-        }
-      })
-      .on(DistubeEvents.FINISH_SONG, async (queue) => {
-        if (!this.playersManager.has(queue.id)) return;
-        if (queue._next || queue._prev || queue.stopped || queue.songs.length > 1) return;
-        await this.playersManager.get(queue.id)?.setState('waiting');
-      })
-      .on(DistubeEvents.ERROR, async (error, queue, song) => {
-        let errorName = `ERROR`;
-        const errorMessage = `${error.name} + \n\n + ${error.message}`;
-
-        if (song) {
-          errorName = song.name!;
-        }
-
-        if (queue.songs.length === 0) await this.stop(queue.id);
-
-        await queue.textChannel?.send({
-          embeds: [generateErrorEmbed(errorMessage, errorName)]
+      await queue.textChannel.send({ embeds: [generateAddedPlaylistMessage(playlist)] });
+      if (queue.songs.length >= ENV.BOT_MAX_SONGS_IN_QUEUE) {
+        await queue.textChannel.send({
+          embeds: [
+            generateWarningEmbed(
+              i18next.t('audioplayer:event_add_list_limit', {
+                queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
+              }) as string
+            )
+          ]
         });
+        queue.songs.length = ENV.BOT_MAX_SONGS_IN_QUEUE;
+      }
+
+      const player = this.playersManager.get(queue.id);
+      if (player) {
+        await player.update();
+      }
+    });
+    this.distube.on(DistubeEvents.FINISH_SONG, async (queue) => {
+      if (!this.playersManager.has(queue.id)) return;
+      if (queue._next || queue._prev || queue.stopped || queue.songs.length > 1) return;
+      await this.playersManager.get(queue.id)?.setState('waiting');
+    });
+    this.distube.on(DistubeEvents.ERROR, async (error, queue, song) => {
+      let errorName = `ERROR`;
+      const errorMessage = `${error.name} + \n\n + ${error.message}`;
+
+      if (song) {
+        errorName = song.name!;
+      }
+
+      if (queue.songs.length === 0) await this.stop(queue.id);
+
+      await queue.textChannel?.send({
+        embeds: [generateErrorEmbed(errorMessage, errorName)]
       });
+    });
   }
 }

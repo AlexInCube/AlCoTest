@@ -85,7 +85,7 @@ function hmsToSeconds(str: string): number | undefined {
       s += m * parseInt(p.pop() as string, 10);
       m *= 60;
     }
-  } catch (e) {
+  } catch {
     return undefined;
   }
 

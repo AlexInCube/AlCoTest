@@ -1,4 +1,5 @@
 import { AudioSourceIcons } from '../AudioPlayerIcons.js';
+import { VK_MUSIC_PLUGIN_SOURCE } from 'distube-vk-music-plugin';
 
 export function getIconFromSource(source: string): AudioSourceIcons {
   switch (source) {
@@ -14,6 +15,8 @@ export function getIconFromSource(source: string): AudioSourceIcons {
       return AudioSourceIcons.soundcloud;
     case 'yandexmusic':
       return AudioSourceIcons.yandexmusic;
+    case VK_MUSIC_PLUGIN_SOURCE:
+      return AudioSourceIcons.vkontakte;
     default:
       return AudioSourceIcons.other;
   }

@@ -7,7 +7,7 @@ export function generateAddedSongMessage(song: Song) {
   const serviceIcon = getIconFromSource(song.source);
 
   return new EmbedBuilder()
-    .setTitle(`${serviceIcon} ${song.name}` ?? i18next.t('audioplayer:player_embed_unknown'))
+    .setTitle(song.name ? `${serviceIcon} ${song.name}` : i18next.t('audioplayer:player_embed_unknown'))
     .setURL(song.url ?? null)
     .setAuthor({ name: `${i18next.t('audioplayer:event_add_song')}` })
     .setThumbnail(song.thumbnail ?? null)
