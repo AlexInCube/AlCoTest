@@ -57,15 +57,6 @@ AICoTest/
 - Copy updateAndRunInDocker.sh (for Linux, Git Bash and terminals) or updateAndRunInDocker.bat for Windows
 - Run command `sh updateAndRunInDocker.sh` for terminals or run updateAndRunInDocker.bat on Windows
 
-> [!NOTE]
-> If you use terminal, Linux or Git Bash etc...,
-> you can copy runInDocker.sh or updateAndRunInDocker.sh to folder with other files.
-> And run command `sh updateAndRunInDocker.sh` to update bot image and restart containers.
-
-> [!NOTE]
-> If you run Docker Desktop on Windows
-> you can copy 
-
 # 🖥️ Run locally (if you are not a developer, this way is no sense)
 
 - Install [Node.js 22](https://nodejs.org/en/download/prebuilt-installer) or higher
