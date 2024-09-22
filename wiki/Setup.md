@@ -1,12 +1,12 @@
 # ⚙️ Configure .env
 
 You can use Docker Compose or install all dependencies and source code locally.
-But in both cases, you need to configure .env file.
+But in both cases, you need to configure .env a file.
 
 Also you need retrieve token, client id and enable intents on Discord Developer Portal.
 
 - Create file .env.production (if you developer create .env.development)
-- Fill all fields in .env.\* If the field is marked as (Optional), you can skip it.
+- Fill all fields in .env.production If the field is marked as (Optional), you can skip it (don't include field in .env.production and don't set field to "undefined").
 - (Required) To get Discord Token and enable intents, follow the [Discord Developer Portal](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#discord-developer-portal-required) section.
 - (Optional) To get YouTube cookies and bypass different errors with YouTube, follow the [YouTube](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#-youtube-cookie-optional) section
 - (Optional) To get Spotify Secret and ID, follow the [Spotify](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#spotify-optional) section.
@@ -54,12 +54,17 @@ AICoTest/
   ├─ yt-cookies.json
 ```
 
-- Run command `docker-compose up --detach --force-recreate` from folder with files
+- Copy updateAndRunInDocker.sh (for Linux, Git Bash and terminals) or updateAndRunInDocker.bat for Windows
+- Run command `sh updateAndRunInDocker.sh` for terminals or run updateAndRunInDocker.bat on Windows
 
 > [!NOTE]
 > If you use terminal, Linux or Git Bash etc...,
 > you can copy runInDocker.sh or updateAndRunInDocker.sh to folder with other files.
 > And run command `sh updateAndRunInDocker.sh` to update bot image and restart containers.
+
+> [!NOTE]
+> If you run Docker Desktop on Windows
+> you can copy 
 
 # 🖥️ Run locally (if you are not a developer, this way is no sense)
 

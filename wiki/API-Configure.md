@@ -14,10 +14,18 @@ You should see a page like this:
 
 You can edit your application's name, description, and avatar here. Once you've done that, then congratulations—you're now the proud owner of a shiny new Discord bot! You're not entirely done, though.
 
-4. On "General Information" page copies the Application ID, this is your Client ID.
-5. On the sidebar select section "Bot"
-6. Press "Reset token" button and copy token.
-7. Also enable all "Privileged Gateway Intents"
+4. Go to "Installation" page
+5. In "Installation Contexts" disable "User Install", enable "Guild install"
+6. In "Default Install Settings" add scope "Bot" and permission "Administrator"
+
+Now your installation page must look like this
+
+![discord-dev-installation-setup](images/api-configure/discord-dev-installation-setup.png)
+
+7. On "General Information" page copies the Application ID, this is your Client ID.
+8. On the sidebar select section "Bot"
+9. Press "Reset token" button and copy token.
+10. Also enable all "Privileged Gateway Intents"
 
 ![discord-dev-enable-intents](images/api-configure/discord-dev-enable-intents.png)
 
