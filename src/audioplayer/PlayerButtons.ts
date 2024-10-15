@@ -205,20 +205,20 @@ export class PlayerButtons {
 
           case ButtonIDs.favorite: {
             try {
-              const queue = ButtonInteraction.client.audioPlayer.distube.getQueue(ButtonInteraction.guild as Guild);
+              const riffyPlayer = ButtonInteraction.client.audioPlayer.riffy.get((ButtonInteraction.guild as Guild).id);
 
-              if (!queue || queue.songs.length === 0) {
+              if (!riffyPlayer || riffyPlayer.queue.length === 0) {
                 await ButtonInteraction.deferUpdate();
                 return;
               }
 
-              await UserPlaylistAddFavoriteSong(ButtonInteraction.user.id, queue.songs[0]);
+              await UserPlaylistAddFavoriteSong(ButtonInteraction.user.id, riffyPlayer.queue.first);
 
               await ButtonInteraction.reply({
                 embeds: [
                   generateSimpleEmbed(
                     i18next.t('audioplayer:song_added_to_favorite', {
-                      name: queue.songs[0].name!,
+                      name: riffyPlayer.queue.first?.info.title,
                       interpolation: { escapeValue: false }
                     })
                   )

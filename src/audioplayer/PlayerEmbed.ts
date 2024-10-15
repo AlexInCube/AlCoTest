@@ -2,9 +2,9 @@ import { EmbedBuilder, User } from 'discord.js';
 import { AudioPlayerLoopMode, AudioPlayerState, AudioSourceIcons } from './AudioPlayerIcons.js';
 import { formatSecondsToTime } from '../utilities/formatSecondsToTime.js';
 import i18next from 'i18next';
-import { Playlist, Song } from 'distube';
 import { getIconFromSource } from './util/getIconFromSource.js';
 import { getSongsNoun } from './util/getSongsNoun.js';
+import { nodeResponse, Track } from 'riffy';
 
 export class PlayerEmbed extends EmbedBuilder {
   private playerState: AudioPlayerState = 'loading';
@@ -76,8 +76,8 @@ export class PlayerEmbed extends EmbedBuilder {
     return this;
   }
 
-  setSongSource(playable: Song | Playlist) {
-    this.sourceIcon = getIconFromSource(playable.source);
+  setSongSource(playable: Track) {
+    this.sourceIcon = getIconFromSource(playable.info.sourceName);
   }
 
   setSongTitle(name: string, url: string) {

@@ -1,10 +1,11 @@
+// TODO: Reimplement song downloading
+/*
 import { AttachmentBuilder, Client } from 'discord.js';
 import prism from 'prism-media';
 import fs, { createReadStream, ReadStream } from 'fs';
 import { pipeline } from 'stream/promises';
 import { v4 as uuidv4 } from 'uuid';
 import { unlink } from 'fs/promises';
-import { isURL, Playlist, Song } from 'distube';
 import i18next from 'i18next';
 import path from 'path';
 
@@ -108,3 +109,4 @@ export function DownloadSongErrorGetLocale(errorMessage: DownloadSongMessage) {
 
   return errorMessage;
 }
+*/

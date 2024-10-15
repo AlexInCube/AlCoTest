@@ -1,6 +1,6 @@
 import { Client, Collection, GuildTextBasedChannel } from 'discord.js';
-import { Queue } from 'distube';
 import { PlayerInstance } from './PlayerInstance.js';
+import { Riffy } from 'riffy';
 
 export class AudioPlayersStore {
   private readonly client: Client;
@@ -8,10 +8,10 @@ export class AudioPlayersStore {
   constructor(_client: Client) {
     this.client = _client;
   }
-  async add(guildId: string, textChannel: GuildTextBasedChannel, queue: Queue): Promise<PlayerInstance | undefined> {
+  async add(guildId: string, textChannel: GuildTextBasedChannel, riffy: Riffy): Promise<PlayerInstance | undefined> {
     if (this.client.guilds.cache.get(guildId)) {
       if (!this.collection.has(guildId)) {
-        this.collection.set(guildId, new PlayerInstance(this.client, textChannel, queue));
+        this.collection.set(guildId, new PlayerInstance(this.client, textChannel, riffy));
       }
 
       return this.collection.get(guildId);

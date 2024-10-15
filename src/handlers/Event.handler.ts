@@ -24,9 +24,9 @@ const handler = async (client: Client) => {
     const event: BotEvent = eventModule.default;
 
     if (event.once) {
-      client.once(event.name, (...args) => event.execute(client, ...args));
+      client.once(event.name as string, (...args) => event.execute(client, ...args));
     } else {
-      client.on(event.name, (...args) => event.execute(client, ...args));
+      client.on(event.name as string, (...args) => event.execute(client, ...args));
     }
 
     if (ENV.BOT_VERBOSE_LOGGING)

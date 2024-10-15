@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ICommand } from '../../CommandTypes.js';
 import { EmbedBuilder, Guild, Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
@@ -6,7 +7,6 @@ import {
   AudioCommandWrapperText
 } from '../../audioplayer/util/AudioCommandWrappers.js';
 import { splitBar } from '../../utilities/splitBar.js';
-import { Queue } from 'distube';
 import i18next from 'i18next';
 
 export default function (): ICommand {

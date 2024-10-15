@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CommandArgument, ICommand, ReplyContext } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
 import {
@@ -14,7 +15,6 @@ import { PlaylistIsNotExists, UserPlaylistGet, UserPlaylistNamesAutocomplete } f
 import { queueSongsIsFull } from '../../audioplayer/util/queueSongsIsFull.js';
 import { generateWarningEmbed } from '../../utilities/generateWarningEmbed.js';
 import { ENV } from '../../EnvironmentVariables.js';
-import { Song } from 'distube';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
 import { loggerError } from '../../utilities/logger.js';
 import { commandEmptyReply } from '../../utilities/commandEmptyReply.js';

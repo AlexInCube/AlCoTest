@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ICommand } from '../../CommandTypes.js';
 import {
   Guild,

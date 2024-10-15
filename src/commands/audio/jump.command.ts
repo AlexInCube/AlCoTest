@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CommandArgument, ICommand } from '../../CommandTypes.js';
 import { EmbedBuilder, GuildMember, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
@@ -6,7 +7,6 @@ import {
   AudioCommandWrapperText
 } from '../../audioplayer/util/AudioCommandWrappers.js';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
-import { Song } from 'distube';
 import i18next from 'i18next';
 import { generateSimpleEmbed } from '../../utilities/generateSimpleEmbed.js';
 

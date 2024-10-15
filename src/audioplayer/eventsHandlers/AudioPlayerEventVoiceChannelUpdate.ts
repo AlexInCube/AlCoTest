@@ -1,8 +1,9 @@
 import { Client, VoiceState } from 'discord.js';
-import { isVoiceChannelEmpty } from 'distube';
 import { getGuildOptionLeaveOnEmpty } from '../../schemas/SchemaGuild.js';
 
+// TODO: Implement AudioPlayerEventVoiceChannelUpdate
 export async function AudioPlayerEventVoiceChannelUpdate(client: Client, oldState: VoiceState, newState: VoiceState) {
+  /*
   const messagePlayer = client.audioPlayer.playersManager.get(oldState.guild.id);
   if (!messagePlayer) return;
 
@@ -15,4 +16,6 @@ export async function AudioPlayerEventVoiceChannelUpdate(client: Client, oldStat
       await client.audioPlayer.resume(oldState.guild);
     }
   }
+
+   */
 }

@@ -10,7 +10,7 @@ Cool audiobot for Discord created by <a href="https://vk.com/alexincube"><b>@Ale
 
 ## 🌟 Features
 ![play-audioplayer](/wiki/images/commands/play-audioplayer.png)
-- Audioplayer based on [Distube](https://github.com/skick1234/DisTube) with buttons
+- Audioplayer based on [Riffy](https://github.com/riffy-team/riffy) (Lavalink interface for Node.js)
 - Playlists for songs
 - Lyrics for songs
 - Downloading of songs via /download command
@@ -26,3 +26,8 @@ If you have issues, try to update your `docker-compose.yml`, `updateAndRunInDock
 And run `sh updateAndRunInDocker.sh`. 
 If bugs are persisted on the latest version of bot,
 please create [issue](https://github.com/AlexInCube/AlCoTest/issues/new/choose).
+
+## Migration Guide from v3 to v4
+
+The bot rewrote to use Lavalink instead of Distube.js to provide more services and stability.
+Now you need to provide the lavanodes.json and set up your lavaserver.

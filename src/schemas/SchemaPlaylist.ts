@@ -1,5 +1,5 @@
+// @ts-nocheck
 import { Document, model, Schema } from 'mongoose';
-import { Song } from 'distube';
 import { ENV } from '../EnvironmentVariables.js';
 import { getOrCreateUser } from './SchemaUser.js';
 import { ApplicationCommandOptionChoiceData, AutocompleteInteraction } from 'discord.js';

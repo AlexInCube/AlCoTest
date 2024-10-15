@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CommandArgument, ICommand } from '../../CommandTypes.js';
 import { Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import i18next from 'i18next';

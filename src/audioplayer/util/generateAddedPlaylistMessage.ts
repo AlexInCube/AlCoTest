@@ -1,10 +1,11 @@
-import { Playlist } from 'distube';
+// @ts-nocheck
 import { EmbedBuilder } from 'discord.js';
 import i18next from 'i18next';
 import { getIconFromSource } from './getIconFromSource.js';
+import { nodeResponse } from 'riffy';
 
-export function generateAddedPlaylistMessage(playlist: Playlist) {
-  const serviceIcon = getIconFromSource(playlist.source);
+export function generateAddedPlaylistMessage(playlist: nodeResponse) {
+  const serviceIcon = getIconFromSource(playlist.pluginInfo?.name ?? undefined);
 
   return new EmbedBuilder()
     .setTitle(playlist.name ? `${serviceIcon} ${playlist.name}` : i18next.t('audioplayer:player_embed_unknown'))

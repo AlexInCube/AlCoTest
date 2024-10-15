@@ -2,9 +2,11 @@ import { Client, Guild } from 'discord.js';
 import { ENV } from '../../EnvironmentVariables.js';
 
 export function queueSongsIsFull(client: Client, guild: Guild): boolean {
-  const queue = client.audioPlayer.distube.getQueue(guild);
+  try {
+    const riffyPlayer = client.audioPlayer.riffy.get(guild.id);
 
-  if (!queue) return false;
-
-  return queue.songs.length >= ENV.BOT_MAX_SONGS_IN_QUEUE;
+    return riffyPlayer.queue.length >= ENV.BOT_MAX_SONGS_IN_QUEUE;
+  } catch {
+    return false;
+  }
 }

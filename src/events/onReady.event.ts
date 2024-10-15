@@ -8,6 +8,8 @@ const event: BotEvent = {
   execute: (client) => {
     if (!client.user) return;
 
+    client.audioPlayer.riffy.init(client.user.id);
+
     loggerSend(`Bot ${client.user.username} is successfully started!`);
     client.user.setActivity('/help');
   }

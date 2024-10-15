@@ -1,16 +1,12 @@
-import Genius from 'genius-lyrics';
 import { ENV } from '../EnvironmentVariables.js';
 import { Colors, EmbedBuilder } from 'discord.js';
 import i18next from 'i18next';
 import { loggerWarn } from '../utilities/logger.js';
 import { generateErrorEmbed } from '../utilities/generateErrorEmbed.js';
-const Lyrics = new Genius.Client(ENV.BOT_GENIUS_TOKEN);
 
-if (!ENV.BOT_GENIUS_TOKEN) {
-  loggerWarn('BOT_GENIUS_TOKEN is not provided, lyrics module disabled', 'Lyrics');
-}
-
+// TODO: Reimplement lyrics with Lava-Lyrics
 export async function getLyricsSong(searchQuery: string) {
+  /*
   const geniusSearch = await Lyrics.songs.search(searchQuery);
 
   if (geniusSearch.length === 0) {
@@ -18,9 +14,11 @@ export async function getLyricsSong(searchQuery: string) {
   }
 
   return geniusSearch[0];
+   */
 }
 
 export async function generateLyricsEmbed(songQuery: string) {
+  /*
   const geniusSong = await getLyricsSong(songQuery);
 
   if (!geniusSong) {
@@ -41,4 +39,6 @@ export async function generateLyricsEmbed(songQuery: string) {
   } catch {
     return generateErrorEmbed(i18next.t('commands:lyrics_embed_lyrics_not_found'));
   }
+
+   */
 }

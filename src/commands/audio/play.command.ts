@@ -13,8 +13,6 @@ import {
 import { GroupAudio } from './AudioTypes.js';
 import { truncateString } from '../../utilities/truncateString.js';
 import i18next from 'i18next';
-import { SearchResultType } from '@distube/youtube';
-import ytsr from '@distube/ytsr';
 import { generateWarningEmbed } from '../../utilities/generateWarningEmbed.js';
 import { ENV } from '../../EnvironmentVariables.js';
 import { queueSongsIsFull } from '../../audioplayer/util/queueSongsIsFull.js';
@@ -72,7 +70,7 @@ const liveText = i18next.t('commands:play_stream');
 
 export async function songSearchAutocomplete(interaction: AutocompleteInteraction) {
   const focusedValue = interaction.options.getFocused(false);
-
+  /*
   if (focusedValue) {
     const choices = await ytsr(focusedValue, {
       safeSearch: true,
@@ -95,6 +93,7 @@ export async function songSearchAutocomplete(interaction: AutocompleteInteractio
   }
 
   await interaction.respond([]);
+ */
 }
 
 async function playAndReply(ctx: ReplyContext, songQuery: string) {
@@ -116,8 +115,10 @@ async function playAndReply(ctx: ReplyContext, songQuery: string) {
 
   const member = ctx.member as GuildMember;
 
-  await ctx.client.audioPlayer.play(member.voice.channel as VoiceChannel, ctx.channel as TextChannel, songQuery, {
-    member,
-    textChannel: ctx.channel as TextChannel
-  });
+  await ctx.client.audioPlayer.play(
+    member.voice.channel as VoiceChannel,
+    ctx.channel as TextChannel,
+    songQuery,
+    member
+  );
 }

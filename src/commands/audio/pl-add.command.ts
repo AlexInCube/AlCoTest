@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CommandArgument, ICommand, ReplyContext } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
 import { Message, PermissionsBitField, SlashCommandBuilder, User } from 'discord.js';
@@ -8,7 +9,6 @@ import {
   UserPlaylistAddSong,
   UserPlaylistNamesAutocomplete
 } from '../../schemas/SchemaPlaylist.js';
-import { Playlist } from 'distube';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
 import { ENV } from '../../EnvironmentVariables.js';
 import { loggerError } from '../../utilities/logger.js';

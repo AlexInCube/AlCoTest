@@ -1,4 +1,4 @@
-import { Song } from 'distube';
+// @ts-nocheck
 import { EmbedBuilder } from 'discord.js';
 import i18next from 'i18next';
 import { getIconFromSource } from './getIconFromSource.js';

@@ -1,6 +1,5 @@
 import { Client, GuildTextBasedChannel, Message } from 'discord.js';
 import { PlayerEmbed } from './PlayerEmbed.js';
-import { Queue, Song } from 'distube';
 import { PlayerButtons } from './PlayerButtons.js';
 import { AudioPlayerState } from './AudioPlayerIcons.js';
 import { checkBotInVoice } from '../utilities/checkBotInVoice.js';
@@ -8,6 +7,7 @@ import i18next from 'i18next';
 import { ENV } from '../EnvironmentVariables.js';
 import { loggerError } from '../utilities/logger.js';
 import { generateSimpleEmbed } from '../utilities/generateSimpleEmbed.js';
+import { Player, Riffy, Track } from 'riffy';
 
 export class PlayerInstance {
   private readonly client: Client;
@@ -21,7 +21,7 @@ export class PlayerInstance {
   private buttonsHandler: PlayerButtons;
   // Message where player is stored right now
   private messageWithPlayer: Message | undefined;
-  private queue: Queue;
+  private riffy;
   // Variable for "recreationPlayer"
   lastDeletedMessage: Message | undefined;
   // Delay for player recreation
@@ -39,10 +39,10 @@ export class PlayerInstance {
 
   private leaveOnEmpty: boolean;
 
-  constructor(client: Client, txtChannel: GuildTextBasedChannel, queue: Queue) {
+  constructor(client: Client, txtChannel: GuildTextBasedChannel, riffy: Riffy) {
     this.client = client;
     this.textChannel = txtChannel;
-    this.queue = queue;
+    this.riffy = riffy;
     this.buttonsHandler = new PlayerButtons(this.client, this.textChannel);
     this.leaveOnEmpty = false;
   }
@@ -75,9 +75,9 @@ export class PlayerInstance {
       if (checkBotInVoice(this.textChannel.guild)) {
         await this.stopFinishTimer();
         this.finishTimer = setTimeout(async () => {
-          const queue = this.client.audioPlayer.distube.getQueue(this.textChannel.guild.id);
+          const riffyPlayer = this.riffy.get(this.textChannel.guild.id);
           // loggerSend('try to stop player on cooldown')
-          if (queue) return;
+          if (riffyPlayer) return;
           if (checkBotInVoice(this.textChannel.guild)) {
             await this.client.audioPlayer.stop(this.textChannel.guild.id);
             await this.textChannel.send({
@@ -100,29 +100,28 @@ export class PlayerInstance {
   }
   // Update embed interface to represent the current state of player, BUT THIS NOT PUSHES UPDATED EMBED TO MESSAGE
   private updateEmbedState() {
-    const queue: Queue | undefined = this.client.audioPlayer.distube.getQueue(this.textChannel.guild.id);
-    if (queue) {
-      this.queue = queue;
-    }
+    const riffyPlayer: Player = this.riffy.get(this.textChannel.guild.id);
+    // loggerSend('try to stop player on cooldown')
+    if (!riffyPlayer) return;
     this.embedBuilder.setPlayerState(this.state);
 
-    const currentSong: Song = this.queue.songs[0];
+    const currentSong: Track | null = riffyPlayer.queue.first;
     if (currentSong) {
-      this.embedBuilder.setSongDuration(currentSong.duration, currentSong.isLive);
+      this.embedBuilder.setSongDuration(currentSong.info.length, currentSong.info.stream);
       this.embedBuilder.setSongSource(currentSong);
       this.embedBuilder.setSongTitle(
-        currentSong.name ?? i18next.t('audioplayer:player_embed_unknown'),
-        currentSong.url!
+        currentSong.info.title ?? i18next.t('audioplayer:player_embed_unknown'),
+        currentSong.info.uri!
       );
-      this.embedBuilder.setThumbnailURL(currentSong.thumbnail ?? null);
-      this.embedBuilder.setUploader(currentSong.uploader.name);
+      this.embedBuilder.setThumbnailURL(currentSong.info.thumbnail);
+      this.embedBuilder.setUploader(currentSong.info.author);
 
-      if (currentSong.user) {
-        this.embedBuilder.setRequester(currentSong.user!);
+      if (currentSong.info.requester) {
+        this.embedBuilder.setRequester(currentSong.info.requester!);
       }
     }
-    this.embedBuilder.setNextSong(this.queue.songs[1]?.name);
-    this.embedBuilder.setQueueData(this.queue.songs.length, this.queue.duration);
+    this.embedBuilder.setNextSong(riffyPlayer.queue.at(1)?.info.title);
+    this.embedBuilder.setQueueData(riffyPlayer.queue.length, 99999);
 
     this.embedBuilder.update();
   }
@@ -188,8 +187,8 @@ export class PlayerInstance {
   async update() {
     if (!this.messageWithPlayer) return;
     if (this.state === 'destroying') return;
-    if (!this.client.audioPlayer.distube.voices.has(this.messageWithPlayer.guild!)) {
-      //loggerSend("I am not in channel, so destroy")
+    const riffyPlayer: Player = this.riffy.get(this.textChannel.guild.id);
+    if (!riffyPlayer) {
       await this.destroy();
       return;
     }
@@ -231,16 +230,12 @@ export class PlayerInstance {
   // Changed state of the player and update player message
   async setState(state: AudioPlayerState) {
     this.state = state;
-    // When Distube is waiting the song, they remove their Queue object.
-    // So when we try to play a new song, we need to receive a new Queue
-    const queue = this.client.audioPlayer.distube.getQueue(this.textChannel.guild.id);
-    if (queue) {
-      this.queue = queue;
-    }
+    const riffyPlayer: Player = this.riffy.get(this.textChannel.guild.id);
+    if (!riffyPlayer) return;
 
     if (this.state === 'waiting' && this.leaveOnEmpty) {
       await this.startFinishTimer();
-    } else if (queue) {
+    } else if (riffyPlayer.queue.length > 0) {
       await this.stopFinishTimer();
     }
 
@@ -269,6 +264,8 @@ export class PlayerInstance {
 
   // Debug info for text command $audiodebug
   debug(): string {
-    return `GuildName: ${this.textChannel.guild.name}, Player State: ${this.state}, GuildID: ${this.textChannel.guildId},  VoiceChannelID: ${this.queue.voice.channel.id}, VoiceChannelName: ${this.queue.voice.channel.name}, TextChannelId: ${this.textChannel.id}, TextChannelName: ${this.textChannel.name} Message ID: ${this.messageWithPlayer?.id}\n`;
+    const riffyPlayer: Player = this.riffy.get(this.textChannel.guild.id);
+    if (!riffyPlayer) return 'undefined';
+    return `GuildName: ${this.textChannel.guild.name}, Player State: ${this.state}, GuildID: ${this.textChannel.guildId}, VoiceChannel: ${riffyPlayer.voiceChannel}, TextChannelId: ${this.textChannel.id}, TextChannelName: ${this.textChannel.name} Message ID: ${this.messageWithPlayer?.id}\n`;
   }
 }

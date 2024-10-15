@@ -1,6 +1,6 @@
+// @ts-nocheck
 import { Document, model, Schema } from 'mongoose';
 import { getOrCreateGuildSettings, GuildModelClass } from './SchemaGuild.js';
-import { Playlist, Song } from 'distube';
 import { ENV } from '../EnvironmentVariables.js';
 
 interface ISchemaSongHistoryUnit {

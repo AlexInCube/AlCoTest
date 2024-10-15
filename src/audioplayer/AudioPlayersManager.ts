@@ -1,11 +1,9 @@
-import { DisTube, Events as DistubeEvents, Playlist, PlayOptions, Queue, RepeatMode, Song } from 'distube';
 import { AudioPlayersStore } from './AudioPlayersStore.js';
 import { clamp } from '../utilities/clamp.js';
 import { generateErrorEmbed } from '../utilities/generateErrorEmbed.js';
 import i18next from 'i18next';
 import { loggerError, loggerSend } from '../utilities/logger.js';
 import { ENV } from '../EnvironmentVariables.js';
-import { DistubePlugin } from './LoadPlugins.js';
 import { generateAddedPlaylistMessage } from './util/generateAddedPlaylistMessage.js';
 import { generateAddedSongMessage } from './util/generateAddedSongMessage.js';
 import {
@@ -14,34 +12,36 @@ import {
   CommandInteraction,
   EmbedBuilder,
   Guild,
+  GuildMember,
   Interaction,
   TextChannel,
   VoiceBasedChannel
 } from 'discord.js';
-import { joinVoiceChannel } from '@discordjs/voice';
 import { generateWarningEmbed } from '../utilities/generateWarningEmbed.js';
 import { generateLyricsEmbed } from './Lyrics.js';
 import { getGuildOptionLeaveOnEmpty, setGuildOptionLeaveOnEmpty } from '../schemas/SchemaGuild.js';
 import { addSongToGuildSongsHistory } from '../schemas/SchemaSongsHistory.js';
 import { PaginationList } from './PaginationList.js';
+import { nodeResponse, Player, Queue, Riffy, Track } from 'riffy';
+import { LavaNodes } from '../LavalinkNodes.js';
 
 export const loggerPrefixAudioplayer = `Audioplayer`;
 
 export class AudioPlayersManager {
   client: Client;
   playersManager: AudioPlayersStore;
-  distube: DisTube;
-  constructor(client: Client, plugins: Array<DistubePlugin>) {
+  riffy: Riffy;
+  constructor(client: Client) {
     this.client = client;
     this.client.audioPlayer = this;
     this.playersManager = new AudioPlayersStore(this.client);
-    this.distube = new DisTube(this.client, {
-      nsfw: true,
-      emitAddListWhenCreatingQueue: true,
-      emitAddSongWhenCreatingQueue: true,
-      savePreviousSongs: true,
-      joinNewVoiceChannel: true,
-      plugins
+    this.riffy = new Riffy(this.client, LavaNodes, {
+      send: (payload) => {
+        const guild = client.guilds.cache.get(payload.d.guild_id);
+        if (guild) guild.shard.send(payload);
+      },
+      defaultSearchPlatform: 'ytmsearch',
+      restVersion: 'v4'
     });
 
     this.setupEvents();
@@ -50,106 +50,117 @@ export class AudioPlayersManager {
   async play(
     voiceChannel: VoiceBasedChannel,
     textChannel: TextChannel,
-    query: string | Song | Playlist,
-    options?: PlayOptions
-  ) {
+    query: string,
+    member: GuildMember
+  ): Promise<void> {
     try {
-      const playableThing: Song | Playlist = await this.distube.handler.resolve(query);
-
-      // I am need manual connect user to a voice channel, because when I am using only Distube "play"
-      // method, getVoiceConnection in @discordjs/voice is not working
-      joinVoiceChannel({
-        channelId: voiceChannel.id,
-        guildId: voiceChannel.guildId,
-        adapterCreator: voiceChannel.guild.voiceAdapterCreator
+      const player: Player = this.riffy.createConnection({
+        guildId: textChannel.guild.id,
+        voiceChannel: voiceChannel.id,
+        textChannel: textChannel.id,
+        deaf: true
       });
 
-      await this.distube.play(voiceChannel, playableThing, options);
+      const resolve: nodeResponse = await this.riffy.resolve({ query, requester: member.id });
+      const { loadType, tracks, playlistInfo } = resolve;
+
+      if (loadType === 'playlist') {
+        if (!playlistInfo) return;
+        for (const track of resolve.tracks) {
+          track.info.requester = member;
+          player.queue.add(track);
+        }
+
+        await textChannel.send(`Added ${tracks.length} songs from ${playlistInfo.name} playlist.`);
+
+        if (!player.playing && !player.paused) await player.play();
+      } else if (loadType === 'search' || loadType === 'track') {
+        const track = tracks.shift();
+        if (!track) return;
+        track.info.requester = member;
+
+        player.queue.add(track);
+
+        await textChannel.send(`Added **${track.info.title}** to the queue.`);
+
+        if (!player.playing && !player.paused) await player.play();
+      } else {
+        await textChannel.send(`There were no results found for your query.`);
+      }
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
       await textChannel.send({
         embeds: [generateErrorEmbed(`${query}\n${e.message}`, i18next.t('audioplayer:play_error') as string)]
       });
-
-      const queue = this.distube.getQueue(voiceChannel.guildId);
-
-      if (!queue) return;
-      if (queue.songs.length === 0) await this.stop(voiceChannel.guild.id);
     }
   }
 
-  async stop(guildId: string) {
-    const queue = this.distube.getQueue(guildId);
-
-    if (queue) {
-      await queue.stop();
-      queue.voice.leave();
-    } else {
-      this.distube.voices.leave(guildId);
-    }
-
+  async stop(guildId: string): Promise<void> {
+    const riffyPlayer = this.riffy.players.get(guildId);
+    if (!riffyPlayer) return;
+    riffyPlayer.destroy();
     await this.playersManager.remove(guildId);
   }
 
-  async pause(guild: Guild) {
-    const queue = this.distube.getQueue(guild);
-    if (!queue) return;
-    const player = this.playersManager.get(queue.id);
+  async pause(guild: Guild): Promise<void> {
+    const riffyPlayer = this.riffy.players.get(guild.id);
+    if (!riffyPlayer) return;
+    const player = this.playersManager.get(guild.id);
     if (!player) return;
-    if (!queue.paused) {
-      this.distube.pause(guild);
+    if (!riffyPlayer.paused) {
+      riffyPlayer.pause();
       await player.setState('pause');
     }
 
     await player.update();
   }
 
-  async resume(guild: Guild) {
-    const queue = this.distube.getQueue(guild);
-    if (!queue) return;
-    const player = this.playersManager.get(queue.id);
+  async resume(guild: Guild): Promise<void> {
+    const riffyPlayer = this.riffy.players.get(guild.id);
+    if (!riffyPlayer) return;
+    const player = this.playersManager.get(guild.id);
     if (!player) return;
-    if (queue.paused) {
-      this.distube.resume(guild);
+    if (riffyPlayer.paused) {
+      await riffyPlayer.play();
       await player.setState('playing');
     }
 
     await player.update();
   }
 
-  async pauseResume(guild: Guild) {
-    const queue = this.distube.getQueue(guild);
-    if (!queue) return;
-    const player = this.playersManager.get(queue.id);
+  async pauseResume(guild: Guild): Promise<void> {
+    const riffyPlayer = this.riffy.players.get(guild.id);
+
+    if (!riffyPlayer) return;
+    const player = this.playersManager.get(guild.id);
     if (!player) return;
-    if (queue.paused) {
-      this.distube.resume(guild);
-      await player.setState('playing');
+    if (riffyPlayer.paused) {
+      await this.resume(guild);
     } else {
-      this.distube.pause(guild);
-      await player.setState('pause');
+      await this.pause(guild);
     }
 
     await player.update();
   }
 
-  async changeLoopMode(guild: Guild) {
-    const queue = this.distube.getQueue(guild);
-    if (!queue) return;
-    const player = this.playersManager.get(queue.id);
+  async changeLoopMode(guild: Guild): Promise<void> {
+    const riffyPlayer = this.riffy.players.get(guild.id);
+
+    if (!riffyPlayer) return;
+    const player = this.playersManager.get(guild.id);
     if (!player) return;
 
-    switch (queue.repeatMode) {
-      case RepeatMode.DISABLED:
-        queue.setRepeatMode(RepeatMode.SONG);
+    switch (riffyPlayer.loop) {
+      case 'none':
+        riffyPlayer.setLoop('track');
         player.embedBuilder.setLoopMode('song');
         break;
-      case RepeatMode.SONG:
-        queue.setRepeatMode(RepeatMode.QUEUE);
+      case 'track':
+        riffyPlayer.setLoop('queue');
         player.embedBuilder.setLoopMode('queue');
         break;
-      case RepeatMode.QUEUE:
-        queue.setRepeatMode(RepeatMode.DISABLED);
+      case 'queue':
+        riffyPlayer.setLoop('none');
         player.embedBuilder.setLoopMode('disabled');
         break;
     }
@@ -157,13 +168,13 @@ export class AudioPlayersManager {
     await player.update();
   }
 
-  async skip(guild: Guild): Promise<Song | undefined> {
+  async skip(guild: Guild): Promise<Track | undefined | null> {
     try {
-      const queue = this.distube.getQueue(guild);
-      if (queue) {
-        await this.distube.skip(guild.id);
-        return queue.songs[0];
-      }
+      const riffyPlayer = this.riffy.players.get(guild.id);
+      if (!riffyPlayer) return;
+
+      riffyPlayer.stop();
+      return riffyPlayer.queue.first;
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
     }
@@ -171,46 +182,60 @@ export class AudioPlayersManager {
   }
 
   async shuffle(guild: Guild): Promise<Queue | undefined> {
+    const riffyPlayer = this.riffy.players.get(guild.id);
+    if (!riffyPlayer) return;
+
     try {
-      let queue = this.distube.getQueue(guild);
-      if (queue) {
-        queue = await this.distube.shuffle(guild);
-        const player = this.playersManager.get(queue.id);
-        if (!player) return undefined;
-        await player.update();
-        return queue;
-      }
+      const queue = riffyPlayer.queue;
+      queue.shuffle();
+      const player = this.playersManager.get(guild.id);
+      if (!player) return undefined;
+      await player.update();
+      return queue;
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
     }
     return undefined;
   }
 
-  async jump(guild: Guild, position: number): Promise<Song | undefined> {
+  // TODO: Implement Jump in audioplayer
+  async jump(guild: Guild, position: number): Promise<Track | undefined> {
+    const riffyPlayer = this.riffy.players.get(guild.id);
+    if (!riffyPlayer) return;
+    loggerError('Riffy JUMP is not implemented.');
+    /*
     try {
-      const queue = this.distube.getQueue(guild);
+      const queue = riffyPlayer.queue
       if (queue) {
-        return this.distube.jump(guild, clamp(position, 1, queue.songs.length));
+        return queue. jump(guild, clamp(position, 1, queue.songs.length));
       }
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
     }
     return undefined;
-  }
 
-  async previous(guild: Guild): Promise<Song | undefined> {
-    try {
-      const queue = this.distube.getQueue(guild);
-      if (queue) {
-        return await this.distube.previous(guild);
-      }
-    } catch (e) {
-      if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
-    }
+     */
     return undefined;
   }
 
+  // TODO: Implement Previous in audioplayer
+  async previous(guild: Guild): Promise<Track | undefined> {
+    /*
+    try {
+      const riffyPlayer = this.riffy.players.get(guild.id);
+      if (!riffyPlayer) return;
+      return await riffyPlayer. .previous(guild);
+    } catch (e) {
+      if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
+    }
+    */
+    return undefined;
+  }
+
+  // TODO: Implement Rewind in audioplayer
   async rewind(guild: Guild, time: number): Promise<boolean> {
+    return false;
+    /*
     try {
       const queue = this.distube.getQueue(guild);
       if (!queue) return false;
@@ -223,9 +248,14 @@ export class AudioPlayersManager {
     } catch {
       return false;
     }
+
+     */
   }
 
+  // TODO: Implement showLyrics in audioplayer
   async showLyrics(interaction: ButtonInteraction) {
+    await interaction.reply({ content: 'undefined' });
+    /*
     if (!interaction.guild) return;
     const queue = this.distube.getQueue(interaction.guild);
     if (!queue) {
@@ -235,9 +265,14 @@ export class AudioPlayersManager {
     const song = queue.songs[0];
 
     await interaction.reply({ embeds: [await generateLyricsEmbed(song.name!)] });
+
+     */
   }
 
-  async showQueue(interaction: Interaction) {
+  // TODO: Implement showQueue in audioplayer
+  async showQueue(interaction: ButtonInteraction) {
+    await interaction.reply({ content: 'undefined' });
+    /*
     if (!interaction.guild) return;
     const queue = this.distube.getQueue(interaction.guild);
     if (!queue) {
@@ -275,6 +310,8 @@ export class AudioPlayersManager {
     }
 
     await PaginationList(interaction as CommandInteraction, arrayEmbeds, interaction.user);
+
+     */
   }
 
   async setLeaveOnEmpty(guild: Guild, mode: boolean) {
@@ -286,6 +323,7 @@ export class AudioPlayersManager {
   }
 
   private setupEvents() {
+    /*
     if (ENV.BOT_VERBOSE_LOGGING) {
       this.distube.on(DistubeEvents.DEBUG, (message) => {
         loggerSend(message, loggerPrefixAudioplayer);
@@ -375,5 +413,7 @@ export class AudioPlayersManager {
         embeds: [generateErrorEmbed(errorMessage, errorName)]
       });
     });
+
+     */
   }
 }

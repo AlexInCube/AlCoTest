@@ -5,7 +5,6 @@ import { loginBot } from './utilities/loginBot.js';
 import { AudioPlayersManager } from './audioplayer/AudioPlayersManager.js';
 import loadLocale from './locales/Locale.js';
 import { handlersLoad } from './handlersLoad.js';
-import { LoadPlugins } from './audioplayer/LoadPlugins.js';
 
 loggerSend(`Starting bot on version ${process.env.npm_package_version}`);
 
@@ -20,7 +19,7 @@ client.rest.on('rateLimited', (args) => {
   loggerError(`Client encountered a rate limit: ${JSON.stringify(args)}`);
 });
 
-new AudioPlayersManager(client, await LoadPlugins());
+new AudioPlayersManager(client);
 
 await handlersLoad(client);
 

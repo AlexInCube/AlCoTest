@@ -1,4 +1,4 @@
-import { Client, ClientEvents, Collection } from 'discord.js';
+import { Client, ClientEvents, Collection, Events } from 'discord.js';
 import { ICommand, ICommandGroup } from './CommandTypes.js';
 import { AudioPlayersManager } from './audioplayer/AudioPlayersManager.js';
 
@@ -11,7 +11,7 @@ declare module 'discord.js' {
 }
 
 export interface BotEvent {
-  name: keyof ClientEvents;
+  name: Events;
   once?: boolean | false;
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   execute: (client: Client, ...args: any) => void;

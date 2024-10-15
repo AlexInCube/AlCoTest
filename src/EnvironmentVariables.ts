@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 import * as dotenv from 'dotenv';
-import { loggerSend } from './utilities/logger.js';
+import { loggerError, loggerSend } from './utilities/logger.js';
 import path from 'path';
 import fs from 'fs';
 
@@ -24,7 +24,7 @@ if (fs.existsSync(envPath)) {
   );
 }
 
-const envVariables = z.object({
+const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production']).default('development'),
 
   BOT_VERBOSE_LOGGING: z
@@ -84,7 +84,7 @@ const envVariables = z.object({
   BOT_GENIUS_TOKEN: z.string().optional()
 });
 
-export const ENV = envVariables.parse(process.env);
+export const ENV = envSchema.parse(process.env);
 
 if (fs.existsSync(envPath)) {
   loggerSend(`Environment variables is loaded from ${envPath}`, loggerPrefixEnv);
