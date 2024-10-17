@@ -1,7 +1,9 @@
-export function formatSecondsToTime(seconds: number | string): string {
-  if (typeof seconds === 'string') {
-    seconds = parseInt(seconds);
+export function formatMilliseconds(ms: number | string): string {
+  if (typeof ms === 'string') {
+    ms = parseInt(ms);
   }
+
+  const seconds = ms / 1000;
 
   const array_with_time = [];
 

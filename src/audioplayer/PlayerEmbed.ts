@@ -1,10 +1,11 @@
 import { EmbedBuilder, User } from 'discord.js';
 import { AudioPlayerLoopMode, AudioPlayerState, AudioSourceIcons } from './AudioPlayerIcons.js';
-import { formatSecondsToTime } from '../utilities/formatSecondsToTime.js';
 import i18next from 'i18next';
 import { getIconFromSource } from './util/getIconFromSource.js';
 import { getSongsNoun } from './util/getSongsNoun.js';
-import { nodeResponse, Track } from 'riffy';
+import { Queue, Track } from 'riffy';
+import { formatMilliseconds } from '../utilities/formatMillisecondsToTime.js';
+import { playlistCalculateDuration } from './util/playlistCalculateDuration.js';
 
 export class PlayerEmbed extends EmbedBuilder {
   private playerState: AudioPlayerState = 'loading';
@@ -130,9 +131,9 @@ export class PlayerEmbed extends EmbedBuilder {
     this.uploader = uploader ?? i18next.t('audioplayer:player_embed_unknown');
   }
 
-  setQueueData(songs_count: number, queue_duration: number) {
-    this.songsCount = songs_count;
-    this.queueDuration = formatSecondsToTime(queue_duration);
+  setQueueData(riffyQueue: Queue) {
+    this.songsCount = riffyQueue.length;
+    this.queueDuration = formatMilliseconds(playlistCalculateDuration(riffyQueue));
   }
 
   setThumbnailURL(url: string | null) {
@@ -161,11 +162,11 @@ export class PlayerEmbed extends EmbedBuilder {
     this.nextSong = songName;
   }
 
-  setSongDuration(formattedDuration: number, isLive = false) {
+  setSongDuration(ms: number, isLive = false) {
     if (isLive) {
       this.formattedDuration = i18next.t('audioplayer:player_embed_duration_stream');
     } else {
-      this.formattedDuration = formatSecondsToTime(formattedDuration);
+      this.formattedDuration = formatMilliseconds(ms);
     }
   }
 

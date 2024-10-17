@@ -105,7 +105,7 @@ export class PlayerInstance {
     if (!riffyPlayer) return;
     this.embedBuilder.setPlayerState(this.state);
 
-    const currentSong: Track | null = riffyPlayer.queue.first;
+    const currentSong: Track | null = riffyPlayer.current;
     if (currentSong) {
       this.embedBuilder.setSongDuration(currentSong.info.length, currentSong.info.stream);
       this.embedBuilder.setSongSource(currentSong);
@@ -121,7 +121,7 @@ export class PlayerInstance {
       }
     }
     this.embedBuilder.setNextSong(riffyPlayer.queue.at(1)?.info.title);
-    this.embedBuilder.setQueueData(riffyPlayer.queue.length, 99999);
+    this.embedBuilder.setQueueData(riffyPlayer.queue);
 
     this.embedBuilder.update();
   }

@@ -209,8 +209,10 @@ export class AudioPlayersManager {
       const riffyPlayer = this.riffy.players.get(guild.id);
       if (!riffyPlayer) return;
 
+      const current_song = riffyPlayer.current;
+      // I don`t know why stop(), but Riffy Player don`t have method skip()
       riffyPlayer.stop();
-      return riffyPlayer.queue.first;
+      return current_song;
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
     }

@@ -2,6 +2,8 @@ import { EmbedBuilder } from 'discord.js';
 import i18next from 'i18next';
 import { getIconFromSource } from './getIconFromSource.js';
 import { nodeResponse } from 'riffy';
+import { formatMilliseconds } from '../../utilities/formatMillisecondsToTime.js';
+import { playlistCalculateDuration } from './playlistCalculateDuration.js';
 
 export function generateAddedPlaylistMessage(playlist: nodeResponse) {
   const serviceIcon = getIconFromSource(playlist.tracks[0].info.sourceName ?? undefined);
@@ -30,7 +32,7 @@ export function generateAddedPlaylistMessage(playlist: nodeResponse) {
         },
         {
           name: `${i18next.t('audioplayer:event_add_song_length')}`,
-          value: `\`${99999}\``,
+          value: `\`${formatMilliseconds(playlistCalculateDuration(playlist.tracks))}\``,
           inline: true
         }
       )

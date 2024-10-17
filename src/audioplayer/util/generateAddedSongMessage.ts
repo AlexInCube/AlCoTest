@@ -2,6 +2,7 @@ import { EmbedBuilder } from 'discord.js';
 import i18next from 'i18next';
 import { getIconFromSource } from './getIconFromSource.js';
 import { Track } from 'riffy';
+import { formatMilliseconds } from '../../utilities/formatMillisecondsToTime.js';
 
 export function generateAddedSongMessage(song: Track) {
   const serviceIcon = getIconFromSource(song.info.sourceName);
@@ -19,7 +20,7 @@ export function generateAddedSongMessage(song: Track) {
       },
       {
         name: `${i18next.t('audioplayer:event_add_song_length')}`,
-        value: `\`${song.info.length}\``,
+        value: `\`${formatMilliseconds(song.info.length)}\``,
         inline: true
       },
       {

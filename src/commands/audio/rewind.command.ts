@@ -1,13 +1,13 @@
 import { CommandArgument, ICommand } from '../../CommandTypes.js';
-import { EmbedBuilder, GuildMember, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, GuildMember, PermissionsBitField, SlashCommandBuilder, time } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
 import {
   AudioCommandWrapperInteraction,
   AudioCommandWrapperText
 } from '../../audioplayer/util/AudioCommandWrappers.js';
-import { formatSecondsToTime } from '../../utilities/formatSecondsToTime.js';
 import i18next from 'i18next';
 import { generateSimpleEmbed } from '../../utilities/generateSimpleEmbed.js';
+import { formatMilliseconds } from '../../utilities/formatMillisecondsToTime.js';
 
 export default function (): ICommand {
   return {
@@ -94,8 +94,8 @@ function hmsToSeconds(str: string): number | undefined {
   return s;
 }
 
-export function generateEmbedAudioPlayerRewind(member: GuildMember, time: number): EmbedBuilder {
-  return generateSimpleEmbed(`${member} ${i18next.t('commands:rewind_success')} ${formatSecondsToTime(time)}`);
+export function generateEmbedAudioPlayerRewind(member: GuildMember, seconds: number): EmbedBuilder {
+  return generateSimpleEmbed(`${member} ${i18next.t('commands:rewind_success')} ${formatMilliseconds(seconds * 1000)}`);
 }
 
 export function generateEmbedAudioPlayerRewindFailure(): EmbedBuilder {
