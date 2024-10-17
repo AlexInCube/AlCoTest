@@ -1,5 +1,4 @@
 import { AudioPlayersStore } from './AudioPlayersStore.js';
-import { clamp } from '../utilities/clamp.js';
 import { generateErrorEmbed } from '../utilities/generateErrorEmbed.js';
 import i18next from 'i18next';
 import { loggerError, loggerSend } from '../utilities/logger.js';
@@ -9,10 +8,9 @@ import { generateAddedSongMessage } from './util/generateAddedSongMessage.js';
 import {
   ButtonInteraction,
   Client,
-  CommandInteraction,
-  EmbedBuilder,
   Guild,
   GuildMember,
+  GuildTextBasedChannel,
   Interaction,
   TextChannel,
   VoiceBasedChannel
@@ -54,36 +52,74 @@ export class AudioPlayersManager {
     member: GuildMember
   ): Promise<void> {
     try {
-      const player: Player = this.riffy.createConnection({
+      const riffyPlayer: Player = this.riffy.createConnection({
         guildId: textChannel.guild.id,
         voiceChannel: voiceChannel.id,
         textChannel: textChannel.id,
         deaf: true
       });
 
-      const resolve: nodeResponse = await this.riffy.resolve({ query, requester: member.id });
-      const { loadType, tracks, playlistInfo } = resolve;
+      const player = this.playersManager.get(textChannel.guild.id);
 
-      if (loadType === 'playlist') {
-        if (!playlistInfo) return;
+      const resolve: nodeResponse = await this.riffy.resolve({ query, requester: member.id });
+
+      if (resolve.loadType === 'playlist') {
+        if (!resolve.playlistInfo) return;
+
         for (const track of resolve.tracks) {
           track.info.requester = member;
-          player.queue.add(track);
+          riffyPlayer.queue.add(track);
         }
 
-        await textChannel.send(`Added ${tracks.length} songs from ${playlistInfo.name} playlist.`);
+        if (player) {
+          if (riffyPlayer.textChannel) {
+            await player.textChannel.send({ embeds: [generateAddedPlaylistMessage(resolve)] });
 
-        if (!player.playing && !player.paused) await player.play();
-      } else if (loadType === 'search' || loadType === 'track') {
-        const track = tracks.shift();
+            if (riffyPlayer.queue.length >= ENV.BOT_MAX_SONGS_IN_QUEUE) {
+              await player.textChannel.send({
+                embeds: [
+                  generateWarningEmbed(
+                    i18next.t('audioplayer:event_add_list_limit', {
+                      queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
+                    }) as string
+                  )
+                ]
+              });
+              // Concat songs count in queue to BOT_MAX_SONGS_IN_QUEUE
+              riffyPlayer.queue.length = ENV.BOT_MAX_SONGS_IN_QUEUE;
+            }
+          }
+          await player.update();
+        } else {
+          await textChannel.send({ embeds: [generateAddedPlaylistMessage(resolve)] });
+        }
+
+        if (ENV.BOT_MAX_SONGS_HISTORY_SIZE > 0) {
+          //await addSongToGuildSongsHistory(queue.id, playlist);
+        }
+
+        if (!riffyPlayer.playing && !riffyPlayer.paused) await riffyPlayer.play();
+      } else if (resolve.loadType === 'search' || resolve.loadType === 'track') {
+        const track = resolve.tracks.shift();
         if (!track) return;
         track.info.requester = member;
 
-        player.queue.add(track);
+        if (ENV.BOT_MAX_SONGS_HISTORY_SIZE > 0) {
+          //await addSongToGuildSongsHistory(textChannel.guild.id, track);
+        }
 
-        await textChannel.send(`Added **${track.info.title}** to the queue.`);
+        if (player) {
+          if (riffyPlayer.textChannel) {
+            await player.textChannel.send({ embeds: [generateAddedSongMessage(track)] });
+          }
+          await player.update();
+        } else {
+          await textChannel.send({ embeds: [generateAddedSongMessage(track)] });
+        }
 
-        if (!player.playing && !player.paused) await player.play();
+        riffyPlayer.queue.add(track);
+
+        if (!riffyPlayer.playing && !riffyPlayer.paused) await riffyPlayer.play();
       } else {
         await textChannel.send(`There were no results found for your query.`);
       }
@@ -108,7 +144,7 @@ export class AudioPlayersManager {
     const player = this.playersManager.get(guild.id);
     if (!player) return;
     if (!riffyPlayer.paused) {
-      riffyPlayer.pause();
+      riffyPlayer.pause(true);
       await player.setState('pause');
     }
 
@@ -121,7 +157,7 @@ export class AudioPlayersManager {
     const player = this.playersManager.get(guild.id);
     if (!player) return;
     if (riffyPlayer.paused) {
-      await riffyPlayer.play();
+      riffyPlayer.pause(false);
       await player.setState('playing');
     }
 
@@ -323,97 +359,44 @@ export class AudioPlayersManager {
   }
 
   private setupEvents() {
-    /*
+    this.riffy.on('nodeConnect', async (node) => {
+      loggerSend(`Node ${node.name} has connected.`, loggerPrefixAudioplayer);
+    });
+
+    this.riffy.on('nodeError', async (node, error) => {
+      loggerSend(`Node ${node.name} encountered an error: ${error.message}`, loggerPrefixAudioplayer);
+    });
+
     if (ENV.BOT_VERBOSE_LOGGING) {
-      this.distube.on(DistubeEvents.DEBUG, (message) => {
-        loggerSend(message, loggerPrefixAudioplayer);
+      this.riffy.on('debug', async (message) => {
+        loggerSend(`Riffy Debug: ${message}`, loggerPrefixAudioplayer);
       });
     }
 
-    if (ENV.BOT_FFMPEG_LOGGING) {
-      this.distube.on(DistubeEvents.FFMPEG_DEBUG, (message) => {
-        loggerSend(message, loggerPrefixAudioplayer);
-      });
-    }
+    this.riffy.on('playerCreate', async (riffyPlayer) => {
+      const guildTextChannel = this.client.channels.cache.get(riffyPlayer.textChannel) as GuildTextBasedChannel;
+      await this.playersManager.add(riffyPlayer.guildId, guildTextChannel, this.riffy);
 
-    this.distube.on(DistubeEvents.INIT_QUEUE, async (queue) => {
-      await this.playersManager.add(queue.id, queue.textChannel as TextChannel, queue);
-
-      const player = this.playersManager.get(queue.id);
+      const player = this.playersManager.get(riffyPlayer.guildId);
       if (!player) return;
 
       await player.init();
-      await player.setLeaveOnEmpty(await getGuildOptionLeaveOnEmpty(queue.id));
+      await player.setLeaveOnEmpty(await getGuildOptionLeaveOnEmpty(riffyPlayer.guildId));
     });
-    this.distube.on(DistubeEvents.PLAY_SONG, async (queue) => {
-      const player = this.playersManager.get(queue.id);
+
+    this.riffy.on('playerDisconnect', async (riffyPlayer) => {
+      await this.playersManager.remove(riffyPlayer.guildId);
+    });
+
+    this.riffy.on('trackStart', async (riffyPlayer, track, payload) => {
+      const player = this.playersManager.get(riffyPlayer.guildId);
       if (player) {
         await player.setState('playing');
       }
     });
-    this.distube.on(DistubeEvents.DISCONNECT, async (queue) => {
-      await this.playersManager.remove(queue.id);
+
+    this.riffy.on('queueEnd', async (riffyPlayer) => {
+      await this.playersManager.get(riffyPlayer.guildId)?.setState('waiting');
     });
-    this.distube.on(DistubeEvents.ADD_SONG, async (queue, song) => {
-      if (queue.textChannel) {
-        await queue.textChannel.send({ embeds: [generateAddedSongMessage(song)] });
-      }
-
-      if (ENV.BOT_MAX_SONGS_HISTORY_SIZE > 0) {
-        await addSongToGuildSongsHistory(queue.id, song);
-      }
-
-      const player = this.playersManager.get(queue.id);
-      if (player) {
-        await player.update();
-      }
-    });
-    this.distube.on(DistubeEvents.ADD_LIST, async (queue, playlist) => {
-      if (ENV.BOT_MAX_SONGS_HISTORY_SIZE > 0) {
-        await addSongToGuildSongsHistory(queue.id, playlist);
-      }
-
-      if (!queue.textChannel) return;
-
-      await queue.textChannel.send({ embeds: [generateAddedPlaylistMessage(playlist)] });
-      if (queue.songs.length >= ENV.BOT_MAX_SONGS_IN_QUEUE) {
-        await queue.textChannel.send({
-          embeds: [
-            generateWarningEmbed(
-              i18next.t('audioplayer:event_add_list_limit', {
-                queueLimit: ENV.BOT_MAX_SONGS_IN_QUEUE
-              }) as string
-            )
-          ]
-        });
-        queue.songs.length = ENV.BOT_MAX_SONGS_IN_QUEUE;
-      }
-
-      const player = this.playersManager.get(queue.id);
-      if (player) {
-        await player.update();
-      }
-    });
-    this.distube.on(DistubeEvents.FINISH_SONG, async (queue) => {
-      if (!this.playersManager.has(queue.id)) return;
-      if (queue._next || queue._prev || queue.stopped || queue.songs.length > 1) return;
-      await this.playersManager.get(queue.id)?.setState('waiting');
-    });
-    this.distube.on(DistubeEvents.ERROR, async (error, queue, song) => {
-      let errorName = `ERROR`;
-      const errorMessage = `${error.name} + \n\n + ${error.message}`;
-
-      if (song) {
-        errorName = song.name!;
-      }
-
-      if (queue.songs.length === 0) await this.stop(queue.id);
-
-      await queue.textChannel?.send({
-        embeds: [generateErrorEmbed(errorMessage, errorName)]
-      });
-    });
-
-     */
   }
 }

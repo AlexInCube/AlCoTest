@@ -1,6 +1,5 @@
 import { GuildMember, Interaction, TextChannel } from 'discord.js';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
-import { checkBotInVoice } from '../../utilities/checkBotInVoice.js';
 import { checkMemberInVoiceWithBot } from '../../utilities/checkMemberInVoiceWithBot.js';
 import { checkMemberInVoice } from '../../utilities/checkMemberInVoice.js';
 import { CheckBotPermissions } from '../../utilities/checkPermissions.js';
@@ -29,20 +28,21 @@ export async function slashCommandHandler(interaction: Interaction) {
       }
 
       if (command.guild_data.voice_required) {
+        const isMemberInVoice = checkMemberInVoice(interaction.member as GuildMember);
+
         if (command.guild_data.voice_with_bot_only) {
-          if (checkBotInVoice(interaction.guild)) {
-            const checkObj = await checkMemberInVoiceWithBot(<GuildMember>interaction.member);
-            if (!checkObj.channelTheSame) {
-              await interaction.reply({
-                embeds: [generateErrorEmbed(checkObj.errorMessage)],
-                ephemeral: true
-              });
-              return;
-            }
+          const isMemberInVoiceWithBot = checkMemberInVoiceWithBot(interaction.member as GuildMember);
+
+          if (!isMemberInVoiceWithBot) {
+            await interaction.reply({
+              embeds: [generateErrorEmbed(i18next.t('commandsHandlers:voice_join_with_bot'))],
+              ephemeral: true
+            });
+            return;
           }
         }
 
-        if (!checkMemberInVoice(<GuildMember>interaction.member)) {
+        if (!isMemberInVoice) {
           await interaction.reply({
             embeds: [generateErrorEmbed(i18next.t('commandsHandlers:command_only_in_voice'))],
             ephemeral: true

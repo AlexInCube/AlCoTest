@@ -1,6 +1,6 @@
 import { BotEvent } from '../DiscordTypes.js';
 import { Client, Events, VoiceState } from 'discord.js';
-import { AudioPlayerEventVoiceChannelUpdate } from '../audioplayer/eventsHandlers/AudioPlayerEventVoiceChannelUpdate.js';
+import { AudioPlayerEventVoiceChannelUpdate } from '../audioplayer/discordEventsHandlers/AudioPlayerEventVoiceChannelUpdate.js';
 
 export const event: BotEvent = {
   name: Events.VoiceStateUpdate,

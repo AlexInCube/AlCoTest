@@ -1,32 +1,38 @@
-// @ts-nocheck
 import { EmbedBuilder } from 'discord.js';
 import i18next from 'i18next';
 import { getIconFromSource } from './getIconFromSource.js';
 import { nodeResponse } from 'riffy';
 
 export function generateAddedPlaylistMessage(playlist: nodeResponse) {
-  const serviceIcon = getIconFromSource(playlist.pluginInfo?.name ?? undefined);
+  const serviceIcon = getIconFromSource(playlist.tracks[0].info.sourceName ?? undefined);
 
-  return new EmbedBuilder()
-    .setTitle(playlist.name ? `${serviceIcon} ${playlist.name}` : i18next.t('audioplayer:player_embed_unknown'))
-    .setURL(playlist.url ?? null)
-    .setAuthor({ name: `${i18next.t('audioplayer:event_add_list')}` })
-    .setThumbnail(playlist.thumbnail ?? null)
-    .addFields(
-      {
-        name: `${i18next.t('audioplayer:player_embed_requester')}`,
-        value: `${playlist.member!.user.toString()}`,
-        inline: true
-      },
-      {
-        name: `${i18next.t('audioplayer:event_add_list_songs_count')}`,
-        value: `\`${playlist.songs.length}\``,
-        inline: true
-      },
-      {
-        name: `${i18next.t('audioplayer:event_add_song_length')}`,
-        value: `\`${playlist.formattedDuration}\``,
-        inline: true
-      }
-    );
+  return (
+    new EmbedBuilder()
+      .setTitle(
+        playlist.playlistInfo?.name
+          ? `${serviceIcon} ${playlist.playlistInfo.name}`
+          : i18next.t('audioplayer:player_embed_unknown')
+      )
+      // @ts-expect-error because
+      .setURL(playlist.pluginInfo?.url ?? null)
+      .setAuthor({ name: `${i18next.t('audioplayer:event_add_list')}` })
+      .setThumbnail(playlist.tracks[0].info.thumbnail ?? null)
+      .addFields(
+        {
+          name: `${i18next.t('audioplayer:player_embed_requester')}`,
+          value: `${playlist.tracks[0].info.requester}`,
+          inline: true
+        },
+        {
+          name: `${i18next.t('audioplayer:event_add_list_songs_count')}`,
+          value: `\`${playlist.tracks.length}\``,
+          inline: true
+        },
+        {
+          name: `${i18next.t('audioplayer:event_add_song_length')}`,
+          value: `\`${99999}\``,
+          inline: true
+        }
+      )
+  );
 }

@@ -1,11 +1,10 @@
 import { ICommand } from '../../CommandTypes.js';
 import { generateSpecificCommandHelp } from '../../commands/info/help.command.js';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
-import { checkBotInVoice } from '../../utilities/checkBotInVoice.js';
 import { checkMemberInVoiceWithBot } from '../../utilities/checkMemberInVoiceWithBot.js';
 import { checkMemberInVoice } from '../../utilities/checkMemberInVoice.js';
 import { CheckBotPermissions, CheckMemberPermissions } from '../../utilities/checkPermissions.js';
-import { Client, Message, TextChannel } from 'discord.js';
+import { Client, GuildMember, Message, TextChannel } from 'discord.js';
 import { loggerError } from '../../utilities/logger.js';
 import i18next from 'i18next';
 import { loggerPrefixCommandHandler } from '../../handlers/Command.handler.js';
@@ -70,17 +69,20 @@ export async function textCommandsHandler(client: Client, message: Message) {
       }
 
       if (command.guild_data.voice_required) {
+        const isMemberInVoice = checkMemberInVoice(message.member as GuildMember);
+
         if (command.guild_data.voice_with_bot_only) {
-          if (checkBotInVoice(message.member!.guild)) {
-            const checkObj = await checkMemberInVoiceWithBot(message.member!);
-            if (!checkObj.channelTheSame) {
-              await message.reply({ content: checkObj.errorMessage });
-              return;
-            }
+          const isMemberInVoiceWithBot = checkMemberInVoiceWithBot(message.member as GuildMember);
+
+          if (!isMemberInVoiceWithBot) {
+            await message.reply({
+              embeds: [generateErrorEmbed(i18next.t('commandsHandlers:voice_join_with_bot'))]
+            });
+            return;
           }
         }
 
-        if (!checkMemberInVoice(message.member!)) {
+        if (!isMemberInVoice) {
           await message.reply({
             embeds: [generateErrorEmbed(i18next.t('commandsHandlers:command_only_in_voice'))]
           });

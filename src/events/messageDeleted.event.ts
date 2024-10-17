@@ -1,6 +1,6 @@
 import { BotEvent } from '../DiscordTypes.js';
 import { Client, Events, Message } from 'discord.js';
-import { AudioPlayerEventMessageDeleted } from '../audioplayer/eventsHandlers/AudioPlayerEventMessageDeleted.js';
+import { AudioPlayerEventMessageDeleted } from '../audioplayer/discordEventsHandlers/AudioPlayerEventMessageDeleted.js';
 
 const event: BotEvent = {
   name: Events.MessageDelete,

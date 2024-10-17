@@ -28,6 +28,7 @@ import { ENV } from '../EnvironmentVariables.js';
 import { UserPlaylistAddFavoriteSong } from '../schemas/SchemaPlaylist.js';
 import { generateSimpleEmbed } from '../utilities/generateSimpleEmbed.js';
 import i18next from 'i18next';
+import { checkMemberInVoice } from '../utilities/checkMemberInVoice.js';
 
 enum ButtonIDs {
   stopMusic = 'stopMusic',
@@ -105,10 +106,20 @@ export class PlayerButtons {
 
     this.collector.on('collect', async (ButtonInteraction: ButtonInteraction) => {
       try {
-        const checkObj = await checkMemberInVoiceWithBot(ButtonInteraction.member as GuildMember);
-        if (!checkObj.channelTheSame) {
+        const isMemberInVoice = checkMemberInVoice(ButtonInteraction.member as GuildMember);
+        const isMemberInVoiceWithBot = checkMemberInVoiceWithBot(ButtonInteraction.member as GuildMember);
+
+        if (!isMemberInVoice) {
           await ButtonInteraction.reply({
-            embeds: [generateErrorEmbed(checkObj.errorMessage)],
+            embeds: [generateErrorEmbed(i18next.t('commandsHandlers:voice_join_in_any_channel'))],
+            ephemeral: true
+          });
+          return;
+        }
+
+        if (!isMemberInVoiceWithBot) {
+          await ButtonInteraction.reply({
+            embeds: [generateErrorEmbed(i18next.t('commandsHandlers:voice_join_with_bot'))],
             ephemeral: true
           });
           return;

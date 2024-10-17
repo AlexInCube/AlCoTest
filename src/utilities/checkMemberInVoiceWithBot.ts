@@ -1,39 +1,12 @@
-import { GuildMember, VoiceChannel } from 'discord.js';
-import { checkBotInVoice } from './checkBotInVoice.js';
-import i18next from 'i18next';
+import { GuildMember } from 'discord.js';
 
-export async function checkMemberInVoiceWithBot(
-  member: GuildMember
-): Promise<{ errorMessage: string; channelTheSame: boolean }> {
-  const response = {
-    channelTheSame: false,
-    errorMessage: 'CheckingVoiceError'
-  };
+export function checkMemberInVoiceWithBot(member: GuildMember): boolean {
+  const memberChannel = member.voice.channelId;
+  const clientChannel = member.guild.members.me?.voice.channelId;
 
-  try {
-    const connection = checkBotInVoice(member.guild);
-    if (connection) {
-      if (member.voice.channel) {
-        response.channelTheSame = member.guild.members.me?.voice.channel?.id === member.voice?.channel.id;
-        if (response.channelTheSame) {
-          return response;
-        }
-      } else {
-        response.errorMessage = i18next.t('commandsHandlers:voice_join_in_any_channel');
-        return response;
-      }
-
-      await member.guild.client.channels.fetch(<string>member.guild.members.me?.voice.channel?.id).then((channel) => {
-        if (channel) {
-          if (channel instanceof VoiceChannel) {
-            response.errorMessage = `${i18next.t('commandsHandlers:voice_join_in_channel')} ${channel.name}`;
-          }
-        }
-      });
-    }
-  } catch {
-    return response;
+  if (!memberChannel || !clientChannel) {
+    return false;
   }
 
-  return response;
+  return memberChannel === clientChannel;
 }

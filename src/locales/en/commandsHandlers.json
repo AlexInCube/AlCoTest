@@ -6,5 +6,6 @@
   "command_only_in_guilds": "This command working only on servers",
   "command_only_in_voice": "You need to be in voice channel for executing this command",
   "voice_join_in_any_channel": "Please, join in any voice channel",
-  "voice_join_in_channel": "Please, join in voice channel"
+  "voice_join_in_channel": "Please, join in voice channel",
+  "voice_join_with_bot": "Please, join in voice channel where is bot"
 }
