@@ -1,5 +1,5 @@
 import {
-  AutocompleteInteraction,
+  AutocompleteInteraction, ButtonInteraction,
   ChatInputCommandInteraction,
   CommandInteraction,
   Message,
@@ -64,7 +64,8 @@ interface ISlashCommandData {
 interface IGuildData {
   guild_only?: boolean | false;
   voice_required?: boolean;
-  voice_with_bot_only?: boolean; // Property enabled only if voice_required is true
+  // This field have sense if field "voice_required" is true
+  voice_with_bot_only?: boolean;
 }
 
 export type InteractionReplyContext = ChatInputCommandInteraction | CommandInteraction;

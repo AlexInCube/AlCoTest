@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ICommand } from '../../CommandTypes.js';
 import { EmbedBuilder, GuildMember, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
@@ -8,6 +7,7 @@ import {
 } from '../../audioplayer/util/AudioCommandWrappers.js';
 import i18next from 'i18next';
 import { generateSimpleEmbed } from '../../utilities/generateSimpleEmbed.js';
+import { Track } from 'riffy';
 
 export default function (): ICommand {
   return {
@@ -55,9 +55,9 @@ export default function (): ICommand {
   };
 }
 
-export function generateEmbedAudioPlayerPrevious(member: GuildMember, song: Song): EmbedBuilder {
+export function generateEmbedAudioPlayerPrevious(member: GuildMember, song: Track): EmbedBuilder {
   return generateSimpleEmbed(
-    `:rewind: ${member} ${i18next.t('commands:previous_success')} ${song.name} - ${song.uploader.name} :rewind:`
+    `:rewind: ${member} ${i18next.t('commands:previous_success')} ${song.info.title} - ${song.info.author} :rewind:`
   );
 }
 

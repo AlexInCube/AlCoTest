@@ -91,7 +91,7 @@ Example: /jump 4
 
 Returns to previous played/skipped song in queue
 
-### rewind
+### seek
 
 Allow you to change the current playback time.
 Accept time in HH:MM:SS or MM:SS or SS format.

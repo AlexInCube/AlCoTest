@@ -8,6 +8,7 @@ import { generateAddedSongMessage } from './util/generateAddedSongMessage.js';
 import {
   ButtonInteraction,
   Client,
+  EmbedBuilder,
   Guild,
   GuildMember,
   GuildTextBasedChannel,
@@ -22,6 +23,8 @@ import { addSongToGuildSongsHistory } from '../schemas/SchemaSongsHistory.js';
 import { PaginationList } from './PaginationList.js';
 import { nodeResponse, Player, Queue, Riffy, Track } from 'riffy';
 import { LavaNodes } from '../LavalinkNodes.js';
+import { clamp } from '../utilities/clamp.js';
+import { formatMilliseconds } from '../utilities/formatMillisecondsToTime.js';
 
 export const loggerPrefixAudioplayer = `Audioplayer`;
 
@@ -240,57 +243,50 @@ export class AudioPlayersManager {
   async jump(guild: Guild, position: number): Promise<Track | undefined> {
     const riffyPlayer = this.riffy.players.get(guild.id);
     if (!riffyPlayer) return;
-    loggerError('Riffy JUMP is not implemented.');
-    /*
+
     try {
-      const queue = riffyPlayer.queue
+      const queue = riffyPlayer.queue;
       if (queue) {
-        return queue. jump(guild, clamp(position, 1, queue.songs.length));
+        //return riffyPlayer.seek() jump(guild, clamp(position, 1, queue.songs.length));
       }
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
     }
-    return undefined;
 
-     */
     return undefined;
   }
 
-  // TODO: Implement Previous in audioplayer
   async previous(guild: Guild): Promise<Track | undefined> {
-    /*
     try {
       const riffyPlayer = this.riffy.players.get(guild.id);
       if (!riffyPlayer) return;
-      return await riffyPlayer. .previous(guild);
+      const previousSong = riffyPlayer.previous;
+      if (!previousSong) return undefined;
+      riffyPlayer.queue.unshift(previousSong);
+      riffyPlayer.stop();
+      return previousSong;
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
     }
-    */
+
     return undefined;
   }
 
-  // TODO: Implement Rewind in audioplayer
-  async rewind(guild: Guild, time: number): Promise<boolean> {
-    return false;
-    /*
+  async seek(guild: Guild, ms: number): Promise<boolean> {
     try {
-      const queue = this.distube.getQueue(guild);
-      if (!queue) return false;
-      const player = this.playersManager.get(queue.id);
+      const riffyPlayer = this.riffy.players.get(guild.id);
+      if (!riffyPlayer) return false;
+      const player = this.playersManager.get(guild.id);
       if (!player) return false;
-      if (time < 0) time = 0;
-      this.distube.seek(guild, time);
+      if (ms < 0) ms = 0;
+      riffyPlayer.seek(ms);
       await player.setState('playing');
       return true;
     } catch {
       return false;
     }
-
-     */
   }
 
-  // TODO: Implement showLyrics in audioplayer
   async showLyrics(interaction: ButtonInteraction) {
     await interaction.reply({ content: 'undefined' });
     /*
@@ -307,49 +303,43 @@ export class AudioPlayersManager {
      */
   }
 
-  // TODO: Implement showQueue in audioplayer
-  async showQueue(interaction: ButtonInteraction) {
-    await interaction.reply({ content: 'undefined' });
-    /*
+  async showQueue(interaction: ButtonInteraction): Promise<void> {
     if (!interaction.guild) return;
-    const queue = this.distube.getQueue(interaction.guild);
-    if (!queue) {
-      return;
-    }
+    const riffyPlayer = this.riffy.players.get(interaction.guildId!);
+    if (!riffyPlayer) return;
 
     function buildPage(queue: Queue, pageNumber: number, entriesPerPage: number) {
       let queueList = '';
 
       const startingIndex = pageNumber * entriesPerPage;
 
-      for (let i = startingIndex; i < Math.min(startingIndex + entriesPerPage, queue.songs.length); i++) {
-        const song = queue.songs[i];
-        queueList += `${i + 1}. ` + `[${song.name}](${song.url})` + ` - \`${song.formattedDuration}\`\n`;
+      for (let i = startingIndex; i < Math.min(startingIndex + entriesPerPage, queue.length); i++) {
+        const song = queue[i];
+        queueList +=
+          `${i + 1}. ` + `[${song.info.title}](${song.info.uri})` + ` - \`${formatMilliseconds(song.info.length)}\`\n`;
       }
 
       const page = new EmbedBuilder()
         .setAuthor({ name: `${i18next.t('audioplayer:show_queue_songs_in_queue')}: ` })
-        .setTitle(queue.songs[0].name!)
+        .setTitle(riffyPlayer?.current.info.title ?? null)
         .setDescription(`**${i18next.t('audioplayer:show_queue_title')}: **\n${queueList}`.slice(0, 4096));
 
-      if (queue.songs[0].url) {
-        page.setURL(queue.songs[0].url);
-      }
+      page.setURL(riffyPlayer?.current.info.uri ?? null);
 
       return page;
     }
 
     const arrayEmbeds: Array<EmbedBuilder> = [];
     const entriesPerPage = 20;
-    const pages = Math.ceil(queue.songs.length / entriesPerPage);
+    const pages = Math.ceil(riffyPlayer.queue.length / entriesPerPage);
 
     for (let i = 0; i < pages; i++) {
-      arrayEmbeds.push(buildPage(queue, i, entriesPerPage));
+      arrayEmbeds.push(buildPage(riffyPlayer.queue, i, entriesPerPage));
     }
 
-    await PaginationList(interaction as CommandInteraction, arrayEmbeds, interaction.user);
-
-     */
+    // @ts-expect-error ButtonInteraction have method reply(),
+    // but it have differences with reply() in MessageInteraction so we get error
+    await PaginationList(interaction, arrayEmbeds, interaction.user);
   }
 
   async setLeaveOnEmpty(guild: Guild, mode: boolean) {

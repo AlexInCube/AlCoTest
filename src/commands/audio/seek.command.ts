@@ -12,7 +12,7 @@ import { formatMilliseconds } from '../../utilities/formatMillisecondsToTime.js'
 export default function (): ICommand {
   return {
     text_data: {
-      name: 'rewind',
+      name: 'seek',
       description: i18next.t('commands:rewind_desc'),
       arguments: [new CommandArgument(i18next.t('commands:rewind_arg_time'), true)],
       execute: async (message, args) => {
@@ -20,7 +20,7 @@ export default function (): ICommand {
 
         await AudioCommandWrapperText(message, async () => {
           if (time) {
-            if (await message.client.audioPlayer.rewind(message.guild!, time)) {
+            if (await message.client.audioPlayer.seek(message.guild!, time * 1000)) {
               await message.reply({
                 embeds: [generateEmbedAudioPlayerRewind(message.member!, time)]
               });
@@ -33,7 +33,7 @@ export default function (): ICommand {
     },
     slash_data: {
       slash_builder: new SlashCommandBuilder()
-        .setName('rewind')
+        .setName('seek')
         .setDescription(i18next.t('commands:rewind_desc'))
         .addStringOption((option) =>
           option
@@ -49,7 +49,7 @@ export default function (): ICommand {
 
         await AudioCommandWrapperInteraction(interaction, async () => {
           if (time) {
-            if (await interaction.client.audioPlayer.rewind(interaction.guild!, time)) {
+            if (await interaction.client.audioPlayer.seek(interaction.guild!, time * 1000)) {
               await interaction.reply({
                 embeds: [generateEmbedAudioPlayerRewind(interaction.member as GuildMember, time)]
               });
