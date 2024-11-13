@@ -1,6 +1,6 @@
 {
   "name": "aicbot",
-  "version": "4.0.0-dev-4",
+  "version": "4.0.0-dev-5",
   "description": "Discord Bot for playing music",
   "main": "build/main.js",
   "scripts": {
@@ -18,6 +18,9 @@
   "license": "ISC",
   "engines": {
     "node": ">=20"
+  },
+  "overrides": {
+    "uri-js": "npm:uri-js-replace"
   },
   "dependencies": {
     "@discordjs/rest": "2.4.0",
