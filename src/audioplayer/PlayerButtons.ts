@@ -223,7 +223,7 @@ export class PlayerButtons {
                 return;
               }
 
-              await UserPlaylistAddFavoriteSong(ButtonInteraction.user.id, riffyPlayer.queue.first);
+              await UserPlaylistAddFavoriteSong(ButtonInteraction.user.id, riffyPlayer.queue.first!);
 
               await ButtonInteraction.reply({
                 embeds: [

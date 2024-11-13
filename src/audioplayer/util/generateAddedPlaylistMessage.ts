@@ -22,7 +22,7 @@ export function generateAddedPlaylistMessage(playlist: nodeResponse) {
       .addFields(
         {
           name: `${i18next.t('audioplayer:player_embed_requester')}`,
-          value: `${playlist.tracks[0].info.requester}`,
+          value: `<@${playlist.tracks[0].info.requester}>`,
           inline: true
         },
         {

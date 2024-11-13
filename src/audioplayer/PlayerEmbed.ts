@@ -9,7 +9,7 @@ import { playlistCalculateDuration } from './util/playlistCalculateDuration.js';
 
 export class PlayerEmbed extends EmbedBuilder {
   private playerState: AudioPlayerState = 'loading';
-  private requester: User | undefined = undefined;
+  private requester: string | undefined = undefined;
   private uploader = i18next.t('audioplayer:player_embed_unknown');
   private songsCount = 0;
   private queueDuration = '00:00';
@@ -37,7 +37,7 @@ export class PlayerEmbed extends EmbedBuilder {
       if (this.requester) {
         this.addFields({
           name: i18next.t('audioplayer:player_embed_requester'),
-          value: this.requester.toString(),
+          value: `<@${this.requester}>`,
           inline: true
         });
       }
@@ -123,8 +123,8 @@ export class PlayerEmbed extends EmbedBuilder {
     }
   }
 
-  setRequester(user: User) {
-    this.requester = user;
+  setRequester(userId: string) {
+    this.requester = userId;
   }
 
   setUploader(uploader: string | undefined) {

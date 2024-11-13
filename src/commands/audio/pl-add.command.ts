@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { CommandArgument, ICommand, ReplyContext } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
 import { Message, PermissionsBitField, SlashCommandBuilder, User } from 'discord.js';
@@ -70,10 +69,7 @@ async function plAddAndReply(playlistName: string, url: string, ctx: ReplyContex
       return;
     }
 
-    const song = await ctx.client.audioPlayer.distube.handler
-      .resolve(url)
-      .then((result) => result)
-      .catch((err) => loggerError(err));
+    const song = await ctx.client.audioPlayer.resolve(url, user.id);
 
     if (!song) {
       await ctx.reply({
@@ -83,7 +79,7 @@ async function plAddAndReply(playlistName: string, url: string, ctx: ReplyContex
       return;
     }
 
-    if (song instanceof Playlist) {
+    if (song.playlistInfo) {
       await ctx.reply({
         embeds: [generateErrorEmbed(i18next.t('commands:pl-add_error_song_must_not_be_playlist'))],
         ephemeral: true
@@ -91,7 +87,7 @@ async function plAddAndReply(playlistName: string, url: string, ctx: ReplyContex
       return;
     }
 
-    if (song.isLive) {
+    if (song.tracks[0].info.stream) {
       await ctx.reply({
         embeds: [generateErrorEmbed(i18next.t('commands:pl-add_error_song_must_not_be_live_stream'))],
         ephemeral: true
@@ -99,13 +95,13 @@ async function plAddAndReply(playlistName: string, url: string, ctx: ReplyContex
       return;
     }
 
-    await UserPlaylistAddSong(user.id, playlistName, song);
+    await UserPlaylistAddSong(user.id, playlistName, song.tracks[0]);
 
     await ctx.reply({
       embeds: [
         generateSimpleEmbed(
           i18next.t('commands:pl-add_success', {
-            song: song.name,
+            song: song.tracks[0].info.title,
             playlist: playlistName,
             interpolation: { escapeValue: false }
           })

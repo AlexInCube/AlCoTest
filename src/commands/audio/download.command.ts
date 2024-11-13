@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { CommandArgument, ICommand } from '../../CommandTypes.js';
 import { PermissionsBitField, SlashCommandBuilder, TextChannel } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
@@ -6,6 +5,11 @@ import { services } from './play.command.js';
 import i18next from 'i18next';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
 import { ReadStream } from 'fs';
+import {
+  deleteMP3file,
+  DownloadSongErrorGetLocale,
+  getSongFileAttachment
+} from '../../audioplayer/util/downloadSong.js';
 
 export default function (): ICommand {
   return {

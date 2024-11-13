@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { CommandArgument, ICommand } from '../../CommandTypes.js';
 import { EmbedBuilder, GuildMember, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
@@ -9,6 +8,7 @@ import {
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
 import i18next from 'i18next';
 import { generateSimpleEmbed } from '../../utilities/generateSimpleEmbed.js';
+import { Track } from 'riffy';
 
 export default function (): ICommand {
   return {
@@ -76,9 +76,9 @@ export default function (): ICommand {
   };
 }
 
-function generateEmbedAudioPlayerJump(member: GuildMember, song: Song): EmbedBuilder {
+function generateEmbedAudioPlayerJump(member: GuildMember, song: Track): EmbedBuilder {
   return generateSimpleEmbed(
-    `:fast_forward: ${member} ${i18next.t('commands:jump_success')} ${song.name} :fast_forward:`
+    `:fast_forward: ${member} ${i18next.t('commands:jump_success')} ${song.info.title} :fast_forward:`
   );
 }
 

@@ -117,7 +117,7 @@ export class PlayerInstance {
       this.embedBuilder.setUploader(currentSong.info.author);
 
       if (currentSong.info.requester) {
-        this.embedBuilder.setRequester(currentSong.info.requester!);
+        this.embedBuilder.setRequester(currentSong.info.requester);
       }
     }
     this.embedBuilder.setNextSong(riffyPlayer.queue.at(1)?.info.title);
@@ -161,18 +161,22 @@ export class PlayerInstance {
     if (!this.messageWithPlayer) return;
     await this.stopRecreationTimer(); // We stop recreation in recreatePlayer to keep "singleton" for this recreatePlayer
     this.recreationTimer = setTimeout(async () => {
-      if (!this.messageWithPlayer) return;
-      const messages = await this.textChannel.messages.fetch({ limit: 1 });
-      const lastMessage = messages.first();
+      try {
+        if (!this.messageWithPlayer) return;
+        const messages = await this.textChannel.messages.fetch({ limit: 1 });
+        const lastMessage = messages.first();
 
-      if (lastMessage?.id !== this.messageWithPlayer.id) {
-        try {
-          this.lastDeletedMessage = this.messageWithPlayer;
-          await this.messageWithPlayer.delete();
-        } finally {
-          this.messageWithPlayer = await this.textChannel.send({ embeds: [this.embedBuilder] });
-          await this.updateMessageState();
+        if (lastMessage?.id !== this.messageWithPlayer.id) {
+          try {
+            this.lastDeletedMessage = this.messageWithPlayer;
+            await this.messageWithPlayer.delete();
+          } finally {
+            this.messageWithPlayer = await this.textChannel.send({ embeds: [this.embedBuilder] });
+            await this.updateMessageState();
+          }
         }
+      } catch {
+        /* empty */
       }
     }, this.updateTime);
   }
@@ -229,17 +233,21 @@ export class PlayerInstance {
 
   // Changed state of the player and update player message
   async setState(state: AudioPlayerState) {
-    this.state = state;
-    const riffyPlayer: Player = this.riffy.get(this.textChannel.guild.id);
-    if (!riffyPlayer) return;
+    try {
+      this.state = state;
+      const riffyPlayer: Player = this.riffy.get(this.textChannel.guild.id);
+      if (!riffyPlayer) return;
 
-    if (this.state === 'waiting' && this.leaveOnEmpty) {
-      await this.startFinishTimer();
-    } else if (riffyPlayer.queue.length > 0) {
-      await this.stopFinishTimer();
+      if (this.state === 'waiting' && this.leaveOnEmpty) {
+        await this.startFinishTimer();
+      } else if (riffyPlayer.queue.length > 0) {
+        await this.stopFinishTimer();
+      }
+
+      await this.update();
+    } catch {
+      /* empty */
     }
-
-    await this.update();
   }
 
   async setLeaveOnEmpty(mode: boolean) {

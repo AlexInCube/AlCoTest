@@ -1,6 +1,7 @@
 import { BotEvent } from '../DiscordTypes.js';
 import { loggerSend } from '../utilities/logger.js';
 import { Events } from 'discord.js';
+import { AudioPlayerEventOnReady } from '../audioplayer/discordEventsHandlers/AudioPlayerEventOnReady.js';
 
 const event: BotEvent = {
   name: Events.ClientReady,
@@ -8,7 +9,7 @@ const event: BotEvent = {
   execute: (client) => {
     if (!client.user) return;
 
-    client.audioPlayer.riffy.init(client.user.id);
+    AudioPlayerEventOnReady(client);
 
     loggerSend(`Bot ${client.user.username} is successfully started!`);
     client.user.setActivity('/help');

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { CommandArgument, ICommand, ReplyContext } from '../../CommandTypes.js';
 import { GroupAudio } from './AudioTypes.js';
 import {
@@ -18,6 +17,8 @@ import { ENV } from '../../EnvironmentVariables.js';
 import { generateErrorEmbed } from '../../utilities/generateErrorEmbed.js';
 import { loggerError } from '../../utilities/logger.js';
 import { commandEmptyReply } from '../../utilities/commandEmptyReply.js';
+import { nodeResponse, Track } from 'riffy';
+import { undefined } from 'zod';
 
 export default function (): ICommand {
   return {
@@ -79,16 +80,9 @@ async function plPlayAndReply(ctx: ReplyContext, playlistName: string, userID: s
       });
       return;
     }
-
     const userPlaylist = await UserPlaylistGet(userID, playlistName, true);
 
-    const songs: Array<Song> = await Promise.all(
-      userPlaylist.songs.map(async (userSong) => {
-        return (await ctx.client.audioPlayer.distube.handler.resolve(userSong.url)) as Song;
-      })
-    );
-
-    if (songs.length === 0) {
+    if (userPlaylist.songs.length === 0) {
       await ctx.reply({
         embeds: [
           generateErrorEmbed(
@@ -103,23 +97,36 @@ async function plPlayAndReply(ctx: ReplyContext, playlistName: string, userID: s
       return;
     }
 
+    // @ts-expect-error flatMap can return empty array, but TS thinks it never returns
+    const tracks: Array<Track> = await Promise.all(
+      userPlaylist.songs.flatMap(async (userSong) => {
+        const nodeResponse = await ctx.client.audioPlayer.resolve(userSong.url, userID);
+        if (!nodeResponse) return [];
+        if (nodeResponse.loadType === 'playlist') return [];
+        return nodeResponse.tracks[0];
+      })
+    );
+
+    const finalResponse: nodeResponse = {
+      exception: null,
+      loadType: 'playlist',
+      playlistInfo: {
+        name: userPlaylist.name,
+        selectedTrack: 0
+      },
+      pluginInfo: undefined,
+      tracks: tracks
+    };
+
     await commandEmptyReply(ctx);
 
     const member = ctx.member as GuildMember;
 
-    const DistubePlaylist = await ctx.client.audioPlayer.distube.createCustomPlaylist(songs, {
-      member,
-      name: playlistName
-    });
-
     await ctx.client.audioPlayer.play(
       member.voice.channel as VoiceChannel,
       ctx.channel as TextChannel,
-      DistubePlaylist,
-      {
-        member,
-        textChannel: ctx.channel as TextChannel
-      }
+      finalResponse,
+      member
     );
   } catch (e) {
     if (e instanceof PlaylistIsNotExists) {

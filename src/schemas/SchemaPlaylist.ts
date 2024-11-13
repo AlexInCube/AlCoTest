@@ -1,9 +1,9 @@
-// @ts-nocheck
 import { Document, model, Schema } from 'mongoose';
 import { ENV } from '../EnvironmentVariables.js';
 import { getOrCreateUser } from './SchemaUser.js';
 import { ApplicationCommandOptionChoiceData, AutocompleteInteraction } from 'discord.js';
 import { getSongsNoun } from '../audioplayer/util/getSongsNoun.js';
+import { Track } from 'riffy';
 
 interface ISchemaSongPlaylistUnit {
   name: string;
@@ -189,7 +189,7 @@ export async function UserPlaylistDelete(userID: string, name: string): Promise<
   await user.save();
 }
 
-export async function UserPlaylistAddSong(userID: string, name: string, song: Song): Promise<void> {
+export async function UserPlaylistAddSong(userID: string, name: string, track: Track): Promise<void> {
   const playlist = await UserPlaylistGet(userID, name, true);
   if (!playlist) throw new PlaylistIsNotExists(name);
 
@@ -197,7 +197,7 @@ export async function UserPlaylistAddSong(userID: string, name: string, song: So
     throw new PlaylistMaxSongsLimit(name);
   }
 
-  playlist.songs.push({ name: song.name!, url: song.url! });
+  playlist.songs.push({ name: track.info.title, url: track.info.uri });
 
   await playlist.save();
 }
@@ -236,14 +236,14 @@ export async function UserPlaylistNamesAutocomplete(interaction: AutocompleteInt
   await interaction.respond(finalResult);
 }
 
-export async function UserPlaylistAddFavoriteSong(userID: string, song: Song): Promise<void> {
+export async function UserPlaylistAddFavoriteSong(userID: string, track: Track): Promise<void> {
   try {
-    await UserPlaylistAddSong(userID, 'favorite-songs', song);
+    await UserPlaylistAddSong(userID, 'favorite-songs', track);
   } catch (e) {
     if (e instanceof PlaylistIsNotExists) {
       await UserPlaylistCreate(userID, 'favorite-songs', true);
 
-      await UserPlaylistAddSong(userID, 'favorite-songs', song);
+      await UserPlaylistAddSong(userID, 'favorite-songs', track);
 
       return;
     }

@@ -1,7 +1,7 @@
-// @ts-nocheck
 import { Document, model, Schema } from 'mongoose';
 import { getOrCreateGuildSettings, GuildModelClass } from './SchemaGuild.js';
 import { ENV } from '../EnvironmentVariables.js';
+import { nodeResponse } from 'riffy';
 
 interface ISchemaSongHistoryUnit {
   name: string;
@@ -59,17 +59,24 @@ export async function deleteGuildSongsHistory(guildID: string) {
   await SongsHistoryListModelClass.deleteOne({ _id: guild.songsHistory });
 }
 
-export async function addSongToGuildSongsHistory(guildID: string, resource: Song | Playlist): Promise<void> {
+export async function addSongToGuildSongsHistory(guildID: string, resource: nodeResponse): Promise<void> {
   const history = await getOrCreateGuildSongsHistory(guildID);
 
   if (!history) return;
 
-  // Users' playlists cannot be added to history, because they don't have url
-  if (resource.name && resource.member?.id && resource.url) {
+  if (resource.loadType === 'track') {
+    if (!resource.tracks[0]) return;
     history.songsHistory.push({
-      name: resource.name ?? 'unknown',
-      requester: resource.member?.id ?? 'unknown',
-      url: resource.url
+      name: resource.tracks[0].info.title ?? 'unknown',
+      requester: resource.tracks[0].info.requester ?? 'unknown',
+      url: resource.tracks[0].info.uri
+    });
+  } else if (resource.loadType === 'playlist') {
+    if (!resource.tracks[0]) return;
+    history.songsHistory.push({
+      name: resource.playlistInfo?.name ?? 'unknown',
+      requester: resource.tracks[0].info.requester ?? 'unknown',
+      url: resource.tracks[0].info.uri
     });
   }
 

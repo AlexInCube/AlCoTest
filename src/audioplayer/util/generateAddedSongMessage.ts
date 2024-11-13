@@ -15,7 +15,7 @@ export function generateAddedSongMessage(song: Track) {
     .addFields(
       {
         name: `${i18next.t('audioplayer:player_embed_requester')}`,
-        value: `${song.info.requester}`,
+        value: `<@${song.info.requester}>`,
         inline: true
       },
       {

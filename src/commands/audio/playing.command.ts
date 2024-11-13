@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ICommand } from '../../CommandTypes.js';
 import { EmbedBuilder, Guild, Message, PermissionsBitField, SlashCommandBuilder } from 'discord.js';
 import { GroupAudio } from './AudioTypes.js';
@@ -8,6 +7,8 @@ import {
 } from '../../audioplayer/util/AudioCommandWrappers.js';
 import { splitBar } from '../../utilities/splitBar.js';
 import i18next from 'i18next';
+import { Track } from 'riffy';
+import { formatMilliseconds } from '../../utilities/formatMillisecondsToTime.js';
 
 export default function (): ICommand {
   return {
@@ -42,17 +43,17 @@ export default function (): ICommand {
 }
 
 export function generatePlayingMessage(guild: Guild): EmbedBuilder {
-  const queue = guild.client.audioPlayer.distube.getQueue(guild);
+  const riffyPlayer = guild.client.audioPlayer.riffy.get(guild.id);
   const embed = new EmbedBuilder().setColor('#4F51FF');
 
-  if (queue) {
-    const song = queue.songs[0];
-    embed.setTitle(song.name!);
-    embed.setURL(song.url!);
+  if (riffyPlayer) {
+    const track = riffyPlayer.current;
+    embed.setTitle(track.info.title);
+    embed.setURL(track.info.uri);
     embed.setAuthor({ name: `${i18next.t('commands:playing_now_playing')}:` });
     embed.addFields({
       name: i18next.t('commands:playing_song_length'),
-      value: generateTimeline(queue),
+      value: generateTimeline(track, riffyPlayer.position, track.info.length),
       inline: true
     });
   } else {
@@ -63,14 +64,13 @@ export function generatePlayingMessage(guild: Guild): EmbedBuilder {
   return embed;
 }
 
-export function generateTimeline(queue: Queue): string {
-  const song = queue.songs[0];
+export function generateTimeline(track: Track, currentMs: number, maxMs: number): string {
   let durationValue: string;
 
-  if (song.isLive) {
-    durationValue = `\`${i18next.t('commands:playing_timeline_stream')} [${queue.formattedCurrentTime}]\``;
+  if (track.info.stream) {
+    durationValue = `\`${i18next.t('commands:playing_timeline_stream')}\``;
   } else {
-    durationValue = `|${splitBar(song.duration, Math.max(queue.currentTime, 1), 25, undefined, '🔷')[0]}|\n\`[${queue.formattedCurrentTime}/${song.formattedDuration}]\``;
+    durationValue = `|${splitBar(maxMs, Math.max(currentMs, 1), 25, undefined, '🔷')[0]}|\n\`[${formatMilliseconds(currentMs)}/${formatMilliseconds(maxMs)}]\``;
   }
 
   return durationValue;

@@ -1,3 +1,8 @@
+/*
+I am grab this code from package the name I forgot,
+this code was written in JS without TS in mind, so TS gives different warnings/errors.
+Ignore them, because pagination works fine.
+ */
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import {

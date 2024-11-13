@@ -21,10 +21,13 @@ import { generateLyricsEmbed } from './Lyrics.js';
 import { getGuildOptionLeaveOnEmpty, setGuildOptionLeaveOnEmpty } from '../schemas/SchemaGuild.js';
 import { addSongToGuildSongsHistory } from '../schemas/SchemaSongsHistory.js';
 import { PaginationList } from './PaginationList.js';
-import { nodeResponse, Player, Queue, Riffy, Track } from 'riffy';
+import { Node, nodeResponse, Player, Queue, Riffy, RiffyEventType, Track } from 'riffy';
 import { LavaNodes } from '../LavalinkNodes.js';
 import { clamp } from '../utilities/clamp.js';
 import { formatMilliseconds } from '../utilities/formatMillisecondsToTime.js';
+import { isValidURL } from '../utilities/isValidURL.js';
+import * as process from 'node:process';
+import * as util from 'node:util';
 
 export const loggerPrefixAudioplayer = `Audioplayer`;
 
@@ -42,7 +45,8 @@ export class AudioPlayersManager {
         if (guild) guild.shard.send(payload);
       },
       defaultSearchPlatform: 'ytmsearch',
-      restVersion: 'v4'
+      restVersion: 'v4',
+      multipleTrackHistory: true
     });
 
     this.setupEvents();
@@ -51,7 +55,7 @@ export class AudioPlayersManager {
   async play(
     voiceChannel: VoiceBasedChannel,
     textChannel: TextChannel,
-    query: string,
+    query: string | nodeResponse,
     member: GuildMember
   ): Promise<void> {
     try {
@@ -64,13 +68,14 @@ export class AudioPlayersManager {
 
       const player = this.playersManager.get(textChannel.guild.id);
 
-      const resolve: nodeResponse = await this.riffy.resolve({ query, requester: member.id });
+      const resolve: nodeResponse | undefined =
+        typeof query === 'string' ? await this.resolve(query, member.id) : query;
+      if (!resolve) return;
 
       if (resolve.loadType === 'playlist') {
         if (!resolve.playlistInfo) return;
 
         for (const track of resolve.tracks) {
-          track.info.requester = member;
           riffyPlayer.queue.add(track);
         }
 
@@ -105,7 +110,6 @@ export class AudioPlayersManager {
       } else if (resolve.loadType === 'search' || resolve.loadType === 'track') {
         const track = resolve.tracks.shift();
         if (!track) return;
-        track.info.requester = member;
 
         if (ENV.BOT_MAX_SONGS_HISTORY_SIZE > 0) {
           //await addSongToGuildSongsHistory(textChannel.guild.id, track);
@@ -132,6 +136,24 @@ export class AudioPlayersManager {
         embeds: [generateErrorEmbed(`${query}\n${e.message}`, i18next.t('audioplayer:play_error') as string)]
       });
     }
+  }
+
+  async resolve(query: string, memberId: string): Promise<nodeResponse | undefined> {
+    const resolve: nodeResponse = await this.riffy.resolve({ query, requester: memberId });
+
+    if (resolve.loadType === 'playlist') {
+      if (!resolve.playlistInfo) return undefined;
+
+      for (const track of resolve.tracks) {
+        track.info.requester = memberId;
+      }
+    } else if (resolve.loadType === 'search' || resolve.loadType === 'track') {
+      const track = resolve.tracks[0];
+      if (!track) return undefined;
+      track.info.requester = memberId;
+    }
+
+    return resolve;
   }
 
   async stop(guildId: string): Promise<void> {
@@ -241,14 +263,16 @@ export class AudioPlayersManager {
 
   // TODO: Implement Jump in audioplayer
   async jump(guild: Guild, position: number): Promise<Track | undefined> {
-    const riffyPlayer = this.riffy.players.get(guild.id);
-    if (!riffyPlayer) return;
-
     try {
-      const queue = riffyPlayer.queue;
-      if (queue) {
-        //return riffyPlayer.seek() jump(guild, clamp(position, 1, queue.songs.length));
-      }
+      const riffyPlayer = this.riffy.players.get(guild.id);
+      if (!riffyPlayer) return;
+      const jumpTrack = riffyPlayer.queue.at(position);
+      riffyPlayer.queue.splice(
+        0 /* At Position */,
+        clamp(position, 1, riffyPlayer.queue.length - 1) /* Tracks to jump */
+      );
+      riffyPlayer.stop();
+      return jumpTrack;
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
     }
@@ -351,21 +375,27 @@ export class AudioPlayersManager {
   }
 
   private setupEvents() {
-    this.riffy.on('nodeConnect', async (node) => {
+    this.riffy.on(RiffyEventType.NodeConnect, async (node) => {
       loggerSend(`Node ${node.name} has connected.`, loggerPrefixAudioplayer);
     });
 
-    this.riffy.on('nodeError', async (node, error) => {
-      loggerSend(`Node ${node.name} encountered an error: ${error.message}`, loggerPrefixAudioplayer);
+    this.riffy.on(RiffyEventType.NodeError, async (node, error) => {
+      // @ts-expect-error When Lavalink node found the error, we have field "code" in class "error"
+      if (error.code === 'ECONNREFUSED') {
+        loggerSend(`Node ${node.name} failed to connect: ${error.message}`, loggerPrefixAudioplayer);
+        process.exit(1);
+      } else {
+        loggerSend(`Node ${node.name} encountered an error: ${error.message}`, loggerPrefixAudioplayer);
+      }
     });
 
     if (ENV.BOT_VERBOSE_LOGGING) {
-      this.riffy.on('debug', async (message) => {
+      this.riffy.on(RiffyEventType.Debug, async (message) => {
         loggerSend(`Riffy Debug: ${message}`, loggerPrefixAudioplayer);
       });
     }
 
-    this.riffy.on('playerCreate', async (riffyPlayer) => {
+    this.riffy.on(RiffyEventType.PlayerCreate, async (riffyPlayer) => {
       const guildTextChannel = this.client.channels.cache.get(riffyPlayer.textChannel) as GuildTextBasedChannel;
       await this.playersManager.add(riffyPlayer.guildId, guildTextChannel, this.riffy);
 
@@ -376,18 +406,18 @@ export class AudioPlayersManager {
       await player.setLeaveOnEmpty(await getGuildOptionLeaveOnEmpty(riffyPlayer.guildId));
     });
 
-    this.riffy.on('playerDisconnect', async (riffyPlayer) => {
+    this.riffy.on(RiffyEventType.PlayerDisconnect, async (riffyPlayer) => {
       await this.playersManager.remove(riffyPlayer.guildId);
     });
 
-    this.riffy.on('trackStart', async (riffyPlayer, track, payload) => {
+    this.riffy.on(RiffyEventType.TrackStart, async (riffyPlayer, track, payload) => {
       const player = this.playersManager.get(riffyPlayer.guildId);
       if (player) {
         await player.setState('playing');
       }
     });
 
-    this.riffy.on('queueEnd', async (riffyPlayer) => {
+    this.riffy.on(RiffyEventType.QueueEnd, async (riffyPlayer) => {
       await this.playersManager.get(riffyPlayer.guildId)?.setState('waiting');
     });
   }

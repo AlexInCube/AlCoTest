@@ -3,13 +3,13 @@
 import * as assert from 'node:assert';
 import { describe, it, before, after } from 'node:test';
 import { Client } from 'discord.js';
-import { LoadPlugins } from '../LoadPlugins.js';
 import '../../EnvironmentVariables.js';
 import { loggerWarn } from '../../utilities/logger.js';
 import * as process from 'node:process';
 import { clientIntents } from '../../ClientIntents.js';
+import { Riffy } from 'riffy';
 
-let distube: DisTube;
+let riffy: Riffy;
 const djsClient: Client = new Client({ intents: clientIntents });
 
 before(async () => {
@@ -138,6 +138,4 @@ after(() => {
     process.exit(0);
   }, 1000);
 });
-
-
- */
+*/

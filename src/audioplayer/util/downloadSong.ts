@@ -1,5 +1,3 @@
-// TODO: Reimplement song downloading
-/*
 import { AttachmentBuilder, Client } from 'discord.js';
 import prism from 'prism-media';
 import fs, { createReadStream, ReadStream } from 'fs';
@@ -8,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { unlink } from 'fs/promises';
 import i18next from 'i18next';
 import path from 'path';
+import { isValidURL } from '../../utilities/isValidURL.js';
 
 const downloadFolderPath = process.cwd() + '/downloads';
 
@@ -40,19 +39,21 @@ const maxDownloadSizeMB = maxDownloadSize / 1000000;
 export async function downloadSong(client: Client, request: string): Promise<ReadStream | undefined> {
   let streamUrl: string | undefined = '';
 
-  if (!isURL(request)) {
+  if (!isValidURL(request)) {
     throw new DownloadSongError('is_not_url');
   }
 
-  const song: Song | Playlist = await client.audioPlayer.distube.handler.resolve(request);
-  if (song instanceof Playlist) {
+  const nodeResponse = await client.audioPlayer.resolve(request, '');
+
+  if (!nodeResponse) {
+    throw new DownloadSongError('not_found');
+  }
+
+  if (nodeResponse?.playlistInfo) {
     throw new DownloadSongError('this_is_playlist');
   }
 
-  await client.audioPlayer.distube.handler.attachStreamInfo(song);
-
-  // @ts-expect-error Url property exists, I know it
-  streamUrl = song.stream.playFromSource ? song.stream.url : song.stream.song?.stream.url;
+  streamUrl = nodeResponse.tracks[0].info.uri;
 
   if (streamUrl === '' || streamUrl === undefined) {
     throw new DownloadSongError('not_found');
@@ -109,4 +110,3 @@ export function DownloadSongErrorGetLocale(errorMessage: DownloadSongMessage) {
 
   return errorMessage;
 }
-*/
