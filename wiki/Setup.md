@@ -41,9 +41,12 @@ Also you need retrieve token, client id and enable intents on Discord Developer 
 
 # 🐋 Run in Docker (recommended)
 
+> [!CAUTION]
+> MONGO_URI in .env.production must be mongodb://aicbot-mongo:27017.
+
 - Install [Docker](https://www.docker.com/get-started/)
-- Copy docker-compose.yml, Dockerfile in empty folder
-- Follow the [Configure .env](#-configure-env) section and copy .env.production in folder with docker-compose.yml etc.
+- Copy [docker-compose.yml](https://github.com/AlexInCube/AlCoTest/blob/master/docker-compose.yml) in empty folder
+- Follow the [Configure .env](#-configure-env) section and copy .env.production in folder with docker-compose.yml.
 - (Optional) Follow the [YouTube Cookie](https://github.com/AlexInCube/AlCoTest/wiki/API-Configure#-youtube-cookie-optional) section and copy yt-cookies.json in the folder with docker-compose.yml etc.
 - Your file structure must be like this
 
