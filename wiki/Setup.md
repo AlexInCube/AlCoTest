@@ -57,7 +57,7 @@ AICoTest/
   ├─ yt-cookies.json
 ```
 
-- Copy updateAndRunInDocker.sh (for Linux, Git Bash and terminals) or updateAndRunInDocker.bat for Windows
+- Copy [updateAndRunInDocker.sh](https://github.com/AlexInCube/AlCoTest/blob/master/updateAndRunInDocker.sh) (for Linux, Git Bash and terminals) or [updateAndRunInDocker.bat](https://github.com/AlexInCube/AlCoTest/blob/master/updateAndRunInDocker.bat) for Windows
 - Run command `sh updateAndRunInDocker.sh` for terminals or run updateAndRunInDocker.bat on Windows
 
 # 🖥️ Run locally (if you are not a developer, this way is no sense)
