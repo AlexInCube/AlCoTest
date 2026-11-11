@@ -5,7 +5,7 @@ export enum AudioPlayerIcons {
   stop = '<:stopwhite:1014551716043173989>',
   play = '<:play:1257590184455835698>',
   pause = '<:pausewhite:1014551696174764133>',
-  toogleLoopMode = '<:repeatmodewhite:1014551751858331731>',
+  toggleLoopMode = '<:repeatmodewhite:1014551751858331731>',
   previous = '<:previousbutton:1092107334542696512>',
   skip = '<:skipbutton:1092107438234275900>',
   shuffle = '<:shufflebutton:1092107651384614912>',

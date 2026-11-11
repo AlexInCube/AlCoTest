@@ -48,7 +48,7 @@ const rowPrimary = new ActionRowBuilder<ButtonBuilder>().addComponents(
   new ButtonBuilder()
     .setCustomId(ButtonIDs.toggleLoopMode)
     .setStyle(ButtonStyle.Primary)
-    .setEmoji(AudioPlayerIcons.toogleLoopMode),
+    .setEmoji(AudioPlayerIcons.toggleLoopMode),
   new ButtonBuilder()
     .setCustomId(ButtonIDs.previousSong)
     .setStyle(ButtonStyle.Primary)
@@ -62,7 +62,7 @@ const rowPrimaryPaused = new ActionRowBuilder<ButtonBuilder>().addComponents(
   new ButtonBuilder()
     .setCustomId(ButtonIDs.toggleLoopMode)
     .setStyle(ButtonStyle.Primary)
-    .setEmoji(AudioPlayerIcons.toogleLoopMode),
+    .setEmoji(AudioPlayerIcons.toggleLoopMode),
   new ButtonBuilder()
     .setCustomId(ButtonIDs.previousSong)
     .setStyle(ButtonStyle.Primary)

@@ -46,7 +46,7 @@
   "previous_error_song_not_exists": "Previous song is not exists",
   "rewind_desc": "Rewinds the song to a specified time in HH:MM:SS or MM:SS or SS format",
   "rewind_arg_time": "HH:MM:SS or MM:SS or SS",
-  "rewind_success": "rewinded the song to",
+  "rewind_success": "rewound the song to",
   "rewind_failure": "You misspelled the time, what should I do with this bullshit",
   "shuffle_desc": "Shuffles the songs in queue",
   "shuffle_success": "shuffled songs",
