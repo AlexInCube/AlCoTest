@@ -1,0 +1,13 @@
+# Secrets that were committed in 2022-2023 and are still in git history (review 2027-05-11).
+# The files no longer contain them. Each one must be revoked or rotated, history cannot be cleaned without a force-push.
+# discord-client-id in .env is DISCORD_OVERPOWERED_ID, a Discord user ID, not a secret.
+
+81a0b4dbde9deb13f6639f5d6ec834094b3a1ebd:config.json:generic-api-key:2
+84cba8998e7e7d2a804a8a71acd68ae0a8a8f38f:config.json:generic-api-key:2
+84cba8998e7e7d2a804a8a71acd68ae0a8a8f38f:config.json:generic-password:6
+9fb434ec3128eec62dc91a204cf176d579c968b1:config/default.json:generic-api-key:11
+9fb434ec3128eec62dc91a204cf176d579c968b1:config/default.json:generic-api-key:2
+9fb434ec3128eec62dc91a204cf176d579c968b1:config/default.json:generic-password:7
+b87918a7fe71548e81b516a35388f4abdd7fdbe7:config/default.json:generic-api-key:4
+b2f1b776206aab957bf6cc7cab27cbf5281fd21f:.env:discord-client-id:5
+8cfb26a0025027f4652be2b1ae1a610f9d59341a:Dockerfile:github-pat:10
