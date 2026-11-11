@@ -4,15 +4,13 @@ on:
   push:
     branches: ['master']
     paths-ignore:
-      - '**/wiki/**'
-      - '/wiki/**'
+      - 'website/**'
       - 'docker-compose.yml'
       - '.env'
       - '*.sh'
   pull_request:
     paths-ignore:
-      - '**/wiki/**'
-      - '/wiki/**'
+      - 'website/**'
       - 'docker-compose.yml'
       - '.env'
       - '*.sh'

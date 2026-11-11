@@ -21,4 +21,14 @@ run = "hk fix --all"
 
 [tasks.links]
 description = "Check links in the docs, needs network"
-run = "lychee --no-progress README.md wiki"
+run = "lychee --no-progress README.md website/docs"
+
+[tasks.docs]
+description = "Start the docs site with live reload"
+dir = "website"
+run = ["pnpm install", "pnpm run start"]
+
+[tasks."docs:build"]
+description = "Build the docs site the way CI does, fails on broken links"
+dir = "website"
+run = ["pnpm install --frozen-lockfile", "pnpm run typecheck", "pnpm run build"]

@@ -6,10 +6,10 @@
 Cool audiobot for Discord created by <a href="https://vk.com/alexincube"><b>@AlexInCube</b></a></p>
 
 ## 🖥️ Setup
-- Go to [Wiki Setup Section](https://github.com/AlexInCube/AlCoTest/wiki/Setup)
+- Go to [Docs Setup Section](https://alexincube.github.io/AlCoTest/setup)
 
 ## 🌟 Features
-![play-audioplayer](/wiki/images/commands/play-audioplayer.png)
+![play-audioplayer](/website/docs/images/commands/play-audioplayer.png)
 - Audioplayer based on [Distube](https://github.com/skick1234/DisTube) with buttons
 - Playlists for songs
 - Lyrics for songs
@@ -18,7 +18,7 @@ Cool audiobot for Discord created by <a href="https://vk.com/alexincube"><b>@Ale
 - Support Slash and Text commands system (with customizable prefix per server using /setprefix)
 - Localization (English and Russian are currently supported)
 - Command /alcotest which shows your alcohol count in blood
-- Go to [Wiki](https://github.com/AlexInCube/AlCoTest/wiki) to get more information about features, commands, and others.
+- Go to [Docs](https://alexincube.github.io/AlCoTest/) to get more information about features, commands, and others.
 
 ## 🐛 Bugs or problems
 

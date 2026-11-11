@@ -1,0 +1,6 @@
+# Own workspace root, so the site has its own lockfile and the bot install (and Docker image) never pulls Docusaurus
+packages:
+  - .
+allowBuilds:
+  # postinstall only prints a donation banner
+  core-js: false

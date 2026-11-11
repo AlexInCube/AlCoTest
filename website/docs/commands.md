@@ -1,24 +1,34 @@
-# About command system
+---
+sidebar_position: 4
+---
+
+# Commands
+
+## About command system
 
 Bot supports slash and text command systems.
 
-## Slash commands
+### Slash commands
 
 Nothing special, start writing / and select command from the list
 
-> [!NOTE]
-> Recommend using slash commands because most of these commands have an "invisible/ephemeral" messages,
-> so no one can see except you the output of command
+:::note
 
-## Text commands
+Recommend using slash commands because most of these commands have an "invisible/ephemeral" messages,
+so no one can see except you the output of command
+
+:::
+
+### Text commands
 
 If a bot owner does not change the default prefix in .env.production file, the prefix is //
 
-> [!NOTE]
-> If bot prefix conflicting with another bot on server,
-> administrator can set the second text prefix for server using [/setPrefix](#setprefix) command
+:::note
 
-# Commands list
+If bot prefix conflicting with another bot on server,
+administrator can set the second text prefix for server using [/setPrefix](#setprefix) command
+
+:::
 
 ## Admin
 
@@ -39,19 +49,25 @@ The bot philosophy built around audioplayer to reduce commands using.
 
 Use [/play](#play) or [/playfile](#playfile) to spawn audioplayer
 
-![play-audioplayer](images/commands/play-audioplayer.png)
+![play-audioplayer](./images/commands/play-audioplayer.png)
 
 Most of the time of using bot, you need only add songs by [/play](#play) or [/playfile](#playfile)
 
 When any message created in chat where audioplayer is spawned,
 bot will recreate the player so that the player is always at the bottom of the chat room.
 
-> [!NOTE]
-> Highly recommended to create a text channel for the bot
+:::note
 
-> [!WARNING]
-> Audio commands which change audioplayer state require audioplayer and be with bot in the same voice channel to exist.
-> Also this kind of commands needs to be written in the same channel where audioplayer was spawned.
+Highly recommended to create a text channel for the bot
+
+:::
+
+:::warning
+
+Audio commands which change audioplayer state require audioplayer and be with bot in the same voice channel to exist.
+Also this kind of commands needs to be written in the same channel where audioplayer was spawned.
+
+:::
 
 ### play
 
@@ -60,19 +76,19 @@ Example: /play https://open.spotify.com/track/46gSk82duJtX3TTA182ruG?si=c668ab77
 Spawn audioplayer in a text channel if not exists.
 Accept songs/playlist from links.
 Support searching on YouTube
-when you write something like this ![play-autocomplete](images/commands/play-autocomplete.png)
+when you write something like this ![play-autocomplete](./images/commands/play-autocomplete.png)
 
 ### playfile
 
 Do the same things as play command, but accept MP3/WAV/OGG files instead of text/links
 
-![play-file](images/commands/play-file.png)
+![play-file](./images/commands/play-file.png)
 
 ### playing
 
 Return the current playback time of the song
 
-![playing](images/commands/playing.png)
+![playing](./images/commands/playing.png)
 
 ### download
 
@@ -170,9 +186,12 @@ Delete the playlist
 
 Give the current count of spawned audioplayers
 
-> [!NOTE]
-> This command supported only by text command system.
-> Also you must be overpowered user.
+:::note
+
+This command supported only by text command system.
+Also you must be overpowered user.
+
+:::
 
 ## Fun
 

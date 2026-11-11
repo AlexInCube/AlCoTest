@@ -1,4 +1,4 @@
-# README links to wiki images with root-relative paths
+# README links to docs images with root-relative paths
 root_dir = "."
 
 exclude = [
