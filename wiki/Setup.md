@@ -90,3 +90,28 @@ or if you are a developer
 ```
 npm run development
 ```
+
+# 🧪 Development checks
+
+All checks run from one command, the same one CI runs. Tool versions are pinned in `mise.toml`.
+
+- Install [mise](https://mise.jdx.dev/getting-started.html)
+- Put the mise shims folder on your PATH, so git hooks can find the tools. On Windows, run in PowerShell and reopen the terminal:
+
+```powershell
+[Environment]::SetEnvironmentVariable('Path', "$env:LOCALAPPDATA\mise\shims;" + [Environment]::GetEnvironmentVariable('Path', 'User'), 'User')
+```
+
+On Linux and macOS, add `eval "$(mise activate bash)"` (or `zsh`) to your shell profile instead.
+
+- Install the tools, packages and git hooks in the folder with repository
+
+```
+mise install
+pnpm install
+hk install
+```
+
+- `mise run check` runs every check, `mise run fix` applies the safe autofixes (formatting, spelling), `mise run links` checks links in the docs
+
+The commit hook checks formatting, lint, spelling, the Dockerfile, workflows and secrets in the staged files. The push hook runs the type check, Knip and a secret scan of the git history.
