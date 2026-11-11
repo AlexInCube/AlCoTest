@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: ['**']
+    branches: ['master']
     paths-ignore:
       - '**/wiki/**'
       - '/wiki/**'
@@ -10,46 +10,47 @@ on:
       - '.env'
       - '*.sh'
   pull_request:
-    branches: ['**']
     paths-ignore:
       - '**/wiki/**'
       - '/wiki/**'
       - 'docker-compose.yml'
       - '.env'
       - '*.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          version: 9
+          persist-credentials: false
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-          cache: "pnpm"
+      - name: Install the toolchain from mise.toml
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Make env file
-        run: |
-          pwd
-          touch .env.development
-          echo '${{ secrets.ENV_DEVELOPMENT }}' > .env.development
+        env:
+          ENV_DEVELOPMENT: ${{ secrets.ENV_DEVELOPMENT }}
+        run: printf '%s\n' "$ENV_DEVELOPMENT" > .env.development
 
       - name: Make yt-cookies.json
-        run: |
-          touch yt-cookies.json
-          echo '${{ secrets.YOUTUBE_COOKIES }}' > yt-cookies.json
+        env:
+          YOUTUBE_COOKIES: ${{ secrets.YOUTUBE_COOKIES }}
+        run: printf '%s\n' "$YOUTUBE_COOKIES" > yt-cookies.json
 
       - name: Run tests
         run: pnpm run test

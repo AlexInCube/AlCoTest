@@ -1,10 +1,19 @@
 name: Publish Docker image
 
 on:
-  workflow_run:
-    workflows: [ "tests", "linters" ]
+  # Baseline (review 2027-05-11): workflow_run was there when jactionlint was adopted. "tests" and "linters" match no
+  # workflow name ("Tests", "Check"), so this workflow does not run today; fixing the names would start publishing images.
+  workflow_run: # jactionlint ignore=dangerous-triggers
+    workflows: [ "tests", "linters" ] # jactionlint ignore=workflow-run-names
     types: ['completed']
     branches: ['master']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 
 env:
   IMAGE_TAG: alexincube/aicotest
@@ -14,9 +23,12 @@ jobs:
     if: github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success'
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       - name: Log in to Docker Hub
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
@@ -26,7 +38,7 @@ jobs:
 
       - name: Extract project version from package.json
         id: package-version
-        uses: martinbeentjes/npm-get-version-action@v1.3.1
+        uses: martinbeentjes/npm-get-version-action@3cf273023a0dda27efcd3164bdfb51908dd46a5b # v1.3.1
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
