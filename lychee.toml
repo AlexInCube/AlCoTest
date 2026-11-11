@@ -1,0 +1,7 @@
+# README links to wiki images with root-relative paths
+root_dir = "."
+
+exclude = [
+  # genius.com answers 403 to bots, the pages exist
+  "^https://genius\\.com/",
+]

@@ -1,0 +1,35 @@
+name: Links
+
+# Links break without any change in this repository, so they are checked on a schedule, not on pull requests
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  links:
+    name: mise run links
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the toolchain from mise.toml
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+
+      - name: Check links in the docs
+        run: mise run links
+        env:
+          # Avoids GitHub rate limits on github.com links
+          GITHUB_TOKEN: ${{ github.token }}
