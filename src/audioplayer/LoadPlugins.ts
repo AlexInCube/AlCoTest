@@ -8,12 +8,10 @@ import { DirectLinkPlugin } from '@distube/direct-link';
 import { FilePlugin } from '@distube/file';
 import { AppleMusicPlugin } from 'distube-apple-music';
 import { YandexMusicPlugin } from 'distube-yandex-music-plugin';
-import { SoundCloudPlugin } from './plugins/soundcloud.js';
-import { getYoutubeCookie } from '../CookiesAutomation.js';
-import Cron from 'node-cron';
 
 import fs from 'fs';
 import { VKMusicPlugin } from 'distube-vk-music-plugin';
+import SoundCloudPlugin from '@distube/soundcloud';
 
 const loggerPrefixAudioplayerPluginsLoader = 'Audioplayer Plugin Loader';
 
@@ -104,40 +102,19 @@ export async function LoadPlugins(): Promise<Array<DistubePlugin>> {
   return plugins;
 }
 
-function setupYtCookieSchedule() {
-  if (ENV.BOT_GOOGLE_EMAIL && ENV.BOT_GOOGLE_PASSWORD) {
-    loggerSend('Google data is provided, setup cron job for cookies fetching', loggerPrefixAudioplayerPluginsLoader);
-    Cron.schedule('0 0 * * *', async () => {
-      const cookies = await getYoutubeCookie();
-      if (!cookies) return;
-      YtPlugin.cookies = cookies;
-      loggerSend('Cookies is fetched by cron job through Google Auth', loggerPrefixAudioplayerPluginsLoader);
-    });
-  }
-}
-
 async function loadPluginsPartYoutube(plugins: Array<DistubePlugin>) {
   plugins.push(YtPlugin);
 
-  setupYtCookieSchedule();
-
-  if (fs.existsSync('yt-cookies.json')) {
-    try {
-      YtPlugin.cookies = JSON.parse(fs.readFileSync('yt-cookies.json', { encoding: 'utf8', flag: 'r' }));
-      loggerSend("'yt-cookies.json' is loaded", loggerPrefixAudioplayerPluginsLoader);
-    } catch {
-      loggerError("'yt-cookies.json' error when parsing", loggerPrefixAudioplayerPluginsLoader);
-      if (ENV.BOT_GOOGLE_EMAIL && ENV.BOT_GOOGLE_PASSWORD) {
-        YtPlugin.cookies = await getYoutubeCookie();
-      }
-    }
-  } else {
+  if (!fs.existsSync('yt-cookies.json')) {
     loggerWarn("'yt-cookies.json' not found", loggerPrefixAudioplayerPluginsLoader);
+    return;
+  }
 
-    if (ENV.BOT_GOOGLE_EMAIL && ENV.BOT_GOOGLE_PASSWORD) {
-      loggerSend('Trying to fetch cookie from Google Auth, this might be take a time');
-      YtPlugin.cookies = await getYoutubeCookie();
-    }
+  try {
+    YtPlugin.cookies = JSON.parse(fs.readFileSync('yt-cookies.json', { encoding: 'utf8', flag: 'r' }));
+    loggerSend("'yt-cookies.json' is loaded", loggerPrefixAudioplayerPluginsLoader);
+  } catch {
+    loggerError("'yt-cookies.json' error when parsing", loggerPrefixAudioplayerPluginsLoader);
   }
 
   if (YtPlugin.cookies === undefined) {

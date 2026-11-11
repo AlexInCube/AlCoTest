@@ -1,0 +1,3 @@
+allowBuilds:
+  '@discordjs/opus': true
+  '@distube/yt-dlp': true

@@ -48,14 +48,6 @@ This will allow you to play 18+ videos and bypass YouTube rate limiting error (4
 4. Click on the extension icon and click "Export" button.
 5. Create file yt-cookies.json and paste cookie in this file
 
-## Automation cookies fetch
-
-> [!WARNING]
-> Disable two-factor auth on Gmail or script can't bypass the Google protection
-
-1. Create file yt-cookies.json (don't paste anything in this file)
-2. Fill the fields BOT_GOOGLE_EMAIL and BOT_GOOGLE_PASSWORD in .env file
-
 # Yandex Music (optional)
 
 If you do not provide token and UID, Yandex Music will not work at all.

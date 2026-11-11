@@ -1,7 +1,6 @@
 import { Guild } from 'discord.js';
-import { getVoiceConnection, VoiceConnection } from '@discordjs/voice';
+import { DisTubeVoice } from 'distube';
 
-export function checkBotInVoice(guild: Guild): VoiceConnection | undefined {
-  //return getVoiceConnection(guild.id, guild.client.user?.id) ?? getVoiceConnection(guild.id)
-  return getVoiceConnection(guild.id);
+export function checkBotInVoice(guild: Guild): DisTubeVoice | undefined {
+  return guild.client.audioPlayer.distube.voices.get(guild.id);
 }

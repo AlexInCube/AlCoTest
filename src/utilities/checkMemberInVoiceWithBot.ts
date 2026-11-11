@@ -1,6 +1,6 @@
-import { GuildMember, VoiceChannel } from 'discord.js';
-import { checkBotInVoice } from './checkBotInVoice.js';
+import { GuildMember } from 'discord.js';
 import i18next from 'i18next';
+import { DisTubeVoice } from 'distube';
 
 export async function checkMemberInVoiceWithBot(
   member: GuildMember
@@ -11,7 +11,7 @@ export async function checkMemberInVoiceWithBot(
   };
 
   try {
-    const connection = checkBotInVoice(member.guild);
+    const connection: DisTubeVoice | undefined = member.guild.client.audioPlayer.distube.voices.get(member.guild);
     if (connection) {
       if (member.voice.channel) {
         response.channelTheSame = member.guild.members.me?.voice.channel?.id === member.voice?.channel.id;
@@ -25,9 +25,7 @@ export async function checkMemberInVoiceWithBot(
 
       await member.guild.client.channels.fetch(<string>member.guild.members.me?.voice.channel?.id).then((channel) => {
         if (channel) {
-          if (channel instanceof VoiceChannel) {
-            response.errorMessage = `${i18next.t('commandsHandlers:voice_join_in_channel')} ${channel.name}`;
-          }
+          response.errorMessage = `${i18next.t('commandsHandlers:voice_join_in_channel')} ${connection.channel.name}`;
         }
       });
     }

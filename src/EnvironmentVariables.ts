@@ -67,9 +67,6 @@ const envVariables = z.object({
   BOT_DISCORD_CLIENT_ID: z.string(),
   BOT_DISCORD_OVERPOWERED_ID: z.string(),
 
-  BOT_GOOGLE_EMAIL: z.string().optional(),
-  BOT_GOOGLE_PASSWORD: z.string().optional(),
-
   BOT_SOUNDCLOUD_CLIENT_ID: z.string().optional(),
   BOT_SOUNDCLOUD_TOKEN: z.string().optional(),
 

@@ -18,7 +18,6 @@ import {
   TextChannel,
   VoiceBasedChannel
 } from 'discord.js';
-import { joinVoiceChannel } from '@discordjs/voice';
 import { generateWarningEmbed } from '../utilities/generateWarningEmbed.js';
 import { generateLyricsEmbed } from './Lyrics.js';
 import { getGuildOptionLeaveOnEmpty, setGuildOptionLeaveOnEmpty } from '../schemas/SchemaGuild.js';
@@ -54,17 +53,7 @@ export class AudioPlayersManager {
     options?: PlayOptions
   ) {
     try {
-      const playableThing: Song | Playlist = await this.distube.handler.resolve(query);
-
-      // I am need manual connect user to a voice channel, because when I am using only Distube "play"
-      // method, getVoiceConnection in @discordjs/voice is not working
-      joinVoiceChannel({
-        channelId: voiceChannel.id,
-        guildId: voiceChannel.guildId,
-        adapterCreator: voiceChannel.guild.voiceAdapterCreator
-      });
-
-      await this.distube.play(voiceChannel, playableThing, options);
+      await this.distube.play(voiceChannel, query, options);
     } catch (e) {
       if (ENV.BOT_VERBOSE_LOGGING) loggerError(e);
       await textChannel.send({
@@ -97,7 +86,7 @@ export class AudioPlayersManager {
     const player = this.playersManager.get(queue.id);
     if (!player) return;
     if (!queue.paused) {
-      this.distube.pause(guild);
+      await this.distube.pause(guild);
       await player.setState('pause');
     }
 
@@ -110,7 +99,7 @@ export class AudioPlayersManager {
     const player = this.playersManager.get(queue.id);
     if (!player) return;
     if (queue.paused) {
-      this.distube.resume(guild);
+      await this.distube.resume(guild);
       await player.setState('playing');
     }
 
@@ -123,10 +112,10 @@ export class AudioPlayersManager {
     const player = this.playersManager.get(queue.id);
     if (!player) return;
     if (queue.paused) {
-      this.distube.resume(guild);
+      await this.distube.resume(guild);
       await player.setState('playing');
     } else {
-      this.distube.pause(guild);
+      await this.distube.pause(guild);
       await player.setState('pause');
     }
 
