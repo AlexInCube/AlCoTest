@@ -1,0 +1,33 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  // Loaded at runtime by file name, see handlersLoad.ts, Event.handler.ts and Command.handler.ts
+  "entry": [
+    "src/handlers/*.handler.ts",
+    "src/events/*.event.ts",
+    "src/commands/**/*.command.ts",
+    "src/**/*.test.ts"
+  ],
+  "project": ["src/**/*.ts"],
+  // @discordjs/voice loads it at runtime for voice encryption, nothing imports it
+  "ignoreDependencies": [
+    "sodium-native",
+    // Baseline: findings that existed when Knip was adopted, remove each entry once it is cleaned up
+    "@discordjs/rest",
+    "soundcloud.ts"
+  ],
+  // Baseline: dead file that existed when Knip was adopted
+  "ignoreFiles": ["src/utilities/hmsToSeconds.ts"],
+  // Baseline: unused exports that existed when Knip was adopted
+  "ignoreIssues": {
+    "src/audioplayer/AudioPlayersManager.ts": ["exports"],
+    "src/audioplayer/Lyrics.ts": ["exports"],
+    "src/audioplayer/util/downloadSong.ts": ["exports"],
+    "src/locales/Locale.ts": ["exports"],
+    "src/schemas/SchemaPlaylist.ts": ["exports"],
+    "src/schemas/SchemaSongsHistory.ts": ["exports"],
+    "src/utilities/logger.ts": ["exports"],
+    "src/CommandTypes.ts": ["types"],
+    "src/utilities/pagination/paginationTypes.ts": ["types"],
+    "src/events/voiceChannelUpdate.event.ts": ["duplicates"]
+  }
+}
