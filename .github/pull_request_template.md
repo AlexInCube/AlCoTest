@@ -1,3 +1,3 @@
 Thanks for opening a PR! Your contribution is much appreciated.
-Before pull requesting, run `pnpm run eslint` and `pnpm run prettier:format`
+Before pull requesting, run `mise run fix` and `mise run check`
 

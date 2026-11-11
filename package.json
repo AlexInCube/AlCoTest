@@ -8,9 +8,9 @@
     "development": "tsc&& cross-env NODE_ENV=development node --trace-deprecation --trace-warnings --disable-warning=DEP0190 build/main.js",
     "production": "cross-env NODE_ENV=production node build/main.js",
     "test": "tsc&& cross-env NODE_ENV=development node --test",
-    "eslint": "eslint \"src/**/*.{ts,js}\"",
-    "prettier:format": "prettier --write \"**/*.{ts,js}\"",
-    "prettier:check": "prettier --check \"**/*.{ts,js}\""
+    "lint": "oxlint --deny-warnings src",
+    "format": "oxfmt src",
+    "format:check": "oxfmt --check src"
   },
   "type": "module",
   "keywords": [],
@@ -49,18 +49,11 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@eslint/js": "9.29.0",
     "@types/node": "24.0.3",
     "@types/node-os-utils": "1.3.4",
     "@types/uuid": "10.0.0",
-    "@typescript-eslint/eslint-plugin": "8.34.1",
-    "@typescript-eslint/parser": "8.34.1",
-    "eslint": "9.29.0",
-    "eslint-config-prettier": "10.1.5",
-    "eslint-plugin-prettier": "5.5.0",
-    "globals": "16.2.0",
-    "prettier": "3.5.3",
-    "typescript": "5.8.3",
-    "typescript-eslint": "8.34.1"
+    "oxfmt": "0.78.0",
+    "oxlint": "1.93.0",
+    "typescript": "5.8.3"
   }
 }

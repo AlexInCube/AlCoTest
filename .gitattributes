@@ -1,3 +1,4 @@
-* text=auto
+* text=auto eol=lf
+*.bat text eol=crlf
 *.ts linguist-language=TypeScript
 *.js linguist-detectable=false
