@@ -1,0 +1,74 @@
+amends "package://github.com/jdx/hk/releases/download/v2.12.0/hk@2.12.0#/Config.pkl"
+
+// Fast checks that run on the files being committed
+local fast = new Mapping<String, Step> {
+  ["oxfmt"] {
+    glob = List("src/**/*.ts", "src/**/*.js", "src/**/*.json")
+    check = "pnpm exec oxfmt --check {{ files }}"
+    fix = "pnpm exec oxfmt {{ files }}"
+  }
+  ["oxlint"] {
+    glob = List("src/**/*.ts", "src/**/*.js")
+    check = "pnpm exec oxlint --deny-warnings {{ files }}"
+  }
+  ["typos"] {
+    check = "typos --force-exclude {{ files }}"
+    fix = "typos --force-exclude --write-changes {{ files }}"
+  }
+  ["hadolint"] {
+    glob = "Dockerfile"
+    check = "hadolint {{ files }}"
+  }
+  ["jactionlint"] {
+    glob = ".github/workflows/*.y*ml"
+    check = "jactionlint {{ files }}"
+  }
+}
+
+local staged_secrets = new Mapping<String, Step> {
+  ["betterleaks"] {
+    check = "betterleaks git --pre-commit --staged --redact --no-banner ."
+  }
+}
+
+// Whole-project checks, too slow for every commit
+local slow = new Mapping<String, Step> {
+  ["typecheck"] {
+    check = "pnpm run typecheck"
+  }
+  // No fix: knip --fix deletes code
+  ["knip"] {
+    check = "pnpm run knip"
+  }
+  ["betterleaks-history"] {
+    check = "betterleaks git --redact --no-banner ."
+  }
+}
+
+hooks {
+  ["pre-commit"] {
+    fix = true
+    stash = "git"
+    steps {
+      ...fast
+      ...staged_secrets
+    }
+  }
+  ["pre-push"] {
+    steps {
+      ...slow
+    }
+  }
+  ["check"] {
+    steps {
+      ...fast
+      ...slow
+    }
+  }
+  ["fix"] {
+    fix = true
+    steps {
+      ...fast
+    }
+  }
+}

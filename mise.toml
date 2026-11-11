@@ -8,3 +8,15 @@ jactionlint = "2.5.0"
 hadolint = "2.15.1"
 typos = "1.52.1"
 lychee = "0.24.2"
+
+[tasks.check]
+description = "Run every check, the same command CI runs"
+run = "hk check --all"
+
+[tasks.fix]
+description = "Apply the safe autofixes (formatting, spelling)"
+run = "hk fix --all"
+
+[tasks.links]
+description = "Check links in the docs, needs network"
+run = "lychee --no-progress README.md wiki"

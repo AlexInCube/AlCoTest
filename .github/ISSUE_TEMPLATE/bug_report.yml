@@ -13,7 +13,7 @@ body:
     id: user-type
     attributes:
       label: Who are you? User (who just use bot from discord)/developer/admin (who download all bot stuff to host)?
-      description: If you are on an older version, update and confirm your issue stil exists!
+      description: If you are on an older version, update and confirm your issue still exists!
       multiple: true
       options:
         - User
