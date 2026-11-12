@@ -1,4 +1,5 @@
 import type * as Preset from '@docusaurus/preset-classic';
+import type { PluginOptions as SearchLocalOptions } from '@easyops-cn/docusaurus-search-local';
 import type { Config } from '@docusaurus/types';
 import { themes as prismThemes } from 'prism-react-renderer';
 
@@ -42,6 +43,21 @@ const config: Config = {
         },
         blog: false
       } satisfies Preset.Options
+    ]
+  ],
+
+  // Search index is built with the site, no external service or keys
+  themes: [
+    [
+      '@easyops-cn/docusaurus-search-local',
+      {
+        hashed: true,
+        docsRouteBasePath: '/',
+        indexBlog: false,
+        language: ['en'],
+        highlightSearchTermsOnTargetPage: true,
+        explicitSearchResultPath: true
+      } satisfies SearchLocalOptions
     ]
   ],
 

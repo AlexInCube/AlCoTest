@@ -1,0 +1,9 @@
+{
+  "label": "Development",
+  "position": 6,
+  "link": {
+    "type": "generated-index",
+    "slug": "/development",
+    "description": "Run the bot from source, run the checks CI runs, and work on these docs."
+  }
+}

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 2
 sidebar_label: API Configure
 ---
 
@@ -20,7 +20,7 @@ If this happens, reset the tokens and get them again.
 
 You should see a page like this:
 
-![discord-dev-selected-app](./images/api-configure/discord-dev-selected-app.png)
+![discord-dev-selected-app](../images/api-configure/discord-dev-selected-app.png)
 
 You can edit your application's name, description, and avatar here. Once you've done that, then congratulations—you're now the proud owner of a shiny new Discord bot! You're not entirely done, though.
 
@@ -30,14 +30,14 @@ You can edit your application's name, description, and avatar here. Once you've 
 
 Now your installation page must look like this
 
-![discord-dev-installation-setup](./images/api-configure/discord-dev-installation-setup.png)
+![discord-dev-installation-setup](../images/api-configure/discord-dev-installation-setup.png)
 
 7. On "General Information" page copies the Application ID, this is your Client ID.
 8. On the sidebar select section "Bot"
 9. Press "Reset token" button and copy token.
 10. Also enable all "Privileged Gateway Intents"
 
-![discord-dev-enable-intents](./images/api-configure/discord-dev-enable-intents.png)
+![discord-dev-enable-intents](../images/api-configure/discord-dev-enable-intents.png)
 
 ## YouTube Cookie (optional) {#youtube-cookie}
 
@@ -78,14 +78,14 @@ If your bot is outside Russia VDS, you must have a Yandex Plus subscription to p
 
 1. Login into [Yandex](https://passport.yandex.ru/auth) account.
 2. Download [browser extension](https://chromewebstore.google.com/detail/yandex-music-token/lcbjeookjibfhjjopieifgjnhlegmkib)
-   This must look like this ![yandex-extension](./images/api-configure/yandex-music-extension.png)
+   This must look like this ![yandex-extension](../images/api-configure/yandex-music-extension.png)
 3. Click "Скопировать токен" button.
 
 ### UID
 
 1. Login into [Yandex](https://passport.yandex.ru/auth) account.
 2. You can retrieve uid by opening [Yandex Mail](https://mail.yandex.ru) and copy uid from the url in the address bar.
-   ![yandex-uid](./images/api-configure/yandex-music-uid.png)
+   ![yandex-uid](../images/api-configure/yandex-music-uid.png)
 
 ## Spotify (optional) {#spotify}
 
@@ -98,8 +98,8 @@ If you want to fetch playlist with more than 100 songs, this API data is require
 :::
 
 1. Login in [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-2. Press "Create app" button![Spotify Dev Main](./images/api-configure/spotify-dev-main.png)
-3. Fill the fields like this![Spotify Dev Create App](./images/api-configure/spotify-dev-create-app.png)
+2. Press "Create app" button![Spotify Dev Main](../images/api-configure/spotify-dev-main.png)
+3. Fill the fields like this![Spotify Dev Create App](../images/api-configure/spotify-dev-create-app.png)
 4. Press "Save"
 5. On the redirected page, press "Settings"
 6. On "Basic Information" section copy Client ID.
