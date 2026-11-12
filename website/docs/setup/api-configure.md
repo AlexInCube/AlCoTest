@@ -62,7 +62,8 @@ I highly recommend that you create a new Google account from which you can get t
 2. Go to [YouTube](https://www.youtube.com/)
 3. Log in to your account. (You should use a new account for this purpose)
 4. Click on the extension icon and click "Export" button.
-5. Create file yt-cookies.json and paste cookie in this file
+5. Create file yt-cookies.json and paste cookie in this file. The content must be a JSON array, starting with `[` and ending with `]`, as the extension exports it.
+6. Put yt-cookies.json in the folder you start the bot from: next to docker-compose.yml for [Docker](./docker.md), or in the repository folder when you [run locally](../development/run-locally.md).
 
 ## Yandex Music (optional) {#yandex-music}
 

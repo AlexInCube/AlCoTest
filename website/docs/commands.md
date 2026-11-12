@@ -32,13 +32,13 @@ administrator can set the second text prefix for server using [/setPrefix](#setp
 
 ## Admin
 
-It Can be used only by server administrators (people who have a role with "Administrator" permission)
+It Can be used only by server administrators. The slash command needs the "Administrator" permission by default (server owners can change this in Server Settings → Integrations), the text command needs the "Manage Server" permission.
 
 ### setPrefix
 
 Changes bot prefix for the server
 
-Example: /newPrefix $$
+Example: /setprefix $$
 
 Prefix symbols cannot be symbols: / @ #, because these symbols reserved for Discord purpose.
 Prefix length cannot be longer than two symbols.
@@ -146,7 +146,8 @@ Return song history of the current server where the command is executed.
 
 Example: /pl-create Funny Music
 
-Create a playlist linked to user with given name
+Create a playlist linked to user with given name.
+The name can be from 1 to 50 symbols. A user can have up to 25 playlists with up to 500 songs each, the bot owner can change these limits in [.env](./setup/configure-env.md).
 
 ### pl-play
 
