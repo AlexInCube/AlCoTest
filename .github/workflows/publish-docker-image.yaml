@@ -1,57 +1,65 @@
 name: Publish Docker image
 
+# Pushes alexincube/aicotest:latest and :<package.json version> to Docker Hub from master.
+# Pull requests into master already run Tests and Check, so a push here publishes what passed them.
 on:
-  # Baseline (review 2027-05-11): workflow_run was there when jactionlint was adopted. "tests" and "linters" match no
-  # workflow name ("Tests", "Check"), so this workflow does not run today; fixing the names would start publishing images.
-  workflow_run: # jactionlint ignore=dangerous-triggers
-    workflows: [ "tests", "linters" ] # jactionlint ignore=workflow-run-names
-    types: ['completed']
+  push:
     branches: ['master']
+    paths-ignore:
+      - 'website/**'
+      - 'docker-compose.yml'
+      - '.env'
+      - '*.sh'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+# A newer push replaces a queued one, but never cancels a push already in progress
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
 env:
-  IMAGE_TAG: alexincube/aicotest
+  IMAGE_NAME: alexincube/aicotest
 
 jobs:
   push_to_registry:
-    if: github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success'
     name: Push Docker image to Docker Hub
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Check out Git repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
+      - name: Read the version from package.json
+        id: package-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=raw,value=${{ steps.package-version.outputs.version }}
+
       - name: Log in to Docker Hub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract project version from package.json
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@3cf273023a0dda27efcd3164bdfb51908dd46a5b # v1.3.1
-
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
-        with:
-          images: ${{ env.IMAGE_TAG }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build and push Docker image
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ env.IMAGE_TAG }}:${{ steps.package-version.outputs.current-version }} , ${{ env.IMAGE_TAG }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
